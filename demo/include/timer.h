@@ -11,20 +11,24 @@ struct Timer
 	float deltaTime = 0.0f;
 	time_point last = time_point();
 
-	Timer()
-		:
-		deltaTime(0.0f),
-		last()
-	{
-		tick();
-	}
+	inline Timer();
 
 	/// @brief Tick the timer, updating the frame delta.
-	inline void tick()
-	{
-		time_point current = std::chrono::steady_clock::now();
-		std::chrono::duration<float> diff = current - last;
-		deltaTime = diff.count();
-		last = current;
-	}
+	inline void tick();
 };
+
+Timer::Timer()
+	:
+	deltaTime(0.0f),
+	last()
+{
+	tick();
+}
+
+void Timer::tick()
+{
+	time_point current = std::chrono::steady_clock::now();
+	std::chrono::duration<float> diff = current - last;
+	deltaTime = diff.count();
+	last = current;
+}
