@@ -45,7 +45,8 @@ int main()
 	windowCreateInfo.pTitle = DEMO_WINDOW_NAME;
 	gWindow = initWindow(&windowCreateInfo);
 
-	// TODO: Load scene
+	// TODO: Load scene file
+	hri::Scene scene = hri::Scene();
 	printf("Startup complete\n");
 
 	while (!glfwWindowShouldClose(gWindow))
