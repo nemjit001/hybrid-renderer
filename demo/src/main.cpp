@@ -42,7 +42,9 @@ void destroyWindow(GLFWwindow* window)
 
 hri::Scene loadScene(const char* path)
 {
+#if		DEMO_DEBUG_OUTPUT == 1
 	printf("Loading scenefile [%s]\n", path);
+#endif
 
 	tinyobj::ObjReaderConfig readerConfig = tinyobj::ObjReaderConfig{};
 	readerConfig.triangulate = true;
@@ -53,45 +55,56 @@ hri::Scene loadScene(const char* path)
 		FATAL_ERROR("Failed to parse scene file");
 	}
 
-	const tinyobj::attrib_t& attributes = reader.GetAttrib();
-	const std::vector<tinyobj::shape_t>& shapes = reader.GetShapes();
-	const std::vector<tinyobj::material_t>& materials = reader.GetMaterials();
+	// Obj scene file attributes
+	const tinyobj::attrib_t& objAttributes = reader.GetAttrib();
+	const std::vector<tinyobj::shape_t>& objShapes = reader.GetShapes();
+	const std::vector<tinyobj::material_t>& objMaterials = reader.GetMaterials();
 
-	// TODO: load obj PBR material into HRI material struct
-	for (auto const& material : materials)
+	// Actually loaded attributes
+	std::vector<hri::Material> materials; materials.reserve(objMaterials.size());
+
+	// Load material data into hri compatible format
+	for (auto const& material : objMaterials)
 	{
+		// TODO: load texture files if a material contains texuture maps
+		hri::Material newMaterial = hri::Material{
+			hri::Float3(material.diffuse[0], material.diffuse[1], material.diffuse[2]),
+			hri::Float3(material.specular[0], material.specular[1], material.specular[2]),
+			hri::Float3(material.transmittance[0], material.transmittance[1], material.transmittance[2]),
+			hri::Float3(material.emission[0], material.emission[1], material.emission[2]),
+			material.shininess,
+			material.ior,
+		};
+
+		materials.push_back(newMaterial);
+		
+#if		DEMO_DEBUG_OUTPUT == 1
 		printf("Material: %s\n", material.name.c_str());
 
-		printf("\tValues:\n");
-		printf("\t\tAmbient Color:  [%.2f %.2f %.2f]\n", material.ambient[0], material.ambient[1], material.ambient[2]);
-		printf("\t\tDiffuse Color:  [%.2f %.2f %.2f]\n", material.diffuse[0], material.diffuse[1], material.diffuse[2]);
-		printf("\t\tSpecular:       [%.2f %.2f %.2f]\n", material.specular[0], material.specular[1], material.specular[2]);
-		printf("\t\tTransmittance:  [%.2f %.2f %.2f]\n", material.transmittance[0], material.transmittance[1], material.transmittance[2]);
-		printf("\t\tEmission Color: [%.2f %.2f %.2f]\n", material.emission[0], material.emission[1], material.emission[2]);
-		printf("\t\tShininess:      [%.2f]\n", material.shininess);
-		printf("\t\tIoR:            [%.2f]\n", material.ior);
-		printf("\t\tDissolve:       [%.2f]\n", material.dissolve);
-
-		printf("\tPBR extension:\n");
-		printf("\t\tRoughness:           [%.2f]\n", material.roughness);
-		printf("\t\tMetallic:            [%.2f]\n", material.metallic);
-		printf("\t\tSheen:               [%.2f]\n", material.sheen);
-		printf("\t\tClearcoat Thickness: [%.2f]\n", material.clearcoat_thickness);
-		printf("\t\tClearcoar Roughness: [%.2f]\n", material.clearcoat_roughness);
-		printf("\t\tAnisotropy:          [%.2f]\n", material.anisotropy);
-		printf("\t\tAnisotropy Rotation: [%.2f]\n", material.anisotropy_rotation);
+		printf("\tMaterial Data:\n");
+		printf("\t\tDiffuse:       [%.2f %.2f %.2f]\n", newMaterial.diffuse.r, newMaterial.diffuse.g, newMaterial.diffuse.b);
+		printf("\t\tSpecular:      [%.2f %.2f %.2f]\n", newMaterial.specular.r, newMaterial.specular.g, newMaterial.specular.b);
+		printf("\t\tTransmittance: [%.2f %.2f %.2f]\n", newMaterial.transmittance.r, newMaterial.transmittance.g, newMaterial.transmittance.b);
+		printf("\t\tEmission:      [%.2f %.2f %.2f]\n", newMaterial.emission.r, newMaterial.emission.g, newMaterial.emission.b);
+		printf("\t\tShininess:     [%.2f]\n", newMaterial.shininess);
+		printf("\t\tIoR:           [%.2f]\n", newMaterial.ior);
 
 		printf("\tTextures:\n");
 		printf("\t\tDiffuse Texture: [%s]\n", material.diffuse_texname.c_str());
 		printf("\t\tNormal Texture:  [%s]\n", material.bump_texname.c_str());
+#endif
 	}
 
-	// TODO: Load shape w/ associated material
-	for (auto const& shape : shapes)
+	// Load shapes into hri compatible format
+	for (auto const& shape : objShapes)
 	{
 		printf("Shape: %s\n", shape.name.c_str());
 		printf("\t%zu indices\n", shape.mesh.indices.size());
 	}
+
+#if		DEMO_DEBUG_OUTPUT == 1
+	printf("Loaded scene file!\n");
+#endif
 
 	return hri::Scene();
 }

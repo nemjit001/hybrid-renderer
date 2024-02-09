@@ -12,6 +12,10 @@
 #define SCR_WIDTH			1280
 #define SCR_HEIGHT			720
 
+#ifndef NDEBUG
+#define DEMO_DEBUG_OUTPUT	1
+#endif
+
 #define FATAL_ERROR(msg)	(void)(fprintf(stderr, "FATAL ERROR: %s\n", msg), abort(), 0)
 
 // Remove win32 bloat
