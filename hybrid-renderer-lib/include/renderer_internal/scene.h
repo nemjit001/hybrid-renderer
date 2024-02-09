@@ -31,6 +31,9 @@ namespace hri
 		/// @param nodes SceneNode list with scene object entries.
 		Scene(SceneParameters sceneParameters, const std::vector<SceneNode>& nodes);
 
+		/// @brief Destroy this Scene object.
+		virtual ~Scene() = default;
+
 	private:
 		SceneParameters m_sceneParameters = SceneParameters{};
 		std::vector<SceneNode> m_nodes = {};

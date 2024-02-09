@@ -15,10 +15,15 @@ namespace hri
 	class Mesh
 	{
 	public:
+		Mesh() = delete;
+
 		/// @brief Instantiate a new Mesh object.
 		/// @param vertices A vector of vertices to draw, may not be empty.
 		/// @param indices A vector of indices into the vertex array, may not be empty.
 		Mesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
+
+		/// @brief Destroy this Mesh object.
+		virtual ~Mesh() = default;
 
 	public:
 		std::vector<Vertex> vertices;
