@@ -45,8 +45,16 @@ int main()
 	windowCreateInfo.pTitle = DEMO_WINDOW_NAME;
 	gWindow = initWindow(&windowCreateInfo);
 
-	// TODO: Load scene file
-	hri::Scene scene = hri::Scene();
+	// TODO: Load scene file instead of manual setup
+	hri::Scene scene = hri::Scene(
+		hri::SceneParameters{},
+		std::vector<hri::SceneNode>{
+			hri::SceneNode{},
+			hri::SceneNode{},
+			hri::SceneNode{},
+		}
+	);
+
 	printf("Startup complete\n");
 
 	while (!glfwWindowShouldClose(gWindow))
