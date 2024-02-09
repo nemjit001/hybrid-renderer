@@ -136,6 +136,8 @@ namespace hri
 
 	// --- Vector specific operations
 
+	inline Float3 cross(const Float3& a, const Float3& b) { return Float3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x); }
+
 	inline float dot(const Float2& a, const Float2& b) { return a.x * b.x + a.y * b.y; }
 	inline float dot(const Float3& a, const Float3& b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
 	inline float dot(const Float4& a, const Float4& b) { return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w; }
@@ -143,4 +145,8 @@ namespace hri
 	inline Float2 normalize(const Float2& vec) { float invLen = rsqrtf(dot(vec, vec)); return invLen * vec; }
 	inline Float3 normalize(const Float3& vec) { float invLen = rsqrtf(dot(vec, vec)); return invLen * vec; }
 	inline Float4 normalize(const Float4& vec) { float invLen = rsqrtf(dot(vec, vec)); return invLen * vec; }
+
+	inline float magnitude(const Float2& vec) { return sqrtf(dot(vec, vec)); }
+	inline float magnitude(const Float3& vec) { return sqrtf(dot(vec, vec)); }
+	inline float magnitude(const Float4& vec) { return sqrtf(dot(vec, vec)); }
 }
