@@ -5,6 +5,8 @@
 #include "renderer_internal/material.h"
 #include "renderer_internal/mesh.h"
 
+#define HRI_INVALID_SCENE_INDEX	(uint32_t)(~0)
+
 namespace hri
 {
 	/// @brief The SceneParameters structure contains parameters controlling
@@ -17,8 +19,8 @@ namespace hri
 	/// @brief A scene node contains references into the scene mesh & material arrays.
 	struct SceneNode
 	{
-		uint32_t mesh		= 0;
-		uint32_t material	= 0;
+		uint32_t mesh		= HRI_INVALID_SCENE_INDEX;
+		uint32_t material	= HRI_INVALID_SCENE_INDEX;
 	};
 
 	/// @brief The Scene class represents the renderable world and its contents.
