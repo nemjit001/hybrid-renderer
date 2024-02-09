@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include "renderer_internal/material.h"
 #include "renderer_internal/mesh.h"
 
 namespace hri
@@ -13,10 +14,11 @@ namespace hri
 		// TODO: Add actual scene settings
 	};
 
+	/// @brief A scene node contains references into the scene mesh & material arrays.
 	struct SceneNode
 	{
-		// TODO: Add mesh / transform / etc. to scene node
-		std::vector<SceneNode> children = {};
+		uint32_t mesh		= 0;
+		uint32_t material	= 0;
 	};
 
 	/// @brief The Scene class represents the renderable world and its contents.
@@ -28,14 +30,18 @@ namespace hri
 
 		/// @brief Instantiate a new Scene object.
 		/// @param sceneParameters SceneParameters to use.
+		/// @param meshes Mesh list with all meshes in the scene.
+		/// @param materials Material list with all materials in the scene.
 		/// @param nodes SceneNode list with scene object entries.
-		Scene(SceneParameters sceneParameters, const std::vector<SceneNode>& nodes);
+		Scene(SceneParameters sceneParameters, const std::vector<Mesh>& meshes, const std::vector<Material>& materials, const std::vector<SceneNode>& nodes);
 
 		/// @brief Destroy this Scene object.
 		virtual ~Scene() = default;
 
 	private:
-		SceneParameters m_sceneParameters = SceneParameters{};
-		std::vector<SceneNode> m_nodes = {};
+		SceneParameters m_sceneParameters	= SceneParameters{};
+		std::vector<Mesh> m_meshes			= {};
+		std::vector<Material> m_materials	= {};
+		std::vector<SceneNode> m_nodes		= {};
 	};
 }

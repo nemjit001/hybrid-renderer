@@ -44,9 +44,12 @@ hri::Scene loadScene(const char* path)
 {
 	printf("Loading scenefile [%s]\n", path);
 
+	// Only real configuration needed is the triangulation on load
 	tinyobj::ObjReaderConfig readerConfig = tinyobj::ObjReaderConfig{};
 	readerConfig.triangulate = true;
+	readerConfig.triangulation_method = "earcut";
 
+	// Parse file & handle errors / report warnings
 	tinyobj::ObjReader reader;
 	if (false == reader.ParseFromFile(path, readerConfig))
 	{
@@ -71,6 +74,9 @@ hri::Scene loadScene(const char* path)
 	// Actually loaded attributes
 	std::vector<hri::Material> materials; materials.reserve(objMaterials.size());
 	std::vector<hri::Mesh> meshes; meshes.reserve(objShapes.size());
+
+	// For now assume all nodes are meshes (i.e. no instancing or per node transform)
+	std::vector<hri::SceneNode> sceneNodes; sceneNodes.reserve(objShapes.size());
 
 	// Load material data into hri compatible format
 	for (auto const& material : objMaterials)
@@ -111,7 +117,7 @@ hri::Scene loadScene(const char* path)
 					objAttributes.normals[normalIndex + 1],
 					objAttributes.normals[normalIndex + 2]
 				),
-				hri::Float3(0.0f),
+				hri::Float3(0.0f),	// The tangent vector is initialy (0, 0, 0), because it can only be calculated AFTER triangles are loaded
 				hri::Float2(
 					objAttributes.texcoords[texCoordIndex + 0],
 					objAttributes.texcoords[texCoordIndex + 1]
@@ -141,7 +147,11 @@ hri::Scene loadScene(const char* path)
 			v2.tangent = normalize(tangent - dot(v2.normal, tangent) * v2.normal);
 		}
 
-		// TODO: link material to mesh (index based?)
+		// Add scene node with mesh & material data
+		uint32_t materialIdx = static_cast<uint32_t>(shape.mesh.material_ids[0]);	// Assumes all faces share the same materials (maybe naive?)
+		uint32_t meshIdx = static_cast<uint32_t>(meshes.size());
+		sceneNodes.push_back(hri::SceneNode{ meshIdx, materialIdx });
+
 		meshes.push_back(hri::Mesh(vertices, indices));
 	}
 
@@ -149,18 +159,24 @@ hri::Scene loadScene(const char* path)
 	printf("\t%zu materials\n", materials.size());
 	printf("\t%zu meshes\n", meshes.size());
 
-	return hri::Scene();
+	return hri::Scene(
+		hri::SceneParameters{},
+		meshes,
+		materials,
+		sceneNodes
+	);
 }
 
 int main()
 {
+	// Set up window
 	WindowCreateInfo windowCreateInfo = WindowCreateInfo{};
 	windowCreateInfo.width = SCR_WIDTH;
 	windowCreateInfo.height = SCR_HEIGHT;
 	windowCreateInfo.pTitle = DEMO_WINDOW_NAME;
 	gWindow = initWindow(&windowCreateInfo);
 
-	// TODO: Load scene file instead of manual setup
+	// Load scene file
 	hri::Scene scene = loadScene("assets/test_scene.obj");
 	printf("Startup complete\n");
 
