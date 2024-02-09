@@ -3,12 +3,17 @@
 #include <cstdint>
 #include <vector>
 
+#include "renderer_internal/hri_math.h"
+
 namespace hri
 {
 	/// @brief A Vertex is a datapoint containing information needed for rendering.
 	struct Vertex
 	{
-		//
+		Float3 position;
+		Float3 normal;
+		Float3 tangent;
+		Float2 textureCoord;
 	};
 
 	/// @brief A Mesh represents a renderable object. It uses indexed drawing to reduce vertex array size.
