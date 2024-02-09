@@ -11,6 +11,8 @@ option(GLFW_BUILD_EXAMPLES OFF)
 option(GLFW_BUILD_TESTS OFF)
 add_subdirectory("deps/glfw/")
 
+add_subdirectory("deps/tinyobjloader/")
+
 add_executable(${TARGET_NAME}
 	${PROJECT_HEADERS}
 	${PROJECT_SOURCES}
@@ -18,12 +20,14 @@ add_executable(${TARGET_NAME}
 
 target_link_libraries(${TARGET_NAME} PRIVATE
 	glfw ${GLFW_LIBRARIES}
+	tinyobjloader
 	hybridrenderer
 )
 
 target_include_directories(${TARGET_NAME} PRIVATE
 	"include/"
 	"/deps/glfw/include/"
+	"deps/tinyobjloader/"
 	"../hybrid-renderer-lib/include/"
 )
 
