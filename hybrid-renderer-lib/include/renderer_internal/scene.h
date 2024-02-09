@@ -23,7 +23,12 @@ namespace hri
 	class Scene
 	{
 	public:
+		/// @brief Instantiate an empty scene with default parameters.
 		Scene() = default;
+
+		/// @brief Instantiate a new Scene object.
+		/// @param sceneParameters SceneParameters to use.
+		/// @param nodes SceneNode list with scene object entries.
 		Scene(SceneParameters sceneParameters, const std::vector<SceneNode>& nodes);
 
 	private:
