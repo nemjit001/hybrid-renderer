@@ -16,7 +16,14 @@ namespace hri
 		// TODO: Add actual scene settings
 	};
 
-	/// @brief A scene node contains references into the scene mesh & material arrays.
+	/// @brief The SceneData struct contains data to be referenced by scene nodes.
+	struct SceneData
+	{
+		std::vector<Mesh> m_meshes = {};
+		std::vector<Material> m_materials = {};
+	};
+
+	/// @brief A scene node contains references into the scene data arrays.
 	struct SceneNode
 	{
 		uint32_t mesh		= HRI_INVALID_SCENE_INDEX;
@@ -35,15 +42,14 @@ namespace hri
 		/// @param meshes Mesh list with all meshes in the scene.
 		/// @param materials Material list with all materials in the scene.
 		/// @param nodes SceneNode list with scene object entries.
-		Scene(SceneParameters sceneParameters, const std::vector<Mesh>& meshes, const std::vector<Material>& materials, const std::vector<SceneNode>& nodes);
+		Scene(SceneParameters sceneParameters, const SceneData& sceneData, const std::vector<SceneNode>& nodes);
 
 		/// @brief Destroy this Scene object.
 		virtual ~Scene() = default;
 
 	private:
 		SceneParameters m_sceneParameters	= SceneParameters{};
-		std::vector<Mesh> m_meshes			= {};
-		std::vector<Material> m_materials	= {};
+		SceneData m_sceneData				= SceneData{};
 		std::vector<SceneNode> m_nodes		= {};
 	};
 }

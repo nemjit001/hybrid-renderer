@@ -159,10 +159,14 @@ hri::Scene loadScene(const char* path)
 	printf("\t%zu materials\n", materials.size());
 	printf("\t%zu meshes\n", meshes.size());
 
-	return hri::Scene(
-		hri::SceneParameters{},
+	struct hri::SceneData sceneData = hri::SceneData{
 		meshes,
 		materials,
+	};
+
+	return hri::Scene(
+		hri::SceneParameters{},
+		sceneData,
 		sceneNodes
 	);
 }

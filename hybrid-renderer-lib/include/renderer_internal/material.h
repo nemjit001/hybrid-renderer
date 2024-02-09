@@ -5,6 +5,7 @@
 
 namespace hri
 {
+	/// @brief The Material struct describes drawing parameters for renderable objects.
 	struct Material
 	{
 		ALIGNAS(16) Float3 diffuse			= Float3(0.8f);
