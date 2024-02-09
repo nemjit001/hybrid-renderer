@@ -7,8 +7,8 @@
 #include "demo.h"
 #include "timer.h"
 
-static Timer gFrameTimer = Timer();
-static GLFWwindow* gWindow = nullptr;
+static Timer gFrameTimer	= Timer();
+static GLFWwindow* gWindow	= nullptr;
 
 struct WindowCreateInfo
 {
@@ -182,6 +182,10 @@ int main()
 
 	// Load scene file
 	hri::Scene scene = loadScene("assets/test_scene.obj");
+
+	// Set up virtual camera
+	hri::Camera camera = hri::Camera();
+
 	printf("Startup complete\n");
 
 	while (!glfwWindowShouldClose(gWindow))

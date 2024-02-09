@@ -19,8 +19,8 @@ namespace hri
 	/// @brief The SceneData struct contains data to be referenced by scene nodes.
 	struct SceneData
 	{
-		std::vector<Mesh> m_meshes = {};
-		std::vector<Material> m_materials = {};
+		std::vector<Mesh> m_meshes			= {};
+		std::vector<Material> m_materials	= {};
 	};
 
 	/// @brief A scene node contains references into the scene data arrays.

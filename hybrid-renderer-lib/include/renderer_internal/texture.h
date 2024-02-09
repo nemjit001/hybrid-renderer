@@ -34,8 +34,8 @@ namespace hri
 		void copyToTexture(void* data, size_t size);
 
 	private:
-		TextureExtent m_extent;
-		size_t m_imageDataSize;
-		uint8_t* m_pImageData;
+		TextureExtent m_extent	= TextureExtent{};
+		size_t m_imageDataSize	= 0;
+		uint8_t* m_pImageData	= nullptr;
 	};
 }
