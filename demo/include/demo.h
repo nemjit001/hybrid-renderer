@@ -14,6 +14,8 @@
 
 #ifndef NDEBUG
 #define DEMO_DEBUG_OUTPUT	1
+#else
+#define DEMO_DEBUG_OUTPUT	0
 #endif
 
 #define FATAL_ERROR(msg)	(void)(fprintf(stderr, "FATAL ERROR: %s\n", msg), abort(), 0)

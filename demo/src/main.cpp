@@ -42,9 +42,7 @@ void destroyWindow(GLFWwindow* window)
 
 hri::Scene loadScene(const char* path)
 {
-#if		DEMO_DEBUG_OUTPUT == 1
 	printf("Loading scenefile [%s]\n", path);
-#endif
 
 	tinyobj::ObjReaderConfig readerConfig = tinyobj::ObjReaderConfig{};
 	readerConfig.triangulate = true;
@@ -52,7 +50,17 @@ hri::Scene loadScene(const char* path)
 	tinyobj::ObjReader reader;
 	if (false == reader.ParseFromFile(path, readerConfig))
 	{
+		if (reader.Error().size() > 0)
+		{
+			fprintf(stderr, "Loader Error: %s", reader.Error().c_str());
+		}
+
 		FATAL_ERROR("Failed to parse scene file");
+	}
+
+	if (reader.Warning().size() > 0)
+	{
+		printf("Loader Warning: %s", reader.Warning().c_str());
 	}
 
 	// Obj scene file attributes
@@ -62,6 +70,7 @@ hri::Scene loadScene(const char* path)
 
 	// Actually loaded attributes
 	std::vector<hri::Material> materials; materials.reserve(objMaterials.size());
+	std::vector<hri::Mesh> meshes; meshes.reserve(objShapes.size());
 
 	// Load material data into hri compatible format
 	for (auto const& material : objMaterials)
@@ -77,34 +86,68 @@ hri::Scene loadScene(const char* path)
 		};
 
 		materials.push_back(newMaterial);
-		
-#if		DEMO_DEBUG_OUTPUT == 1
-		printf("Material: %s\n", material.name.c_str());
-
-		printf("\tMaterial Data:\n");
-		printf("\t\tDiffuse:       [%.2f %.2f %.2f]\n", newMaterial.diffuse.r, newMaterial.diffuse.g, newMaterial.diffuse.b);
-		printf("\t\tSpecular:      [%.2f %.2f %.2f]\n", newMaterial.specular.r, newMaterial.specular.g, newMaterial.specular.b);
-		printf("\t\tTransmittance: [%.2f %.2f %.2f]\n", newMaterial.transmittance.r, newMaterial.transmittance.g, newMaterial.transmittance.b);
-		printf("\t\tEmission:      [%.2f %.2f %.2f]\n", newMaterial.emission.r, newMaterial.emission.g, newMaterial.emission.b);
-		printf("\t\tShininess:     [%.2f]\n", newMaterial.shininess);
-		printf("\t\tIoR:           [%.2f]\n", newMaterial.ior);
-
-		printf("\tTextures:\n");
-		printf("\t\tDiffuse Texture: [%s]\n", material.diffuse_texname.c_str());
-		printf("\t\tNormal Texture:  [%s]\n", material.bump_texname.c_str());
-#endif
 	}
 
 	// Load shapes into hri compatible format
 	for (auto const& shape : objShapes)
 	{
-		printf("Shape: %s\n", shape.name.c_str());
-		printf("\t%zu indices\n", shape.mesh.indices.size());
+		// Retrieve indexed vertices for Shape
+		std::vector<hri::Vertex> vertices; vertices.reserve(shape.mesh.indices.size());
+		std::vector<uint32_t> indices; indices.reserve(shape.mesh.indices.size());
+		for (auto const& index : shape.mesh.indices)
+		{
+			size_t vertexIndex = index.vertex_index * 3;
+			size_t normalIndex = index.normal_index * 3;
+			size_t texCoordIndex = index.texcoord_index * 2;
+
+			hri::Vertex newVertex = hri::Vertex{
+				hri::Float3(
+					objAttributes.vertices[vertexIndex + 0],
+					objAttributes.vertices[vertexIndex + 1],
+					objAttributes.vertices[vertexIndex + 2]
+				),
+				hri::Float3(
+					objAttributes.normals[normalIndex + 0],
+					objAttributes.normals[normalIndex + 1],
+					objAttributes.normals[normalIndex + 2]
+				),
+				hri::Float3(0.0f),
+				hri::Float2(
+					objAttributes.texcoords[texCoordIndex + 0],
+					objAttributes.texcoords[texCoordIndex + 1]
+				),
+			};
+
+			vertices.push_back(newVertex);
+			indices.push_back(static_cast<uint32_t>(indices.size()));	// Works because mesh is already triangulated on load
+		}
+
+		// Calculate tangent space vectors for Shape
+		for (size_t i = 0; i < indices.size(); i += 3)
+		{
+			hri::Vertex& v0 = vertices[indices[i + 0]];
+			hri::Vertex& v1 = vertices[indices[i + 1]];
+			hri::Vertex& v2 = vertices[indices[i + 2]];
+
+			const hri::Float3 e1 = v1.position - v0.position, e2 = v2.position - v0.position;
+			const hri::Float2 dUV1 = v1.textureCoord - v0.textureCoord, dUV2 = v2.textureCoord - v0.textureCoord;
+
+			const float f = 1.0f / (dUV1.x * dUV2.y - dUV2.x * dUV1.y);
+			const hri::Float3 tangent = normalize(f * (dUV2.y * e1 - dUV1.y * e2));
+
+			// Ensure tangent is 90 degrees w/ normal for each vertex
+			v0.tangent = normalize(tangent - dot(v0.normal, tangent) * v0.normal);
+			v1.tangent = normalize(tangent - dot(v1.normal, tangent) * v1.normal);
+			v2.tangent = normalize(tangent - dot(v2.normal, tangent) * v2.normal);
+		}
+
+		// TODO: link material to mesh (index based?)
+		meshes.push_back(hri::Mesh(vertices, indices));
 	}
 
-#if		DEMO_DEBUG_OUTPUT == 1
-	printf("Loaded scene file!\n");
-#endif
+	printf("Loaded scene file:\n");
+	printf("\t%zu materials\n", materials.size());
+	printf("\t%zu meshes\n", meshes.size());
 
 	return hri::Scene();
 }
