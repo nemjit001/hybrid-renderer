@@ -4,6 +4,11 @@
 
 #include "platform.h"
 
+#define HRI_PI			3.14159265358979323846264f
+#define HRI_INV_PI		0.31830988618379067153777f
+#define HRI_2PI			6.28318530717958647692528f
+#define HRI_INV_2PI		0.15915494309189533576888f
+
 namespace hri
 {
 	ALIGNAS(4)
@@ -61,6 +66,10 @@ namespace hri
 	/// @param val Value to calculate inverse sqrt for.
 	/// @return The inverse square root of val.
 	inline float rsqrtf(float val) { return 1.0f / sqrtf(val); }
+
+	inline float degrees(float radians) { return radians * 180.0f * HRI_INV_PI; /* rad * (180 / pi) */ }
+
+	inline float radians(float degrees) { return degrees * HRI_PI * 0.00555555555555555555555555555556f; /* deg * (pi / 180) */ }
 
 	// --- Standard math operations
 

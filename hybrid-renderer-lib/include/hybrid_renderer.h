@@ -2,6 +2,7 @@
 
 #include "platform.h"
 
+#include "renderer_internal/camera.h"
 #include "renderer_internal/hri_math.h"
 #include "renderer_internal/material.h"
 #include "renderer_internal/mesh.h"
