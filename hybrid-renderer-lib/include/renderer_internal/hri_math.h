@@ -11,8 +11,7 @@
 
 namespace hri
 {
-	ALIGNAS(4)
-	struct Float2
+	struct ALIGNAS(4) Float2
 	{
 	public:
 		inline Float2() : x(0.0f), y(0.0f) {};
@@ -28,8 +27,7 @@ namespace hri
 		};
 	};
 
-	ALIGNAS(4)
-	struct Float3
+	struct ALIGNAS(4) Float3
 	{
 	public:
 		inline Float3() : x(0.0f), y(0.0f), z(0.0f) {};
@@ -45,8 +43,7 @@ namespace hri
 		};
 	};
 
-	ALIGNAS(4)
-	struct Float4
+	struct ALIGNAS(4) Float4
 	{
 	public:
 		inline Float4() : x(0.0f), y(0.0f), z(0.0f), w(0.0f) {};
