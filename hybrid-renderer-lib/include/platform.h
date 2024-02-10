@@ -11,3 +11,9 @@
 #elif	HRI_PLATFORM_UNIX == 1
 #define ALIGNAS(size)	__attribute__((aligned(size)))
 #endif
+
+#ifndef NDEBUG
+#define HRI_DEBUG 1
+#else
+#define HRI_DEBUG 0
+#endif

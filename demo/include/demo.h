@@ -1,6 +1,5 @@
 #pragma once
 
-#define GLFW_NO_API
 #define GLFW_INCLUDE_VULKAN
 
 #include <cassert>

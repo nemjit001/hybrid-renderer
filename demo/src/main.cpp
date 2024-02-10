@@ -1,3 +1,4 @@
+#define GLFW_INCLUDE_VULKAN
 #define TINYOBJLOADER_IMPLEMENTATION
 
 #include <GLFW/glfw3.h>
@@ -24,6 +25,7 @@ GLFWwindow* initWindow(WindowCreateInfo* createInfo)
 	assert(createInfo != nullptr);
 	glfwInit();
 
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 	GLFWwindow* window = glfwCreateWindow(createInfo->width, createInfo->height, createInfo->pTitle, nullptr, nullptr);
 	assert(window != nullptr);
@@ -179,6 +181,16 @@ int main()
 	windowCreateInfo.height = SCR_HEIGHT;
 	windowCreateInfo.pTitle = DEMO_WINDOW_NAME;
 	gWindow = initWindow(&windowCreateInfo);
+
+	auto surfaceCreateFunc = [](vkb::Instance instance, VkSurfaceKHR* surface){
+		return glfwCreateWindowSurface(instance, gWindow, nullptr, surface);
+	};
+
+	// Set up render context
+	hri::RenderContextCreateInfo ctxCreateInfo = hri::RenderContextCreateInfo{};
+	ctxCreateInfo.surfaceCreateFunc = surfaceCreateFunc;
+	ctxCreateInfo.vsyncMode = hri::VSyncMode::Disabled;
+	hri::RenderContext renderContext = hri::RenderContext(ctxCreateInfo);
 
 	// Load scene file
 	hri::Scene scene = loadScene("assets/test_scene.obj");
