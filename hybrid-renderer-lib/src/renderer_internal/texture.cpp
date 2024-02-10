@@ -1,6 +1,7 @@
 #include "renderer_internal/texture.h"
 
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
 #include <cstring>
 
