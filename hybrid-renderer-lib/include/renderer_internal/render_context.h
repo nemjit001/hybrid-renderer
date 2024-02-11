@@ -1,5 +1,6 @@
 #pragma once
 
+#include "config.h"
 #include "platform.h"
 
 #if     HRI_PLATFORM_WINDOWS == 1
@@ -13,8 +14,7 @@
 #include <vulkan/vulkan.h>
 
 #define HRI_VK_API_VERSION  VK_API_VERSION_1_3
-#define HRI_ENGINE_NAME     "HybridRenderEngine"
-#define HRI_ENGINE_VERSION  VK_MAKE_API_VERSION(0, 1, 0, 0)
+#define HRI_ENGINE_VERSION  VK_MAKE_API_VERSION(0, HRI_ENGINE_VERSION_MAJOR, HRI_ENGINE_VERSION_MINOR, HRI_ENGINE_VERSION_PATCH)
 
 #define HRI_DEFAULT_SWAP_IMAGE_COUNT 3
 

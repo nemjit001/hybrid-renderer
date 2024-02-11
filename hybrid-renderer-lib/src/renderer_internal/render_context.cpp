@@ -1,5 +1,6 @@
 #include "renderer_internal/render_context.h"
 
+#include "config.h"
 #include "platform.h"
 
 #include <cassert>

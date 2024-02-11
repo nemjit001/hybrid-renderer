@@ -8,12 +8,24 @@ option(VK_BOOTSTRAP_DISABLE_WARNINGS "Disable warnings during compilation" OFF)
 option(VK_BOOTSTRAP_WERROR "Enable warnings as errors during compilation" OFF)
 add_subdirectory("deps/vk-bootstrap/")
 
+# Project setup
 file(GLOB PROJECT_HEADERS "include/*.h" "include/**/*.h")
 file(GLOB PROJECT_SOURCES "src/*.cpp" "src/**/*.cpp")
+file(GLOB PROJECT_CONFIG "config.h.in")
+
+# Project config variables
+set(HRI_ENGINE_NAME "HybridRenderEngine")
+
+#Set up configuration file
+configure_file(
+	${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
+	${CMAKE_CURRENT_SOURCE_DIR}/include/config.h
+)
 
 add_library(${LIB_NAME}
 	${PROJECT_HEADERS}
 	${PROJECT_SOURCES}
+	${PROJECT_CONFIG}
 )
 
 target_include_directories(${LIB_NAME} PUBLIC
