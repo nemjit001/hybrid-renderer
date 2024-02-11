@@ -1,46 +1,14 @@
-#define GLFW_INCLUDE_VULKAN
 #define TINYOBJLOADER_IMPLEMENTATION
 
-#include <GLFW/glfw3.h>
 #include <iostream>
 #include <tiny_obj_loader.h>
 
 #include "demo.h"
 #include "timer.h"
+#include "window_manager.h"
 
-static Timer gFrameTimer	= Timer();
-static GLFWwindow* gWindow	= nullptr;
-
-struct WindowCreateInfo
-{
-	int32_t width;
-	int32_t height;
-	const char* pTitle;
-	void* pWindowPointer;
-	GLFWwindowsizefun pfnResizeFun;
-};
-
-GLFWwindow* initWindow(WindowCreateInfo* createInfo)
-{
-	assert(createInfo != nullptr);
-	glfwInit();
-
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-	GLFWwindow* window = glfwCreateWindow(createInfo->width, createInfo->height, createInfo->pTitle, nullptr, nullptr);
-	assert(window != nullptr);
-	
-	glfwSetWindowUserPointer(window, createInfo->pWindowPointer);
-	glfwSetWindowSizeCallback(window, createInfo->pfnResizeFun);
-
-	return window;
-}
-
-void destroyWindow(GLFWwindow* window)
-{
-	glfwDestroyWindow(window);
-	glfwTerminate();
-}
+static Timer gFrameTimer		= Timer();
+static WindowHandle* gWindow	= nullptr;
 
 hri::Scene loadScene(const char* path)
 {
@@ -175,16 +143,19 @@ hri::Scene loadScene(const char* path)
 
 int main()
 {
-	// Set up window
+	// Set up window manager & main window
+	WindowManager windowManager = WindowManager();
+
 	WindowCreateInfo windowCreateInfo = WindowCreateInfo{};
 	windowCreateInfo.width = SCR_WIDTH;
 	windowCreateInfo.height = SCR_HEIGHT;
 	windowCreateInfo.pTitle = DEMO_WINDOW_NAME;
-	gWindow = initWindow(&windowCreateInfo);
+	windowCreateInfo.resizable = true;
+	gWindow = windowManager.createWindow(&windowCreateInfo);
 
 	// Set up render context
 	hri::RenderContextCreateInfo ctxCreateInfo = hri::RenderContextCreateInfo{};
-	ctxCreateInfo.surfaceCreateFunc = [](vkb::Instance instance, VkSurfaceKHR* surface) { return glfwCreateWindowSurface(instance, gWindow, nullptr, surface); };
+	ctxCreateInfo.surfaceCreateFunc = [&windowManager](VkInstance instance, VkSurfaceKHR* surface) { return windowManager.createVulkanSurface(instance, surface); };
 	ctxCreateInfo.vsyncMode = hri::VSyncMode::Disabled;
 	hri::RenderContext renderContext = hri::RenderContext(ctxCreateInfo);
 
@@ -196,18 +167,18 @@ int main()
 
 	printf("Startup complete\n");
 
-	while (!glfwWindowShouldClose(gWindow))
+	while (!windowManager.windowShouldClose(gWindow))
 	{
 		gFrameTimer.tick();
 
 		// TODO: set up render loop
 
-		glfwPollEvents();
+		windowManager.pollEvents();
 	}
 
 	printf("Shutting down\n");
-	destroyWindow(gWindow);
-	printf("Goodbye!\n");
+	windowManager.destroyWindow(gWindow);
 
+	printf("Goodbye!\n");
 	return 0;
 }

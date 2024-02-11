@@ -1,0 +1,59 @@
+#include "window_manager.h"
+
+#define GLFW_INCLUDE_VULKAN
+
+#include <cassert>
+#include <cstdint>
+#include <GLFW/glfw3.h>
+#include <vulkan/vulkan.h>
+
+WindowManager::WindowManager()
+{
+	glfwInit();
+}
+
+WindowManager::~WindowManager()
+{
+	glfwTerminate();
+}
+
+WindowHandle* WindowManager::createWindow(WindowCreateInfo* createInfo)
+{
+	assert(createInfo != nullptr);
+
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+	glfwWindowHint(GLFW_RESIZABLE, static_cast<int>(createInfo->resizable));
+	GLFWwindow* window = glfwCreateWindow(createInfo->width, createInfo->height, createInfo->pTitle, nullptr, nullptr);
+	assert(window != nullptr);
+
+	glfwSetWindowUserPointer(window, createInfo->pWindowPointer);
+	glfwSetWindowSizeCallback(window, createInfo->pfnResizeFunc);
+
+	m_window = window;
+	return window;
+}
+
+void WindowManager::destroyWindow(WindowHandle* window)
+{
+	assert(window != nullptr);
+	glfwDestroyWindow(window);
+	m_window = nullptr;
+}
+
+bool WindowManager::windowShouldClose(WindowHandle* window)
+{
+	assert(window != nullptr);
+	assert(window == m_window);
+	return glfwWindowShouldClose(window);
+}
+
+void WindowManager::pollEvents()
+{
+	glfwPollEvents();
+}
+
+VkResult WindowManager::createVulkanSurface(VkInstance instance, VkSurfaceKHR* surface)
+{
+	assert(m_window != nullptr);
+	return glfwCreateWindowSurface(instance, m_window, nullptr, surface);
+}
