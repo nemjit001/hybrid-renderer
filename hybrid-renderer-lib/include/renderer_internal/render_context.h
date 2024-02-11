@@ -48,6 +48,29 @@ namespace hri
         VkPresentModeKHR presentMode;
     };
 
+    /// @brief A Device Queue is a queue on the logical device to which operations can be submitted.
+    struct DeviceQueue
+    {
+        uint32_t family = VK_QUEUE_FAMILY_IGNORED;
+        VkQueue handle  = VK_NULL_HANDLE;
+    };
+
+    /// @brief The context queue state creates and maintains the device queue setup.
+    class RenderContextQueueState
+    {
+    public:
+        /// @brief Create an empty queue state, has invalid queues stored.
+        RenderContextQueueState() = default;
+
+        /// @brief Create a new queue state.
+        /// @param device The device for which to retrieve the queues.
+        RenderContextQueueState(vkb::Device device);
+
+    public:
+        DeviceQueue graphicsQueue   = DeviceQueue{};
+        DeviceQueue presentQueue    = DeviceQueue{};
+    };
+
     /// @brief THe RenderContext manages the Vulkan instance, device, and swapchain state.
     class RenderContext
     {
@@ -89,11 +112,12 @@ namespace hri
         );
 
     public:
-        vkb::Instance instance      = vkb::Instance();
-        VkSurfaceKHR surface        = VK_NULL_HANDLE;
-        vkb::PhysicalDevice gpu     = vkb::PhysicalDevice();
-        vkb::Device device          = vkb::Device();
-        vkb::Swapchain swapchain    = vkb::Swapchain();
+        vkb::Instance instance          = vkb::Instance();
+        VkSurfaceKHR surface            = VK_NULL_HANDLE;
+        vkb::PhysicalDevice gpu         = vkb::PhysicalDevice();
+        vkb::Device device              = vkb::Device();
+        vkb::Swapchain swapchain        = vkb::Swapchain();
+        RenderContextQueueState queues  = RenderContextQueueState();
 
     private:
         /// @brief The Context Config maintains state needed for recreation of devices, swapchains, etc.

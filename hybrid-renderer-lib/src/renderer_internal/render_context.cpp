@@ -29,6 +29,19 @@ static const std::vector<const char*> gDeviceExtensions = {
     VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 };
 
+RenderContextQueueState::RenderContextQueueState(vkb::Device device)
+{
+    graphicsQueue = DeviceQueue{
+        device.get_queue_index(vkb::QueueType::graphics).value(),
+        device.get_queue(vkb::QueueType::graphics).value(),
+    };
+
+    presentQueue = DeviceQueue{
+        device.get_queue_index(vkb::QueueType::present).value(),
+        device.get_queue(vkb::QueueType::present).value(),
+    };
+}
+
 RenderContext::RenderContext(RenderContextCreateInfo createInfo)
 {
     assert(createInfo.surfaceCreateFunc != nullptr);
@@ -80,6 +93,9 @@ RenderContext::RenderContext(RenderContextCreateInfo createInfo)
         .add_fallback_present_mode(VK_PRESENT_MODE_FIFO_KHR)
         .set_required_min_image_count(presentSetup.imageCount)
         .build().value();
+
+    // Initialize device queues
+    queues = RenderContextQueueState(device);
 
     // Set up context config based on passed params
     m_config.vsyncMode = createInfo.vsyncMode;
