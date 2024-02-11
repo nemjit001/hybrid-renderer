@@ -15,6 +15,7 @@ file(GLOB PROJECT_CONFIG "config.h.in")
 
 # Project config variables
 set(HRI_ENGINE_NAME "HybridRenderEngine")
+set(HRI_FRAMES_IN_FLIGHT 3)
 
 #Set up configuration file
 configure_file(

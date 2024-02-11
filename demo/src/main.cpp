@@ -159,6 +159,9 @@ int main()
 	ctxCreateInfo.vsyncMode = hri::VSyncMode::Disabled;
 	hri::RenderContext renderContext = hri::RenderContext(ctxCreateInfo);
 
+	// Create render core
+	hri::RenderCore renderCore = hri::RenderCore(&renderContext);
+
 	// Load scene file
 	hri::Scene scene = loadScene("assets/test_scene.obj");
 
@@ -170,13 +173,16 @@ int main()
 	while (!windowManager.windowShouldClose(gWindow))
 	{
 		gFrameTimer.tick();
+		renderCore.startFrame();
 
-		// TODO: set up render loop
+		// TODO: draw scene
 
+		renderCore.endFrame();
 		windowManager.pollEvents();
 	}
 
 	printf("Shutting down\n");
+	renderCore.awaitFrameFinished();
 	windowManager.destroyWindow(gWindow);
 
 	printf("Goodbye!\n");
