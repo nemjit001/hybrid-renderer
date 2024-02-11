@@ -35,7 +35,7 @@ public:
 
 	void pollEvents();
 
-	VkResult createVulkanSurface(VkInstance instance, VkSurfaceKHR* surface);
+	static VkResult createVulkanSurface(VkInstance instance, WindowHandle* window, VkAllocationCallbacks* allocator, VkSurfaceKHR* surface);
 
 private:
 	WindowHandle* m_window	= nullptr;

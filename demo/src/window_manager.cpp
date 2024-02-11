@@ -52,8 +52,8 @@ void WindowManager::pollEvents()
 	glfwPollEvents();
 }
 
-VkResult WindowManager::createVulkanSurface(VkInstance instance, VkSurfaceKHR* surface)
+VkResult WindowManager::createVulkanSurface(VkInstance instance, WindowHandle* window, VkAllocationCallbacks* allocator, VkSurfaceKHR* surface)
 {
-	assert(m_window != nullptr);
-	return glfwCreateWindowSurface(instance, m_window, nullptr, surface);
+	assert(window != nullptr);
+	return glfwCreateWindowSurface(instance, window, allocator, surface);
 }
