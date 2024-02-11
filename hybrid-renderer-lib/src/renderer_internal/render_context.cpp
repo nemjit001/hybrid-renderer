@@ -79,7 +79,6 @@ RenderContext::RenderContext(RenderContextCreateInfo createInfo)
         .add_required_extensions(gDeviceExtensions)
         .select().value();
 
-    // TODO: set up device queues properly
     vkb::DeviceBuilder deviceBuilder = vkb::DeviceBuilder(gpu);
     device = deviceBuilder
         .build().value();
