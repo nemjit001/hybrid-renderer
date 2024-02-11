@@ -16,12 +16,14 @@
 
 using namespace hri;
 
+/// @brief Enabled & required Vulkan instance extensions
 static const std::vector<const char*> gInstanceExtensions = {
     VK_EXT_DEBUG_UTILS_EXTENSION_NAME,
     VK_KHR_SURFACE_EXTENSION_NAME,
     HRI_VK_PLATFORM_SURFACE_EXTENSION_NAME,
 };
 
+/// @brief Enabled & required Vulkan device extensions
 static const std::vector<const char*> gDeviceExtensions = {
     VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 };
@@ -68,10 +70,63 @@ RenderContext::RenderContext(RenderContextCreateInfo createInfo)
     device = deviceBuilder
         .build().value();
 
+    SwapchainPresentSetup presentSetup = RenderContext::getSwapPresentSetup(createInfo.vsyncMode);
+    vkb::SwapchainBuilder swapchainBuilder = vkb::SwapchainBuilder(device);
+    swapchain = swapchainBuilder
+        .set_desired_format(VkSurfaceFormatKHR{ VK_FORMAT_R8G8B8A8_SRGB, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR })
+        .add_fallback_format(VkSurfaceFormatKHR{ VK_FORMAT_B8G8R8A8_SRGB, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR })
+        .set_desired_present_mode(presentSetup.presentMode)
+        .add_fallback_present_mode(VK_PRESENT_MODE_FIFO_KHR)
+        .set_required_min_image_count(presentSetup.imageCount)
+        .build().value();
+
+    // Set up context config based on passed params
+    m_config.vsyncMode = createInfo.vsyncMode;
+}
+
+RenderContext::~RenderContext()
+{
+    vkb::destroy_swapchain(swapchain);
+    vkb::destroy_device(device);
+    vkb::destroy_surface(instance, surface);
+    vkb::destroy_instance(instance);
+}
+
+void RenderContext::setVSyncMode(VSyncMode vsyncMode)
+{
+    // Nothing to do here
+    if (m_config.vsyncMode == vsyncMode)
+        return;
+
+    m_config.vsyncMode = vsyncMode;
+    recreateSwapchain();
+}
+
+void RenderContext::recreateSwapchain()
+{
+    HRI_VK_CHECK(vkDeviceWaitIdle(device));
+
+    SwapchainPresentSetup presentSetup = RenderContext::getSwapPresentSetup(m_config.vsyncMode);
+    vkb::Swapchain oldSwapchain = swapchain;
+
+    vkb::SwapchainBuilder swapchainBuilder = vkb::SwapchainBuilder(device);
+    swapchain = swapchainBuilder
+        .set_desired_format(VkSurfaceFormatKHR{ oldSwapchain.image_format, oldSwapchain.color_space })
+        .set_desired_present_mode(presentSetup.presentMode)
+        .add_fallback_present_mode(VK_PRESENT_MODE_FIFO_KHR)
+        .set_required_min_image_count(presentSetup.imageCount)
+        .set_old_swapchain(oldSwapchain)
+        .build().value();
+
+    vkb::destroy_swapchain(oldSwapchain);
+}
+
+SwapchainPresentSetup RenderContext::getSwapPresentSetup(VSyncMode vsyncMode)
+{
     // Select image count & present mode based on VSync mode
     uint32_t swapImageCount = 0;
     VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
-    switch (createInfo.vsyncMode)
+    switch (vsyncMode)
     {
     case VSyncMode::Disabled:
         swapImageCount = HRI_DEFAULT_SWAP_IMAGE_COUNT;
@@ -87,22 +142,10 @@ RenderContext::RenderContext(RenderContextCreateInfo createInfo)
         break;
     }
 
-    vkb::SwapchainBuilder swapchainBuilder = vkb::SwapchainBuilder(device);
-    swapchain = swapchainBuilder
-        .set_desired_format(VkSurfaceFormatKHR{ VK_FORMAT_R8G8B8A8_SRGB, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR })
-        .add_fallback_format(VkSurfaceFormatKHR{ VK_FORMAT_B8G8R8A8_SRGB, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR })
-        .set_desired_present_mode(presentMode)
-        .add_fallback_present_mode(VK_PRESENT_MODE_FIFO_KHR)
-        .set_required_min_image_count(swapImageCount)
-        .build().value();
-}
-
-RenderContext::~RenderContext()
-{
-    vkb::destroy_swapchain(swapchain);
-    vkb::destroy_device(device);
-    vkb::destroy_surface(instance, surface);
-    vkb::destroy_instance(instance);
+    return SwapchainPresentSetup{
+        swapImageCount,
+        presentMode,
+    };
 }
 
 VKAPI_ATTR VkBool32 VKAPI_CALL RenderContext::debugCallback(

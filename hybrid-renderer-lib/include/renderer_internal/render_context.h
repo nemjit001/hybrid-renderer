@@ -41,6 +41,13 @@ namespace hri
         VSyncMode vsyncMode                     = VSyncMode::Disabled;
     };
 
+    /// @brief The swapchain present setup dictates available swap images for rendering, as well as the present mode.
+    struct SwapchainPresentSetup
+    {
+        uint32_t imageCount;
+        VkPresentModeKHR presentMode;
+    };
+
     /// @brief THe RenderContext manages the Vulkan instance, device, and swapchain state.
     class RenderContext
     {
@@ -56,7 +63,18 @@ namespace hri
         RenderContext(const RenderContext&) = delete;
         RenderContext& operator=(const RenderContext&) = delete;
 
+        /// @brief Set the VSync mode for the swap chain. Recreates the swap chain.
+        ///     NOTE: does not free any allocated swap images or views!
+        /// @param vsyncMode The new VSync mode to use.
+        void setVSyncMode(VSyncMode vsyncMode);
+
+        /// @brief Recreate the swap chain, freeing old resources.
+        ///     NOTE: does not free any allocated swap images or views!
+        void recreateSwapchain();
+
     private:
+        static SwapchainPresentSetup getSwapPresentSetup(VSyncMode vsyncMode);
+
         /// @brief Debug callback for the Vulkan API
         /// @param severity 
         /// @param messageTypes 
@@ -76,6 +94,15 @@ namespace hri
         vkb::PhysicalDevice gpu     = vkb::PhysicalDevice();
         vkb::Device device          = vkb::Device();
         vkb::Swapchain swapchain    = vkb::Swapchain();
+
+    private:
+        /// @brief The Context Config maintains state needed for recreation of devices, swapchains, etc.
+        struct ContextConfig
+        {
+            VSyncMode vsyncMode;
+        };
+
+        ContextConfig m_config = ContextConfig{};
     };
 }
 

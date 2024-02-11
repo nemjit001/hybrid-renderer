@@ -182,13 +182,9 @@ int main()
 	windowCreateInfo.pTitle = DEMO_WINDOW_NAME;
 	gWindow = initWindow(&windowCreateInfo);
 
-	auto surfaceCreateFunc = [](vkb::Instance instance, VkSurfaceKHR* surface){
-		return glfwCreateWindowSurface(instance, gWindow, nullptr, surface);
-	};
-
 	// Set up render context
 	hri::RenderContextCreateInfo ctxCreateInfo = hri::RenderContextCreateInfo{};
-	ctxCreateInfo.surfaceCreateFunc = surfaceCreateFunc;
+	ctxCreateInfo.surfaceCreateFunc = [](vkb::Instance instance, VkSurfaceKHR* surface) { return glfwCreateWindowSurface(instance, gWindow, nullptr, surface); };
 	ctxCreateInfo.vsyncMode = hri::VSyncMode::Disabled;
 	hri::RenderContext renderContext = hri::RenderContext(ctxCreateInfo);
 
