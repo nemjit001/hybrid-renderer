@@ -38,6 +38,13 @@ namespace hri
 		static void destroy(RenderContext* ctx, RenderTarget& renderTarget);
 	};
 
+	/// @brief The IFrameGraphNode interface exposes executable render pass functionality.
+	class IFrameGraphNode
+	{
+	public:
+		//
+	};
+
 	class FrameGraph
 	{
 	public:
@@ -280,11 +287,11 @@ namespace hri
 			}
 
 	private:
-		RenderContext* m_pCtx				= nullptr;
-		RenderTarget m_gbufferDepthTarget	= RenderTarget{};
-		RenderTarget m_gbufferNormalTarget	= RenderTarget{};
-		RenderTarget m_gbufferAlbedoTarget	= RenderTarget{};
-		VkRenderPass m_renderPass			= VK_NULL_HANDLE;
+		RenderContext* m_pCtx						= nullptr;
+		RenderTarget m_gbufferDepthTarget			= RenderTarget{};
+		RenderTarget m_gbufferNormalTarget			= RenderTarget{};
+		RenderTarget m_gbufferAlbedoTarget			= RenderTarget{};
+		VkRenderPass m_renderPass					= VK_NULL_HANDLE;
 		std::vector<VkImageView> m_swapViews		= {};
 		std::vector<VkFramebuffer> m_framebuffers	= {};
 	};
