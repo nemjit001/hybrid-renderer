@@ -199,7 +199,13 @@ namespace hri
 			passBeginInfo.pClearValues = clearValues;
 			vkCmdBeginRenderPass(commandBuffer, &passBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
+			// TODO: execute deferred pass using precompiled shaders
+			//		DO: find a way to bind needed buffers -> use scene data?
+
 			vkCmdNextSubpass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
+
+			// TODO: execute present pass using precompiled shaders
+			//		DO: allocate resource descriptors for input attachments
 
 			vkCmdEndRenderPass(commandBuffer);
 		}
