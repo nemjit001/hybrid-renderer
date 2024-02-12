@@ -87,6 +87,14 @@ RenderContext::RenderContext(RenderContextCreateInfo createInfo)
     device = deviceBuilder
         .build().value();
 
+    VmaAllocatorCreateInfo allocatorCreateInfo = VmaAllocatorCreateInfo{};
+    allocatorCreateInfo.flags = 0;
+    allocatorCreateInfo.instance = instance;
+    allocatorCreateInfo.physicalDevice = gpu;
+    allocatorCreateInfo.device = device;
+    allocatorCreateInfo.vulkanApiVersion = HRI_VK_API_VERSION;
+    HRI_VK_CHECK(vmaCreateAllocator(&allocatorCreateInfo, &allocator));
+
     SwapchainPresentSetup presentSetup = RenderContext::getSwapPresentSetup(createInfo.vsyncMode);
     vkb::SwapchainBuilder swapchainBuilder = vkb::SwapchainBuilder(device);
     swapchain = swapchainBuilder
@@ -107,6 +115,7 @@ RenderContext::RenderContext(RenderContextCreateInfo createInfo)
 RenderContext::~RenderContext()
 {
     vkb::destroy_swapchain(swapchain);
+    vmaDestroyAllocator(allocator);
     vkb::destroy_device(device);
     vkb::destroy_surface(instance, surface);
     vkb::destroy_instance(instance);

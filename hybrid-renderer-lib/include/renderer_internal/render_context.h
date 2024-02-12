@@ -11,6 +11,7 @@
 
 #include <functional>
 #include <VkBootstrap.h>
+#include <vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
 
 #define HRI_VK_API_VERSION  VK_API_VERSION_1_3
@@ -116,6 +117,7 @@ namespace hri
         VkSurfaceKHR surface            = VK_NULL_HANDLE;
         vkb::PhysicalDevice gpu         = vkb::PhysicalDevice();
         vkb::Device device              = vkb::Device();
+        VmaAllocator allocator          = VK_NULL_HANDLE;
         vkb::Swapchain swapchain        = vkb::Swapchain();
         RenderContextQueueState queues  = RenderContextQueueState();
 

@@ -7,3 +7,6 @@
 [submodule "hybrid-renderer-lib/deps/vk-bootstrap"]
 	path = hybrid-renderer-lib/deps/vk-bootstrap
 	url = https://github.com/charles-lunarg/vk-bootstrap
+[submodule "hybrid-renderer-lib/deps/VulkanMemoryAllocator"]
+	path = hybrid-renderer-lib/deps/VulkanMemoryAllocator
+	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator

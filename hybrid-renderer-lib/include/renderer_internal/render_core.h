@@ -5,6 +5,7 @@
 #include "config.h"
 #include "platform.h"
 #include "renderer_internal/render_context.h"
+#include "renderer_internal/frame_graph.h"
 
 namespace hri
 {
@@ -47,6 +48,8 @@ namespace hri
 		/// @brief Immeditely record & submit Vulkan commands, e.g. for resource transfer operations.
 		/// @param submitFunc The submit function to use.
 		void immediateSubmit(HRIImmediateSubmitFunc submitFunc);
+
+		void recordFrameGraph(const FrameGraph& frameGraph);
 
 	private:
 		/// @brief Validate a swap chain operation result, setting the recreate flag if necessary.

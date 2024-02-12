@@ -159,8 +159,9 @@ int main()
 	ctxCreateInfo.vsyncMode = hri::VSyncMode::Disabled;
 	hri::RenderContext renderContext = hri::RenderContext(ctxCreateInfo);
 
-	// Create render core
+	// Create render core & fixed frame graph
 	hri::RenderCore renderCore = hri::RenderCore(&renderContext);
+	hri::FrameGraph frameGraph = hri::FrameGraph(&renderContext);
 
 	// Load scene file
 	hri::Scene scene = loadScene("assets/test_scene.obj");
@@ -176,6 +177,7 @@ int main()
 		renderCore.startFrame();
 
 		// TODO: draw scene
+		renderCore.recordFrameGraph(frameGraph);
 
 		renderCore.endFrame();
 		windowManager.pollEvents();

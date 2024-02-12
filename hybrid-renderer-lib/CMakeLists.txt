@@ -8,6 +8,8 @@ option(VK_BOOTSTRAP_DISABLE_WARNINGS "Disable warnings during compilation" OFF)
 option(VK_BOOTSTRAP_WERROR "Enable warnings as errors during compilation" OFF)
 add_subdirectory("deps/vk-bootstrap/")
 
+add_subdirectory("deps/VulkanMemoryAllocator/")
+
 # Project setup
 file(GLOB PROJECT_HEADERS "include/*.h" "include/**/*.h")
 file(GLOB PROJECT_SOURCES "src/*.cpp" "src/**/*.cpp")
@@ -33,9 +35,11 @@ target_include_directories(${LIB_NAME} PUBLIC
 	"include/"
 	${Vulkan_INCLUDE_DIRS}
 	"deps/vk-bootstrap/src/"
+	"deps/VulkanMemoryAllocator/include/"
 )
 
 target_link_libraries(${LIB_NAME}
 	${Vulkan_LIBRARIES}
 	vk-bootstrap
+	VulkanMemoryAllocator
 )
