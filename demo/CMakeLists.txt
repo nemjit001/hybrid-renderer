@@ -39,17 +39,3 @@ add_custom_target(custom-commands ALL
 add_custom_command(TARGET custom-commands
 	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/assets/ $<TARGET_FILE_DIR:${TARGET_NAME}>/assets/
 )
-
-# Create the shader output directory
-add_custom_command(TARGET custom-commands
-	COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${TARGET_NAME}>/shaders/
-)
-
-# Compile shaders to SPIR-V
-foreach(FILE_PATH IN LISTS PROJECT_SHADERS)
-	cmake_path(GET FILE_PATH FILENAME FILE_NAME)
-
-	add_custom_command(TARGET custom-commands
-		COMMAND glslc ${FILE_PATH} -o $<TARGET_FILE_DIR:${TARGET_NAME}>/shaders/${FILE_NAME}.spv
-	)
-endforeach()
