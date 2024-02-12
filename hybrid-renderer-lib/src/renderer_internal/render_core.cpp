@@ -137,7 +137,7 @@ void RenderCore::endFrame()
 
 void RenderCore::awaitFrameFinished() const
 {
-	assert(m_previousFrame != m_currentFrame);
+	assert(HRI_VK_FRAMES_IN_FLIGHT == 1 || m_previousFrame != m_currentFrame);
 
 	const FrameState& activeFrame = m_frames[m_previousFrame];
 	VkFence frameFences[] = { activeFrame.frameReady };

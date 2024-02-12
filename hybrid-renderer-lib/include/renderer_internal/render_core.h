@@ -55,7 +55,7 @@ namespace hri
 
 	private:
 		RenderContext* m_pCtx			= nullptr;
-		uint32_t m_previousFrame		= HRI_VK_FRAMES_IN_FLIGHT - 1;
+		uint32_t m_previousFrame		= 0;
 		uint32_t m_currentFrame			= 0;
 		uint32_t m_activeSwapImage		= 0;
 		bool m_recreateSwapchain		= false;
