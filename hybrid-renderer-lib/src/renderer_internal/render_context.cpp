@@ -27,10 +27,10 @@ static const std::vector<const char*> gInstanceExtensions = {
 /// @brief Enabled & required Vulkan device extensions
 static const std::vector<const char*> gDeviceExtensions = {
     VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-    VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
-    VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
-    VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,
-    VK_KHR_RAY_QUERY_EXTENSION_NAME,
+//    VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
+//    VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
+//    VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,
+//    VK_KHR_RAY_QUERY_EXTENSION_NAME,
 };
 
 RenderContextQueueState::RenderContextQueueState(vkb::Device device)
