@@ -48,31 +48,6 @@ namespace hri
 			assert(ctx != nullptr);
 			VkExtent2D swapExtent = m_pCtx->swapchain.extent;
 
-			// Initialize render targets
-			m_gbufferDepthTarget = RenderTarget::init(
-				ctx,
-				VK_FORMAT_D32_SFLOAT,
-				swapExtent,
-				VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-				VK_IMAGE_ASPECT_DEPTH_BIT
-			);
-
-			m_gbufferNormalTarget = RenderTarget::init(
-				ctx,
-				VK_FORMAT_R8G8B8A8_SNORM,
-				swapExtent,
-				VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-				VK_IMAGE_ASPECT_COLOR_BIT
-			);
-
-			m_gbufferAlbedoTarget = RenderTarget::init(
-				ctx,
-				VK_FORMAT_R8G8B8A8_UNORM,
-				swapExtent,
-				VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-				VK_IMAGE_ASPECT_COLOR_BIT
-			);
-
 			// Set up deferred rendering subpass
 			VkAttachmentReference gbufferDepthRef = VkAttachmentReference{ 1, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL };
 			VkAttachmentDescription gbufferDepth = VkAttachmentDescription{};
@@ -189,46 +164,114 @@ namespace hri
 			renderPassCreateInfo.pDependencies = dependencies;
 			HRI_VK_CHECK(vkCreateRenderPass(m_pCtx->device, &renderPassCreateInfo, nullptr, &m_renderPass));
 
-			// Create framebuffers for render pass
-			m_swapViews = m_pCtx->swapchain.get_image_views().value();
-			for (auto const& swapView : m_swapViews)
-			{
-				VkImageView fbAttachments[] = {
-					swapView,
-					m_gbufferDepthTarget.view,
-					m_gbufferNormalTarget.view,
-					m_gbufferAlbedoTarget.view,
-				};
-
-				VkFramebufferCreateInfo fbCreateInfo = VkFramebufferCreateInfo{ VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
-				fbCreateInfo.flags = 0;
-				fbCreateInfo.attachmentCount = HRI_SIZEOF_ARRAY(fbAttachments);
-				fbCreateInfo.pAttachments = fbAttachments;
-				fbCreateInfo.renderPass = m_renderPass;
-				fbCreateInfo.width	= swapExtent.width;
-				fbCreateInfo.height = swapExtent.height;
-				fbCreateInfo.layers = 1;
-
-				VkFramebuffer framebuffer = VK_NULL_HANDLE;
-				HRI_VK_CHECK(vkCreateFramebuffer(m_pCtx->device, &fbCreateInfo, nullptr, &framebuffer));
-				m_framebuffers.push_back(framebuffer);
-			}
+			createFrameResources();
 		}
 
 		virtual ~FrameGraph()
 		{
-			RenderTarget::destroy(m_pCtx, m_gbufferDepthTarget);
-			RenderTarget::destroy(m_pCtx, m_gbufferNormalTarget);
-			RenderTarget::destroy(m_pCtx, m_gbufferAlbedoTarget);
-
 			vkDestroyRenderPass(m_pCtx->device, m_renderPass, nullptr);
-			m_pCtx->swapchain.destroy_image_views(m_swapViews);
-
-			for (auto const& framebuffer : m_framebuffers)
-			{
-				vkDestroyFramebuffer(m_pCtx->device, framebuffer, nullptr);
-			}
+			destroyFrameResources();
 		}
+
+		void recreateFrameResources()
+		{			
+			destroyFrameResources();
+			createFrameResources();
+		}
+
+		void execute(VkCommandBuffer commandBuffer, uint32_t activeSwapImageIdx) const
+		{
+			assert(activeSwapImageIdx < m_framebuffers.size());
+			VkExtent2D swapExtent = m_pCtx->swapchain.extent;
+
+			VkClearValue clearValues[] = {
+				VkClearValue{{ 0.0f, 0.0f, 0.0f, 0.0f }},
+				VkClearValue{{ 1.0f, 0x00 }},
+				VkClearValue{{ 0.0f, 0.0f, 0.0f, 0.0f }},
+				VkClearValue{{ 0.0f, 0.0f, 0.0f, 0.0f }},
+			};
+
+			VkRenderPassBeginInfo passBeginInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
+			passBeginInfo.renderPass = m_renderPass;
+			passBeginInfo.framebuffer = m_framebuffers[activeSwapImageIdx];
+			passBeginInfo.renderArea = VkRect2D{ 0, 0, swapExtent.width, swapExtent.height };
+			passBeginInfo.clearValueCount = HRI_SIZEOF_ARRAY(clearValues);
+			passBeginInfo.pClearValues = clearValues;
+			vkCmdBeginRenderPass(commandBuffer, &passBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+			vkCmdNextSubpass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
+
+			vkCmdEndRenderPass(commandBuffer);
+		}
+
+		private:
+			void createFrameResources()
+			{
+				VkExtent2D swapExtent = m_pCtx->swapchain.extent;
+
+				m_gbufferDepthTarget = RenderTarget::init(
+					m_pCtx,
+					VK_FORMAT_D32_SFLOAT,
+					swapExtent,
+					VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+					VK_IMAGE_ASPECT_DEPTH_BIT
+				);
+
+				m_gbufferNormalTarget = RenderTarget::init(
+					m_pCtx,
+					VK_FORMAT_R8G8B8A8_SNORM,
+					swapExtent,
+					VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+					VK_IMAGE_ASPECT_COLOR_BIT
+				);
+
+				m_gbufferAlbedoTarget = RenderTarget::init(
+					m_pCtx,
+					VK_FORMAT_R8G8B8A8_UNORM,
+					swapExtent,
+					VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+					VK_IMAGE_ASPECT_COLOR_BIT
+				);
+
+				m_swapViews = m_pCtx->swapchain.get_image_views().value();
+				for (auto const& swapView : m_swapViews)
+				{
+					VkImageView fbAttachments[] = {
+						swapView,
+						m_gbufferDepthTarget.view,
+						m_gbufferNormalTarget.view,
+						m_gbufferAlbedoTarget.view,
+					};
+
+					VkFramebufferCreateInfo fbCreateInfo = VkFramebufferCreateInfo{ VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
+					fbCreateInfo.flags = 0;
+					fbCreateInfo.attachmentCount = HRI_SIZEOF_ARRAY(fbAttachments);
+					fbCreateInfo.pAttachments = fbAttachments;
+					fbCreateInfo.renderPass = m_renderPass;
+					fbCreateInfo.width = swapExtent.width;
+					fbCreateInfo.height = swapExtent.height;
+					fbCreateInfo.layers = 1;
+
+					VkFramebuffer framebuffer = VK_NULL_HANDLE;
+					HRI_VK_CHECK(vkCreateFramebuffer(m_pCtx->device, &fbCreateInfo, nullptr, &framebuffer));
+					m_framebuffers.push_back(framebuffer);
+				}
+			}
+
+			void destroyFrameResources()
+			{
+				RenderTarget::destroy(m_pCtx, m_gbufferDepthTarget);
+				RenderTarget::destroy(m_pCtx, m_gbufferNormalTarget);
+				RenderTarget::destroy(m_pCtx, m_gbufferAlbedoTarget);
+
+				m_pCtx->swapchain.destroy_image_views(m_swapViews);
+				for (auto const& framebuffer : m_framebuffers)
+				{
+					vkDestroyFramebuffer(m_pCtx->device, framebuffer, nullptr);
+				}
+				
+				m_framebuffers.clear();
+			}
 
 	private:
 		RenderContext* m_pCtx				= nullptr;

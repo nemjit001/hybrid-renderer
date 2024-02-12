@@ -163,6 +163,11 @@ int main()
 	hri::RenderCore renderCore = hri::RenderCore(&renderContext);
 	hri::FrameGraph frameGraph = hri::FrameGraph(&renderContext);
 
+	// Register a callback for when the swap chain is invalidated
+	renderCore.setOnSwapchainInvalidateCallback([&frameGraph]() {
+		frameGraph.recreateFrameResources();
+	});
+
 	// Load scene file
 	hri::Scene scene = loadScene("assets/test_scene.obj");
 

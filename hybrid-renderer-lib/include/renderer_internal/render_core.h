@@ -10,6 +10,7 @@
 namespace hri
 {
 	typedef std::function<void(VkCommandBuffer)> HRIImmediateSubmitFunc;
+	typedef std::function<void()> HRIOnSwapchainInvalidateFunc;
 
 	/// @brief The Frame State manages per frame data such as buffers & sync primitives
 	struct FrameState
@@ -45,11 +46,19 @@ namespace hri
 		/// @brief Await the finish of the currently active frame.
 		void awaitFrameFinished() const;
 
+		/// @brief Register a callback for when the Swap Chain is invalidated. This callback can be used to
+		///		recreate frame resources for example.
+		/// @param onSwapchainInvalidate Callback to execute on swapchain invalidation.
+		/// @return The previously registered callback, may be a nullptr.
+		HRIOnSwapchainInvalidateFunc setOnSwapchainInvalidateCallback(HRIOnSwapchainInvalidateFunc onSwapchainInvalidate);
+
 		/// @brief Immeditely record & submit Vulkan commands, e.g. for resource transfer operations.
 		/// @param submitFunc The submit function to use.
 		void immediateSubmit(HRIImmediateSubmitFunc submitFunc);
 
-		void recordFrameGraph(const FrameGraph& frameGraph);
+		/// @brief Record a frame graph using the render core builtin command buffers.
+		/// @param frameGraph The FrameGraph object to record commands with.
+		void recordFrameGraph(FrameGraph& frameGraph);
 
 	private:
 		/// @brief Validate a swap chain operation result, setting the recreate flag if necessary.
@@ -63,6 +72,7 @@ namespace hri
 		uint32_t m_activeSwapImage		= 0;
 		bool m_recreateSwapchain		= false;
 		VkCommandPool m_submitPool		= VK_NULL_HANDLE;
+		HRIOnSwapchainInvalidateFunc m_onSwapchainInvalidateFunc = nullptr;
 		FrameState m_frames[HRI_VK_FRAMES_IN_FLIGHT] = {};
 	};
 }

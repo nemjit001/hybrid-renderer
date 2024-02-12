@@ -87,6 +87,10 @@ void RenderCore::startFrame()
 	if (m_recreateSwapchain)
 	{
 		m_pCtx->recreateSwapchain();
+
+		if (m_onSwapchainInvalidateFunc != nullptr)
+			m_onSwapchainInvalidateFunc();
+
 		m_recreateSwapchain = false;
 	}
 
@@ -144,6 +148,14 @@ void RenderCore::awaitFrameFinished() const
 	HRI_VK_CHECK(vkWaitForFences(m_pCtx->device, HRI_SIZEOF_ARRAY(frameFences), frameFences, VK_TRUE, UINT64_MAX));
 }
 
+HRIOnSwapchainInvalidateFunc RenderCore::setOnSwapchainInvalidateCallback(HRIOnSwapchainInvalidateFunc onSwapchainInvalidate)
+{
+	HRIOnSwapchainInvalidateFunc old = m_onSwapchainInvalidateFunc;
+	m_onSwapchainInvalidateFunc = onSwapchainInvalidate;
+
+	return old;
+}
+
 void RenderCore::immediateSubmit(HRIImmediateSubmitFunc submitFunc)
 {
 	VkCommandBuffer oneshotBuffer = VK_NULL_HANDLE;
@@ -171,7 +183,7 @@ void RenderCore::immediateSubmit(HRIImmediateSubmitFunc submitFunc)
 	vkFreeCommandBuffers(m_pCtx->device, m_submitPool, 1, &oneshotBuffer);
 }
 
-void RenderCore::recordFrameGraph(const FrameGraph& frameGraph)
+void RenderCore::recordFrameGraph(FrameGraph& frameGraph)
 {
 	FrameState& activeFrame = m_frames[m_currentFrame];
 
@@ -182,7 +194,7 @@ void RenderCore::recordFrameGraph(const FrameGraph& frameGraph)
 	frameBeginInfo.pInheritanceInfo = nullptr;
 	HRI_VK_CHECK(vkBeginCommandBuffer(activeFrame.graphicsCommandBuffer, &frameBeginInfo));
 
-	// TODO: execute frame graph
+	frameGraph.execute(activeFrame.graphicsCommandBuffer, m_activeSwapImage);
 
 	HRI_VK_CHECK(vkEndCommandBuffer(activeFrame.graphicsCommandBuffer));
 }
