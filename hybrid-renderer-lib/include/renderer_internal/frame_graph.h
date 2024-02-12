@@ -38,11 +38,45 @@ namespace hri
 		static void destroy(RenderContext* ctx, RenderTarget& renderTarget);
 	};
 
-	/// @brief The IFrameGraphNode interface exposes executable render pass functionality.
+	/// @brief The IFrameGraphNode interface exposes functions for rendering using a higher level interface.
 	class IFrameGraphNode
 	{
 	public:
-		//
+		virtual void execute(VkCommandBuffer) const = 0;
+
+	private:
+		// Pointer to pass resources (descriptor sets, push constant values)
+		// Pointer to pipeline resources (graphics pipeline & its layout)
+	};
+
+	class RasterFrameGraphNode
+		:
+		IFrameGraphNode
+	{
+	public:
+		virtual void execute(VkCommandBuffer) const override
+		{
+			// TODO: record raster pass commands
+			//	- bind pass resources
+			//	- bind pass pipeline
+			//	- bind pass buffers (vertex / index / inderect draw(?))
+			//	- execute draw command(s)
+		}
+	};
+
+	class PresentFrameGraphNode
+		:
+		IFrameGraphNode
+	{
+	public:
+		virtual void execute(VkCommandBuffer) const override
+		{
+			// TODO: record present pass commands
+			//	- bind pass resources
+			//	- bind pass pipeline
+			//	- bind pass buffers (vertex / index / inderect draw(?))
+			//	- execute draw command
+		}
 	};
 
 	class FrameGraph
