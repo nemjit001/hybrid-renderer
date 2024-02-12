@@ -164,7 +164,7 @@ int main()
 	hri::FrameGraph frameGraph = hri::FrameGraph(&renderContext);
 
 	// Register a callback for when the swap chain is invalidated
-	renderCore.setOnSwapchainInvalidateCallback([&frameGraph]() {
+	renderCore.setOnSwapchainInvalidateCallback([&frameGraph](vkb::Swapchain _swapchain) {
 		frameGraph.recreateFrameResources();
 	});
 

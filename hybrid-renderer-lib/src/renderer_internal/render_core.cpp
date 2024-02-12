@@ -89,7 +89,7 @@ void RenderCore::startFrame()
 		m_pCtx->recreateSwapchain();
 
 		if (m_onSwapchainInvalidateFunc != nullptr)
-			m_onSwapchainInvalidateFunc();
+			m_onSwapchainInvalidateFunc(m_pCtx->swapchain);
 
 		m_recreateSwapchain = false;
 	}

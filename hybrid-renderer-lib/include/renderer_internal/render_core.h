@@ -10,7 +10,7 @@
 namespace hri
 {
 	typedef std::function<void(VkCommandBuffer)> HRIImmediateSubmitFunc;
-	typedef std::function<void()> HRIOnSwapchainInvalidateFunc;
+	typedef std::function<void(vkb::Swapchain)> HRIOnSwapchainInvalidateFunc;
 
 	/// @brief The Frame State manages per frame data such as buffers & sync primitives
 	struct FrameState
