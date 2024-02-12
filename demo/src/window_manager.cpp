@@ -40,11 +40,19 @@ void WindowManager::destroyWindow(WindowHandle* window)
 	m_window = nullptr;
 }
 
-bool WindowManager::windowShouldClose(WindowHandle* window)
+bool WindowManager::windowShouldClose(WindowHandle* window) const
 {
 	assert(window != nullptr);
 	assert(window == m_window);
 	return glfwWindowShouldClose(window);
+}
+
+bool WindowManager::isWindowMinimized(WindowHandle* window) const
+{
+	int width = 0, height = 0;
+	glfwGetFramebufferSize(window, &width, &height);
+
+	return width == 0 || height == 0;
 }
 
 void WindowManager::pollEvents()

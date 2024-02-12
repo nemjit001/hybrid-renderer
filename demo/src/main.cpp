@@ -178,14 +178,18 @@ int main()
 
 	while (!windowManager.windowShouldClose(gWindow))
 	{
+		windowManager.pollEvents();
 		gFrameTimer.tick();
+
+		if (windowManager.isWindowMinimized(gWindow))
+			continue;
+
 		renderCore.startFrame();
 
 		// TODO: draw scene
 		renderCore.recordFrameGraph(frameGraph);
 
 		renderCore.endFrame();
-		windowManager.pollEvents();
 	}
 
 	printf("Shutting down\n");
