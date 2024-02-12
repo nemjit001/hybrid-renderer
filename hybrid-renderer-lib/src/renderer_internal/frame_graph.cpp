@@ -17,6 +17,7 @@ RenderTarget RenderTarget::init(
 	VkImageAspectFlags imageAspect
 )
 {
+	assert(ctx != nullptr);
 	RenderTarget target = RenderTarget{};
 
 	VkImageCreateInfo imageCreateInfo = VkImageCreateInfo{ VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
@@ -62,7 +63,7 @@ RenderTarget RenderTarget::init(
 
 void RenderTarget::destroy(RenderContext* ctx, RenderTarget& renderTarget)
 {
-	assert(ctx);
+	assert(ctx != nullptr);
 
 	vmaDestroyImage(ctx->allocator, renderTarget.image, renderTarget.allocation);
 	vkDestroyImageView(ctx->device, renderTarget.view, nullptr);

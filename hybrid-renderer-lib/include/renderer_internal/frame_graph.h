@@ -185,10 +185,10 @@ namespace hri
 			VkExtent2D swapExtent = m_pCtx->swapchain.extent;
 
 			VkClearValue clearValues[] = {
-				VkClearValue{{ 0.0f, 0.0f, 0.0f, 0.0f }},
-				VkClearValue{{ 1.0f, 0x00 }},
-				VkClearValue{{ 0.0f, 0.0f, 0.0f, 0.0f }},
-				VkClearValue{{ 0.0f, 0.0f, 0.0f, 0.0f }},
+				VkClearValue{{ 0.0f, 0.0f, 0.0f, 0.0f }},	// Swap attachment
+				VkClearValue{{ 1.0f, 0x00 }},				// GBuffer Depth
+				VkClearValue{{ 0.0f, 0.0f, 0.0f, 0.0f }},	// GBuffer Normal
+				VkClearValue{{ 0.0f, 0.0f, 0.0f, 0.0f }},	// GBuffer Albedo
 			};
 
 			VkRenderPassBeginInfo passBeginInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
