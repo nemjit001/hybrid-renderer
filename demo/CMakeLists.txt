@@ -31,11 +31,11 @@ target_include_directories(${TARGET_NAME} PRIVATE
 	"../hybrid-renderer-lib/include/"
 )
 
-add_custom_target(custom-commands ALL
+add_custom_target(custom-commands-${TARGET_NAME} ALL
 	COMMAND ${CMAKE_COMMAND} -E echo "Running custom commands..."
 )
 
 # Copy assets to target dir
-add_custom_command(TARGET custom-commands
+add_custom_command(TARGET custom-commands-${TARGET_NAME}
 	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/assets/ $<TARGET_FILE_DIR:${TARGET_NAME}>/assets/
 )
