@@ -10,4 +10,5 @@
 #include "renderer_internal/render_context.h"
 #include "renderer_internal/render_core.h"
 #include "renderer_internal/scene.h"
+#include "renderer_internal/shader_database.h"
 #include "renderer_internal/texture.h"
