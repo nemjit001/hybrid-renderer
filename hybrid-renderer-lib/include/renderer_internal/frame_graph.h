@@ -6,6 +6,7 @@
 #include <vulkan/vulkan.h>
 
 #include "renderer_internal/render_context.h"
+#include "renderer_internal/shader_database.h"
 
 namespace hri
 {
@@ -44,9 +45,11 @@ namespace hri
 	public:
 		virtual void execute(VkCommandBuffer) const = 0;
 
-	private:
+		virtual inline void setPipeline(const PipelineStateObject* pPSO) { assert(m_pPSO != nullptr); m_pPSO = pPSO; }
+
+	protected:
 		// Pointer to pass resources (descriptor sets, push constant values)
-		// Pointer to pipeline resources (graphics pipeline & its layout)
+		const PipelineStateObject* m_pPSO	= nullptr;
 	};
 
 	class RasterFrameGraphNode
@@ -54,13 +57,14 @@ namespace hri
 		public IFrameGraphNode
 	{
 	public:
-		virtual void execute(VkCommandBuffer) const override
+		virtual void execute(VkCommandBuffer commandBuffer) const override
 		{
-			// TODO: record raster pass commands
-			//	- bind pass resources
-			//	- bind pass pipeline
-			//	- bind pass buffers (vertex / index / inderect draw(?))
-			//	- execute draw command(s)
+			assert(m_pPSO != nullptr);
+
+			// TODO: bind resources
+			vkCmdBindPipeline(commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
+			// TODO: bind buffers
+			// TODO: draw
 		}
 	};
 
@@ -69,13 +73,13 @@ namespace hri
 		public IFrameGraphNode
 	{
 	public:
-		virtual void execute(VkCommandBuffer) const override
+		virtual void execute(VkCommandBuffer commandBuffer) const override
 		{
-			// TODO: record present pass commands
-			//	- bind pass resources
-			//	- bind pass pipeline
-			//	- bind pass buffers (vertex / index / inderect draw(?))
-			//	- execute draw command
+			assert(m_pPSO != nullptr);
+
+			// TODO: bind resources
+			vkCmdBindPipeline(commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
+			vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 		}
 	};
 
