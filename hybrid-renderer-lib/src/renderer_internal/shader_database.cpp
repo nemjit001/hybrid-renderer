@@ -1,5 +1,6 @@
 #include "renderer_internal/shader_database.h"
 
+#include <cstdio>
 #include <string>
 #include <map>
 #include <vector>
@@ -72,7 +73,39 @@ VkPipelineDepthStencilStateCreateInfo GraphicsPipelineBuilder::initDepthStencilS
 
 Shader Shader::loadFile(RenderContext* ctx, const std::string& path, VkShaderStageFlagBits stage)
 {
-    return Shader::init(ctx, nullptr, 0, stage);
+    // Open code file
+    FILE* file = fopen(path.c_str(), "rb");
+    if (file == nullptr)
+    {
+        fprintf(stderr, "Failed to open Shader File [%s]\n", path.c_str());
+        abort();
+    }
+
+    // Check file size
+    fseek(file, 0, SEEK_END);
+    long codeSize = ftell(file);
+    assert(codeSize > 0);
+
+    if (codeSize <= 0)
+    {
+        fclose(file);
+        fprintf(stderr, "Failed to read Shader File [%s]\n", path.c_str());
+        abort();
+    }
+
+    // Read shader binary blob
+    fseek(file, 0, SEEK_SET);
+    char* pCode = new char[codeSize + 1] {};
+    fread(pCode, sizeof(char), codeSize, file);
+
+    // Initialize shader
+    Shader shader = Shader::init(ctx, reinterpret_cast<uint32_t*>(pCode), static_cast<size_t>(codeSize), stage);
+
+    // Free resources
+    fclose(file);
+    delete[] pCode;
+
+    return shader;
 }
 
 Shader Shader::init(RenderContext* ctx, uint32_t* pCode, size_t codeSize, VkShaderStageFlagBits stage)
