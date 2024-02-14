@@ -166,17 +166,23 @@ int main()
 
 	// Register a callback for when the swap chain is invalidated
 	renderCore.setOnSwapchainInvalidateCallback([&frameGraph](vkb::Swapchain _swapchain) {
-		frameGraph.generateGraph();
+		frameGraph.generate();
 	});
 
 	// Set up frame graph nodes & associated resources
-	hri::RasterFrameGraphNode gbufferPass = hri::RasterFrameGraphNode();
-	gbufferPass.setViewport(hri::Viewport{ 0.0f, 0.0f, SCR_WIDTH, SCR_HEIGHT });
-	gbufferPass.setScissor(hri::Scissor{ 0, 0, SCR_WIDTH, SCR_HEIGHT });
+	hri::VirtualResourceHandle albedoTarget = frameGraph.createTextureResource("Albedo Target", { SCR_WIDTH, SCR_HEIGHT }, VK_FORMAT_R8G8B8A8_UNORM, 0);
+	hri::VirtualResourceHandle normalTarget = frameGraph.createTextureResource("Normal Target", { SCR_WIDTH, SCR_HEIGHT }, VK_FORMAT_R8G8B8A8_SNORM, 0);
+	hri::VirtualResourceHandle depthTarget = frameGraph.createTextureResource("Depth Target", { SCR_WIDTH, SCR_HEIGHT }, VK_FORMAT_D32_SFLOAT, 0);
 
-	hri::PresentFrameGraphNode presentPass = hri::PresentFrameGraphNode();
-	presentPass.setViewport(hri::Viewport{ 0.0f, 0.0f, SCR_WIDTH, SCR_HEIGHT });
-	presentPass.setScissor(hri::Scissor{ 0, 0, SCR_WIDTH, SCR_HEIGHT });
+	hri::RasterFrameGraphNode gbufferPass = hri::RasterFrameGraphNode("GBuffer Raster", frameGraph);
+	gbufferPass.write(albedoTarget);
+	gbufferPass.write(normalTarget);
+	gbufferPass.write(depthTarget);
+
+	hri::PresentFrameGraphNode presentPass = hri::PresentFrameGraphNode("Present", frameGraph);
+	presentPass.read(albedoTarget);
+
+	frameGraph.generate();
 
 	// Load scene file
 	hri::Scene scene = loadScene("assets/test_scene.obj");

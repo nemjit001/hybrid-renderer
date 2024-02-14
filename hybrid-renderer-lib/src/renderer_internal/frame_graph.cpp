@@ -71,54 +71,37 @@ void RenderTarget::destroy(RenderContext* ctx, RenderTarget& renderTarget)
 	memset(&renderTarget, 0, sizeof(RenderTarget));
 }
 
+IFrameGraphNode::IFrameGraphNode(const std::string& name, FrameGraph& frameGraph)
+	:
+	m_frameGraph(frameGraph),
+	m_name(name)
+{
+	m_frameGraph.m_graphNodes.push_back(this);
+}
+
+void IFrameGraphNode::read(VirtualResourceHandle& resource)
+{
+	m_readDependencies.push_back(resource);
+}
+
+void IFrameGraphNode::write(VirtualResourceHandle& resource)
+{
+	m_readDependencies.push_back(resource);
+	m_writeDependencies.push_back(resource);
+
+	VirtualResourceHandle& handle = m_frameGraph.m_resourceHandles[resource.index];
+	handle.version++;
+	resource = handle;
+}
+
 void RasterFrameGraphNode::execute(VkCommandBuffer commandBuffer) const
 {
-	assert(m_pPSO != nullptr);
-
-	setDynamicViewportState(commandBuffer);
-
-	// TODO: bind resources
-	vkCmdBindPipeline(commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
-	// TODO: bind buffers
-	// TODO: draw
-}
-
-void RasterFrameGraphNode::setViewport(Viewport viewport)
-{
-	m_viewport = viewport;
-}
-
-void RasterFrameGraphNode::setScissor(Scissor scissor)
-{
-	m_scissor = scissor;
-}
-
-void RasterFrameGraphNode::setDynamicViewportState(VkCommandBuffer commandBuffer) const
-{
-	VkViewport viewport = VkViewport{
-		m_viewport.x, m_viewport.y,
-		m_viewport.width, m_viewport.height,
-		m_viewport.minDepth, m_viewport.maxDepth,
-	};
-
-	VkRect2D scissor = VkRect2D{
-		m_scissor.x, m_scissor.y,
-		m_scissor.width, m_scissor.height,
-	};
-
-	vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+	//
 }
 
 void PresentFrameGraphNode::execute(VkCommandBuffer commandBuffer) const
 {
-	assert(m_pPSO != nullptr);
-
-	setDynamicViewportState(commandBuffer);
-
-	// TODO: bind resources
-	vkCmdBindPipeline(commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
-	vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+	//
 }
 
 FrameGraph::FrameGraph(RenderContext* ctx)
@@ -126,8 +109,6 @@ FrameGraph::FrameGraph(RenderContext* ctx)
 	m_pCtx(ctx)
 {
 	assert(ctx != nullptr);
-
-	createFrameGraphResources();
 }
 
 FrameGraph::~FrameGraph()
@@ -135,74 +116,79 @@ FrameGraph::~FrameGraph()
 	destroyFrameGraphResources();
 }
 
-void FrameGraph::execute(VkCommandBuffer commandBuffer, uint32_t activeSwapImageIdx) const
+VirtualResourceHandle FrameGraph::createBufferResource(
+	const std::string& name,
+	size_t size,
+	VkBufferUsageFlags usage
+)
 {
-	assert(activeSwapImageIdx < m_framebuffers.size());
-	VkExtent2D swapExtent = m_pCtx->swapchain.extent;
+	VirtualResourceHandle resource = allocateResource(name);
 
-	//VkClearValue clearValues[] = {
-	//	VkClearValue{{ 0.0f, 0.0f, 0.0f, 0.0f }},	// Swap attachment
-	//	VkClearValue{{ 1.0f, 0x00 }},				// GBuffer Depth
-	//	VkClearValue{{ 0.0f, 0.0f, 0.0f, 0.0f }},	// GBuffer Normal
-	//	VkClearValue{{ 0.0f, 0.0f, 0.0f, 0.0f }},	// GBuffer Albedo
-	//};
+	const auto& it = m_bufferMetadata.insert(std::make_pair(name, BufferMetadata{ size, usage }));
+	assert(it.second != false);
 
-	//VkRenderPassBeginInfo passBeginInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
-	//passBeginInfo.renderPass = VK_NULL_HANDLE;
-	//passBeginInfo.framebuffer = m_framebuffers[activeSwapImageIdx];
-	//passBeginInfo.renderArea = VkRect2D{ 0, 0, swapExtent.width, swapExtent.height };
-	//passBeginInfo.clearValueCount = HRI_SIZEOF_ARRAY(clearValues);
-	//passBeginInfo.pClearValues = clearValues;
-	//vkCmdBeginRenderPass(commandBuffer, &passBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-	//// TODO: execute generated frame graph
-
-	//vkCmdEndRenderPass(commandBuffer);
+	return resource;
 }
 
-void FrameGraph::generateGraph()
+VirtualResourceHandle FrameGraph::createTextureResource(
+	const std::string& name,
+	VkExtent2D resolution,
+	VkFormat format,
+	VkImageUsageFlags usage
+)
+{
+	VirtualResourceHandle resource = allocateResource(name);
+
+	const auto& it = m_textureMetadata.insert(std::make_pair(name, TextureMetadata{ resolution, format, usage }));
+	assert(it.second != false);
+
+	return resource;
+}
+
+void FrameGraph::execute(VkCommandBuffer commandBuffer, uint32_t activeSwapImageIdx) const
+{
+	// TODO: execute frame graph
+}
+
+void FrameGraph::generate()
 {
 	destroyFrameGraphResources();
 
-	// TODO: generate render pass based on topological sort of graph nodes
+	// TODO: create topological sort of graph nodes for execution
+	for (auto const& pNode : m_graphNodes)
+	{
+		printf("`%s` node\n", pNode->m_name.c_str());
+		printf("\tRead Dependencies:\n");
+		for (auto const& dep : pNode->m_readDependencies)
+			printf("\t - index: %zu version: %zu (%s)\n", dep.index, dep.version, dep.name.c_str());
+
+		printf("\tWrite Dependencies:\n");
+		for (auto const& dep : pNode->m_writeDependencies)
+			printf("\t - index: %zu version: %zu (%s)\n", dep.index, dep.version, dep.name.c_str());
+	}
 
 	createFrameGraphResources();
 }
 
+VirtualResourceHandle FrameGraph::allocateResource(const std::string& name)
+{
+	VirtualResourceHandle resource = VirtualResourceHandle{
+		name,
+		ResourceType::Texture,
+		m_resourceHandles.size(),
+		0
+	};
+
+	m_resourceHandles.push_back(resource);
+	return resource;
+}
+
 void FrameGraph::createFrameGraphResources()
 {
-	VkExtent2D swapExtent = m_pCtx->swapchain.extent;
-
-	m_swapViews = m_pCtx->swapchain.get_image_views().value();
-	for (auto const& swapView : m_swapViews)
-	{
-		VkImageView fbAttachments[] = {
-			swapView,
-			// TODO: add auto generated attachments
-		};
-
-		VkFramebufferCreateInfo fbCreateInfo = VkFramebufferCreateInfo{ VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
-		fbCreateInfo.flags = 0;
-		fbCreateInfo.attachmentCount = HRI_SIZEOF_ARRAY(fbAttachments);
-		fbCreateInfo.pAttachments = fbAttachments;
-		fbCreateInfo.renderPass = VK_NULL_HANDLE;
-		fbCreateInfo.width = swapExtent.width;
-		fbCreateInfo.height = swapExtent.height;
-		fbCreateInfo.layers = 1;
-
-		VkFramebuffer framebuffer = VK_NULL_HANDLE;
-		HRI_VK_CHECK(vkCreateFramebuffer(m_pCtx->device, &fbCreateInfo, nullptr, &framebuffer));
-		m_framebuffers.push_back(framebuffer);
-	}
+	//
 }
 
 void FrameGraph::destroyFrameGraphResources()
 {
-	m_pCtx->swapchain.destroy_image_views(m_swapViews);
-	for (auto const& framebuffer : m_framebuffers)
-	{
-		vkDestroyFramebuffer(m_pCtx->device, framebuffer, nullptr);
-	}
-
-	m_framebuffers.clear();
+	//
 }
