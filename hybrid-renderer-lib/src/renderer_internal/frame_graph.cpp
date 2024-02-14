@@ -99,6 +99,26 @@ void RasterFrameGraphNode::execute(VkCommandBuffer commandBuffer) const
 	//
 }
 
+void RasterFrameGraphNode::createResources(RenderContext* ctx)
+{
+	assert(ctx != nullptr);
+	VkRenderPassCreateInfo passCreateInfo = VkRenderPassCreateInfo{ VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO };
+	passCreateInfo.flags = 0;
+	passCreateInfo.attachmentCount = 0;
+	passCreateInfo.pAttachments = nullptr;
+	passCreateInfo.subpassCount = 0;
+	passCreateInfo.pSubpasses = nullptr;
+	passCreateInfo.dependencyCount = 0;
+	passCreateInfo.pDependencies = nullptr;
+	HRI_VK_CHECK(vkCreateRenderPass(ctx->device, &passCreateInfo, nullptr, &m_renderPass));
+}
+
+void RasterFrameGraphNode::destroyResources(RenderContext* ctx)
+{
+	assert(ctx != nullptr);
+	vkDestroyRenderPass(ctx->device, m_renderPass, nullptr);
+}
+
 void PresentFrameGraphNode::execute(VkCommandBuffer commandBuffer) const
 {
 	//
@@ -145,6 +165,18 @@ VirtualResourceHandle FrameGraph::createTextureResource(
 	return resource;
 }
 
+void FrameGraph::markOutputNode(const std::string& name)
+{
+	m_outputNodeIndex = 0;
+	for (auto const& node : m_graphNodes)
+	{
+		if (node->m_name == name)
+			break;
+
+		m_outputNodeIndex++;
+	}
+}
+
 void FrameGraph::execute(VkCommandBuffer commandBuffer, uint32_t activeSwapImageIdx) const
 {
 	// TODO: execute frame graph
@@ -152,9 +184,12 @@ void FrameGraph::execute(VkCommandBuffer commandBuffer, uint32_t activeSwapImage
 
 void FrameGraph::generate()
 {
-	destroyFrameGraphResources();
+	assert(!m_graphNodes.empty());
 
-	// TODO: create topological sort of graph nodes for execution
+	destroyFrameGraphResources();
+	m_graphTopology.clear();
+
+	size_t idx = 0;
 	for (auto const& pNode : m_graphNodes)
 	{
 		printf("`%s` node\n", pNode->m_name.c_str());
@@ -165,6 +200,19 @@ void FrameGraph::generate()
 		printf("\tWrite Dependencies:\n");
 		for (auto const& dep : pNode->m_writeDependencies)
 			printf("\t - index: %zu version: %zu (%s)\n", dep.index, dep.version, dep.name.c_str());
+
+		idx++;
+	}
+
+	// TODO: dead strip nodes
+	doTopologicalSort();
+
+	for (auto const& pass : m_graphTopology)
+	{
+		printf("[\n");
+		for (auto const& pNode : pass)
+			printf("\t%s\n", pNode->m_name.c_str());
+		printf("]\n");
 	}
 
 	createFrameGraphResources();
@@ -185,10 +233,73 @@ VirtualResourceHandle FrameGraph::allocateResource(const std::string& name)
 
 void FrameGraph::createFrameGraphResources()
 {
-	//
+	// Generate node resources
+	for (auto const& pNode : m_graphNodes)
+	{
+		if (pNode->m_alive)
+			pNode->createResources(m_pCtx);
+	}
 }
 
 void FrameGraph::destroyFrameGraphResources()
 {
-	//
+	// Destroy node resources
+	for (auto const& pNode : m_graphNodes)
+	{
+		pNode->destroyResources(m_pCtx);
+	}
+}
+
+size_t FrameGraph::parentCountInWorkList(IFrameGraphNode* pNode, const std::vector<IFrameGraphNode*>& workList) const
+{
+	size_t parentCount = 0;
+
+	// XXX: this might be ugly & slow, check if this bottlenecks performance in large frame graph.
+	for (auto const& readDep : pNode->m_readDependencies)
+	{
+		if (readDep.version == 0)
+			continue;
+
+		size_t targetVersion = readDep.version - 1;
+		for (auto const& pOther : workList)
+		{
+			for (auto const& writeDep : pOther->m_writeDependencies)
+			{
+				if (writeDep.index == readDep.index && writeDep.version == targetVersion)
+				{
+					parentCount++;
+				}
+			}
+		}
+	}
+
+	return parentCount;
+}
+
+void FrameGraph::doTopologicalSort()
+{
+	m_graphTopology.clear();
+	std::vector<IFrameGraphNode*> workList = m_graphNodes;
+	std::vector<IFrameGraphNode*> leftOverList = {};
+	
+	while (!workList.empty())
+	{
+		m_graphTopology.push_back({});
+
+		for (auto const& pNode : workList)
+		{
+			// check if no parents in work list
+			if (parentCountInWorkList(pNode, workList) == 0)
+			{
+				m_graphTopology.back().push_back(pNode);
+			}
+			else
+			{
+				leftOverList.push_back(pNode);
+			}
+		}
+
+		workList = leftOverList;
+		leftOverList.clear();
+	}
 }

@@ -141,8 +141,6 @@ void RenderCore::endFrame()
 
 void RenderCore::awaitFrameFinished() const
 {
-	assert(HRI_VK_FRAMES_IN_FLIGHT == 1 || m_previousFrame != m_currentFrame);
-
 	const FrameState& activeFrame = m_frames[m_previousFrame];
 	VkFence frameFences[] = { activeFrame.frameReady };
 	HRI_VK_CHECK(vkWaitForFences(m_pCtx->device, HRI_SIZEOF_ARRAY(frameFences), frameFences, VK_TRUE, UINT64_MAX));

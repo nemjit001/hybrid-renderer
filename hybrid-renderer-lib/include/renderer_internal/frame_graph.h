@@ -99,6 +99,14 @@ namespace hri
 		/// @param commandBuffer The command buffer to record into.
 		virtual void execute(VkCommandBuffer) const = 0;
 
+		/// @brief Overideable resource creation method. Use this method to create per node resources.
+		/// @param ctx Render Context to use.
+		virtual void createResources(RenderContext* ctx) = 0;
+
+		/// @brief Overideable resource destruction method. Use this method to destroy per node resources.
+		/// @param ctx Render Context to use.
+		virtual void destroyResources(RenderContext* ctx) = 0;
+
 		/// @brief Add a read dependency to this graph node.
 		/// @param resource Resource handle.
 		virtual void read(VirtualResourceHandle& resource);
@@ -109,6 +117,7 @@ namespace hri
 
 	protected:
 		FrameGraph& m_frameGraph;
+		bool m_alive = false;
 		std::string m_name = std::string("IFrameGraphNode");
 		std::vector<VirtualResourceHandle> m_readDependencies	= {};
 		std::vector<VirtualResourceHandle> m_writeDependencies	= {};
@@ -128,6 +137,17 @@ namespace hri
 		/// @brief Execute this raster pass.
 		/// @param commandBuffer Command buffer to record into.
 		virtual void execute(VkCommandBuffer commandBuffer) const override;
+
+		/// @brief Create node resources.
+		/// @param ctx Render Context to use.
+		virtual void createResources(RenderContext* ctx) override;
+
+		/// @brief Destroy node resources.
+		/// @param ctx Render Context to use.
+		virtual void destroyResources(RenderContext* ctx) override;
+
+	protected:
+		VkRenderPass m_renderPass = VK_NULL_HANDLE;
 	};
 
 	/// @brief Present type raster graph node, executes a rasterization pipeline that writes into an active swap image.
@@ -158,18 +178,33 @@ namespace hri
 		/// @brief Destroy this Frame Graph.
 		virtual ~FrameGraph();
 
+		/// @brief Create a virtual buffer resource.
+		/// @param name Name of the resource.
+		/// @param size Size of the buffer to be created.
+		/// @param usage Expected usage of the buffer.
+		/// @return A new resource handle.
 		VirtualResourceHandle createBufferResource(
 			const std::string& name,
 			size_t size,
 			VkBufferUsageFlags usage
 		);
 
+		/// @brief Create a virtual texture resource.
+		/// @param name Name of the resource.
+		/// @param resolution Resolution of the texture.
+		/// @param format Texture format.
+		/// @param usage Expected usage of the texture.
+		/// @return A new resource handle.
 		VirtualResourceHandle createTextureResource(
 			const std::string& name,
 			VkExtent2D resolution,
 			VkFormat format,
 			VkImageUsageFlags usage
 		);
+
+		/// @brief Mark a graph node as this graph's output node.
+		/// @param name Name of the node to mark as output.
+		void markOutputNode(const std::string& name);
 
 		/// @brief Execute the Frame Graph. NOTE: generate the frame graph before execution!
 		/// @param commandBuffer Command buffer to record into.
@@ -180,6 +215,9 @@ namespace hri
 		void generate();
 
 	private:
+		/// @brief Allocate a new virtual resource handle.
+		/// @param name Name of the handle to allocate.
+		/// @return A new resource handle.
 		VirtualResourceHandle allocateResource(const std::string& name);
 
 		/// @brief Create frame graph resources such as frame buffers and render targets.
@@ -187,6 +225,15 @@ namespace hri
 
 		/// @brief Destroy the current frame graph resources.
 		void destroyFrameGraphResources();
+
+		/// @brief Calculate the number of node parents in a work list.
+		/// @param pNode The node for which to check parent count.
+		/// @param workList The work list to use for verification.
+		/// @return The number of parents in the work list.
+		size_t parentCountInWorkList(IFrameGraphNode* pNode, const std::vector<IFrameGraphNode*>& workList) const;
+
+		/// @brief Do a topological sort of the stored graph nodes.
+		void doTopologicalSort();
 
 	private:
 		struct BufferMetadata
@@ -203,9 +250,13 @@ namespace hri
 		};
 
 		RenderContext* m_pCtx = nullptr;
-		std::map<std::string, BufferMetadata> m_bufferMetadata = {};
+
+		std::map<std::string, BufferMetadata> m_bufferMetadata		= {};
 		std::map<std::string, TextureMetadata> m_textureMetadata	= {};
 		std::vector<VirtualResourceHandle> m_resourceHandles		= {};
+
+		size_t m_outputNodeIndex = 0;
 		std::vector<IFrameGraphNode*> m_graphNodes					= {};
+		std::vector<std::vector<IFrameGraphNode*>> m_graphTopology	= {};
 	};
 }
