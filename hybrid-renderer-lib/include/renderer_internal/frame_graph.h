@@ -45,24 +45,25 @@ namespace hri
 		VkExtent2D extent;
 		VkFormat format;
 		VkImageUsageFlags usage;
+		VkImageAspectFlags aspect;
 	};
 
-	/// @brief A Render Target is a collection of an image, its view, and an allocation.
-	///		Render Targets are used by the Frame Graph to store intermediary render results.
-	struct RenderTarget
+	/// @brief A StorageTexture is a collection of an image, its view, and an allocation.
+	///		StorageTextures are used by the Frame Graph to store intermediary render results.
+	struct StorageTexture
 	{
 		VkImage image				= VK_NULL_HANDLE;
 		VkImageView view			= VK_NULL_HANDLE;
 		VmaAllocation allocation	= VK_NULL_HANDLE;
 
-		/// @brief Initialize a new Render Target.
+		/// @brief Initialize a new StorageTexture.
 		/// @param ctx Render Context to use.
 		/// @param format Target image format.
 		/// @param extent Target extent (resolution)
 		/// @param usage Target expected usage.
 		/// @param imageAspect Target image aspect.
-		/// @return A newly initialized RenderTarget.
-		static RenderTarget init(
+		/// @return A newly initialized StorageTexture.
+		static StorageTexture init(
 			RenderContext* ctx,
 			VkFormat format,
 			VkExtent2D extent,
@@ -70,10 +71,10 @@ namespace hri
 			VkImageAspectFlags imageAspect
 		);
 
-		/// @brief Destroy a Render Target.
+		/// @brief Destroy a StorageTexture.
 		/// @param ctx Render Context to use.
-		/// @param renderTarget Render Target to destroy.
-		static void destroy(RenderContext* ctx, RenderTarget& renderTarget);
+		/// @param renderTarget StorageTexture to destroy.
+		static void destroy(RenderContext* ctx, StorageTexture& storageTexture);
 	};
 
 	/// @brief The IFrameGraphNode interface exposes functions for rendering using a higher level interface.
@@ -140,7 +141,13 @@ namespace hri
 		/// @param resource Resource to be used as render target.
 		/// @param loadOp Load operation.
 		/// @param storeOp Store operation.
-		virtual void renderTarget(VirtualResourceHandle& resource, VkAttachmentLoadOp loadOp, VkAttachmentStoreOp storeOp);
+		/// @param clearValue Clear value for this attachment.
+		virtual void renderTarget(
+			VirtualResourceHandle& resource,
+			VkAttachmentLoadOp loadOp,
+			VkAttachmentStoreOp storeOp,
+			VkClearValue clearValue = VkClearValue{{ 0.0f, 0.0f, 0.0f, 0.0f }}
+		);
 
 		/// @brief Register a Depth Stencil target to this Raster Pass.
 		/// @param resource Resource to be used as depth stencil target.
@@ -148,20 +155,25 @@ namespace hri
 		/// @param storeOp Store operation for depth.
 		/// @param stencilLoadOp Load operation for stencil.
 		/// @param stencilStoreOp Store operation for stencil.
+		/// @param clearValue Clear value for this attachment.
 		virtual void depthStencil(
 			VirtualResourceHandle& resource,
 			VkAttachmentLoadOp loadOp,
 			VkAttachmentStoreOp storeOp,
 			VkAttachmentLoadOp stencilLoadOp,
-			VkAttachmentStoreOp stencilStoreOp
+			VkAttachmentStoreOp stencilStoreOp,
+			VkClearValue clearValue = VkClearValue{{ 1.0f, 0x00 }}
 		);
 
 	protected:
+		std::vector<VirtualResourceHandle> m_attachmentDependencies		= {};
+		std::vector<VkClearValue> m_clearValues							= {};
 		std::vector<VkAttachmentDescription> m_attachments				= {};
 		std::vector<VkAttachmentReference> m_colorAttachments			= {};
 		std::optional<VkAttachmentReference> m_depthStencilAttachment	= {};
-		VkRenderPass m_renderPass	= VK_NULL_HANDLE;
-		VkFramebuffer m_framebuffer = VK_NULL_HANDLE;
+		VkExtent2D m_framebufferExtent	= VkExtent2D{ 0, 0 };
+		VkRenderPass m_renderPass		= VK_NULL_HANDLE;
+		VkFramebuffer m_framebuffer		= VK_NULL_HANDLE;
 	};
 
 	/// @brief Present type raster graph node, executes a rasterization pipeline that writes into an active swap image.
@@ -213,10 +225,15 @@ namespace hri
 			const std::string& name,
 			VkExtent2D resolution,
 			VkFormat format,
-			VkImageUsageFlags usage
+			VkImageUsageFlags usage,
+			VkImageAspectFlags aspect
 		);
 
+		const BufferResourceMetadata& getBufferMetadata(const std::string& name) const;
+
 		const TextureResourceMetadata& getTextureMetadata(const std::string& name) const;
+
+		const StorageTexture& getStorageTexture(const std::string& name) const;
 
 		/// @brief Mark a graph node as this graph's output node.
 		/// @param name Name of the node to mark as output.
@@ -257,6 +274,7 @@ namespace hri
 		std::map<std::string, BufferResourceMetadata> m_bufferMetadata		= {};
 		std::map<std::string, TextureResourceMetadata> m_textureMetadata	= {};
 		std::vector<VirtualResourceHandle> m_resourceHandles				= {};
+		std::map<std::string, StorageTexture> m_storageTextures				= {};
 
 		size_t m_outputNodeIndex = 0;
 		std::vector<IFrameGraphNode*> m_graphNodes					= {};

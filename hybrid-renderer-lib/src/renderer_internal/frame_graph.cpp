@@ -9,7 +9,7 @@
 
 using namespace hri;
 
-RenderTarget RenderTarget::init(
+StorageTexture StorageTexture::init(
 	RenderContext* ctx,
 	VkFormat format,
 	VkExtent2D extent,
@@ -18,7 +18,7 @@ RenderTarget RenderTarget::init(
 )
 {
 	assert(ctx != nullptr);
-	RenderTarget target = RenderTarget{};
+	StorageTexture target = StorageTexture{};
 
 	VkImageCreateInfo imageCreateInfo = VkImageCreateInfo{ VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
 	imageCreateInfo.flags = 0;
@@ -61,14 +61,14 @@ RenderTarget RenderTarget::init(
 	return target;
 }
 
-void RenderTarget::destroy(RenderContext* ctx, RenderTarget& renderTarget)
+void StorageTexture::destroy(RenderContext* ctx, StorageTexture& storageTexture)
 {
 	assert(ctx != nullptr);
 
-	vmaDestroyImage(ctx->allocator, renderTarget.image, renderTarget.allocation);
-	vkDestroyImageView(ctx->device, renderTarget.view, nullptr);
+	vmaDestroyImage(ctx->allocator, storageTexture.image, storageTexture.allocation);
+	vkDestroyImageView(ctx->device, storageTexture.view, nullptr);
 
-	memset(&renderTarget, 0, sizeof(RenderTarget));
+	memset(&storageTexture, 0, sizeof(StorageTexture));
 }
 
 IFrameGraphNode::IFrameGraphNode(const std::string& name, FrameGraph& frameGraph)
@@ -99,9 +99,12 @@ void RasterFrameGraphNode::execute(VkCommandBuffer commandBuffer) const
 	VkRenderPassBeginInfo rpBeginInfo = VkRenderPassBeginInfo{ VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
 	rpBeginInfo.renderPass = m_renderPass;
 	rpBeginInfo.framebuffer = m_framebuffer;
-	rpBeginInfo.renderArea = VkRect2D{};
-	rpBeginInfo.clearValueCount = 0;
-	rpBeginInfo.pClearValues = nullptr;
+	rpBeginInfo.renderArea = VkRect2D{
+		0, 0,
+		m_framebufferExtent.width, m_framebufferExtent.height
+	};
+	rpBeginInfo.clearValueCount = static_cast<uint32_t>(m_clearValues.size());
+	rpBeginInfo.pClearValues = m_clearValues.data();
 	vkCmdBeginRenderPass(commandBuffer, &rpBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 	// TODO: execute draw here
@@ -112,6 +115,17 @@ void RasterFrameGraphNode::execute(VkCommandBuffer commandBuffer) const
 void RasterFrameGraphNode::createResources(RenderContext* ctx)
 {
 	assert(ctx != nullptr);
+
+	m_framebufferExtent = VkExtent2D{ 0, 0 };
+	std::vector<VkImageView> framebufferAttachments = {}; framebufferAttachments.reserve(m_attachmentDependencies.size());
+	for (auto const& dep : m_attachmentDependencies)
+	{
+		const TextureResourceMetadata& meta = m_frameGraph.getTextureMetadata(dep.name);
+		const StorageTexture& texture = m_frameGraph.getStorageTexture(dep.name);
+
+		m_framebufferExtent = meta.extent;	// Always update
+		framebufferAttachments.push_back(texture.view);
+	}
 
 	VkSubpassDescription subpass = VkSubpassDescription{};
 	subpass.flags = 0;
@@ -135,14 +149,13 @@ void RasterFrameGraphNode::createResources(RenderContext* ctx)
 	passCreateInfo.pDependencies = nullptr;
 	HRI_VK_CHECK(vkCreateRenderPass(ctx->device, &passCreateInfo, nullptr, &m_renderPass));
 
-	// TODO: load resource attachments from Frame Graph
 	VkFramebufferCreateInfo fbCreateInfo = VkFramebufferCreateInfo{ VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
 	fbCreateInfo.flags = 0;
 	fbCreateInfo.renderPass = m_renderPass;
-	fbCreateInfo.attachmentCount = 0;
-	fbCreateInfo.pAttachments = nullptr;
-	fbCreateInfo.width = 0;
-	fbCreateInfo.height = 0;
+	fbCreateInfo.attachmentCount = static_cast<uint32_t>(framebufferAttachments.size());
+	fbCreateInfo.pAttachments = framebufferAttachments.data();
+	fbCreateInfo.width = m_framebufferExtent.width;
+	fbCreateInfo.height = m_framebufferExtent.height;
 	fbCreateInfo.layers = 1;
 	HRI_VK_CHECK(vkCreateFramebuffer(ctx->device, &fbCreateInfo, nullptr, &m_framebuffer));
 }
@@ -154,7 +167,12 @@ void RasterFrameGraphNode::destroyResources(RenderContext* ctx)
 	vkDestroyFramebuffer(ctx->device, m_framebuffer, nullptr);
 }
 
-void RasterFrameGraphNode::renderTarget(VirtualResourceHandle& resource, VkAttachmentLoadOp loadOp, VkAttachmentStoreOp storeOp)
+void RasterFrameGraphNode::renderTarget(
+	VirtualResourceHandle& resource,
+	VkAttachmentLoadOp loadOp,
+	VkAttachmentStoreOp storeOp,
+	VkClearValue clearValue
+)
 {
 	write(resource);
 
@@ -170,6 +188,8 @@ void RasterFrameGraphNode::renderTarget(VirtualResourceHandle& resource, VkAttac
 	colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
+	m_attachmentDependencies.push_back(resource);
+	m_clearValues.push_back(clearValue);
 	m_colorAttachments.push_back(VkAttachmentReference{
 		static_cast<uint32_t>(m_attachments.size()),
 		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
@@ -183,7 +203,8 @@ void RasterFrameGraphNode::depthStencil(
 	VkAttachmentLoadOp loadOp,
 	VkAttachmentStoreOp storeOp,
 	VkAttachmentLoadOp stencilLoadOp,
-	VkAttachmentStoreOp stencilStoreOp
+	VkAttachmentStoreOp stencilStoreOp,
+	VkClearValue clearValue
 )
 {
 	write(resource);
@@ -200,6 +221,8 @@ void RasterFrameGraphNode::depthStencil(
 	depthStencilAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	depthStencilAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
+	m_attachmentDependencies.push_back(resource);
+	m_clearValues.push_back(clearValue);
 	m_depthStencilAttachment = VkAttachmentReference{
 		static_cast<uint32_t>(m_attachments.size()),
 		VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
@@ -243,15 +266,21 @@ VirtualResourceHandle FrameGraph::createTextureResource(
 	const std::string& name,
 	VkExtent2D resolution,
 	VkFormat format,
-	VkImageUsageFlags usage
+	VkImageUsageFlags usage,
+	VkImageAspectFlags aspect
 )
 {
 	VirtualResourceHandle resource = allocateResource(name);
 
-	const auto& it = m_textureMetadata.insert(std::make_pair(name, TextureResourceMetadata{ resolution, format, usage }));
+	const auto& it = m_textureMetadata.insert(std::make_pair(name, TextureResourceMetadata{ resolution, format, usage, aspect }));
 	assert(it.second != false);
 
 	return resource;
+}
+
+const BufferResourceMetadata& FrameGraph::getBufferMetadata(const std::string& name) const
+{
+	return m_bufferMetadata.at(name);
 }
 
 const TextureResourceMetadata& FrameGraph::getTextureMetadata(const std::string& name) const
@@ -259,8 +288,15 @@ const TextureResourceMetadata& FrameGraph::getTextureMetadata(const std::string&
 	return m_textureMetadata.at(name);
 }
 
+const StorageTexture& FrameGraph::getStorageTexture(const std::string& name) const
+{
+	return m_storageTextures.at(name);
+}
+
 void FrameGraph::markOutputNode(const std::string& name)
 {
+	assert(!m_graphNodes.empty());
+
 	m_outputNodeIndex = 0;
 	for (auto const& node : m_graphNodes)
 	{
@@ -335,6 +371,28 @@ VirtualResourceHandle FrameGraph::allocateResource(const std::string& name)
 
 void FrameGraph::createFrameGraphResources()
 {
+	// Generate graph resources from virtual handles
+	for (auto const& resourceHandle : m_resourceHandles)
+	{
+		if (resourceHandle.type == ResourceType::Texture)
+		{
+			TextureResourceMetadata meta = m_textureMetadata[resourceHandle.name];
+			StorageTexture texture = StorageTexture::init(
+				m_pCtx,
+				meta.format,
+				meta.extent,
+				meta.usage,
+				meta.aspect
+			);
+
+			m_storageTextures.insert(std::make_pair(resourceHandle.name, texture));
+		}
+		else if (resourceHandle.type == ResourceType::Buffer)
+		{
+			// TODO: create buffer resources
+		}
+	}
+
 	// Generate node resources
 	for (auto const& pNode : m_graphNodes)
 	{
@@ -344,6 +402,11 @@ void FrameGraph::createFrameGraphResources()
 
 void FrameGraph::destroyFrameGraphResources()
 {
+	for (auto& [ name, texture ] : m_storageTextures)
+	{
+		StorageTexture::destroy(m_pCtx, texture);
+	}
+
 	// Destroy node resources
 	for (auto const& pNode : m_graphNodes)
 	{

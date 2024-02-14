@@ -170,9 +170,26 @@ int main()
 	});
 
 	// Set up frame graph nodes & associated resources
-	hri::VirtualResourceHandle albedoTarget = frameGraph.createTextureResource("Albedo Target", { SCR_WIDTH, SCR_HEIGHT }, VK_FORMAT_R8G8B8A8_UNORM, 0);
-	hri::VirtualResourceHandle normalTarget = frameGraph.createTextureResource("Normal Target", { SCR_WIDTH, SCR_HEIGHT }, VK_FORMAT_R8G8B8A8_SNORM, 0);
-	hri::VirtualResourceHandle depthTarget = frameGraph.createTextureResource("Depth Target", { SCR_WIDTH, SCR_HEIGHT }, VK_FORMAT_D32_SFLOAT, 0);
+	hri::VirtualResourceHandle albedoTarget = frameGraph.createTextureResource(
+		"Albedo Target", { SCR_WIDTH, SCR_HEIGHT },
+		VK_FORMAT_R8G8B8A8_UNORM,
+		VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+		VK_IMAGE_ASPECT_COLOR_BIT
+	);
+
+	hri::VirtualResourceHandle normalTarget = frameGraph.createTextureResource(
+		"Normal Target", { SCR_WIDTH, SCR_HEIGHT },
+		VK_FORMAT_R8G8B8A8_SNORM,
+		VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+		VK_IMAGE_ASPECT_COLOR_BIT
+	);
+
+	hri::VirtualResourceHandle depthTarget = frameGraph.createTextureResource(
+		"Depth Target", { SCR_WIDTH, SCR_HEIGHT },
+		VK_FORMAT_D32_SFLOAT,
+		VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+		VK_IMAGE_ASPECT_DEPTH_BIT
+	);
 
 	hri::RasterFrameGraphNode gbufferPass = hri::RasterFrameGraphNode("GBuffer Raster", frameGraph);
 	gbufferPass.renderTarget(albedoTarget, VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE);
@@ -185,7 +202,13 @@ int main()
 		VK_ATTACHMENT_STORE_OP_STORE
 	);
 
-	hri::VirtualResourceHandle colorTarget = frameGraph.createTextureResource("Color Target", { SCR_WIDTH, SCR_HEIGHT }, VK_FORMAT_R8G8B8A8_UNORM, 0);
+	hri::VirtualResourceHandle colorTarget = frameGraph.createTextureResource(
+		"Color Target", { SCR_WIDTH, SCR_HEIGHT },
+		VK_FORMAT_R8G8B8A8_UNORM,
+		VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
+		| VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
+		VK_IMAGE_ASPECT_COLOR_BIT
+	);
 
 	hri::RasterFrameGraphNode shadingPass = hri::RasterFrameGraphNode("Shading Raster", frameGraph);
 	shadingPass.read(albedoTarget);
