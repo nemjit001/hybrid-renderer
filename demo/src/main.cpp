@@ -173,18 +173,25 @@ int main()
 	hri::VirtualResourceHandle albedoTarget = frameGraph.createTextureResource("Albedo Target", { SCR_WIDTH, SCR_HEIGHT }, VK_FORMAT_R8G8B8A8_UNORM, 0);
 	hri::VirtualResourceHandle normalTarget = frameGraph.createTextureResource("Normal Target", { SCR_WIDTH, SCR_HEIGHT }, VK_FORMAT_R8G8B8A8_SNORM, 0);
 	hri::VirtualResourceHandle depthTarget = frameGraph.createTextureResource("Depth Target", { SCR_WIDTH, SCR_HEIGHT }, VK_FORMAT_D32_SFLOAT, 0);
-	hri::VirtualResourceHandle colorTarget = frameGraph.createTextureResource("Color Target", { SCR_WIDTH, SCR_HEIGHT }, VK_FORMAT_R8G8B8A8_UNORM, 0);
 
 	hri::RasterFrameGraphNode gbufferPass = hri::RasterFrameGraphNode("GBuffer Raster", frameGraph);
-	gbufferPass.write(albedoTarget);
-	gbufferPass.write(normalTarget);
-	gbufferPass.write(depthTarget);
+	gbufferPass.renderTarget(albedoTarget, VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE);
+	gbufferPass.renderTarget(normalTarget, VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE);
+	gbufferPass.depthStencil(
+		depthTarget,
+		VK_ATTACHMENT_LOAD_OP_CLEAR,
+		VK_ATTACHMENT_STORE_OP_STORE,
+		VK_ATTACHMENT_LOAD_OP_CLEAR,
+		VK_ATTACHMENT_STORE_OP_STORE
+	);
+
+	hri::VirtualResourceHandle colorTarget = frameGraph.createTextureResource("Color Target", { SCR_WIDTH, SCR_HEIGHT }, VK_FORMAT_R8G8B8A8_UNORM, 0);
 
 	hri::RasterFrameGraphNode shadingPass = hri::RasterFrameGraphNode("Shading Raster", frameGraph);
 	shadingPass.read(albedoTarget);
 	shadingPass.read(normalTarget);
 	shadingPass.read(depthTarget);
-	shadingPass.write(colorTarget);
+	shadingPass.renderTarget(colorTarget, VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE);
 
 	hri::PresentFrameGraphNode presentPass = hri::PresentFrameGraphNode("Present", frameGraph);
 	presentPass.read(colorTarget);
@@ -200,21 +207,21 @@ int main()
 
 	printf("Startup complete\n");
 
-	//while (!windowManager.windowShouldClose(gWindow))
-	//{
-	//	windowManager.pollEvents();
-	//	gFrameTimer.tick();
+	while (!windowManager.windowShouldClose(gWindow))
+	{
+		windowManager.pollEvents();
+		gFrameTimer.tick();
 
-	//	if (windowManager.isWindowMinimized(gWindow))
-	//		continue;
+		if (windowManager.isWindowMinimized(gWindow))
+			continue;
 
-	//	renderCore.startFrame();
+		renderCore.startFrame();
 
-	//	// TODO: draw scene
-	//	renderCore.recordFrameGraph(frameGraph);
+		// TODO: draw scene
+		renderCore.recordFrameGraph(frameGraph);
 
-	//	renderCore.endFrame();
-	//}
+		renderCore.endFrame();
+	}
 
 	printf("Shutting down\n");
 	renderCore.awaitFrameFinished();

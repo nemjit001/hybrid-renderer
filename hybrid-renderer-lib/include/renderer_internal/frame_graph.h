@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <map>
+#include <optional>
 #include <vector>
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
@@ -117,7 +118,6 @@ namespace hri
 
 	protected:
 		FrameGraph& m_frameGraph;
-		bool m_alive = false;
 		std::string m_name = std::string("IFrameGraphNode");
 		std::vector<VirtualResourceHandle> m_readDependencies	= {};
 		std::vector<VirtualResourceHandle> m_writeDependencies	= {};
@@ -146,8 +146,22 @@ namespace hri
 		/// @param ctx Render Context to use.
 		virtual void destroyResources(RenderContext* ctx) override;
 
+		virtual void renderTarget(VirtualResourceHandle& resource, VkAttachmentLoadOp loadOp, VkAttachmentStoreOp storeOp);
+
+		virtual void depthStencil(
+			VirtualResourceHandle& resource,
+			VkAttachmentLoadOp loadOp,
+			VkAttachmentStoreOp storeOp,
+			VkAttachmentLoadOp stencilLoadOp,
+			VkAttachmentStoreOp stencilStoreOp
+		);
+
 	protected:
-		VkRenderPass m_renderPass = VK_NULL_HANDLE;
+		std::vector<VkAttachmentDescription> m_attachments				= {};
+		std::vector<VkAttachmentReference> m_colorAttachments			= {};
+		std::optional<VkAttachmentReference> m_depthStencilAttachment	= {};
+		VkRenderPass m_renderPass	= VK_NULL_HANDLE;
+		VkFramebuffer m_framebuffer = VK_NULL_HANDLE;
 	};
 
 	/// @brief Present type raster graph node, executes a rasterization pipeline that writes into an active swap image.
@@ -236,12 +250,14 @@ namespace hri
 		void doTopologicalSort();
 
 	private:
+		/// @brief Buffer Metadata is used to create buffer handles for the Frame Graph.
 		struct BufferMetadata
 		{
 			size_t size;
 			VkBufferUsageFlags usage;
 		};
 
+		/// @brief Texture Metadata is used to create texture handles for the Frame Graph.
 		struct TextureMetadata
 		{
 			VkExtent2D extent;

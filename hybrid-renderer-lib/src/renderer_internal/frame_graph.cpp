@@ -96,32 +96,119 @@ void IFrameGraphNode::write(VirtualResourceHandle& resource)
 
 void RasterFrameGraphNode::execute(VkCommandBuffer commandBuffer) const
 {
-	//
+	VkRenderPassBeginInfo rpBeginInfo = VkRenderPassBeginInfo{ VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
+	rpBeginInfo.renderPass = m_renderPass;
+	rpBeginInfo.framebuffer = m_framebuffer;
+	rpBeginInfo.renderArea = VkRect2D{};
+	rpBeginInfo.clearValueCount = 0;
+	rpBeginInfo.pClearValues = nullptr;
+	vkCmdBeginRenderPass(commandBuffer, &rpBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+	// TODO: execute draw here
+
+	vkCmdEndRenderPass(commandBuffer);
 }
 
 void RasterFrameGraphNode::createResources(RenderContext* ctx)
 {
 	assert(ctx != nullptr);
+
+	VkSubpassDescription subpass = VkSubpassDescription{};
+	subpass.flags = 0;
+	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpass.inputAttachmentCount = 0;
+	subpass.pInputAttachments = nullptr;
+	subpass.colorAttachmentCount = static_cast<uint32_t>(m_colorAttachments.size());
+	subpass.pColorAttachments = m_colorAttachments.data();
+	subpass.pResolveAttachments = nullptr;
+	subpass.pDepthStencilAttachment = m_depthStencilAttachment.has_value() ? &m_depthStencilAttachment.value() : (nullptr);
+	subpass.preserveAttachmentCount = 0;
+	subpass.pPreserveAttachments = nullptr;
+
 	VkRenderPassCreateInfo passCreateInfo = VkRenderPassCreateInfo{ VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO };
 	passCreateInfo.flags = 0;
-	passCreateInfo.attachmentCount = 0;
-	passCreateInfo.pAttachments = nullptr;
-	passCreateInfo.subpassCount = 0;
-	passCreateInfo.pSubpasses = nullptr;
+	passCreateInfo.attachmentCount = static_cast<uint32_t>(m_attachments.size());
+	passCreateInfo.pAttachments = m_attachments.data();
+	passCreateInfo.subpassCount = 1;
+	passCreateInfo.pSubpasses = &subpass;
 	passCreateInfo.dependencyCount = 0;
 	passCreateInfo.pDependencies = nullptr;
 	HRI_VK_CHECK(vkCreateRenderPass(ctx->device, &passCreateInfo, nullptr, &m_renderPass));
+
+	// TODO: load resource attachments from Frame Graph
+	VkFramebufferCreateInfo fbCreateInfo = VkFramebufferCreateInfo{ VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
+	fbCreateInfo.flags = 0;
+	fbCreateInfo.renderPass = m_renderPass;
+	fbCreateInfo.attachmentCount = 0;
+	fbCreateInfo.pAttachments = nullptr;
+	fbCreateInfo.width = 0;
+	fbCreateInfo.height = 0;
+	fbCreateInfo.layers = 1;
+	HRI_VK_CHECK(vkCreateFramebuffer(ctx->device, &fbCreateInfo, nullptr, &m_framebuffer));
 }
 
 void RasterFrameGraphNode::destroyResources(RenderContext* ctx)
 {
 	assert(ctx != nullptr);
 	vkDestroyRenderPass(ctx->device, m_renderPass, nullptr);
+	vkDestroyFramebuffer(ctx->device, m_framebuffer, nullptr);
+}
+
+void RasterFrameGraphNode::renderTarget(VirtualResourceHandle& resource, VkAttachmentLoadOp loadOp, VkAttachmentStoreOp storeOp)
+{
+	write(resource);
+
+	VkAttachmentDescription colorAttachment = VkAttachmentDescription{};
+	colorAttachment.flags = 0;
+	colorAttachment.format = VK_FORMAT_UNDEFINED;	// TODO: fetch from texture metadata in framegraph
+	colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+	colorAttachment.loadOp = loadOp;
+	colorAttachment.storeOp = storeOp;
+	colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+	m_colorAttachments.push_back(VkAttachmentReference{
+		static_cast<uint32_t>(m_attachments.size()),
+		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+	});
+
+	m_attachments.push_back(colorAttachment);
+}
+
+void RasterFrameGraphNode::depthStencil(
+	VirtualResourceHandle& resource,
+	VkAttachmentLoadOp loadOp,
+	VkAttachmentStoreOp storeOp,
+	VkAttachmentLoadOp stencilLoadOp,
+	VkAttachmentStoreOp stencilStoreOp
+)
+{
+	write(resource);
+	
+	VkAttachmentDescription depthStencilAttachment = VkAttachmentDescription{};
+	depthStencilAttachment.flags = 0;
+	depthStencilAttachment.format = VK_FORMAT_UNDEFINED;	// TODO: fetch from texture metadata in framegraph
+	depthStencilAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+	depthStencilAttachment.loadOp = loadOp;
+	depthStencilAttachment.storeOp = storeOp;
+	depthStencilAttachment.stencilLoadOp = stencilLoadOp;
+	depthStencilAttachment.stencilStoreOp = stencilStoreOp;
+	depthStencilAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	depthStencilAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+	m_depthStencilAttachment = VkAttachmentReference{
+		static_cast<uint32_t>(m_attachments.size()),
+		VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+	};
+
+	m_attachments.push_back(depthStencilAttachment);
 }
 
 void PresentFrameGraphNode::execute(VkCommandBuffer commandBuffer) const
 {
-	//
+	// TODO: implement
 }
 
 FrameGraph::FrameGraph(RenderContext* ctx)
@@ -179,7 +266,15 @@ void FrameGraph::markOutputNode(const std::string& name)
 
 void FrameGraph::execute(VkCommandBuffer commandBuffer, uint32_t activeSwapImageIdx) const
 {
-	// TODO: execute frame graph
+	for (auto const& nodeList : m_graphTopology)
+	{
+		for (auto const* pNode : nodeList)
+		{
+			pNode->execute(commandBuffer);
+		}
+
+		// TODO: add memory barrier here
+	}
 }
 
 void FrameGraph::generate()
@@ -236,8 +331,7 @@ void FrameGraph::createFrameGraphResources()
 	// Generate node resources
 	for (auto const& pNode : m_graphNodes)
 	{
-		if (pNode->m_alive)
-			pNode->createResources(m_pCtx);
+		pNode->createResources(m_pCtx);
 	}
 }
 
@@ -288,7 +382,6 @@ void FrameGraph::doTopologicalSort()
 
 		for (auto const& pNode : workList)
 		{
-			// check if no parents in work list
 			if (parentCountInWorkList(pNode, workList) == 0)
 			{
 				m_graphTopology.back().push_back(pNode);
