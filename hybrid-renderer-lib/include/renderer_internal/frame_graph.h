@@ -96,33 +96,19 @@ namespace hri
 
 		void execute(VkCommandBuffer commandBuffer, uint32_t activeSwapImageIdx) const;
 
-		void recreateFrameResources();
+		void recreateFrameGraphResources();
 
 	private:
-		void createRenderPass();
+		void createFrameGraphResources();
 
-		void createFrameResources();
-
-		void destroyFrameResources();
-
-		GraphicsPipelineBuilder getPresentPipelineBuilder() const;
+		void destroyFrameGraphResources();
 
 	private:
 		RenderContext* m_pCtx						= nullptr;
 
-		// FIXME: auto generate render targets based on Frame Graph state.
-		RenderTarget m_gbufferDepthTarget			= RenderTarget{};
-		RenderTarget m_gbufferNormalTarget			= RenderTarget{};
-		RenderTarget m_gbufferAlbedoTarget			= RenderTarget{};
+		// TODO: auto generate render pass (w/ subpasses) & render targets
 
-		// FIXME: auto generate render pass based on frame graph nodes
-		VkRenderPass m_renderPass					= VK_NULL_HANDLE;
-
-		// TODO: only create framebuffers after render pass & target auto generation
 		std::vector<VkImageView> m_swapViews		= {};
 		std::vector<VkFramebuffer> m_framebuffers	= {};
-
-		// FIXME: remove default builtins, instead allow graph setup by API users
-		PresentFrameGraphNode m_presentNode			= PresentFrameGraphNode();
 	};
 }

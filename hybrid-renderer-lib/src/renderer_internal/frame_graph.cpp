@@ -141,22 +141,12 @@ FrameGraph::FrameGraph(RenderContext* ctx, ShaderDatabase* shaderDB)
 	assert(ctx != nullptr);
 	assert(shaderDB != nullptr);
 
-	createRenderPass();
-	createFrameResources();
-
-	// Set up builtin shaders
-	shaderDB->registerShader(HRI_SHADER_DB_BUILTIN_NAME("PresentVertShader"), Shader::init(m_pCtx, gPresentVertShader, sizeof(uint32_t) * HRI_SIZEOF_ARRAY(gPresentVertShader), VK_SHADER_STAGE_VERTEX_BIT));
-	shaderDB->registerShader(HRI_SHADER_DB_BUILTIN_NAME("PresentFragShader"), Shader::init(m_pCtx, gPresentFragShader, sizeof(uint32_t) * HRI_SIZEOF_ARRAY(gPresentFragShader), VK_SHADER_STAGE_FRAGMENT_BIT));
-	shaderDB->createPipeline(HRI_SHADER_DB_BUILTIN_NAME("Present"), { HRI_SHADER_DB_BUILTIN_NAME("PresentVertShader"), HRI_SHADER_DB_BUILTIN_NAME("PresentFragShader") }, getPresentPipelineBuilder());
-
-	// Set up builtin nodes
-	m_presentNode.setPipeline(shaderDB->getPipeline(HRI_SHADER_DB_BUILTIN_NAME("Present")));
+	createFrameGraphResources();
 }
 
 FrameGraph::~FrameGraph()
 {
-	vkDestroyRenderPass(m_pCtx->device, m_renderPass, nullptr);
-	destroyFrameResources();
+	destroyFrameGraphResources();
 }
 
 void FrameGraph::execute(VkCommandBuffer commandBuffer, uint32_t activeSwapImageIdx) const
@@ -164,201 +154,49 @@ void FrameGraph::execute(VkCommandBuffer commandBuffer, uint32_t activeSwapImage
 	assert(activeSwapImageIdx < m_framebuffers.size());
 	VkExtent2D swapExtent = m_pCtx->swapchain.extent;
 
-	VkClearValue clearValues[] = {
-		VkClearValue{{ 0.0f, 0.0f, 0.0f, 0.0f }},	// Swap attachment
-		VkClearValue{{ 1.0f, 0x00 }},				// GBuffer Depth
-		VkClearValue{{ 0.0f, 0.0f, 0.0f, 0.0f }},	// GBuffer Normal
-		VkClearValue{{ 0.0f, 0.0f, 0.0f, 0.0f }},	// GBuffer Albedo
-	};
+	//VkClearValue clearValues[] = {
+	//	VkClearValue{{ 0.0f, 0.0f, 0.0f, 0.0f }},	// Swap attachment
+	//	VkClearValue{{ 1.0f, 0x00 }},				// GBuffer Depth
+	//	VkClearValue{{ 0.0f, 0.0f, 0.0f, 0.0f }},	// GBuffer Normal
+	//	VkClearValue{{ 0.0f, 0.0f, 0.0f, 0.0f }},	// GBuffer Albedo
+	//};
 
-	VkRenderPassBeginInfo passBeginInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
-	passBeginInfo.renderPass = m_renderPass;
-	passBeginInfo.framebuffer = m_framebuffers[activeSwapImageIdx];
-	passBeginInfo.renderArea = VkRect2D{ 0, 0, swapExtent.width, swapExtent.height };
-	passBeginInfo.clearValueCount = HRI_SIZEOF_ARRAY(clearValues);
-	passBeginInfo.pClearValues = clearValues;
-	vkCmdBeginRenderPass(commandBuffer, &passBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+	//VkRenderPassBeginInfo passBeginInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
+	//passBeginInfo.renderPass = VK_NULL_HANDLE;
+	//passBeginInfo.framebuffer = m_framebuffers[activeSwapImageIdx];
+	//passBeginInfo.renderArea = VkRect2D{ 0, 0, swapExtent.width, swapExtent.height };
+	//passBeginInfo.clearValueCount = HRI_SIZEOF_ARRAY(clearValues);
+	//passBeginInfo.pClearValues = clearValues;
+	//vkCmdBeginRenderPass(commandBuffer, &passBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-	// TODO: execute deferred pass using precompiled shaders
-	//		DO: find a way to bind needed buffers -> use scene data?
+	//// TODO: execute generated frame graph
 
-	vkCmdNextSubpass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
-
-	// TODO: allocate resource descriptors for input attachments
-	// TODO: set viewport & scissor state
-	m_presentNode.execute(commandBuffer);
-
-	vkCmdEndRenderPass(commandBuffer);
+	//vkCmdEndRenderPass(commandBuffer);
 }
 
-void FrameGraph::recreateFrameResources()
+void FrameGraph::recreateFrameGraphResources()
 {
-	destroyFrameResources();
-	createFrameResources();
+	destroyFrameGraphResources();
+	createFrameGraphResources();
 }
 
-void FrameGraph::createRenderPass()
-{
-	// Set up deferred rendering subpass
-	VkAttachmentReference gbufferDepthRef = VkAttachmentReference{ 1, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL };
-	VkAttachmentDescription gbufferDepth = VkAttachmentDescription{};
-	gbufferDepth.flags = 0;
-	gbufferDepth.format = VK_FORMAT_D32_SFLOAT;
-	gbufferDepth.samples = VK_SAMPLE_COUNT_1_BIT;
-	gbufferDepth.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	gbufferDepth.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	gbufferDepth.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	gbufferDepth.stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
-	gbufferDepth.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	gbufferDepth.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-	VkAttachmentReference gbufferNormalRef = VkAttachmentReference{ 2, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
-	VkAttachmentDescription gbufferNormal = VkAttachmentDescription{};
-	gbufferNormal.flags = 0;
-	gbufferNormal.format = VK_FORMAT_R8G8B8A8_SNORM;
-	gbufferNormal.samples = VK_SAMPLE_COUNT_1_BIT;
-	gbufferNormal.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	gbufferNormal.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	gbufferNormal.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	gbufferNormal.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	gbufferNormal.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	gbufferNormal.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-	VkAttachmentReference gbufferAlbedoRef = VkAttachmentReference{ 3, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
-	VkAttachmentDescription gbufferAlbedo = VkAttachmentDescription{};
-	gbufferAlbedo.flags = 0;
-	gbufferAlbedo.format = VK_FORMAT_R8G8B8A8_UNORM;
-	gbufferAlbedo.samples = VK_SAMPLE_COUNT_1_BIT;
-	gbufferAlbedo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	gbufferAlbedo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	gbufferAlbedo.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	gbufferAlbedo.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	gbufferAlbedo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	gbufferAlbedo.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-	VkAttachmentReference gbufferColorAttachments[] = {
-		gbufferNormalRef,
-		gbufferAlbedoRef,
-	};
-
-	VkSubpassDescription gBufferSubpass = VkSubpassDescription{};
-	gBufferSubpass.flags = 0;
-	gBufferSubpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	gBufferSubpass.inputAttachmentCount = 0;
-	gBufferSubpass.pInputAttachments = nullptr;
-	gBufferSubpass.colorAttachmentCount = HRI_SIZEOF_ARRAY(gbufferColorAttachments);
-	gBufferSubpass.pColorAttachments = gbufferColorAttachments;
-	gBufferSubpass.pResolveAttachments = nullptr;
-	gBufferSubpass.pDepthStencilAttachment = &gbufferDepthRef;
-	gBufferSubpass.preserveAttachmentCount = 0;
-	gBufferSubpass.pPreserveAttachments = nullptr;
-
-	// Set up presentation subpass
-	VkAttachmentReference swapAttachmentColorRef = VkAttachmentReference{ 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
-	VkAttachmentDescription swapAttachment = VkAttachmentDescription{};
-	swapAttachment.flags = 0;
-	swapAttachment.format = m_pCtx->swapchain.image_format;
-	swapAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-	swapAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	swapAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	swapAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	swapAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	swapAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	swapAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-	VkSubpassDescription presentSubpass = VkSubpassDescription{};
-	presentSubpass.flags = 0;
-	presentSubpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	presentSubpass.inputAttachmentCount = 0;
-	presentSubpass.pInputAttachments = nullptr;
-	presentSubpass.colorAttachmentCount = 1;
-	presentSubpass.pColorAttachments = &swapAttachmentColorRef;
-	presentSubpass.pResolveAttachments = nullptr;
-	presentSubpass.pDepthStencilAttachment = nullptr;
-	presentSubpass.preserveAttachmentCount = 0;
-	presentSubpass.pPreserveAttachments = nullptr;
-
-	// Set up subpass dependencies
-	VkSubpassDependency presentDependency = VkSubpassDependency{};
-	presentDependency.srcSubpass = 0;	// gbuffer pass
-	presentDependency.dstSubpass = 1;	// present pass
-	presentDependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	presentDependency.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-	presentDependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-	presentDependency.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-	presentDependency.dependencyFlags = 0;
-
-	// Set up render pass
-	VkAttachmentDescription attachments[] = {
-		swapAttachment,
-		gbufferDepth,
-		gbufferNormal,
-		gbufferAlbedo,
-	};
-
-	VkSubpassDescription subpasses[] = {
-		gBufferSubpass,
-		presentSubpass,
-	};
-
-	VkSubpassDependency dependencies[] = {
-		presentDependency,
-	};
-
-	VkRenderPassCreateInfo renderPassCreateInfo = VkRenderPassCreateInfo{ VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO };
-	renderPassCreateInfo.flags = 0;
-	renderPassCreateInfo.attachmentCount = HRI_SIZEOF_ARRAY(attachments);
-	renderPassCreateInfo.pAttachments = attachments;
-	renderPassCreateInfo.subpassCount = HRI_SIZEOF_ARRAY(subpasses);
-	renderPassCreateInfo.pSubpasses = subpasses;
-	renderPassCreateInfo.dependencyCount = HRI_SIZEOF_ARRAY(dependencies);
-	renderPassCreateInfo.pDependencies = dependencies;
-	HRI_VK_CHECK(vkCreateRenderPass(m_pCtx->device, &renderPassCreateInfo, nullptr, &m_renderPass));
-}
-
-void FrameGraph::createFrameResources()
+void FrameGraph::createFrameGraphResources()
 {
 	VkExtent2D swapExtent = m_pCtx->swapchain.extent;
-
-	m_gbufferDepthTarget = RenderTarget::init(
-		m_pCtx,
-		VK_FORMAT_D32_SFLOAT,
-		swapExtent,
-		VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-		VK_IMAGE_ASPECT_DEPTH_BIT
-	);
-
-	m_gbufferNormalTarget = RenderTarget::init(
-		m_pCtx,
-		VK_FORMAT_R8G8B8A8_SNORM,
-		swapExtent,
-		VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-		VK_IMAGE_ASPECT_COLOR_BIT
-	);
-
-	m_gbufferAlbedoTarget = RenderTarget::init(
-		m_pCtx,
-		VK_FORMAT_R8G8B8A8_UNORM,
-		swapExtent,
-		VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-		VK_IMAGE_ASPECT_COLOR_BIT
-	);
 
 	m_swapViews = m_pCtx->swapchain.get_image_views().value();
 	for (auto const& swapView : m_swapViews)
 	{
 		VkImageView fbAttachments[] = {
 			swapView,
-			m_gbufferDepthTarget.view,
-			m_gbufferNormalTarget.view,
-			m_gbufferAlbedoTarget.view,
+			// TODO: add auto generated attachments
 		};
 
 		VkFramebufferCreateInfo fbCreateInfo = VkFramebufferCreateInfo{ VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
 		fbCreateInfo.flags = 0;
 		fbCreateInfo.attachmentCount = HRI_SIZEOF_ARRAY(fbAttachments);
 		fbCreateInfo.pAttachments = fbAttachments;
-		fbCreateInfo.renderPass = m_renderPass;
+		fbCreateInfo.renderPass = VK_NULL_HANDLE;
 		fbCreateInfo.width = swapExtent.width;
 		fbCreateInfo.height = swapExtent.height;
 		fbCreateInfo.layers = 1;
@@ -369,12 +207,8 @@ void FrameGraph::createFrameResources()
 	}
 }
 
-void FrameGraph::destroyFrameResources()
+void FrameGraph::destroyFrameGraphResources()
 {
-	RenderTarget::destroy(m_pCtx, m_gbufferDepthTarget);
-	RenderTarget::destroy(m_pCtx, m_gbufferNormalTarget);
-	RenderTarget::destroy(m_pCtx, m_gbufferAlbedoTarget);
-
 	m_pCtx->swapchain.destroy_image_views(m_swapViews);
 	for (auto const& framebuffer : m_framebuffers)
 	{
@@ -382,38 +216,4 @@ void FrameGraph::destroyFrameResources()
 	}
 
 	m_framebuffers.clear();
-}
-
-GraphicsPipelineBuilder FrameGraph::getPresentPipelineBuilder() const
-{
-	static const std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments = {
-		VkPipelineColorBlendAttachmentState{
-			VK_FALSE,
-			VK_BLEND_FACTOR_ONE,
-			VK_BLEND_FACTOR_ZERO,
-			VK_BLEND_OP_ADD,
-			VK_BLEND_FACTOR_ONE,
-			VK_BLEND_FACTOR_ZERO,
-			VK_BLEND_OP_ADD,
-			VK_COLOR_COMPONENT_R_BIT
-			| VK_COLOR_COMPONENT_G_BIT
-			| VK_COLOR_COMPONENT_B_BIT
-			| VK_COLOR_COMPONENT_A_BIT
-		}
-	};
-
-	static const GraphicsPipelineBuilder presentPipelineBuilder = GraphicsPipelineBuilder{
-		{}, {},	// No vertex bindings & attributes
-		GraphicsPipelineBuilder::initInputAssemblyState(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_FALSE),
-		GraphicsPipelineBuilder::initDefaultViewport(1.0f, 1.0f),
-		GraphicsPipelineBuilder::initDefaultScissor(1, 1),
-		GraphicsPipelineBuilder::initRasterizationState(VK_FALSE, VK_POLYGON_MODE_FILL, VK_CULL_MODE_NONE, VK_FRONT_FACE_COUNTER_CLOCKWISE),
-		GraphicsPipelineBuilder::initMultisampleState(VK_SAMPLE_COUNT_1_BIT),
-		GraphicsPipelineBuilder::initDepthStencilState(VK_FALSE, VK_FALSE, VK_COMPARE_OP_NEVER),
-		GraphicsPipelineBuilder::initColorBlendState(colorBlendAttachments),
-		{ VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR },
-		m_renderPass, 1
-	};
-
-	return presentPipelineBuilder;
 }

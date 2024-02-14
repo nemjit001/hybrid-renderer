@@ -166,7 +166,7 @@ int main()
 
 	// Register a callback for when the swap chain is invalidated
 	renderCore.setOnSwapchainInvalidateCallback([&frameGraph](vkb::Swapchain _swapchain) {
-		frameGraph.recreateFrameResources();
+		frameGraph.recreateFrameGraphResources();
 	});
 
 	// Load scene file
