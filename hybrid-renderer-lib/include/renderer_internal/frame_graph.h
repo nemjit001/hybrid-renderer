@@ -43,8 +43,12 @@ namespace hri
 	class IFrameGraphNode
 	{
 	public:
+		/// @brief Overrideable execute method, this method is used to record command buffers for a node.
+		/// @param commandBuffer The command buffer to record into.
 		virtual void execute(VkCommandBuffer) const = 0;
 
+		/// @brief Set the PSO for this graph node.
+		/// @param pPSO PSO to register.
 		virtual inline void setPipeline(const PipelineStateObject* pPSO) { assert(pPSO != nullptr); m_pPSO = pPSO; }
 
 	protected:
@@ -105,12 +109,20 @@ namespace hri
 
 	private:
 		RenderContext* m_pCtx						= nullptr;
+
+		// FIXME: auto generate render targets based on Frame Graph state.
 		RenderTarget m_gbufferDepthTarget			= RenderTarget{};
 		RenderTarget m_gbufferNormalTarget			= RenderTarget{};
 		RenderTarget m_gbufferAlbedoTarget			= RenderTarget{};
+
+		// FIXME: auto generate render pass based on frame graph nodes
 		VkRenderPass m_renderPass					= VK_NULL_HANDLE;
+
+		// TODO: only create framebuffers after render pass & target auto generation
 		std::vector<VkImageView> m_swapViews		= {};
 		std::vector<VkFramebuffer> m_framebuffers	= {};
+
+		// FIXME: remove default builtins, instead allow graph setup by API users
 		PresentFrameGraphNode m_presentNode			= PresentFrameGraphNode();
 	};
 }

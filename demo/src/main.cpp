@@ -159,7 +159,7 @@ int main()
 	ctxCreateInfo.vsyncMode = hri::VSyncMode::Disabled;
 	hri::RenderContext renderContext = hri::RenderContext(ctxCreateInfo);
 
-	// Create render core, shader database, and fixed frame graph
+	// Create render core, shader database, and frame graph
 	hri::RenderCore renderCore = hri::RenderCore(&renderContext);
 	hri::ShaderDatabase shaderDB = hri::ShaderDatabase(&renderContext);
 	hri::FrameGraph frameGraph = hri::FrameGraph(&renderContext, &shaderDB);
