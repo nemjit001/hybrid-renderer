@@ -162,12 +162,21 @@ int main()
 	// Create render core, shader database, and frame graph
 	hri::RenderCore renderCore = hri::RenderCore(&renderContext);
 	hri::ShaderDatabase shaderDB = hri::ShaderDatabase(&renderContext);
-	hri::FrameGraph frameGraph = hri::FrameGraph(&renderContext, &shaderDB);
+	hri::FrameGraph frameGraph = hri::FrameGraph(&renderContext);
 
 	// Register a callback for when the swap chain is invalidated
 	renderCore.setOnSwapchainInvalidateCallback([&frameGraph](vkb::Swapchain _swapchain) {
-		frameGraph.recreateFrameGraphResources();
+		frameGraph.generateGraph();
 	});
+
+	// Set up frame graph nodes & associated resources
+	hri::RasterFrameGraphNode gbufferPass = hri::RasterFrameGraphNode();
+	gbufferPass.setViewport(hri::Viewport{ 0.0f, 0.0f, SCR_WIDTH, SCR_HEIGHT });
+	gbufferPass.setScissor(hri::Scissor{ 0, 0, SCR_WIDTH, SCR_HEIGHT });
+
+	hri::PresentFrameGraphNode presentPass = hri::PresentFrameGraphNode();
+	presentPass.setViewport(hri::Viewport{ 0.0f, 0.0f, SCR_WIDTH, SCR_HEIGHT });
+	presentPass.setScissor(hri::Scissor{ 0, 0, SCR_WIDTH, SCR_HEIGHT });
 
 	// Load scene file
 	hri::Scene scene = loadScene("assets/test_scene.obj");
