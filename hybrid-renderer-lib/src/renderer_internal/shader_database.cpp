@@ -55,6 +55,20 @@ VkPipelineRasterizationStateCreateInfo GraphicsPipelineBuilder::initRasterizatio
     };
 }
 
+VkPipelineMultisampleStateCreateInfo GraphicsPipelineBuilder::initMultisampleState(VkSampleCountFlagBits samples)
+{
+    return VkPipelineMultisampleStateCreateInfo{
+        VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
+        nullptr,
+        0,
+        samples,
+        VK_FALSE, 0.0f, // No sample shading
+        nullptr,        // No sample mask
+        VK_FALSE,       // No alpha to coverage
+        VK_FALSE,       // No alpha to one
+    };
+}
+
 VkPipelineDepthStencilStateCreateInfo GraphicsPipelineBuilder::initDepthStencilState(VkBool32 depthTest, VkBool32 depthWrite, VkCompareOp depthCompareOp)
 {
     return VkPipelineDepthStencilStateCreateInfo{
@@ -68,6 +82,20 @@ VkPipelineDepthStencilStateCreateInfo GraphicsPipelineBuilder::initDepthStencilS
         VK_FALSE,   // No stencil test
         VkStencilOpState{}, VkStencilOpState{}, // Empty defaults
         0.0f, 0.0f  // Empty defaults
+    };
+}
+
+VkPipelineColorBlendStateCreateInfo GraphicsPipelineBuilder::initColorBlendState(const std::vector<VkPipelineColorBlendAttachmentState>& attachments)
+{
+    return VkPipelineColorBlendStateCreateInfo{
+        VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
+        nullptr,
+        0,
+        VK_FALSE,
+        VK_LOGIC_OP_CLEAR,
+        static_cast<uint32_t>(attachments.size()),
+        attachments.data(),
+        { 0.0f, 0.0f, 0.0f, 0.0f },
     };
 }
 
@@ -108,12 +136,13 @@ Shader Shader::loadFile(RenderContext* ctx, const std::string& path, VkShaderSta
     return shader;
 }
 
-Shader Shader::init(RenderContext* ctx, uint32_t* pCode, size_t codeSize, VkShaderStageFlagBits stage)
+Shader Shader::init(RenderContext* ctx, const uint32_t* pCode, size_t codeSize, VkShaderStageFlagBits stage)
 {
     assert(ctx != nullptr);
     assert(pCode != nullptr && codeSize > 0);
 
     Shader shader = Shader{};
+    shader.stage = stage;
 
     VkShaderModuleCreateInfo createInfo = VkShaderModuleCreateInfo{ VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO };
     createInfo.flags = 0;
@@ -202,6 +231,7 @@ const PipelineStateObject* ShaderDatabase::createPipeline(const std::string& nam
         pipelineShaderStage.module = shader->module;
         pipelineShaderStage.pName = "main";
         pipelineShaderStage.pSpecializationInfo = nullptr;
+        pipelineStages.push_back(pipelineShaderStage);
     }
 
     // Create PSO object
@@ -248,10 +278,11 @@ const PipelineStateObject* ShaderDatabase::createPipeline(const std::string& nam
     pipelineCreateInfo.pTessellationState = nullptr;
     pipelineCreateInfo.pViewportState = &viewportState;
     pipelineCreateInfo.pRasterizationState = &pipelineBuilder.rasterizationState;
-    pipelineCreateInfo.pMultisampleState = nullptr;
+    pipelineCreateInfo.pMultisampleState = &pipelineBuilder.multisampleState;
     pipelineCreateInfo.pDepthStencilState = &pipelineBuilder.depthStencilState;
     pipelineCreateInfo.pColorBlendState = &pipelineBuilder.colorBlendState;
     pipelineCreateInfo.pDynamicState = &dynamicState;
+    pipelineCreateInfo.layout = pso.layout;
     pipelineCreateInfo.renderPass = pipelineBuilder.renderPass;
     pipelineCreateInfo.subpass = pipelineBuilder.subpass;
     pipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;

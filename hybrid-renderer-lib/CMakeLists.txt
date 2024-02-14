@@ -62,4 +62,8 @@ foreach(SHADER_PATH IN LISTS PROJECT_SHADERS)
 	add_custom_command(TARGET custom-commands-${LIB_NAME}
 		COMMAND glslc ${SHADER_PATH} -o $<TARGET_FILE_DIR:${LIB_NAME}>/shaders/${SHADER_FILE}.spv
 	)
+
+	add_custom_command(TARGET custom-commands-${LIB_NAME}
+		COMMAND glslangValidator -V -x ${SHADER_PATH} -o $<TARGET_FILE_DIR:${LIB_NAME}>/shaders/${SHADER_FILE}.u32
+	)
 endforeach()

@@ -162,7 +162,7 @@ int main()
 	// Create render core, shader database, and fixed frame graph
 	hri::RenderCore renderCore = hri::RenderCore(&renderContext);
 	hri::ShaderDatabase shaderDB = hri::ShaderDatabase(&renderContext);
-	hri::FrameGraph frameGraph = hri::FrameGraph(&renderContext);
+	hri::FrameGraph frameGraph = hri::FrameGraph(&renderContext, &shaderDB);
 
 	// Register a callback for when the swap chain is invalidated
 	renderCore.setOnSwapchainInvalidateCallback([&frameGraph](vkb::Swapchain _swapchain) {

@@ -21,6 +21,7 @@ namespace hri
         VkViewport viewport;
         VkRect2D scissor;
         VkPipelineRasterizationStateCreateInfo rasterizationState;
+        VkPipelineMultisampleStateCreateInfo multisampleState;
         VkPipelineDepthStencilStateCreateInfo depthStencilState;
         VkPipelineColorBlendStateCreateInfo colorBlendState;    // FIXME: allow easy color blend state registration / initialization
         std::vector<VkDynamicState> dynamicStates;
@@ -35,7 +36,11 @@ namespace hri
 
         static VkPipelineRasterizationStateCreateInfo initRasterizationState(VkBool32 discard, VkPolygonMode polygonMode, VkCullModeFlags cullMode, VkFrontFace frontFace);
 
+        static VkPipelineMultisampleStateCreateInfo initMultisampleState(VkSampleCountFlagBits samples);
+
         static VkPipelineDepthStencilStateCreateInfo initDepthStencilState(VkBool32 depthTest, VkBool32 depthWrite, VkCompareOp depthCompareOp);
+
+        static VkPipelineColorBlendStateCreateInfo initColorBlendState(const std::vector<VkPipelineColorBlendAttachmentState>& attachments);
     };
 
     /// @brief A Shader object represents a programmable pipeline stage.
@@ -57,7 +62,7 @@ namespace hri
         /// @param codeSize Size in bytes for SPIR-V code block.
         /// @param stage Shader stage flag.
         /// @return A new Shader object.
-        static Shader init(RenderContext* ctx, uint32_t* pCode, size_t codeSize, VkShaderStageFlagBits stage);
+        static Shader init(RenderContext* ctx, const uint32_t* pCode, size_t codeSize, VkShaderStageFlagBits stage);
 
         /// @brief Destroy a shader object.
         /// @param ctx Render Context to use.

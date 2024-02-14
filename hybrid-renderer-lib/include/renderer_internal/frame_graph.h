@@ -45,7 +45,7 @@ namespace hri
 	public:
 		virtual void execute(VkCommandBuffer) const = 0;
 
-		virtual inline void setPipeline(const PipelineStateObject* pPSO) { assert(m_pPSO != nullptr); m_pPSO = pPSO; }
+		virtual inline void setPipeline(const PipelineStateObject* pPSO) { assert(pPSO != nullptr); m_pPSO = pPSO; }
 
 	protected:
 		// Pointer to pass resources (descriptor sets, push constant values)
@@ -86,7 +86,7 @@ namespace hri
 	class FrameGraph
 	{
 	public:
-		FrameGraph(RenderContext* ctx);
+		FrameGraph(RenderContext* ctx, ShaderDatabase* shaderDB);
 
 		virtual ~FrameGraph();
 
@@ -101,6 +101,8 @@ namespace hri
 
 		void destroyFrameResources();
 
+		GraphicsPipelineBuilder getPresentPipelineBuilder() const;
+
 	private:
 		RenderContext* m_pCtx						= nullptr;
 		RenderTarget m_gbufferDepthTarget			= RenderTarget{};
@@ -109,5 +111,6 @@ namespace hri
 		VkRenderPass m_renderPass					= VK_NULL_HANDLE;
 		std::vector<VkImageView> m_swapViews		= {};
 		std::vector<VkFramebuffer> m_framebuffers	= {};
+		PresentFrameGraphNode m_presentNode			= PresentFrameGraphNode();
 	};
 }
