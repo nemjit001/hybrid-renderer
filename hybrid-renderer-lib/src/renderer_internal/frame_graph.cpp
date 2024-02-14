@@ -233,7 +233,22 @@ void RasterFrameGraphNode::depthStencil(
 
 void PresentFrameGraphNode::execute(VkCommandBuffer commandBuffer) const
 {
-	// TODO: implement
+	printf("Present NYI\n");
+	abort();
+}
+
+/// @brief Create node resources.
+		/// @param ctx Render Context to use.
+void PresentFrameGraphNode::createResources(RenderContext* ctx)
+{
+	//
+}
+
+/// @brief Destroy node resources.
+/// @param ctx Render Context to use.
+void PresentFrameGraphNode::destroyResources(RenderContext* ctx)
+{
+	//
 }
 
 FrameGraph::FrameGraph(RenderContext* ctx)

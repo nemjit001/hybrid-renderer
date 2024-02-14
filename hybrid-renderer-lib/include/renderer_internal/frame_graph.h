@@ -190,6 +190,17 @@ namespace hri
 		/// @brief Execute this present pass.
 		/// @param commandBuffer Command buffer to record into.
 		virtual void execute(VkCommandBuffer commandBuffer) const override;
+
+		/// @brief Create node resources.
+		/// @param ctx Render Context to use.
+		virtual void createResources(RenderContext* ctx) override;
+
+		/// @brief Destroy node resources.
+		/// @param ctx Render Context to use.
+		virtual void destroyResources(RenderContext* ctx) override;
+
+	protected:
+		//
 	};
 
 	/// @brief The Frame Graph generates a render pass & per frame render commands based on registered graph nodes.
