@@ -15,31 +15,6 @@ namespace hri
 	/// @brief Forward declaration for FrameGraph class
 	class FrameGraph;
 
-	/// @brief Simple viewport representation
-	struct Viewport
-	{
-		float x			= 0.0f;
-		float y			= 0.0f;
-		float width		= 0.0f;
-		float height	= 0.0f;
-		float minDepth	= hri::DefaultViewportMinDepth;
-		float maxDepth	= hri::DefaultViewportMaxDepth;
-	};
-
-	/// @brief Simple scissor rectangle representation
-	struct Scissor
-	{
-		struct {
-			int32_t x;
-			int32_t y;
-		};	// Offset
-
-		struct {
-			uint32_t width;
-			uint32_t height;
-		};	// Extent
-	};
-
 	/// @brief Resource Type indicates a Virtual Resource's type.
 	enum class ResourceType
 	{
@@ -55,6 +30,21 @@ namespace hri
 		ResourceType type;
 		size_t index;
 		size_t version;
+	};
+
+	/// @brief Buffer Resource Metadata is stored for buffer resource handles in the Frame Graph.
+	struct BufferResourceMetadata
+	{
+		size_t size;
+		VkBufferUsageFlags usage;
+	};
+
+	/// @brief Texture Resource Metadata is stored for texture resource handles in the Frame Graph.
+	struct TextureResourceMetadata
+	{
+		VkExtent2D extent;
+		VkFormat format;
+		VkImageUsageFlags usage;
 	};
 
 	/// @brief A Render Target is a collection of an image, its view, and an allocation.
@@ -146,8 +136,18 @@ namespace hri
 		/// @param ctx Render Context to use.
 		virtual void destroyResources(RenderContext* ctx) override;
 
+		/// @brief Register a Render Target to this Raster Pass.
+		/// @param resource Resource to be used as render target.
+		/// @param loadOp Load operation.
+		/// @param storeOp Store operation.
 		virtual void renderTarget(VirtualResourceHandle& resource, VkAttachmentLoadOp loadOp, VkAttachmentStoreOp storeOp);
 
+		/// @brief Register a Depth Stencil target to this Raster Pass.
+		/// @param resource Resource to be used as depth stencil target.
+		/// @param loadOp Load operation for depth.
+		/// @param storeOp Store operation for depth.
+		/// @param stencilLoadOp Load operation for stencil.
+		/// @param stencilStoreOp Store operation for stencil.
 		virtual void depthStencil(
 			VirtualResourceHandle& resource,
 			VkAttachmentLoadOp loadOp,
@@ -216,6 +216,8 @@ namespace hri
 			VkImageUsageFlags usage
 		);
 
+		const TextureResourceMetadata& getTextureMetadata(const std::string& name) const;
+
 		/// @brief Mark a graph node as this graph's output node.
 		/// @param name Name of the node to mark as output.
 		void markOutputNode(const std::string& name);
@@ -250,26 +252,11 @@ namespace hri
 		void doTopologicalSort();
 
 	private:
-		/// @brief Buffer Metadata is used to create buffer handles for the Frame Graph.
-		struct BufferMetadata
-		{
-			size_t size;
-			VkBufferUsageFlags usage;
-		};
-
-		/// @brief Texture Metadata is used to create texture handles for the Frame Graph.
-		struct TextureMetadata
-		{
-			VkExtent2D extent;
-			VkFormat format;
-			VkImageUsageFlags usage;
-		};
-
 		RenderContext* m_pCtx = nullptr;
 
-		std::map<std::string, BufferMetadata> m_bufferMetadata		= {};
-		std::map<std::string, TextureMetadata> m_textureMetadata	= {};
-		std::vector<VirtualResourceHandle> m_resourceHandles		= {};
+		std::map<std::string, BufferResourceMetadata> m_bufferMetadata		= {};
+		std::map<std::string, TextureResourceMetadata> m_textureMetadata	= {};
+		std::vector<VirtualResourceHandle> m_resourceHandles				= {};
 
 		size_t m_outputNodeIndex = 0;
 		std::vector<IFrameGraphNode*> m_graphNodes					= {};

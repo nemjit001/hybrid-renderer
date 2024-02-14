@@ -158,9 +158,10 @@ void RasterFrameGraphNode::renderTarget(VirtualResourceHandle& resource, VkAttac
 {
 	write(resource);
 
+	const TextureResourceMetadata& meta = m_frameGraph.getTextureMetadata(resource.name);
 	VkAttachmentDescription colorAttachment = VkAttachmentDescription{};
 	colorAttachment.flags = 0;
-	colorAttachment.format = VK_FORMAT_UNDEFINED;	// TODO: fetch from texture metadata in framegraph
+	colorAttachment.format = meta.format;
 	colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
 	colorAttachment.loadOp = loadOp;
 	colorAttachment.storeOp = storeOp;
@@ -187,9 +188,10 @@ void RasterFrameGraphNode::depthStencil(
 {
 	write(resource);
 	
+	const TextureResourceMetadata& meta = m_frameGraph.getTextureMetadata(resource.name);
 	VkAttachmentDescription depthStencilAttachment = VkAttachmentDescription{};
 	depthStencilAttachment.flags = 0;
-	depthStencilAttachment.format = VK_FORMAT_UNDEFINED;	// TODO: fetch from texture metadata in framegraph
+	depthStencilAttachment.format = meta.format;
 	depthStencilAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
 	depthStencilAttachment.loadOp = loadOp;
 	depthStencilAttachment.storeOp = storeOp;
@@ -231,7 +233,7 @@ VirtualResourceHandle FrameGraph::createBufferResource(
 {
 	VirtualResourceHandle resource = allocateResource(name);
 
-	const auto& it = m_bufferMetadata.insert(std::make_pair(name, BufferMetadata{ size, usage }));
+	const auto& it = m_bufferMetadata.insert(std::make_pair(name, BufferResourceMetadata{ size, usage }));
 	assert(it.second != false);
 
 	return resource;
@@ -246,10 +248,15 @@ VirtualResourceHandle FrameGraph::createTextureResource(
 {
 	VirtualResourceHandle resource = allocateResource(name);
 
-	const auto& it = m_textureMetadata.insert(std::make_pair(name, TextureMetadata{ resolution, format, usage }));
+	const auto& it = m_textureMetadata.insert(std::make_pair(name, TextureResourceMetadata{ resolution, format, usage }));
 	assert(it.second != false);
 
 	return resource;
+}
+
+const TextureResourceMetadata& FrameGraph::getTextureMetadata(const std::string& name) const
+{
+	return m_textureMetadata.at(name);
 }
 
 void FrameGraph::markOutputNode(const std::string& name)
@@ -391,6 +398,9 @@ void FrameGraph::doTopologicalSort()
 				leftOverList.push_back(pNode);
 			}
 		}
+
+		// If the current graph layer is empty, we encountered a cyclic graph
+		assert(!m_graphTopology.back().empty());
 
 		workList = leftOverList;
 		leftOverList.clear();
