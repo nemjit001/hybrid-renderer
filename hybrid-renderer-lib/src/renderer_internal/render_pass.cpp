@@ -72,7 +72,6 @@ RenderPassBuilder::RenderPassBuilder(RenderContext* ctx)
 	:
 	m_pCtx(ctx)
 {
-	assert(m_pCtx != nullptr);
 	// Start first subpass
 	this->nextSubpass();
 }
@@ -124,6 +123,12 @@ RenderPassBuilder& RenderPassBuilder::setAttachmentReference(AttachmentType type
 		break;
 	}
 
+	return *this;
+}
+
+RenderPassBuilder& RenderPassBuilder::setContext(RenderContext* ctx)
+{
+	m_pCtx = ctx;
 	return *this;
 }
 

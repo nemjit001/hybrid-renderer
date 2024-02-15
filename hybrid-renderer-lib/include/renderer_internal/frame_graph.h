@@ -171,7 +171,7 @@ namespace hri
 		};
 		
 		// Configuration data for Raster node.
-		RenderPassBuilder m_renderPassBuilder;
+		RenderPassBuilder m_renderPassBuilder				= RenderPassBuilder();
 		std::vector<RenderAttachmentResource> m_attachments	= {};
 		std::vector<VkClearValue> m_clearValues				= {};
 
@@ -231,9 +231,6 @@ namespace hri
 
 		/// @brief Clear the Frame Graph's internal state, cleaning up all acquired resources.
 		void clear();
-
-		/// @brief Retrieve the Frame Graph render context.
-		inline RenderContext* context() const { return m_pCtx; }
 
 	private:
 		/// @brief Allocate a new virtual resource handle.

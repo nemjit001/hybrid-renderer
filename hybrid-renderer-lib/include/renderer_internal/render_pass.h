@@ -21,7 +21,7 @@ namespace hri
 	public:
 		/// @brief Create a new render pass builder.
 		/// @param ctx Render context to use.
-		RenderPassBuilder(RenderContext* ctx);
+		RenderPassBuilder(RenderContext* ctx = nullptr);
 
 		/// @brief Destroy this render pass builder.
 		virtual ~RenderPassBuilder() = default;
@@ -56,6 +56,11 @@ namespace hri
 		/// @param ref Reference.
 		/// @return RenderPassBuilder reference.
 		RenderPassBuilder& setAttachmentReference(AttachmentType type, VkAttachmentReference ref);
+
+		/// @brief Update the used render context.
+		/// @param ctx New render context to use for render pass creation.
+		/// @return RenderPassBuilder reference.
+		RenderPassBuilder& setContext(RenderContext* ctx);
 
 		/// @brief Build the configured render pass.
 		/// @return RenderPassBuilder reference.

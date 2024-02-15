@@ -75,8 +75,7 @@ void IFrameGraphNode::write(VirtualResourceHandle& resource)
 
 RasterFrameGraphNode::RasterFrameGraphNode(const std::string& name, FrameGraph& frameGraph)
 	:
-	IFrameGraphNode(name, frameGraph),
-	m_renderPassBuilder(frameGraph.context())
+	IFrameGraphNode(name, frameGraph)
 {
 	//
 }
@@ -102,6 +101,8 @@ void RasterFrameGraphNode::execute(VkCommandBuffer commandBuffer) const
 void RasterFrameGraphNode::createResources(RenderContext* ctx)
 {
 	assert(ctx != nullptr);
+
+	m_renderPassBuilder.setContext(ctx);
 
 	m_framebufferExtent = VkExtent2D{ 0, 0 };
 	m_imageViews.reserve(m_attachments.size());
