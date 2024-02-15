@@ -68,38 +68,114 @@ static const uint32_t gGlslPresentFragShader[] = {
 	0x00000012,0x0003003e,0x00000009,0x00000013,0x000100fd,0x00010038
 };
 
+RenderPassBuilder::RenderPassBuilder(RenderContext* ctx)
+	:
+	m_pCtx(ctx)
+{
+	assert(m_pCtx != nullptr);
+	// Start first subpass
+	this->nextSubpass();
+}
+
+RenderPassBuilder& RenderPassBuilder::addAttachment(
+	VkFormat format,
+	VkSampleCountFlagBits samples,
+	VkImageLayout finalLayout,
+	VkAttachmentLoadOp loadOp,
+	VkAttachmentStoreOp storeOp,
+	VkAttachmentLoadOp stencilLoadOp,
+	VkAttachmentStoreOp stencilStoreOp,
+	VkImageLayout initialLayout
+)
+{
+	m_attachments.push_back(VkAttachmentDescription{
+		0,
+		format,
+		samples,
+		loadOp, storeOp,
+		stencilLoadOp, stencilStoreOp,
+		initialLayout,
+		finalLayout
+	});
+
+	return *this;
+}
+
+RenderPassBuilder& RenderPassBuilder::nextSubpass()
+{
+	m_subpasses.push_back(SubpassData{});
+
+	return *this;
+}
+
+RenderPassBuilder& RenderPassBuilder::setAttachmentReference(AttachmentType type, VkAttachmentReference ref)
+{
+	SubpassData& currentSubpass = m_subpasses.back();
+	
+	switch (type)
+	{
+	case hri::AttachmentType::Color:
+		currentSubpass.colorAttachments.push_back(ref);
+		break;
+	case hri::AttachmentType::DepthStencil:
+		currentSubpass.depthStencilAttachment = ref;
+		break;
+	default:
+		break;
+	}
+
+	return *this;
+}
+
+VkRenderPass RenderPassBuilder::build()
+{
+	std::vector<VkSubpassDescription> subpasses = {}; subpasses.reserve(m_subpasses.size());
+	for (auto const& pass : m_subpasses)
+	{
+		VkSubpassDescription description = VkSubpassDescription{};
+		description.flags = 0;
+		description.colorAttachmentCount = static_cast<uint32_t>(pass.colorAttachments.size());
+		description.pColorAttachments = pass.colorAttachments.data();
+		description.pDepthStencilAttachment = pass.depthStencilAttachment.has_value() ? &pass.depthStencilAttachment.value() : nullptr;
+
+		subpasses.push_back(description);
+	}
+
+	VkRenderPassCreateInfo createInfo = VkRenderPassCreateInfo{ VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO };
+	createInfo.flags = 0;
+	createInfo.attachmentCount = static_cast<uint32_t>(m_attachments.size());
+	createInfo.pAttachments = m_attachments.data();
+	createInfo.subpassCount = static_cast<uint32_t>(subpasses.size());
+	createInfo.pSubpasses = subpasses.data();
+	createInfo.dependencyCount = 0;
+	createInfo.pDependencies = nullptr;
+
+	VkRenderPass newPass = VK_NULL_HANDLE;
+	HRI_VK_CHECK(vkCreateRenderPass(m_pCtx->device, &createInfo, nullptr, &newPass));
+
+	return newPass;
+}
+
 BuiltinRenderPass::BuiltinRenderPass(RenderContext* ctx, ShaderDatabase* shaderDB)
 	:
 	m_pCtx(ctx)
 {
 	assert(m_pCtx != nullptr);
 
-	VkAttachmentReference swapRef = VkAttachmentReference{ 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
-	VkAttachmentDescription swapAttachment = VkAttachmentDescription{};
-	swapAttachment.flags = 0;
-	swapAttachment.format = m_pCtx->swapchain.image_format;
-	swapAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-	swapAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	swapAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	swapAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	swapAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	swapAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	swapAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-	VkSubpassDescription subpass = VkSubpassDescription{};
-	subpass.flags = 0;
-	subpass.colorAttachmentCount = 1;
-	subpass.pColorAttachments = &swapRef;
-
-	VkRenderPassCreateInfo passCreateInfo = VkRenderPassCreateInfo{ VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO };
-	passCreateInfo.flags = 0;
-	passCreateInfo.attachmentCount = 1;
-	passCreateInfo.pAttachments = &swapAttachment;
-	passCreateInfo.subpassCount = 1;
-	passCreateInfo.pSubpasses = &subpass;
-	passCreateInfo.dependencyCount = 0;
-	passCreateInfo.pDependencies = nullptr;
-	HRI_VK_CHECK(vkCreateRenderPass(m_pCtx->device, &passCreateInfo, nullptr, &m_renderPass));
+	RenderPassBuilder passBuilder = RenderPassBuilder(m_pCtx);
+	m_renderPass = passBuilder
+		.addAttachment(
+			m_pCtx->swapchain.image_format,
+			VK_SAMPLE_COUNT_1_BIT,
+			VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+			VK_ATTACHMENT_LOAD_OP_CLEAR,
+			VK_ATTACHMENT_STORE_OP_STORE
+		)
+		.setAttachmentReference(
+			AttachmentType::Color,
+			VkAttachmentReference{ 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL }
+		)
+		.build();
 
 	// Set up shaders after render pass creation
 	size_t presentVertShaderSize = sizeof(uint32_t) * HRI_SIZEOF_ARRAY(gGlslPresentVertShader);
