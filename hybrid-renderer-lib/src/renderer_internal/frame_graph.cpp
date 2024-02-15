@@ -210,6 +210,7 @@ void RasterFrameGraphNode::renderTarget(
 
 void RasterFrameGraphNode::depthStencil(
 	VirtualResourceHandle& resource,
+	VkImageAspectFlags imageUsageAspect,
 	VkAttachmentLoadOp loadOp,
 	VkAttachmentStoreOp storeOp,
 	VkAttachmentLoadOp stencilLoadOp,
@@ -236,7 +237,7 @@ void RasterFrameGraphNode::depthStencil(
 	RenderAttachment renderAttachment = RenderAttachment{
 		resource,
 		depthStencilAttachment,
-		VK_IMAGE_ASPECT_DEPTH_BIT,
+		imageUsageAspect,
 	};
 	
 	m_depthStencilAttachment = VkAttachmentReference{

@@ -145,6 +145,7 @@ namespace hri
 
 		/// @brief Register a Depth Stencil target to this Raster Pass.
 		/// @param resource Resource to be used as depth stencil target.
+		/// @param imageUsageAspect Image usage, either depth, stencil, or depth & stencil.
 		/// @param loadOp Load operation for depth.
 		/// @param storeOp Store operation for depth.
 		/// @param stencilLoadOp Load operation for stencil.
@@ -152,6 +153,7 @@ namespace hri
 		/// @param clearValue Clear value for this attachment.
 		virtual void depthStencil(
 			VirtualResourceHandle& resource,
+			VkImageAspectFlags imageUsageAspect,
 			VkAttachmentLoadOp loadOp,
 			VkAttachmentStoreOp storeOp,
 			VkAttachmentLoadOp stencilLoadOp,

@@ -170,35 +170,21 @@ int main()
 	});
 
 	// Set up frame graph nodes & associated resources
-	hri::VirtualResourceHandle albedoTarget = frameGraph.createTextureResource(
-		"Albedo Target", { SCR_WIDTH, SCR_HEIGHT },
-		VK_FORMAT_R8G8B8A8_UNORM
-	);
-
-	hri::VirtualResourceHandle normalTarget = frameGraph.createTextureResource(
-		"Normal Target", { SCR_WIDTH, SCR_HEIGHT },
-		VK_FORMAT_R8G8B8A8_SNORM
-	);
-
-	hri::VirtualResourceHandle depthTarget = frameGraph.createTextureResource(
-		"Depth Target", { SCR_WIDTH, SCR_HEIGHT },
-		VK_FORMAT_D32_SFLOAT
-	);
+	hri::VirtualResourceHandle albedoTarget = frameGraph.createTextureResource("Albedo Target", { SCR_WIDTH, SCR_HEIGHT }, VK_FORMAT_R8G8B8A8_UNORM);
+	hri::VirtualResourceHandle normalTarget = frameGraph.createTextureResource("Normal Target", { SCR_WIDTH, SCR_HEIGHT }, VK_FORMAT_R8G8B8A8_SNORM);
+	hri::VirtualResourceHandle depthTarget = frameGraph.createTextureResource("Depth Target", { SCR_WIDTH, SCR_HEIGHT }, VK_FORMAT_D32_SFLOAT);
+	hri::VirtualResourceHandle colorTarget = frameGraph.createTextureResource("Color Target", { SCR_WIDTH, SCR_HEIGHT }, VK_FORMAT_R8G8B8A8_UNORM);
 
 	hri::RasterFrameGraphNode gbufferPass = hri::RasterFrameGraphNode("GBuffer Raster", frameGraph);
 	gbufferPass.renderTarget(albedoTarget, VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE);
 	gbufferPass.renderTarget(normalTarget, VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE);
 	gbufferPass.depthStencil(
 		depthTarget,
+		VK_IMAGE_ASPECT_DEPTH_BIT,
 		VK_ATTACHMENT_LOAD_OP_CLEAR,
 		VK_ATTACHMENT_STORE_OP_STORE,
 		VK_ATTACHMENT_LOAD_OP_CLEAR,
 		VK_ATTACHMENT_STORE_OP_STORE
-	);
-
-	hri::VirtualResourceHandle colorTarget = frameGraph.createTextureResource(
-		"Color Target", { SCR_WIDTH, SCR_HEIGHT },
-		VK_FORMAT_R8G8B8A8_UNORM
 	);
 
 	hri::RasterFrameGraphNode shadingPass = hri::RasterFrameGraphNode("Shading Raster", frameGraph);
