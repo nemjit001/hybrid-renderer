@@ -103,6 +103,11 @@ RenderContext::RenderContext(RenderContextCreateInfo createInfo)
         .set_desired_present_mode(presentSetup.presentMode)
         .add_fallback_present_mode(VK_PRESENT_MODE_FIFO_KHR)
         .set_required_min_image_count(presentSetup.imageCount)
+        .set_image_usage_flags( // Some sensible default flags for swap image usage
+            VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
+            | VK_IMAGE_USAGE_TRANSFER_DST_BIT
+            | VK_IMAGE_USAGE_SAMPLED_BIT
+        )
         .build().value();
 
     // Initialize device queues
@@ -144,6 +149,7 @@ void RenderContext::recreateSwapchain()
         .set_desired_present_mode(presentSetup.presentMode)
         .add_fallback_present_mode(VK_PRESENT_MODE_FIFO_KHR)
         .set_required_min_image_count(presentSetup.imageCount)
+        .set_image_usage_flags(oldSwapchain.image_usage_flags)
         .set_old_swapchain(oldSwapchain)
         .build().value();
 

@@ -19,7 +19,6 @@ namespace hri
 	enum class ResourceType
 	{
 		Texture,
-		Buffer,
 	};
 
 	/// @brief A Virtual Resource Handle represents a resource in use by the frame graph.
@@ -45,36 +44,31 @@ namespace hri
 		VkExtent2D extent;
 		VkFormat format;
 		VkImageUsageFlags usage;
-		VkImageAspectFlags aspect;
 	};
 
-	/// @brief A StorageTexture is a collection of an image, its view, and an allocation.
-	///		StorageTextures are used by the Frame Graph to store intermediary render results.
-	struct StorageTexture
+	/// @brief A TextureResource links an image and its allocation, allowing for easy creation & destruction of resources.
+	struct TextureResource
 	{
 		VkImage image				= VK_NULL_HANDLE;
-		VkImageView view			= VK_NULL_HANDLE;
 		VmaAllocation allocation	= VK_NULL_HANDLE;
 
-		/// @brief Initialize a new StorageTexture.
-		/// @param ctx Render Context to use.
-		/// @param format Target image format.
-		/// @param extent Target extent (resolution)
-		/// @param usage Target expected usage.
-		/// @param imageAspect Target image aspect.
-		/// @return A newly initialized StorageTexture.
-		static StorageTexture init(
+		/// @brief Initialize a new Texture Resource.
+		/// @param ctx RenderContext to use.
+		/// @param format Image Format.
+		/// @param extent Image extent. (resolution)
+		/// @param usage Image usage flags.
+		/// @return A new TextureResource.
+		static TextureResource init(
 			RenderContext* ctx,
 			VkFormat format,
 			VkExtent2D extent,
-			VkImageUsageFlags usage,
-			VkImageAspectFlags imageAspect
+			VkImageUsageFlags usage
 		);
 
-		/// @brief Destroy a StorageTexture.
-		/// @param ctx Render Context to use.
-		/// @param renderTarget StorageTexture to destroy.
-		static void destroy(RenderContext* ctx, StorageTexture& storageTexture);
+		/// @brief Destroy a Texture Resource.
+		/// @param ctx RenderContext used to create the resource.
+		/// @param texture TextureResource to destroy.
+		static void destroy(RenderContext* ctx, TextureResource& texture);
 	};
 
 	/// @brief The IFrameGraphNode interface exposes functions for rendering using a higher level interface.
@@ -166,41 +160,22 @@ namespace hri
 		);
 
 	protected:
-		std::vector<VirtualResourceHandle> m_attachmentDependencies		= {};
+		struct RenderAttachment
+		{
+			VirtualResourceHandle resource;
+			VkAttachmentDescription attachmentDescription;
+			VkImageAspectFlags aspectFlags;
+		};
+
+		std::vector<RenderAttachment> m_attachments						= {};
 		std::vector<VkClearValue> m_clearValues							= {};
-		std::vector<VkAttachmentDescription> m_attachments				= {};
 		std::vector<VkAttachmentReference> m_colorAttachments			= {};
 		std::optional<VkAttachmentReference> m_depthStencilAttachment	= {};
-		VkExtent2D m_framebufferExtent	= VkExtent2D{ 0, 0 };
-		VkRenderPass m_renderPass		= VK_NULL_HANDLE;
-		VkFramebuffer m_framebuffer		= VK_NULL_HANDLE;
-	};
 
-	/// @brief Present type raster graph node, executes a rasterization pipeline that writes into an active swap image.
-	class PresentFrameGraphNode
-		:
-		public RasterFrameGraphNode
-	{
-	public:
-		/// @brief Create a new Present type Frame Graph Node
-		/// @param name 
-		/// @param frameGraph 
-		PresentFrameGraphNode(const std::string& name, FrameGraph& frameGraph) : RasterFrameGraphNode(name, frameGraph) {};
-
-		/// @brief Execute this present pass.
-		/// @param commandBuffer Command buffer to record into.
-		virtual void execute(VkCommandBuffer commandBuffer) const override;
-
-		/// @brief Create node resources.
-		/// @param ctx Render Context to use.
-		virtual void createResources(RenderContext* ctx) override;
-
-		/// @brief Destroy node resources.
-		/// @param ctx Render Context to use.
-		virtual void destroyResources(RenderContext* ctx) override;
-
-	protected:
-		//
+		VkExtent2D m_framebufferExtent			= VkExtent2D{ 0, 0 };
+		std::vector<VkImageView> m_imageViews	= {};
+		VkRenderPass m_renderPass				= VK_NULL_HANDLE;
+		VkFramebuffer m_framebuffer				= VK_NULL_HANDLE;
 	};
 
 	/// @brief The Frame Graph generates a render pass & per frame render commands based on registered graph nodes.
@@ -215,17 +190,6 @@ namespace hri
 		/// @brief Destroy this Frame Graph.
 		virtual ~FrameGraph();
 
-		/// @brief Create a virtual buffer resource.
-		/// @param name Name of the resource.
-		/// @param size Size of the buffer to be created.
-		/// @param usage Expected usage of the buffer.
-		/// @return A new resource handle.
-		VirtualResourceHandle createBufferResource(
-			const std::string& name,
-			size_t size,
-			VkBufferUsageFlags usage
-		);
-
 		/// @brief Create a virtual texture resource.
 		/// @param name Name of the resource.
 		/// @param resolution Resolution of the texture.
@@ -235,16 +199,12 @@ namespace hri
 		VirtualResourceHandle createTextureResource(
 			const std::string& name,
 			VkExtent2D resolution,
-			VkFormat format,
-			VkImageUsageFlags usage,
-			VkImageAspectFlags aspect
+			VkFormat format
 		);
 
-		const BufferResourceMetadata& getBufferMetadata(const std::string& name) const;
+		TextureResourceMetadata& getTextureMetadata(const VirtualResourceHandle& resource);
 
-		const TextureResourceMetadata& getTextureMetadata(const std::string& name) const;
-
-		const StorageTexture& getStorageTexture(const std::string& name) const;
+		const TextureResource& getTextureResource(const VirtualResourceHandle& resource) const;
 
 		/// @brief Mark a graph node as this graph's output node.
 		/// @param name Name of the node to mark as output.
@@ -257,6 +217,9 @@ namespace hri
 
 		/// @brief Generate a new Frame Graph from the currently registered nodes.
 		void generate();
+
+		/// @brief Clear the Frame Graph's internal state, cleaning up all acquired resources.
+		void clear();
 
 	private:
 		/// @brief Allocate a new virtual resource handle.
@@ -285,10 +248,12 @@ namespace hri
 		std::map<std::string, BufferResourceMetadata> m_bufferMetadata		= {};
 		std::map<std::string, TextureResourceMetadata> m_textureMetadata	= {};
 		std::vector<VirtualResourceHandle> m_resourceHandles				= {};
-		std::map<std::string, StorageTexture> m_storageTextures				= {};
+		std::map<std::string, TextureResource> m_textureResources			= {};
 
 		size_t m_outputNodeIndex = 0;
 		std::vector<IFrameGraphNode*> m_graphNodes					= {};
 		std::vector<std::vector<IFrameGraphNode*>> m_graphTopology	= {};
+
+		// TODO: set up builtin render pass for presentation etc.
 	};
 }
