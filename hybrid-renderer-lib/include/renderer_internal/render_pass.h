@@ -78,24 +78,40 @@ namespace hri
 		std::vector<SubpassData> m_subpasses;
 	};
 
+	/// @brief The Builtin Render Pass is a simple present pass that draw a fullscreen triangle to
+	///		a swap image. This pass takes in *1* image sampler as input, drawing its image contents every frame.
 	class BuiltinRenderPass
 	{
 	public:
+		/// @brief Create an empty builtin pass, will be invalid.
 		BuiltinRenderPass() = default;
 
+		/// @brief Create a new builtin pass.
+		/// @param ctx Render Context to use.
+		/// @param shaderDB Shader Database to use, will register builtin shaders with database.
 		BuiltinRenderPass(RenderContext* ctx, ShaderDatabase* shaderDB);
 
+		/// @brief Destroy this builtin pass.
 		virtual ~BuiltinRenderPass();
 
+		/// @brief Create pass resources needed for rendering.
 		void createResources();
 
+		/// @brief  Destroy pass resources.
 		void destroyResources();
 
+		/// @brief Execute the builtin pass.
+		/// @param commandBuffer Command buffer to record into.
+		/// @param activeSwapImage Swap image index to draw into.
 		void execute(VkCommandBuffer commandBuffer, uint32_t activeSwapImage) const;
 
 	private:
+		/// @brief The Pipeline Layout Description is fixed for the Builtin pass.
+		/// @return The layout description.
 		PipelineLayoutDescription builtinPipelineLayoutDescription() const;
 
+		/// @brief The Graphics Pipeline Builder is fixed for the Builtin pass.
+		/// @return The pipeline builder.
 		GraphicsPipelineBuilder builtinPipelineBuilder() const;
 
 	private:
