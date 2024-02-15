@@ -8,6 +8,7 @@
 #include <vulkan/vulkan.h>
 
 #include "renderer_internal/render_context.h"
+#include "render_pass.h"
 #include "renderer_internal/shader_database.h"
 
 namespace hri
@@ -180,29 +181,6 @@ namespace hri
 		std::vector<VkImageView> m_imageViews	= {};
 		VkRenderPass m_renderPass				= VK_NULL_HANDLE;
 		VkFramebuffer m_framebuffer				= VK_NULL_HANDLE;
-	};
-
-	class BuiltinRenderPass
-	{
-	public:
-		BuiltinRenderPass() = default;
-
-		BuiltinRenderPass(RenderContext* ctx, ShaderDatabase* shaderDB);
-
-		virtual ~BuiltinRenderPass();
-
-		void recreatePassResources();
-
-		void execute(VkCommandBuffer commandBuffer, uint32_t activeSwapImage) const;
-
-	private:
-		GraphicsPipelineBuilder builtinPipelineBuilder() const;
-
-	private:
-		RenderContext* m_pCtx						= nullptr;
-		std::vector<VkImageView> m_swapViews		= {};
-		std::vector<VkFramebuffer> m_framebuffers	= {};
-		VkRenderPass m_renderPass					= VK_NULL_HANDLE;
 	};
 
 	/// @brief The Frame Graph generates a render pass & per frame render commands based on registered graph nodes.

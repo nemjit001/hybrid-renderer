@@ -7,6 +7,8 @@
 
 #include "renderer_internal/render_context.h"
 
+#define HRI_SHADER_DB_BUILTIN_NAME(name) ("Builtin" ## name)
+
 namespace hri
 {
     constexpr float DefaultViewportMinDepth = 0.0f;
@@ -23,7 +25,7 @@ namespace hri
         VkPipelineRasterizationStateCreateInfo rasterizationState;
         VkPipelineMultisampleStateCreateInfo multisampleState;
         VkPipelineDepthStencilStateCreateInfo depthStencilState;
-        VkPipelineColorBlendStateCreateInfo colorBlendState;    // FIXME: allow easy color blend state registration / initialization
+        VkPipelineColorBlendStateCreateInfo colorBlendState;
         std::vector<VkDynamicState> dynamicStates;
         VkRenderPass renderPass;
         uint32_t subpass;
@@ -38,7 +40,7 @@ namespace hri
 
         static VkPipelineMultisampleStateCreateInfo initMultisampleState(VkSampleCountFlagBits samples);
 
-        static VkPipelineDepthStencilStateCreateInfo initDepthStencilState(VkBool32 depthTest, VkBool32 depthWrite, VkCompareOp depthCompareOp);
+        static VkPipelineDepthStencilStateCreateInfo initDepthStencilState(VkBool32 depthTest, VkBool32 depthWrite, VkCompareOp depthCompareOp = VK_COMPARE_OP_LESS);
 
         static VkPipelineColorBlendStateCreateInfo initColorBlendState(const std::vector<VkPipelineColorBlendAttachmentState>& attachments);
     };
