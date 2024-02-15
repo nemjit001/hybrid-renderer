@@ -129,6 +129,8 @@ RenderPassBuilder& RenderPassBuilder::setAttachmentReference(AttachmentType type
 
 VkRenderPass RenderPassBuilder::build()
 {
+	assert(m_pCtx != nullptr);
+
 	std::vector<VkSubpassDescription> subpasses = {}; subpasses.reserve(m_subpasses.size());
 	for (auto const& pass : m_subpasses)
 	{

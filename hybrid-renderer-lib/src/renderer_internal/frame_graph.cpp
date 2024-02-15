@@ -73,6 +73,14 @@ void IFrameGraphNode::write(VirtualResourceHandle& resource)
 	resource = handle;
 }
 
+RasterFrameGraphNode::RasterFrameGraphNode(const std::string& name, FrameGraph& frameGraph)
+	:
+	IFrameGraphNode(name, frameGraph),
+	m_renderPassBuilder(frameGraph.context())
+{
+	//
+}
+
 void RasterFrameGraphNode::execute(VkCommandBuffer commandBuffer) const
 {
 	VkRenderPassBeginInfo rpBeginInfo = VkRenderPassBeginInfo{ VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
@@ -96,8 +104,9 @@ void RasterFrameGraphNode::createResources(RenderContext* ctx)
 	assert(ctx != nullptr);
 
 	m_framebufferExtent = VkExtent2D{ 0, 0 };
-	std::vector<VkAttachmentDescription> attachmentDescriptions = {}; attachmentDescriptions.reserve(m_attachments.size());
 	m_imageViews.reserve(m_attachments.size());
+	m_renderPass = m_renderPassBuilder.build();
+
 	for (auto const& attachment : m_attachments)
 	{
 		const TextureResourceMetadata& meta = m_frameGraph.getTextureMetadata(attachment.resource);
@@ -118,31 +127,8 @@ void RasterFrameGraphNode::createResources(RenderContext* ctx)
 		HRI_VK_CHECK(vkCreateImageView(ctx->device, &viewCreateInfo, nullptr, &view));
 
 		m_framebufferExtent = meta.extent;
-		attachmentDescriptions.push_back(attachment.attachmentDescription);
 		m_imageViews.push_back(view);
 	}
-
-	VkSubpassDescription subpass = VkSubpassDescription{};
-	subpass.flags = 0;
-	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	subpass.inputAttachmentCount = 0;
-	subpass.pInputAttachments = nullptr;
-	subpass.colorAttachmentCount = static_cast<uint32_t>(m_colorAttachments.size());
-	subpass.pColorAttachments = m_colorAttachments.data();
-	subpass.pResolveAttachments = nullptr;
-	subpass.pDepthStencilAttachment = m_depthStencilAttachment.has_value() ? &m_depthStencilAttachment.value() : (nullptr);
-	subpass.preserveAttachmentCount = 0;
-	subpass.pPreserveAttachments = nullptr;
-
-	VkRenderPassCreateInfo passCreateInfo = VkRenderPassCreateInfo{ VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO };
-	passCreateInfo.flags = 0;
-	passCreateInfo.attachmentCount = static_cast<uint32_t>(attachmentDescriptions.size());
-	passCreateInfo.pAttachments = attachmentDescriptions.data();
-	passCreateInfo.subpassCount = 1;
-	passCreateInfo.pSubpasses = &subpass;
-	passCreateInfo.dependencyCount = 0;
-	passCreateInfo.pDependencies = nullptr;
-	HRI_VK_CHECK(vkCreateRenderPass(ctx->device, &passCreateInfo, nullptr, &m_renderPass));
 
 	VkFramebufferCreateInfo fbCreateInfo = VkFramebufferCreateInfo{ VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
 	fbCreateInfo.flags = 0;
@@ -193,31 +179,29 @@ void RasterFrameGraphNode::renderTarget(
 	TextureResourceMetadata& meta = m_frameGraph.getTextureMetadata(resource);
 	meta.usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-	VkAttachmentDescription colorAttachment = VkAttachmentDescription{};
-	colorAttachment.flags = 0;
-	colorAttachment.format = meta.format;
-	colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-	colorAttachment.loadOp = loadOp;
-	colorAttachment.storeOp = storeOp;
-	colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	m_renderPassBuilder
+		.addAttachment(
+			meta.format,
+			VK_SAMPLE_COUNT_1_BIT,
+			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			loadOp,
+			storeOp
+		)
+		.setAttachmentReference(
+			AttachmentType::Color,
+			VkAttachmentReference{
+				static_cast<uint32_t>(m_attachments.size()),
+				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			}
+		);
 
-	RenderAttachment renderAttachment = RenderAttachment{
+	RenderAttachmentResource renderAttachment = RenderAttachmentResource{
 		resource,
-		colorAttachment,
 		VK_IMAGE_ASPECT_COLOR_BIT,
-	};
-
-	VkAttachmentReference attachmentRef = VkAttachmentReference{
-		static_cast<uint32_t>(m_attachments.size()),
-		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 	};
 
 	m_attachments.push_back(renderAttachment);
 	m_clearValues.push_back(clearValue);
-	m_colorAttachments.push_back(attachmentRef);
 }
 
 void RasterFrameGraphNode::depthStencil(
@@ -235,26 +219,25 @@ void RasterFrameGraphNode::depthStencil(
 	TextureResourceMetadata& meta = m_frameGraph.getTextureMetadata(resource);
 	meta.usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
 
-	VkAttachmentDescription depthStencilAttachment = VkAttachmentDescription{};
-	depthStencilAttachment.flags = 0;
-	depthStencilAttachment.format = meta.format;
-	depthStencilAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-	depthStencilAttachment.loadOp = loadOp;
-	depthStencilAttachment.storeOp = storeOp;
-	depthStencilAttachment.stencilLoadOp = stencilLoadOp;
-	depthStencilAttachment.stencilStoreOp = stencilStoreOp;
-	depthStencilAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	depthStencilAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+	m_renderPassBuilder
+		.addAttachment(
+			meta.format,
+			VK_SAMPLE_COUNT_1_BIT,
+			VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+			loadOp,
+			storeOp
+		)
+		.setAttachmentReference(
+			AttachmentType::DepthStencil,
+			VkAttachmentReference{
+				static_cast<uint32_t>(m_attachments.size()),
+				VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+			}
+		);
 
-	RenderAttachment renderAttachment = RenderAttachment{
+	RenderAttachmentResource renderAttachment = RenderAttachmentResource{
 		resource,
-		depthStencilAttachment,
 		imageUsageAspect,
-	};
-	
-	m_depthStencilAttachment = VkAttachmentReference{
-		static_cast<uint32_t>(m_attachments.size()),
-		VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
 	};
 
 	m_attachments.push_back(renderAttachment);

@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <map>
-#include <optional>
 #include <vector>
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
@@ -118,7 +117,7 @@ namespace hri
 		/// @brief Create a new Raster type Frame Graph Node
 		/// @param name 
 		/// @param frameGraph 
-		RasterFrameGraphNode(const std::string& name, FrameGraph& frameGraph) : IFrameGraphNode(name, frameGraph) {};
+		RasterFrameGraphNode(const std::string& name, FrameGraph& frameGraph);
 
 		/// @brief Execute this raster pass.
 		/// @param commandBuffer Command buffer to record into.
@@ -165,18 +164,18 @@ namespace hri
 		);
 
 	protected:
-		struct RenderAttachment
+		struct RenderAttachmentResource
 		{
 			VirtualResourceHandle resource;
-			VkAttachmentDescription attachmentDescription;
 			VkImageAspectFlags aspectFlags;
 		};
+		
+		// Configuration data for Raster node.
+		RenderPassBuilder m_renderPassBuilder;
+		std::vector<RenderAttachmentResource> m_attachments	= {};
+		std::vector<VkClearValue> m_clearValues				= {};
 
-		std::vector<RenderAttachment> m_attachments						= {};
-		std::vector<VkClearValue> m_clearValues							= {};
-		std::vector<VkAttachmentReference> m_colorAttachments			= {};
-		std::optional<VkAttachmentReference> m_depthStencilAttachment	= {};
-
+		// Data for instantiated Raster node.
 		VkExtent2D m_framebufferExtent			= VkExtent2D{ 0, 0 };
 		std::vector<VkImageView> m_imageViews	= {};
 		VkRenderPass m_renderPass				= VK_NULL_HANDLE;
@@ -232,6 +231,9 @@ namespace hri
 
 		/// @brief Clear the Frame Graph's internal state, cleaning up all acquired resources.
 		void clear();
+
+		/// @brief Retrieve the Frame Graph render context.
+		inline RenderContext* context() const { return m_pCtx; }
 
 	private:
 		/// @brief Allocate a new virtual resource handle.
