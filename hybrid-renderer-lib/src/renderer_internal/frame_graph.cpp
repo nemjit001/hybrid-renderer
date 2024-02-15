@@ -302,6 +302,8 @@ void FrameGraph::markOutputNode(const std::string& name)
 
 void FrameGraph::execute(VkCommandBuffer commandBuffer, uint32_t activeSwapImageIdx) const
 {
+	assert(activeSwapImageIdx < m_framebuffers.size());
+
 	for (auto const& nodeList : m_graphTopology)
 	{
 		for (auto const* pNode : nodeList)
@@ -312,7 +314,19 @@ void FrameGraph::execute(VkCommandBuffer commandBuffer, uint32_t activeSwapImage
 		// TODO: add memory barrier here
 	}
 
-	// TODO: use builtin render pass & pipeline to draw fullscreen quad
+	VkExtent2D swapExtent = m_pCtx->swapchain.extent;
+	VkClearValue swapClearValue = VkClearValue{{ 0.0f, 0.0f, 0.0f, 0.0f }};
+	VkRenderPassBeginInfo presentPassBegin = VkRenderPassBeginInfo{ VK_STRUCTURE_TYPE_DEVICE_GROUP_RENDER_PASS_BEGIN_INFO };
+	presentPassBegin.renderPass = m_presentPass;
+	presentPassBegin.framebuffer = m_framebuffers[activeSwapImageIdx];
+	presentPassBegin.renderArea = VkRect2D{ 0, 0, swapExtent.width, swapExtent.height };
+	presentPassBegin.clearValueCount = 1;
+	presentPassBegin.pClearValues = &swapClearValue;
+	vkCmdBeginRenderPass(commandBuffer, &presentPassBegin, VK_SUBPASS_CONTENTS_INLINE);
+
+	// TODO: draw fullscreen quad w/ builtin shaders & pipeline
+
+	vkCmdEndRenderPass(commandBuffer);
 }
 
 void FrameGraph::generate()

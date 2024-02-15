@@ -255,5 +255,8 @@ namespace hri
 		std::vector<std::vector<IFrameGraphNode*>> m_graphTopology	= {};
 
 		// TODO: set up builtin render pass for presentation etc.
+		std::vector<VkImageView> m_swapViews		= {};
+		std::vector<VkFramebuffer> m_framebuffers	= {};
+		VkRenderPass m_presentPass					= VK_NULL_HANDLE;
 	};
 }
