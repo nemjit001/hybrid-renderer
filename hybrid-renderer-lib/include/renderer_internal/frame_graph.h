@@ -202,8 +202,14 @@ namespace hri
 			VkFormat format
 		);
 
+		/// @brief Retrieve Texture metadata registered for a virtual handle.
+		/// @param resource Resource to retrieve metadata for.
+		/// @return The Texture metadata registered.
 		TextureResourceMetadata& getTextureMetadata(const VirtualResourceHandle& resource);
 
+		/// @brief Retrieve a TextureResource registered for a virtual handle.
+		/// @param resource Resource to retrieve data for.
+		/// @return The TextureResource associated with the virtual handle.
 		const TextureResource& getTextureResource(const VirtualResourceHandle& resource) const;
 
 		/// @brief Mark a graph node as this graph's output node.
