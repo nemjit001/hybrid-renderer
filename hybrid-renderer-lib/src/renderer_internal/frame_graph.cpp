@@ -1,11 +1,14 @@
 #include "renderer_internal/frame_graph.h"
 
 #include <cassert>
+#include <map>
 #include <vector>
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
 
 #include "renderer_internal/render_context.h"
+#include "renderer_internal/render_pass.h"
+#include "renderer_internal/shader_database.h"
 
 using namespace hri;
 

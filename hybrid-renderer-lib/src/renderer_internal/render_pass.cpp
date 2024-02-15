@@ -1,5 +1,6 @@
 #include "renderer_internal/render_pass.h"
 
+#include <optional>
 #include <vector>
 #include <vulkan/vulkan.h>
 

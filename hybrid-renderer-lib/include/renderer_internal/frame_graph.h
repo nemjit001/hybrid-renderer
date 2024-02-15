@@ -7,7 +7,7 @@
 #include <vulkan/vulkan.h>
 
 #include "renderer_internal/render_context.h"
-#include "render_pass.h"
+#include "renderer_internal/render_pass.h"
 #include "renderer_internal/shader_database.h"
 
 namespace hri
