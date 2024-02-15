@@ -94,6 +94,8 @@ namespace hri
 		void execute(VkCommandBuffer commandBuffer, uint32_t activeSwapImage) const;
 
 	private:
+		PipelineLayoutDescription builtinPipelineLayoutDescription() const;
+
 		GraphicsPipelineBuilder builtinPipelineBuilder() const;
 
 	private:

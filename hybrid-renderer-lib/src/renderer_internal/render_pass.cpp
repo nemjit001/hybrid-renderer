@@ -194,6 +194,7 @@ BuiltinRenderPass::BuiltinRenderPass(RenderContext* ctx, ShaderDatabase* shaderD
 	m_pBuiltinPSO = shaderDB->createPipeline(
 		HRI_SHADER_DB_BUILTIN_NAME("Present"),
 		{ HRI_SHADER_DB_BUILTIN_NAME("PresentVert"), HRI_SHADER_DB_BUILTIN_NAME("PresentFrag") },
+		builtinPipelineLayoutDescription(),
 		builtinPipelineBuilder()
 	);
 
@@ -278,6 +279,27 @@ void BuiltinRenderPass::execute(VkCommandBuffer commandBuffer, uint32_t activeSw
 	vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 
 	vkCmdEndRenderPass(commandBuffer);
+}
+
+PipelineLayoutDescription BuiltinRenderPass::builtinPipelineLayoutDescription() const
+{
+	PipelineLayoutDescription builtinLayoutDescription = PipelineLayoutDescription{};
+	builtinLayoutDescription.descriptorSetLayouts = {
+		DescriptorSetLayoutDescription{
+			0,	// No flags
+			std::vector{
+				VkDescriptorSetLayoutBinding{
+					0,
+					VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+					1,
+					VK_SHADER_STAGE_FRAGMENT_BIT,
+					nullptr
+				}
+			}
+		}
+	};
+
+	return builtinLayoutDescription;
 }
 
 GraphicsPipelineBuilder BuiltinRenderPass::builtinPipelineBuilder() const

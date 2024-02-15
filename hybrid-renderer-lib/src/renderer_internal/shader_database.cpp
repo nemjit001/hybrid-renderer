@@ -209,7 +209,12 @@ const Shader* ShaderDatabase::registerShader(const std::string& name, const Shad
     return &it->second;
 }
 
-const PipelineStateObject* ShaderDatabase::createPipeline(const std::string& name, const std::vector<std::string>& shaders, const GraphicsPipelineBuilder& pipelineBuilder)
+const PipelineStateObject* ShaderDatabase::createPipeline(
+    const std::string& name,
+    const std::vector<std::string>& shaders,
+    const PipelineLayoutDescription& layoutDescription,
+    const GraphicsPipelineBuilder& pipelineBuilder
+)
 {
     if (isExistingPipeline(name))
     {
@@ -238,14 +243,27 @@ const PipelineStateObject* ShaderDatabase::createPipeline(const std::string& nam
     PipelineStateObject pso = PipelineStateObject{};
     pso.bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 
+    // Create pipeline layout objects
+    pso.setLayouts = {}; pso.setLayouts.reserve(layoutDescription.descriptorSetLayouts.size());
+    for (auto const& layoutDescription : layoutDescription.descriptorSetLayouts)
+    {
+        VkDescriptorSetLayoutCreateInfo setLayoutCreateInfo = VkDescriptorSetLayoutCreateInfo{ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
+        setLayoutCreateInfo.flags = layoutDescription.flags;
+        setLayoutCreateInfo.bindingCount = static_cast<uint32_t>(layoutDescription.bindings.size());
+        setLayoutCreateInfo.pBindings = layoutDescription.bindings.data();
+
+        VkDescriptorSetLayout setLayout = VK_NULL_HANDLE;
+        HRI_VK_CHECK(vkCreateDescriptorSetLayout(m_pCtx->device, &setLayoutCreateInfo, nullptr, &setLayout));
+        pso.setLayouts.push_back(setLayout);
+    }
+
     // Create pipeline layout
-    // TODO: generate based on shader layout
     VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = VkPipelineLayoutCreateInfo{ VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
     pipelineLayoutCreateInfo.flags = 0;
-    pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
-    pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
-    pipelineLayoutCreateInfo.setLayoutCount = 0;
-    pipelineLayoutCreateInfo.pSetLayouts = nullptr;
+    pipelineLayoutCreateInfo.pushConstantRangeCount = static_cast<uint32_t>(layoutDescription.pushConstants.size());
+    pipelineLayoutCreateInfo.pPushConstantRanges = layoutDescription.pushConstants.data();
+    pipelineLayoutCreateInfo.setLayoutCount = static_cast<uint32_t>(pso.setLayouts.size());
+    pipelineLayoutCreateInfo.pSetLayouts = pso.setLayouts.data();
     HRI_VK_CHECK(vkCreatePipelineLayout(m_pCtx->device, &pipelineLayoutCreateInfo, nullptr, &pso.layout));
 
     // Generate pipeline state from builder

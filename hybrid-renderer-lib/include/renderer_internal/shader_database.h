@@ -14,6 +14,20 @@ namespace hri
     constexpr float DefaultViewportMinDepth = 0.0f;
     constexpr float DefaultViewportMaxDepth = 1.0f;
 
+    /// @brief A Descriptor Set Layout Description is used to generate the binding layout for a descriptor set.
+    struct DescriptorSetLayoutDescription
+    {
+        VkDescriptorSetLayoutCreateFlags flags;
+        std::vector<VkDescriptorSetLayoutBinding> bindings;
+    };
+
+    /// @brief A Pipeline Layout Description is used to generate an entire pipeline's layout.
+    struct PipelineLayoutDescription
+    {
+        std::vector<VkPushConstantRange> pushConstants;
+        std::vector<DescriptorSetLayoutDescription> descriptorSetLayouts;
+    };
+
     /// @brief The Graphics Pipeline Builder allows easy configuration & initialization of fixed function state.
     struct GraphicsPipelineBuilder
     {
@@ -75,9 +89,10 @@ namespace hri
     /// @brief A pipeline state object (PSO) maintains a pipeline, its layout, and its bind point.
     struct PipelineStateObject
     {
-        VkPipelineBindPoint bindPoint   = VK_PIPELINE_BIND_POINT_MAX_ENUM;
-        VkPipelineLayout layout         = VK_NULL_HANDLE;
-        VkPipeline pipeline             = VK_NULL_HANDLE;
+        VkPipelineBindPoint bindPoint                   = VK_PIPELINE_BIND_POINT_MAX_ENUM;
+        std::vector<VkDescriptorSetLayout> setLayouts   = {};
+        VkPipelineLayout layout                         = VK_NULL_HANDLE;
+        VkPipeline pipeline                             = VK_NULL_HANDLE;
     };
 
     /// @brief The Shader Database maintains a cache of Shader Modules and PSO's.
@@ -102,7 +117,12 @@ namespace hri
         /// @param shaders Shader names to use.
         /// @param pipelineBuilder Pipeline Builder object to use for initialization.
         /// @return A pointer to the Pipeline in the Shader Database.
-        const PipelineStateObject* createPipeline(const std::string& name, const std::vector<std::string>& shaders, const GraphicsPipelineBuilder& pipelineBuilder);
+        const PipelineStateObject* createPipeline(
+            const std::string& name,
+            const std::vector<std::string>& shaders,
+            const PipelineLayoutDescription& layoutDescription,
+            const GraphicsPipelineBuilder& pipelineBuilder
+        );
 
         /// @brief Retrieve a Shader from the Shader Database.
         /// @param name Shader name to retrieve.
