@@ -131,6 +131,8 @@ namespace hri
 		/// @param ctx Render Context to use.
 		virtual void destroyResources(RenderContext* ctx) override;
 
+		virtual void read(VirtualResourceHandle& resource) override;
+
 		/// @brief Register a Render Target to this Raster Pass.
 		/// @param resource Resource to be used as render target.
 		/// @param loadOp Load operation.
@@ -180,6 +182,29 @@ namespace hri
 		VkFramebuffer m_framebuffer				= VK_NULL_HANDLE;
 	};
 
+	class BuiltinRenderPass
+	{
+	public:
+		BuiltinRenderPass() = default;
+
+		BuiltinRenderPass(RenderContext* ctx, ShaderDatabase* shaderDB);
+
+		virtual ~BuiltinRenderPass();
+
+		void recreatePassResources();
+
+		void execute(VkCommandBuffer commandBuffer, uint32_t activeSwapImage) const;
+
+	private:
+		GraphicsPipelineBuilder builtinPipelineBuilder() const;
+
+	private:
+		RenderContext* m_pCtx						= nullptr;
+		std::vector<VkImageView> m_swapViews		= {};
+		std::vector<VkFramebuffer> m_framebuffers	= {};
+		VkRenderPass m_renderPass					= VK_NULL_HANDLE;
+	};
+
 	/// @brief The Frame Graph generates a render pass & per frame render commands based on registered graph nodes.
 	class FrameGraph
 	{
@@ -187,7 +212,8 @@ namespace hri
 	public:
 		/// @brief Create a new Frame Graph.
 		/// @param ctx Render context to use.
-		FrameGraph(RenderContext* ctx);
+		/// @param shaderDB Shader Database to use for builtin render pass.
+		FrameGraph(RenderContext* ctx, ShaderDatabase* shaderDB);
 
 		/// @brief Destroy this Frame Graph.
 		virtual ~FrameGraph();
@@ -252,6 +278,7 @@ namespace hri
 
 	private:
 		RenderContext* m_pCtx = nullptr;
+		BuiltinRenderPass m_builtinRenderPass = BuiltinRenderPass();
 
 		std::map<std::string, BufferResourceMetadata> m_bufferMetadata		= {};
 		std::map<std::string, TextureResourceMetadata> m_textureMetadata	= {};
@@ -261,10 +288,5 @@ namespace hri
 		size_t m_outputNodeIndex = 0;
 		std::vector<IFrameGraphNode*> m_graphNodes					= {};
 		std::vector<std::vector<IFrameGraphNode*>> m_graphTopology	= {};
-
-		// TODO: set up builtin render pass for presentation etc.
-		std::vector<VkImageView> m_swapViews		= {};
-		std::vector<VkFramebuffer> m_framebuffers	= {};
-		VkRenderPass m_presentPass					= VK_NULL_HANDLE;
 	};
 }

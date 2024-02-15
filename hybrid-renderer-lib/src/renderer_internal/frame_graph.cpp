@@ -169,6 +169,18 @@ void RasterFrameGraphNode::destroyResources(RenderContext* ctx)
 	vkDestroyFramebuffer(ctx->device, m_framebuffer, nullptr);
 }
 
+void RasterFrameGraphNode::read(VirtualResourceHandle& resource)
+{
+	IFrameGraphNode::read(resource);
+
+	// Handle all read resources as sampled image inputs for shaders.
+	if (resource.type == ResourceType::Texture)
+	{
+		TextureResourceMetadata& meta = m_frameGraph.getTextureMetadata(resource);
+		meta.usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
+	}
+}
+
 void RasterFrameGraphNode::renderTarget(
 	VirtualResourceHandle& resource,
 	VkAttachmentLoadOp loadOp,
@@ -176,7 +188,7 @@ void RasterFrameGraphNode::renderTarget(
 	VkClearValue clearValue
 )
 {
-	write(resource);
+	RasterFrameGraphNode::write(resource);
 
 	TextureResourceMetadata& meta = m_frameGraph.getTextureMetadata(resource);
 	meta.usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
@@ -249,9 +261,36 @@ void RasterFrameGraphNode::depthStencil(
 	m_clearValues.push_back(clearValue);
 }
 
-FrameGraph::FrameGraph(RenderContext* ctx)
+BuiltinRenderPass::BuiltinRenderPass(RenderContext* ctx, ShaderDatabase* shaderDB)
+{
+	// TODO: create render pass & builtin shaders
+}
+
+BuiltinRenderPass::~BuiltinRenderPass()
+{
+	// TODO: destroy resources
+}
+
+void BuiltinRenderPass::recreatePassResources()
+{
+	// TODO: recreate resources (framebuffers, views)
+}
+
+void BuiltinRenderPass::execute(VkCommandBuffer commandBuffer, uint32_t activeSwapImage) const
+{
+	// TODO: execute render pass
+}
+
+GraphicsPipelineBuilder BuiltinRenderPass::builtinPipelineBuilder() const
+{
+	// TODO: set up present pipeline config (static variable?)
+	return GraphicsPipelineBuilder{};
+}
+
+FrameGraph::FrameGraph(RenderContext* ctx, ShaderDatabase* shaderDB)
 	:
-	m_pCtx(ctx)
+	m_pCtx(ctx),
+	m_builtinRenderPass(ctx, shaderDB)
 {
 	assert(ctx != nullptr);
 }
@@ -299,12 +338,12 @@ void FrameGraph::markOutputNode(const std::string& name)
 
 		m_outputNodeIndex++;
 	}
+
+	// TODO: check if output node has 1 color attachment as output
 }
 
 void FrameGraph::execute(VkCommandBuffer commandBuffer, uint32_t activeSwapImageIdx) const
 {
-	assert(activeSwapImageIdx < m_framebuffers.size());
-
 	for (auto const& nodeList : m_graphTopology)
 	{
 		for (auto const* pNode : nodeList)
@@ -312,22 +351,22 @@ void FrameGraph::execute(VkCommandBuffer commandBuffer, uint32_t activeSwapImage
 			pNode->execute(commandBuffer);
 		}
 
-		// TODO: add memory barrier here
+		VkMemoryBarrier memoryBarrier = VkMemoryBarrier{ VK_STRUCTURE_TYPE_MEMORY_BARRIER };
+		memoryBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		memoryBarrier.dstAccessMask = VK_ACCESS_NONE;
+		vkCmdPipelineBarrier(
+			commandBuffer,
+			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+			0,
+			1, &memoryBarrier,
+			0, nullptr,
+			0, nullptr
+		);
 	}
 
-	VkExtent2D swapExtent = m_pCtx->swapchain.extent;
-	VkClearValue swapClearValue = VkClearValue{{ 0.0f, 0.0f, 0.0f, 0.0f }};
-	VkRenderPassBeginInfo presentPassBegin = VkRenderPassBeginInfo{ VK_STRUCTURE_TYPE_DEVICE_GROUP_RENDER_PASS_BEGIN_INFO };
-	presentPassBegin.renderPass = m_presentPass;
-	presentPassBegin.framebuffer = m_framebuffers[activeSwapImageIdx];
-	presentPassBegin.renderArea = VkRect2D{ 0, 0, swapExtent.width, swapExtent.height };
-	presentPassBegin.clearValueCount = 1;
-	presentPassBegin.pClearValues = &swapClearValue;
-	vkCmdBeginRenderPass(commandBuffer, &presentPassBegin, VK_SUBPASS_CONTENTS_INLINE);
-
-	// TODO: draw fullscreen quad w/ builtin shaders & pipeline
-
-	vkCmdEndRenderPass(commandBuffer);
+	// TODO: set output node's color attachment as sampled input for default pass
+	m_builtinRenderPass.execute(commandBuffer, activeSwapImageIdx);
 }
 
 void FrameGraph::generate()
