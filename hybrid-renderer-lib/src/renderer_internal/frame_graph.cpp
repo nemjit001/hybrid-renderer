@@ -262,23 +262,103 @@ void RasterFrameGraphNode::depthStencil(
 }
 
 BuiltinRenderPass::BuiltinRenderPass(RenderContext* ctx, ShaderDatabase* shaderDB)
+	:
+	m_pCtx(ctx)
 {
-	// TODO: create render pass & builtin shaders
+	assert(m_pCtx != nullptr);
+
+	// TODO: create builtin shaders & pipeline
+
+	VkAttachmentReference swapRef = VkAttachmentReference{ 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
+	VkAttachmentDescription swapAttachment = VkAttachmentDescription{};
+	swapAttachment.flags = 0;
+	swapAttachment.format = m_pCtx->swapchain.image_format;
+	swapAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+	swapAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	swapAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	swapAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	swapAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	swapAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	swapAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+	VkSubpassDescription subpass = VkSubpassDescription{};
+	subpass.flags = 0;
+	subpass.colorAttachmentCount = 1;
+	subpass.pColorAttachments = &swapRef;
+
+	VkRenderPassCreateInfo passCreateInfo = VkRenderPassCreateInfo{ VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO };
+	passCreateInfo.flags = 0;
+	passCreateInfo.attachmentCount = 1;
+	passCreateInfo.pAttachments = &swapAttachment;
+	passCreateInfo.subpassCount = 1;
+	passCreateInfo.pSubpasses = &subpass;
+	passCreateInfo.dependencyCount = 0;
+	passCreateInfo.pDependencies = nullptr;
+	HRI_VK_CHECK(vkCreateRenderPass(m_pCtx->device, &passCreateInfo, nullptr, &m_renderPass));
+	recreatePassResources();
 }
 
 BuiltinRenderPass::~BuiltinRenderPass()
 {
-	// TODO: destroy resources
+	for (auto const& framebuffer : m_framebuffers)
+	{
+		vkDestroyFramebuffer(m_pCtx->device, framebuffer, nullptr);
+	}
+
+	vkDestroyRenderPass(m_pCtx->device, m_renderPass, nullptr);
+	m_pCtx->swapchain.destroy_image_views(m_swapViews);
 }
 
 void BuiltinRenderPass::recreatePassResources()
 {
-	// TODO: recreate resources (framebuffers, views)
+	for (auto const& framebuffer : m_framebuffers)
+	{
+		vkDestroyFramebuffer(m_pCtx->device, framebuffer, nullptr);
+	}
+	m_pCtx->swapchain.destroy_image_views(m_swapViews);
+	m_framebuffers.clear();
+
+	VkExtent2D swapExtent = m_pCtx->swapchain.extent;
+	m_swapViews = m_pCtx->swapchain.get_image_views().value();
+	m_framebuffers.reserve(m_swapViews.size());
+	for (auto const& view : m_swapViews)
+	{
+		VkFramebufferCreateInfo fbCreateInfo = VkFramebufferCreateInfo{ VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
+		fbCreateInfo.flags = 0;
+		fbCreateInfo.renderPass = m_renderPass;
+		fbCreateInfo.attachmentCount = 1;
+		fbCreateInfo.pAttachments = &view;
+		fbCreateInfo.width = swapExtent.width;
+		fbCreateInfo.height = swapExtent.height;
+		fbCreateInfo.layers = 1;
+
+		VkFramebuffer framebuffer = VK_NULL_HANDLE;
+		vkCreateFramebuffer(m_pCtx->device, &fbCreateInfo, nullptr, &framebuffer);
+		m_framebuffers.push_back(framebuffer);
+	}
 }
 
 void BuiltinRenderPass::execute(VkCommandBuffer commandBuffer, uint32_t activeSwapImage) const
 {
-	// TODO: execute render pass
+	assert(activeSwapImage < m_framebuffers.size());
+	VkExtent2D swapExtent = m_pCtx->swapchain.extent;
+	VkFramebuffer activeFramebuffer = m_framebuffers[activeSwapImage];
+
+	VkClearValue swapClearValue = VkClearValue{};	// Just clear swap to black
+	VkRenderPassBeginInfo passBeginInfo = VkRenderPassBeginInfo{ VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
+	passBeginInfo.renderPass = m_renderPass;
+	passBeginInfo.framebuffer = activeFramebuffer;
+	passBeginInfo.renderArea = VkRect2D{
+		VkOffset2D{ 0, 0 },
+		swapExtent
+	};
+	passBeginInfo.clearValueCount = 1;
+	passBeginInfo.pClearValues = &swapClearValue;
+	vkCmdBeginRenderPass(commandBuffer, &passBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+	// TODO: execute present shaders & pipeline w/ bound resources
+
+	vkCmdEndRenderPass(commandBuffer);
 }
 
 GraphicsPipelineBuilder BuiltinRenderPass::builtinPipelineBuilder() const
@@ -402,6 +482,7 @@ void FrameGraph::generate()
 		printf("]\n");
 	}
 
+	m_builtinRenderPass.recreatePassResources();
 	createFrameGraphResources();
 }
 
