@@ -7,7 +7,7 @@
 
 #include "renderer_internal/render_context.h"
 
-#define HRI_SHADER_DB_BUILTIN_NAME(name) ("Builtin" ## name)
+#define HRI_SHADER_DB_BUILTIN_NAME(name) ("Builtin::" name)
 
 namespace hri
 {
