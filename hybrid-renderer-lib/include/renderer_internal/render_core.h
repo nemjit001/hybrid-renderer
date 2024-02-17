@@ -26,6 +26,13 @@ namespace hri
 		static void destroy(RenderContext* ctx, FrameState& frameState);
 	};
 
+	/// @brief The Active Frame struct maintains information on frame state relevant for recording graphics commands.
+	struct ActiveFrame
+	{
+		uint32_t activeSwapImageIndex	= 0;
+		VkCommandBuffer commandBuffer	= VK_NULL_HANDLE;
+	};
+
 	/// @brief The Render Core handles frame state and work submission.
 	class RenderCore
 	{
@@ -59,6 +66,10 @@ namespace hri
 		/// @brief Record a frame graph using the render core builtin command buffers.
 		/// @param frameGraph The FrameGraph object to record commands with.
 		void recordFrameGraph(FrameGraph& frameGraph);
+
+		/// @brief Retrive the currently active frame's data.
+		/// @return ActiveFrame struct.
+		inline const ActiveFrame getActiveFrame() const { return ActiveFrame{ m_activeSwapImage, m_frames[m_currentFrame].graphicsCommandBuffer }; }
 
 	private:
 		/// @brief Validate a swap chain operation result, setting the recreate flag if necessary.
