@@ -87,6 +87,16 @@ namespace hri
 
 		virtual ~IRecordablePass() = default;
 
+		virtual void createFrameResources() = 0;
+
+		virtual void destroyFrameResources() = 0;
+
+		inline virtual void recreateFrameResources()
+		{
+			destroyFrameResources();
+			createFrameResources();
+		}
+
 		/// @brief Record a pass into an active frame's graphics command buffer.
 		/// @param frame Frame to record pass into.
 		virtual void record(const ActiveFrame& frame) const = 0;
