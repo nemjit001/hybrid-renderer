@@ -8,7 +8,7 @@ class PresentPass
     public hri::IRecordablePass
 {
 public:
-    PresentPass(hri::RenderContext* ctx)
+    PresentPass(hri::RenderContext* ctx, hri::ShaderDatabase* shaderDB)
         :
         hri::IRecordablePass(ctx)
     {
@@ -23,6 +23,11 @@ public:
             )
             .setAttachmentReference(hri::AttachmentType::Color, VkAttachmentReference{ 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL })
             .build();
+
+        shaderDB->registerShader("PresentVert", hri::Shader::loadFile(m_pCtx, "shaders/present.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
+        shaderDB->registerShader("PresentFrag", hri::Shader::loadFile(m_pCtx, "shaders/present.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
+        shaderDB->createPipeline("PresentPipeline", { "PresentVert", "PresentFrag" }, {}, {}); // TODO: set up pipeline layout description & pipeline builder
+        m_pPresentPSO = shaderDB->getPipeline("PresentPipeline");
 
         createFrameResources();
     }
@@ -107,5 +112,5 @@ private:
     VkRenderPass m_renderPass = VK_NULL_HANDLE;
     std::vector<VkImageView> m_swapViews = {};
     std::vector<VkFramebuffer> m_framebuffers = {};
-    hri::PipelineStateObject* m_pPresentPSO = nullptr;
+    const hri::PipelineStateObject* m_pPresentPSO = nullptr;
 };

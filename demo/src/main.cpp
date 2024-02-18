@@ -164,7 +164,7 @@ int main()
 	hri::RenderCore renderCore = hri::RenderCore(&renderContext);
 	hri::ShaderDatabase shaderDB = hri::ShaderDatabase(&renderContext);
 
-	PresentPass presentPass = PresentPass(&renderContext);
+	PresentPass presentPass = PresentPass(&renderContext, &shaderDB);
 
 	// Register a callback for when the swap chain is invalidated
 	renderCore.setOnSwapchainInvalidateCallback([&presentPass](vkb::Swapchain _swapchain) {
