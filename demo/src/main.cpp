@@ -4,6 +4,7 @@
 #include <tiny_obj_loader.h>
 
 #include "demo.h"
+#include "passes.h"
 #include "timer.h"
 #include "window_manager.h"
 
@@ -163,9 +164,11 @@ int main()
 	hri::RenderCore renderCore = hri::RenderCore(&renderContext);
 	hri::ShaderDatabase shaderDB = hri::ShaderDatabase(&renderContext);
 
+	PresentPass presentPass = PresentPass(&renderContext);
+
 	// Register a callback for when the swap chain is invalidated
-	renderCore.setOnSwapchainInvalidateCallback([](vkb::Swapchain _swapchain) {
-		//
+	renderCore.setOnSwapchainInvalidateCallback([&presentPass](vkb::Swapchain _swapchain) {
+		presentPass.recreateFrameResources();
 	});
 
 	// Load scene file
@@ -186,8 +189,10 @@ int main()
 
 		renderCore.startFrame();
 
-		// TODO: draw scene
-
+		hri::ActiveFrame frame = renderCore.getActiveFrame();
+		frame.beginCommands();
+		presentPass.record(frame);
+		frame.endCommands();
 		renderCore.endFrame();
 	}
 

@@ -4,6 +4,7 @@
 #include <vector>
 #include <vulkan/vulkan.h>
 
+#include "renderer_internal/render_core.h"
 #include "renderer_internal/shader_database.h"
 
 namespace hri
@@ -76,6 +77,22 @@ namespace hri
 		RenderContext* m_pCtx = nullptr;
 		std::vector<VkAttachmentDescription> m_attachments;
 		std::vector<SubpassData> m_subpasses;
+	};
+
+	/// @brief The Recordable Pass Interface is used to as a unifying interface for pass recording.
+	class IRecordablePass
+	{
+	public:
+		IRecordablePass(RenderContext* ctx) : m_pCtx(ctx) { assert(m_pCtx != nullptr); }
+
+		virtual ~IRecordablePass() = default;
+
+		/// @brief Record a pass into an active frame's graphics command buffer.
+		/// @param frame Frame to record pass into.
+		virtual void record(const ActiveFrame& frame) const = 0;
+
+	protected:
+		RenderContext* m_pCtx = nullptr;
 	};
 
 	/// @brief The Builtin Render Pass is a simple present pass that draw a fullscreen triangle to

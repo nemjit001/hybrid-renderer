@@ -5,7 +5,6 @@
 #include "config.h"
 #include "platform.h"
 #include "renderer_internal/render_context.h"
-#include "renderer_internal/frame_graph.h"
 
 namespace hri
 {
@@ -31,6 +30,19 @@ namespace hri
 	{
 		uint32_t activeSwapImageIndex	= 0;
 		VkCommandBuffer commandBuffer	= VK_NULL_HANDLE;
+
+		inline void beginCommands()
+		{
+			VkCommandBufferBeginInfo beginInfo = VkCommandBufferBeginInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
+			beginInfo.flags = 0;
+			beginInfo.pInheritanceInfo = nullptr;
+			vkBeginCommandBuffer(commandBuffer, &beginInfo);
+		}
+
+		inline void endCommands()
+		{
+			HRI_VK_CHECK(vkEndCommandBuffer(commandBuffer));
+		}
 	};
 
 	/// @brief The Render Core handles frame state and work submission.
@@ -62,10 +74,6 @@ namespace hri
 		/// @brief Immeditely record & submit Vulkan commands, e.g. for resource transfer operations.
 		/// @param submitFunc The submit function to use.
 		void immediateSubmit(HRIImmediateSubmitFunc submitFunc);
-
-		/// @brief Record a frame graph using the render core builtin command buffers.
-		/// @param frameGraph The FrameGraph object to record commands with.
-		void recordFrameGraph(FrameGraph& frameGraph);
 
 		/// @brief Retrive the currently active frame's data.
 		/// @return ActiveFrame struct.

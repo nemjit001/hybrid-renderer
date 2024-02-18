@@ -181,22 +181,6 @@ void RenderCore::immediateSubmit(HRIImmediateSubmitFunc submitFunc)
 	vkFreeCommandBuffers(m_pCtx->device, m_submitPool, 1, &oneshotBuffer);
 }
 
-void RenderCore::recordFrameGraph(FrameGraph& frameGraph)
-{
-	FrameState& activeFrame = m_frames[m_currentFrame];
-
-	HRI_VK_CHECK(vkResetCommandBuffer(activeFrame.graphicsCommandBuffer, 0 /* No reset flags */));
-
-	VkCommandBufferBeginInfo frameBeginInfo = VkCommandBufferBeginInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
-	frameBeginInfo.flags = 0;
-	frameBeginInfo.pInheritanceInfo = nullptr;
-	HRI_VK_CHECK(vkBeginCommandBuffer(activeFrame.graphicsCommandBuffer, &frameBeginInfo));
-
-	frameGraph.execute(activeFrame.graphicsCommandBuffer, m_activeSwapImage);
-
-	HRI_VK_CHECK(vkEndCommandBuffer(activeFrame.graphicsCommandBuffer));
-}
-
 void RenderCore::validateSwapchainState(VkResult result)
 {
 	if (result == VK_SUCCESS)

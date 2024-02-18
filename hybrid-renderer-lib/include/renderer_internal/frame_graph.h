@@ -7,6 +7,7 @@
 #include <vulkan/vulkan.h>
 
 #include "renderer_internal/render_context.h"
+#include "renderer_internal/render_core.h"
 #include "renderer_internal/render_pass.h"
 #include "renderer_internal/shader_database.h"
 
@@ -222,9 +223,8 @@ namespace hri
 		void markOutputNode(const std::string& name);
 
 		/// @brief Execute the Frame Graph. NOTE: generate the frame graph before execution!
-		/// @param commandBuffer Command buffer to record into.
-		/// @param activeSwapImageIdx Active swap image to use as final output.
-		void execute(VkCommandBuffer commandBuffer, uint32_t activeSwapImageIdx) const;
+		/// @param activeFrame The active frame to record into.
+		void execute(const ActiveFrame& activeFrame) const;
 
 		/// @brief Generate a new Frame Graph from the currently registered nodes.
 		void generate();

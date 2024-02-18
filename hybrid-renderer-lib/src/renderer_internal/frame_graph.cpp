@@ -303,20 +303,25 @@ void FrameGraph::markOutputNode(const std::string& name)
 	// TODO: check if output node has 1 color attachment as output
 }
 
-void FrameGraph::execute(VkCommandBuffer commandBuffer, uint32_t activeSwapImageIdx) const
+void FrameGraph::execute(const ActiveFrame& activeFrame) const
 {
+	VkCommandBufferBeginInfo commandBeginInfo = VkCommandBufferBeginInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
+	commandBeginInfo.flags = 0;
+	commandBeginInfo.pInheritanceInfo = nullptr;
+	HRI_VK_CHECK(vkBeginCommandBuffer(activeFrame.commandBuffer, &commandBeginInfo));
+
 	for (auto const& nodeList : m_graphTopology)
 	{
 		for (auto const* pNode : nodeList)
 		{
-			pNode->execute(commandBuffer);
+			pNode->execute(activeFrame.commandBuffer);
 		}
 
 		VkMemoryBarrier memoryBarrier = VkMemoryBarrier{ VK_STRUCTURE_TYPE_MEMORY_BARRIER };
 		memoryBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 		memoryBarrier.dstAccessMask = VK_ACCESS_NONE;
 		vkCmdPipelineBarrier(
-			commandBuffer,
+			activeFrame.commandBuffer,
 			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
 			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
 			0,
@@ -327,7 +332,8 @@ void FrameGraph::execute(VkCommandBuffer commandBuffer, uint32_t activeSwapImage
 	}
 
 	// TODO: set output node's color attachment as sampled input for default pass
-	m_builtinRenderPass.execute(commandBuffer, activeSwapImageIdx);
+	m_builtinRenderPass.execute(activeFrame.commandBuffer, activeFrame.activeSwapImageIndex);
+	HRI_VK_CHECK(vkEndCommandBuffer(activeFrame.commandBuffer));
 }
 
 void FrameGraph::generate()
