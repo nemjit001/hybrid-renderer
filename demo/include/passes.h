@@ -3,6 +3,219 @@
 #include <hybrid_renderer.h>
 #include <vector>
 
+class GBufferLayoutPass
+    :
+    public hri::IRecordablePass
+{
+public:
+    GBufferLayoutPass(hri::RenderContext* ctx, hri::ShaderDatabase* shaderDB)
+        :
+        hri::IRecordablePass(ctx)
+    {
+        // Set up GBuffer Layout pass
+        hri::RenderPassBuilder passBuilder = hri::RenderPassBuilder(m_pCtx);
+        m_renderPass = passBuilder
+            .addAttachment( // Albedo target
+                VK_FORMAT_R8G8B8A8_UNORM,
+                VK_SAMPLE_COUNT_1_BIT,
+                VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                VK_ATTACHMENT_LOAD_OP_CLEAR,
+                VK_ATTACHMENT_STORE_OP_STORE
+            )
+            .addAttachment( // World Pos target
+                VK_FORMAT_R8G8B8A8_SNORM,
+                VK_SAMPLE_COUNT_1_BIT,
+                VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                VK_ATTACHMENT_LOAD_OP_CLEAR,
+                VK_ATTACHMENT_STORE_OP_STORE
+            )
+            .addAttachment( // Normal target
+                VK_FORMAT_R8G8B8A8_SNORM,
+                VK_SAMPLE_COUNT_1_BIT,
+                VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                VK_ATTACHMENT_LOAD_OP_CLEAR,
+                VK_ATTACHMENT_STORE_OP_STORE
+            )
+            .addAttachment( // Depth attachment
+                VK_FORMAT_D32_SFLOAT,
+                VK_SAMPLE_COUNT_1_BIT,
+                VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                VK_ATTACHMENT_LOAD_OP_CLEAR,
+                VK_ATTACHMENT_STORE_OP_STORE
+            )
+            .setAttachmentReference(hri::AttachmentType::Color, VkAttachmentReference{ 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL })
+            .setAttachmentReference(hri::AttachmentType::Color, VkAttachmentReference{ 1, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL })
+            .setAttachmentReference(hri::AttachmentType::Color, VkAttachmentReference{ 2, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL })
+            .setAttachmentReference(hri::AttachmentType::DepthStencil, VkAttachmentReference{ 3, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL })
+            .build();
+
+        // TODO: set up PSO & shaders
+
+        createFrameResources();
+    }
+
+    virtual ~GBufferLayoutPass()
+    {
+        vkDestroyRenderPass(m_pCtx->device, m_renderPass, nullptr);
+        destroyFrameResources();
+    }
+
+    virtual void createFrameResources() override
+    {
+        VkExtent2D swapExtent = m_pCtx->swapchain.extent;
+
+        // Set up attachment create infos
+        VkImageCreateInfo albedoTargetCreateInfo = VkImageCreateInfo{ VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
+        albedoTargetCreateInfo.flags = 0;
+        albedoTargetCreateInfo.imageType = VK_IMAGE_TYPE_2D;
+        albedoTargetCreateInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
+        albedoTargetCreateInfo.extent = VkExtent3D{ swapExtent.width, swapExtent.height, 1 };
+        albedoTargetCreateInfo.mipLevels = 1;
+        albedoTargetCreateInfo.arrayLayers = 1;
+        albedoTargetCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+        albedoTargetCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+        albedoTargetCreateInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+        albedoTargetCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        albedoTargetCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+        VkImageCreateInfo wPosTargetCreateInfo = VkImageCreateInfo{ VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
+        wPosTargetCreateInfo.flags = 0;
+        wPosTargetCreateInfo.imageType = VK_IMAGE_TYPE_2D;
+        wPosTargetCreateInfo.format = VK_FORMAT_R8G8B8A8_SNORM;
+        wPosTargetCreateInfo.extent = VkExtent3D{ swapExtent.width, swapExtent.height, 1 };
+        wPosTargetCreateInfo.mipLevels = 1;
+        wPosTargetCreateInfo.arrayLayers = 1;
+        wPosTargetCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+        wPosTargetCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+        wPosTargetCreateInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+        wPosTargetCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        wPosTargetCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+        VkImageCreateInfo normalTargetCreateInfo = VkImageCreateInfo{ VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
+        normalTargetCreateInfo.flags = 0;
+        normalTargetCreateInfo.imageType = VK_IMAGE_TYPE_2D;
+        normalTargetCreateInfo.format = VK_FORMAT_R8G8B8A8_SNORM;
+        normalTargetCreateInfo.extent = VkExtent3D{ swapExtent.width, swapExtent.height, 1 };
+        normalTargetCreateInfo.mipLevels = 1;
+        normalTargetCreateInfo.arrayLayers = 1;
+        normalTargetCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+        normalTargetCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+        normalTargetCreateInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+        normalTargetCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        normalTargetCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+        VkImageCreateInfo depthTargetCreateInfo = VkImageCreateInfo{ VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
+        depthTargetCreateInfo.flags = 0;
+        depthTargetCreateInfo.imageType = VK_IMAGE_TYPE_2D;
+        depthTargetCreateInfo.format = VK_FORMAT_D32_SFLOAT;
+        depthTargetCreateInfo.extent = VkExtent3D{ swapExtent.width, swapExtent.height, 1 };
+        depthTargetCreateInfo.mipLevels = 1;
+        depthTargetCreateInfo.arrayLayers = 1;
+        depthTargetCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+        depthTargetCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+        depthTargetCreateInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+        depthTargetCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        depthTargetCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+        // Set up render attachments & views
+        m_albedoTarget = hri::RenderAttachment::init(m_pCtx, &albedoTargetCreateInfo);
+        m_wPosTarget = hri::RenderAttachment::init(m_pCtx, &wPosTargetCreateInfo);
+        m_normalTarget = hri::RenderAttachment::init(m_pCtx, &normalTargetCreateInfo);
+        m_depthTarget = hri::RenderAttachment::init(m_pCtx, &depthTargetCreateInfo);
+
+        VkComponentMapping defaultColorMapping = VkComponentMapping{
+            VK_COMPONENT_SWIZZLE_IDENTITY,
+            VK_COMPONENT_SWIZZLE_IDENTITY,
+            VK_COMPONENT_SWIZZLE_IDENTITY,
+            VK_COMPONENT_SWIZZLE_IDENTITY,
+        };
+
+        m_albedoTargetView = m_albedoTarget.createView(m_pCtx, VK_IMAGE_VIEW_TYPE_2D, defaultColorMapping, VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 });
+        m_wPosTargetView = m_wPosTarget.createView(m_pCtx, VK_IMAGE_VIEW_TYPE_2D, defaultColorMapping, VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 });
+        m_normalTargetView = m_normalTarget.createView(m_pCtx, VK_IMAGE_VIEW_TYPE_2D, defaultColorMapping, VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 });
+        m_depthTargetView = m_depthTarget.createView(m_pCtx, VK_IMAGE_VIEW_TYPE_2D, defaultColorMapping, VkImageSubresourceRange{ VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1 });
+
+        VkImageView attachments[] = {
+            m_albedoTargetView,
+            m_wPosTargetView,
+            m_normalTargetView,
+            m_depthTargetView,
+        };
+
+        VkFramebufferCreateInfo fbCreateInfo = VkFramebufferCreateInfo{ VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
+        fbCreateInfo.flags = 0;
+        fbCreateInfo.renderPass = m_renderPass;
+        fbCreateInfo.attachmentCount = HRI_SIZEOF_ARRAY(attachments);
+        fbCreateInfo.pAttachments = attachments;
+        fbCreateInfo.width = swapExtent.width;
+        fbCreateInfo.height = swapExtent.height;
+        fbCreateInfo.layers = 1;
+        HRI_VK_CHECK(vkCreateFramebuffer(m_pCtx->device, &fbCreateInfo, nullptr, &m_framebuffer));
+    }
+
+    virtual void destroyFrameResources() override
+    {
+        // destroy render attachments & views
+        m_albedoTarget.destroyView(m_pCtx, m_albedoTargetView);
+        m_wPosTarget.destroyView(m_pCtx, m_wPosTargetView);
+        m_normalTarget.destroyView(m_pCtx, m_normalTargetView);
+        m_depthTarget.destroyView(m_pCtx, m_depthTargetView);
+
+        hri::RenderAttachment::destroy(m_pCtx, m_albedoTarget);
+        hri::RenderAttachment::destroy(m_pCtx, m_wPosTarget);
+        hri::RenderAttachment::destroy(m_pCtx, m_normalTarget);
+        hri::RenderAttachment::destroy(m_pCtx, m_depthTarget);
+
+        vkDestroyFramebuffer(m_pCtx->device, m_framebuffer, nullptr);
+    }
+
+    virtual void setInputAttachment(uint32_t binding, const VkImageView& attachment)
+    {
+        // TODO: update PSO bindings
+    }
+
+    virtual std::vector<VkImageView> getOutputAttachments() const
+    {
+        return { m_albedoTargetView, m_wPosTargetView, m_normalTargetView, m_depthTargetView };
+    }
+
+    virtual void record(const hri::ActiveFrame& frame) const override
+    {
+        VkExtent2D swapExtent = m_pCtx->swapchain.extent;
+        VkClearValue clearValues[] = {
+            VkClearValue{{ 0.0f, 0.0f, 0.0f, 1.0f }},   // Albedo target
+            VkClearValue{{ 0.0f, 0.0f, 0.0f, 1.0f }},   // wPos target
+            VkClearValue{{ 0.0f, 0.0f, 0.0f, 1.0f }},   // Normal target
+            VkClearValue{{ 0x00, 1.0f }},               // Depth target
+        };
+
+        VkRenderPassBeginInfo passBeginInfo = VkRenderPassBeginInfo{ VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
+        passBeginInfo.renderPass = m_renderPass;
+        passBeginInfo.framebuffer = m_framebuffer;
+        passBeginInfo.renderArea = VkRect2D{ VkOffset2D{ 0, 0 }, swapExtent };
+        passBeginInfo.clearValueCount = HRI_SIZEOF_ARRAY(clearValues);
+        passBeginInfo.pClearValues = clearValues;
+        vkCmdBeginRenderPass(frame.commandBuffer, &passBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+        // TODO: record draw commands
+
+        vkCmdEndRenderPass(frame.commandBuffer);
+    }
+
+private:
+    VkRenderPass m_renderPass = VK_NULL_HANDLE;
+    hri::RenderAttachment m_albedoTarget = hri::RenderAttachment{};
+    hri::RenderAttachment m_wPosTarget = hri::RenderAttachment{};
+    hri::RenderAttachment m_normalTarget = hri::RenderAttachment{};
+    hri::RenderAttachment m_depthTarget = hri::RenderAttachment{};
+    VkImageView m_albedoTargetView = VK_NULL_HANDLE;
+    VkImageView m_wPosTargetView = VK_NULL_HANDLE;
+    VkImageView m_normalTargetView = VK_NULL_HANDLE;
+    VkImageView m_depthTargetView = VK_NULL_HANDLE;
+    VkFramebuffer m_framebuffer = VK_NULL_HANDLE;
+    hri::PipelineStateObject* m_pGbufferPSO = nullptr;
+};
+
 class PresentPass
     :
     public hri::IRecordablePass
@@ -76,6 +289,8 @@ public:
         shaderDB->createPipeline("PresentPipeline", { "PresentVert", "PresentFrag" }, presentPipelineLayout, presentPipelineBuilder);
         m_pPresentPSO = shaderDB->getPipeline("PresentPipeline");
 
+        // TODO: allocate resource descriptors
+
         createFrameResources();
     }
 
@@ -116,6 +331,16 @@ public:
             vkDestroyFramebuffer(m_pCtx->device, framebuffer, nullptr);
         }
         m_framebuffers.clear();
+    }
+
+    virtual void setInputAttachment(uint32_t binding, const VkImageView& attachment) override
+    {
+        // TODO: update descriptor binding for PSO w/ attachment input
+    }
+
+    virtual std::vector<VkImageView> getOutputAttachments() const
+    {
+        return {};  // Present pass has no output attachments except swap image
     }
 
     virtual void record(const hri::ActiveFrame& frame) const override
@@ -161,5 +386,5 @@ private:
     VkRenderPass m_renderPass = VK_NULL_HANDLE;
     std::vector<VkImageView> m_swapViews = {};
     std::vector<VkFramebuffer> m_framebuffers = {};
-    const hri::PipelineStateObject* m_pPresentPSO = nullptr;
+    hri::PipelineStateObject* m_pPresentPSO = nullptr;
 };

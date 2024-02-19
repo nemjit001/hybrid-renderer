@@ -160,14 +160,19 @@ int main()
 	ctxCreateInfo.vsyncMode = hri::VSyncMode::Disabled;
 	hri::RenderContext renderContext = hri::RenderContext(ctxCreateInfo);
 
-	// Create render core, shader database, and frame graph
+	// Create render core & shader database
 	hri::RenderCore renderCore = hri::RenderCore(&renderContext);
 	hri::ShaderDatabase shaderDB = hri::ShaderDatabase(&renderContext);
 
+	// Set up render pass objects & link per pass I/O
+	GBufferLayoutPass gbufferLayoutPass = GBufferLayoutPass(&renderContext, &shaderDB);
 	PresentPass presentPass = PresentPass(&renderContext, &shaderDB);
 
-	// Register a callback for when the swap chain is invalidated
-	renderCore.setOnSwapchainInvalidateCallback([&presentPass](vkb::Swapchain _swapchain) {
+	presentPass.setInputAttachment(0, gbufferLayoutPass.getOutputAttachments()[0]);
+
+	// Register a callback for when the swap chain is invalidated (recreates swap dependent resources for render passes)
+	renderCore.setOnSwapchainInvalidateCallback([&gbufferLayoutPass, &presentPass](vkb::Swapchain _swapchain) {
+		gbufferLayoutPass.recreateFrameResources();
 		presentPass.recreateFrameResources();
 	});
 
@@ -191,6 +196,7 @@ int main()
 
 		hri::ActiveFrame frame = renderCore.getActiveFrame();
 		frame.beginCommands();
+		gbufferLayoutPass.record(frame);
 		presentPass.record(frame);
 		frame.endCommands();
 		renderCore.endFrame();

@@ -2,6 +2,7 @@
 
 #include <optional>
 #include <vector>
+#include <vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
 
 #include "renderer_internal/shader_database.h"
@@ -68,6 +69,53 @@ static const uint32_t gGlslPresentFragShader[] = {
 	0x0004003d,0x0000000f,0x00000012,0x00000011,0x00050057,0x00000007,0x00000013,0x0000000e,
 	0x00000012,0x0003003e,0x00000009,0x00000013,0x000100fd,0x00010038
 };
+
+RenderAttachment RenderAttachment::init(RenderContext* ctx, VkImageCreateInfo* createInfo)
+{
+	assert(ctx != nullptr);
+	assert(createInfo != nullptr);
+
+	RenderAttachment attachment = RenderAttachment{};
+	attachment.format = createInfo->format;
+
+	VmaAllocationCreateInfo allocationInfo = VmaAllocationCreateInfo{};
+	allocationInfo.flags = 0;
+	allocationInfo.usage = VMA_MEMORY_USAGE_AUTO;
+	HRI_VK_CHECK(vmaCreateImage(ctx->allocator, createInfo, &allocationInfo, &attachment.image, &attachment.allocation, nullptr));
+
+	return attachment;
+}
+
+void RenderAttachment::destroy(RenderContext* ctx, RenderAttachment& attachment)
+{
+	assert(ctx != nullptr);
+	vmaDestroyImage(ctx->allocator, attachment.image, attachment.allocation);
+
+	memset(&attachment, 0, sizeof(RenderAttachment));
+}
+
+VkImageView RenderAttachment::createView(RenderContext* ctx, VkImageViewType viewType, VkComponentMapping components, VkImageSubresourceRange subresourceRange)
+{
+	assert(ctx != nullptr);
+
+	VkImageViewCreateInfo createInfo = VkImageViewCreateInfo{ VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
+	createInfo.flags = 0;
+	createInfo.image = image;
+	createInfo.viewType = viewType;
+	createInfo.format = format;
+	createInfo.components = components;
+	createInfo.subresourceRange = subresourceRange;
+
+	VkImageView view = VK_NULL_HANDLE;
+	HRI_VK_CHECK(vkCreateImageView(ctx->device, &createInfo, nullptr, &view));
+	return view;
+}
+
+void RenderAttachment::destroyView(RenderContext* ctx, VkImageView view)
+{
+	assert(ctx != nullptr);
+	vkDestroyImageView(ctx->device, view, nullptr);
+}
 
 RenderPassBuilder::RenderPassBuilder(RenderContext* ctx)
 	:

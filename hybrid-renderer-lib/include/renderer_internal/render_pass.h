@@ -2,6 +2,7 @@
 
 #include <optional>
 #include <vector>
+#include <vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
 
 #include "renderer_internal/render_core.h"
@@ -14,6 +15,21 @@ namespace hri
 	{
 		Color,
 		DepthStencil,
+	};
+
+	struct RenderAttachment	// XXX: More like image -> move to separate header?
+	{
+		VkFormat format				= VK_FORMAT_UNDEFINED;
+		VkImage image				= VK_NULL_HANDLE;
+		VmaAllocation allocation	= VK_NULL_HANDLE;
+
+		static RenderAttachment init(RenderContext* ctx, VkImageCreateInfo* createInfo);
+
+		static void destroy(RenderContext* ctx, RenderAttachment& attachment);
+
+		VkImageView createView(RenderContext* ctx, VkImageViewType viewType, VkComponentMapping components, VkImageSubresourceRange subresourceRange);
+
+		void destroyView(RenderContext* ctx, VkImageView view);
 	};
 
 	/// @brief The RenderPassBuilder allows for easy setup of render passes.
@@ -96,6 +112,10 @@ namespace hri
 			destroyFrameResources();
 			createFrameResources();
 		}
+
+		virtual void setInputAttachment(uint32_t binding, const VkImageView& attachment) = 0;
+
+		virtual std::vector<VkImageView> getOutputAttachments() const = 0;
 
 		/// @brief Record a pass into an active frame's graphics command buffer.
 		/// @param frame Frame to record pass into.

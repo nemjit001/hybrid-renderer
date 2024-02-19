@@ -191,7 +191,7 @@ ShaderDatabase::~ShaderDatabase()
     vkDestroyPipelineCache(m_pCtx->device, m_pipelineCache, nullptr);
 }
 
-const Shader* ShaderDatabase::registerShader(const std::string& name, const Shader& shader)
+Shader* ShaderDatabase::registerShader(const std::string& name, const Shader& shader)
 {
     if (isExistingShader(name))
     {
@@ -209,7 +209,7 @@ const Shader* ShaderDatabase::registerShader(const std::string& name, const Shad
     return &it->second;
 }
 
-const PipelineStateObject* ShaderDatabase::createPipeline(
+PipelineStateObject* ShaderDatabase::createPipeline(
     const std::string& name,
     const std::vector<std::string>& shaders,
     const PipelineLayoutDescription& layoutDescription,
@@ -324,7 +324,7 @@ const PipelineStateObject* ShaderDatabase::createPipeline(
     return &it->second;
 }
 
-const Shader* ShaderDatabase::getShader(const std::string& name) const
+Shader* ShaderDatabase::getShader(const std::string& name)
 {
     if (!isExistingShader(name))
     {
@@ -336,7 +336,7 @@ const Shader* ShaderDatabase::getShader(const std::string& name) const
     return &it->second;
 }
 
-const PipelineStateObject* ShaderDatabase::getPipeline(const std::string& name) const
+PipelineStateObject* ShaderDatabase::getPipeline(const std::string& name)
 {
     if (!isExistingPipeline(name))
     {

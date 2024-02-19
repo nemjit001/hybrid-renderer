@@ -110,14 +110,14 @@ namespace hri
         /// @param name Shader name to use. MUST be unique.
         /// @param shader Shader object to register.
         /// @return A pointer to the Shader in the Shader Database.
-        const Shader* registerShader(const std::string& name, const Shader& shader);
+        Shader* registerShader(const std::string& name, const Shader& shader);
 
         /// @brief Create a new pipeline object in the Shader Database.
         /// @param name Pipeline name to use. MUST be unique.
         /// @param shaders Shader names to use.
         /// @param pipelineBuilder Pipeline Builder object to use for initialization.
         /// @return A pointer to the Pipeline in the Shader Database.
-        const PipelineStateObject* createPipeline(
+        PipelineStateObject* createPipeline(
             const std::string& name,
             const std::vector<std::string>& shaders,
             const PipelineLayoutDescription& layoutDescription,
@@ -127,12 +127,12 @@ namespace hri
         /// @brief Retrieve a Shader from the Shader Database.
         /// @param name Shader name to retrieve.
         /// @return A pointer to the Shader in the Shader Database.
-        const Shader* getShader(const std::string& name) const;
+        Shader* getShader(const std::string& name);
 
         /// @brief Retrieve a Pipeline from the Shader Database.
         /// @param name Pipeline name to retrieve.
         /// @return A pointer to the Pipeline in the Shader Database.
-        const PipelineStateObject* getPipeline(const std::string& name) const;
+        PipelineStateObject* getPipeline(const std::string& name);
 
     private:
         /// @brief Check if a Shader already exists in the Database.
