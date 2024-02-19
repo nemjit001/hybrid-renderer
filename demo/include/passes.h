@@ -49,6 +49,24 @@ public:
             .setAttachmentReference(hri::AttachmentType::DepthStencil, VkAttachmentReference{ 3, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL })
             .build();
 
+        // Set up descriptor set layouts
+        hri::DescriptorSetLayoutBuilder sceneSetBuilder = hri::DescriptorSetLayoutBuilder(m_pCtx);
+        m_sceneSetLayout = sceneSetBuilder
+            .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+            .build();
+
+        hri::DescriptorSetLayoutBuilder modelSetBuilder = hri::DescriptorSetLayoutBuilder(m_pCtx);
+        m_objectSetLayout = modelSetBuilder
+            .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+            .build();
+
+        // Set up pipeline layout
+        hri::PipelineLayoutBuilder layoutBuilder = hri::PipelineLayoutBuilder(m_pCtx);
+        VkPipelineLayout pipelineLayout = layoutBuilder // TODO: thinly wrap layout object & store set layouts / push constants w/ it?
+            .addDescriptorSetLayout(m_sceneSetLayout)
+            .addDescriptorSetLayout(m_objectSetLayout)
+            .build();
+
         // Set up color blend state
         std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments = {
             VkPipelineColorBlendAttachmentState{
@@ -79,18 +97,6 @@ public:
                 | VK_COLOR_COMPONENT_A_BIT
             },
         };
-
-        // Set up pipeline layout
-        hri::DescriptorSetLayoutBuilder descriptorSetBuilder = hri::DescriptorSetLayoutBuilder(m_pCtx);
-        hri::DescriptorSetLayout descriptorSetLayout = descriptorSetBuilder
-            .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
-            .addBinding(1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
-            .build();
-
-        hri::PipelineLayoutBuilder layoutBuilder = hri::PipelineLayoutBuilder(m_pCtx);
-        VkPipelineLayout pipelineLayout = layoutBuilder
-            .addDescriptorSetLayout(descriptorSetLayout)
-            .build();
 
         // Configure graphics pipeline
         hri::GraphicsPipelineBuilder gbufferPipelineBuilder = hri::GraphicsPipelineBuilder{};
@@ -126,6 +132,8 @@ public:
     {
         vkDestroyRenderPass(m_pCtx->device, m_renderPass, nullptr);
         destroyFrameResources();
+        hri::DescriptorSetLayout::destroy(m_pCtx, m_sceneSetLayout);
+        hri::DescriptorSetLayout::destroy(m_pCtx, m_objectSetLayout);
     }
 
     virtual void createFrameResources() override
@@ -265,7 +273,7 @@ public:
         passBeginInfo.pClearValues = clearValues;
         vkCmdBeginRenderPass(frame.commandBuffer, &passBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-        // TODO: record draw commands (retrive scene data from somewhere?)
+        // TODO: record draw commands (retrieve scene data from somewhere?)
 
         vkCmdEndRenderPass(frame.commandBuffer);
     }
@@ -281,6 +289,8 @@ private:
     VkImageView m_normalTargetView = VK_NULL_HANDLE;
     VkImageView m_depthTargetView = VK_NULL_HANDLE;
     VkFramebuffer m_framebuffer = VK_NULL_HANDLE;
+    hri::DescriptorSetLayout m_sceneSetLayout = hri::DescriptorSetLayout{};
+    hri::DescriptorSetLayout m_objectSetLayout = hri::DescriptorSetLayout{};
     hri::PipelineStateObject* m_pGbufferPSO = nullptr;
 };
 
@@ -306,6 +316,18 @@ public:
             .setAttachmentReference(hri::AttachmentType::Color, VkAttachmentReference{ 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL })
             .build();
 
+        // Set up descriptor set layout
+        hri::DescriptorSetLayoutBuilder presentSetBuilder = hri::DescriptorSetLayoutBuilder(m_pCtx);
+        m_presentSetLayout = presentSetBuilder
+            .addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+            .build();
+
+        // Set up pipeline layout
+        hri::PipelineLayoutBuilder layoutBuilder = hri::PipelineLayoutBuilder(m_pCtx);
+        VkPipelineLayout pipelineLayout = layoutBuilder
+            .addDescriptorSetLayout(m_presentSetLayout)
+            .build();
+
         // Set up color blend state
         std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments = {
             VkPipelineColorBlendAttachmentState{
@@ -318,17 +340,6 @@ public:
                 | VK_COLOR_COMPONENT_A_BIT
             },
         };
-
-        // Set up pipeline layout
-        hri::DescriptorSetLayoutBuilder descriptorSetBuilder = hri::DescriptorSetLayoutBuilder(m_pCtx);
-        hri::DescriptorSetLayout descriptorSetLayout = descriptorSetBuilder
-            .addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-            .build();
-
-        hri::PipelineLayoutBuilder layoutBuilder = hri::PipelineLayoutBuilder(m_pCtx);
-        VkPipelineLayout pipelineLayout = layoutBuilder
-            .addDescriptorSetLayout(descriptorSetLayout)
-            .build();
 
         // Configure graphics pipeline
         hri::GraphicsPipelineBuilder presentPipelineBuilder = hri::GraphicsPipelineBuilder{};
@@ -359,6 +370,7 @@ public:
     {
         vkDestroyRenderPass(m_pCtx->device, m_renderPass, nullptr);
         destroyFrameResources();
+        hri::DescriptorSetLayout::destroy(m_pCtx, m_presentSetLayout);
     }
 
     virtual void createFrameResources() override
@@ -466,5 +478,6 @@ private:
     VkRenderPass m_renderPass = VK_NULL_HANDLE;
     std::vector<VkImageView> m_swapViews = {};
     std::vector<VkFramebuffer> m_framebuffers = {};
+    hri::DescriptorSetLayout m_presentSetLayout = hri::DescriptorSetLayout{};
     hri::PipelineStateObject* m_pPresentPSO = nullptr;
 };

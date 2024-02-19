@@ -12,13 +12,13 @@ layout(location = 0) out VS_OUT
     vec2 texCoord;
 } vs_out;
 
-layout(binding = 0) uniform CAMERA
+layout(set = 0, binding = 0) uniform CAMERA
 {
     vec3 position;
     mat4 viewProject;
 } camera;
 
-layout(binding = 1) uniform MODEL
+layout(set = 1, binding = 0) uniform MODEL
 {
     mat4 transform;
 } model;

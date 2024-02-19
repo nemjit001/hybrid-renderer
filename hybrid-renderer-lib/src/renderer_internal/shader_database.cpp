@@ -173,7 +173,6 @@ ShaderDatabase::~ShaderDatabase()
 
     for (auto& [ name, pso ] : m_pipelineMap)
     {
-        vkDestroyPipelineLayout(m_pCtx->device, pso.layout, nullptr);
         vkDestroyPipeline(m_pCtx->device, pso.pipeline, nullptr);
     }
 
