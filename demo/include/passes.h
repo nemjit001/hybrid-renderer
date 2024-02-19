@@ -80,11 +80,16 @@ public:
             },
         };
 
-        // Set up pipeline descriptor layout
-        hri::PipelineLayoutDescriptionBuilder layoutBuilder = hri::PipelineLayoutDescriptionBuilder();
-        hri::PipelineLayoutDescription gbufferPipelineLayout = layoutBuilder
-            .addDescriptorBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT)
-            .addDescriptorBinding(1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT)
+        // Set up pipeline layout
+        hri::DescriptorSetLayoutBuilder descriptorSetBuilder = hri::DescriptorSetLayoutBuilder(m_pCtx);
+        hri::DescriptorSetLayout descriptorSetLayout = descriptorSetBuilder
+            .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+            .addBinding(1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+            .build();
+
+        hri::PipelineLayoutBuilder layoutBuilder = hri::PipelineLayoutBuilder(m_pCtx);
+        VkPipelineLayout pipelineLayout = layoutBuilder
+            .addDescriptorSetLayout(descriptorSetLayout)
             .build();
 
         // Configure graphics pipeline
@@ -104,13 +109,14 @@ public:
         gbufferPipelineBuilder.depthStencilState = hri::GraphicsPipelineBuilder::initDepthStencilState(true, true);
         gbufferPipelineBuilder.colorBlendState = hri::GraphicsPipelineBuilder::initColorBlendState(colorBlendAttachments);
         gbufferPipelineBuilder.dynamicStates = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
+        gbufferPipelineBuilder.layout = pipelineLayout;
         gbufferPipelineBuilder.renderPass = m_renderPass;
         gbufferPipelineBuilder.subpass = 0;
 
         // Register shaders & create PSO
         shaderDB->registerShader("StaticVert", hri::Shader::loadFile(m_pCtx, "./shaders/static.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
         shaderDB->registerShader("GBufferLayoutFrag", hri::Shader::loadFile(m_pCtx, "./shaders/gbuffer_layout.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
-        shaderDB->createPipeline("GBufferLayoutPipeline", { "StaticVert", "GBufferLayoutFrag" }, gbufferPipelineLayout, gbufferPipelineBuilder);
+        shaderDB->createPipeline("GBufferLayoutPipeline", { "StaticVert", "GBufferLayoutFrag" }, gbufferPipelineBuilder);
         m_pGbufferPSO = shaderDB->getPipeline("GBufferLayoutPipeline");
 
         createFrameResources();
@@ -313,10 +319,15 @@ public:
             },
         };
 
-        // Set up pipeline descriptor layout
-        hri::PipelineLayoutDescriptionBuilder layoutBuilder = hri::PipelineLayoutDescriptionBuilder();
-        hri::PipelineLayoutDescription presentPipelineLayout = layoutBuilder
-            .addDescriptorBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT)
+        // Set up pipeline layout
+        hri::DescriptorSetLayoutBuilder descriptorSetBuilder = hri::DescriptorSetLayoutBuilder(m_pCtx);
+        hri::DescriptorSetLayout descriptorSetLayout = descriptorSetBuilder
+            .addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+            .build();
+
+        hri::PipelineLayoutBuilder layoutBuilder = hri::PipelineLayoutBuilder(m_pCtx);
+        VkPipelineLayout pipelineLayout = layoutBuilder
+            .addDescriptorSetLayout(descriptorSetLayout)
             .build();
 
         // Configure graphics pipeline
@@ -331,13 +342,14 @@ public:
         presentPipelineBuilder.depthStencilState = hri::GraphicsPipelineBuilder::initDepthStencilState(false, false);
         presentPipelineBuilder.colorBlendState = hri::GraphicsPipelineBuilder::initColorBlendState(colorBlendAttachments);
         presentPipelineBuilder.dynamicStates = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
+        presentPipelineBuilder.layout = pipelineLayout;
         presentPipelineBuilder.renderPass = m_renderPass;
         presentPipelineBuilder.subpass = 0;
 
         // Register shaders & create PSO
         shaderDB->registerShader("PresentVert", hri::Shader::loadFile(m_pCtx, "shaders/present.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
         shaderDB->registerShader("PresentFrag", hri::Shader::loadFile(m_pCtx, "shaders/present.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
-        shaderDB->createPipeline("PresentPipeline", { "PresentVert", "PresentFrag" }, presentPipelineLayout, presentPipelineBuilder);
+        shaderDB->createPipeline("PresentPipeline", { "PresentVert", "PresentFrag" }, presentPipelineBuilder);
         m_pPresentPSO = shaderDB->getPipeline("PresentPipeline");
 
         createFrameResources();
