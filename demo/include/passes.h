@@ -252,21 +252,10 @@ public:
         };
 
         // Set up pipeline descriptor layout
-        hri::PipelineLayoutDescription presentPipelineLayout = hri::PipelineLayoutDescription{};
-        presentPipelineLayout.descriptorSetLayouts = {
-            hri::DescriptorSetLayoutDescription{
-                0,
-                {
-                    VkDescriptorSetLayoutBinding{
-                        0,
-                        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                        1,
-                        VK_SHADER_STAGE_FRAGMENT_BIT,
-                        nullptr
-                    }
-                }
-            }
-        };
+        hri::PipelineLayoutDescriptionBuilder layoutBuilder = hri::PipelineLayoutDescriptionBuilder();
+        hri::PipelineLayoutDescription presentPipelineLayout = layoutBuilder
+            .addDescriptorBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT)
+            .build();
 
         // Configure graphics pipeline
         hri::GraphicsPipelineBuilder presentPipelineBuilder = hri::GraphicsPipelineBuilder{};
@@ -288,8 +277,6 @@ public:
         shaderDB->registerShader("PresentFrag", hri::Shader::loadFile(m_pCtx, "shaders/present.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
         shaderDB->createPipeline("PresentPipeline", { "PresentVert", "PresentFrag" }, presentPipelineLayout, presentPipelineBuilder);
         m_pPresentPSO = shaderDB->getPipeline("PresentPipeline");
-
-        // TODO: allocate resource descriptors
 
         createFrameResources();
     }
@@ -335,7 +322,19 @@ public:
 
     virtual void setInputAttachment(uint32_t binding, const VkImageView& attachment) override
     {
-        // TODO: update descriptor binding for PSO w/ attachment input
+        VkDescriptorImageInfo imageInfo = VkDescriptorImageInfo{};
+        imageInfo.sampler = VK_NULL_HANDLE; // TODO: create sampler object for this pass
+        imageInfo.imageView = attachment;
+        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+        VkWriteDescriptorSet attachmentWriteSet = VkWriteDescriptorSet{ VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
+        attachmentWriteSet.dstSet = VK_NULL_HANDLE; // TODO: use allocated descriptor set
+        attachmentWriteSet.dstBinding = binding;
+        attachmentWriteSet.dstArrayElement = 0;
+        attachmentWriteSet.descriptorCount = 1;
+        attachmentWriteSet.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        attachmentWriteSet.pImageInfo = &imageInfo;
+        vkUpdateDescriptorSets(m_pCtx->device, 1, &attachmentWriteSet, 0, nullptr);
     }
 
     virtual std::vector<VkImageView> getOutputAttachments() const
@@ -375,7 +374,14 @@ public:
         vkCmdSetViewport(frame.commandBuffer, 0, 1, &viewport);
         vkCmdSetScissor(frame.commandBuffer, 0, 1, &scissor);
 
-        // TODO: allocate(?) & bind descriptor sets for PSO
+        vkCmdBindDescriptorSets(
+            frame.commandBuffer,
+            m_pPresentPSO->bindPoint,
+            m_pPresentPSO->layout,
+            0, 0, nullptr,
+            0, nullptr
+        );
+
         vkCmdBindPipeline(frame.commandBuffer, m_pPresentPSO->bindPoint, m_pPresentPSO->pipeline);
         vkCmdDraw(frame.commandBuffer, 3, 1, 0, 0);
 

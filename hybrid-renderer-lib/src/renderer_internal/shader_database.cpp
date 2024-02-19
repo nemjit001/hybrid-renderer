@@ -10,6 +10,64 @@
 
 using namespace hri;
 
+PipelineLayoutDescriptionBuilder::PipelineLayoutDescriptionBuilder()
+{
+    nextDescriptorSet();
+}
+
+PipelineLayoutDescriptionBuilder& PipelineLayoutDescriptionBuilder::addPushConstant(size_t size, VkShaderStageFlags shaderStages)
+{
+    VkPushConstantRange pushConstant = VkPushConstantRange{};
+    pushConstant.offset = m_pushConstantOffset;
+    pushConstant.size = size;
+    pushConstant.stageFlags = shaderStages;
+    m_layoutDescription.pushConstants.push_back(pushConstant);
+
+    m_pushConstantOffset += size;
+
+    return *this;
+}
+
+PipelineLayoutDescriptionBuilder& PipelineLayoutDescriptionBuilder::addDescriptorBinding(
+    uint32_t binding,
+    VkDescriptorType type,
+    uint32_t count,
+    VkShaderStageFlags shaderStages
+)
+{
+    hri::DescriptorSetLayoutDescription& currentSetLayout = m_layoutDescription.descriptorSetLayouts.back();
+
+    VkDescriptorSetLayoutBinding descriptorBinding = VkDescriptorSetLayoutBinding{};
+    descriptorBinding.binding = binding;
+    descriptorBinding.descriptorType = type;
+    descriptorBinding.descriptorCount = count;
+    descriptorBinding.stageFlags = shaderStages;
+    descriptorBinding.pImmutableSamplers = nullptr;
+    currentSetLayout.bindings.push_back(descriptorBinding);
+
+    return *this;
+}
+
+PipelineLayoutDescriptionBuilder& PipelineLayoutDescriptionBuilder::nextDescriptorSet()
+{
+    m_layoutDescription.descriptorSetLayouts.push_back(DescriptorSetLayoutDescription{});
+
+    return *this;
+}
+
+PipelineLayoutDescriptionBuilder& PipelineLayoutDescriptionBuilder::setDescriptorSetFlags(VkDescriptorSetLayoutCreateFlags flags)
+{
+    hri::DescriptorSetLayoutDescription& currentSetLayout = m_layoutDescription.descriptorSetLayouts.back();
+    currentSetLayout.flags = flags;
+
+    return *this;
+}
+
+PipelineLayoutDescription PipelineLayoutDescriptionBuilder::build()
+{
+    return m_layoutDescription;
+}
+
 VkPipelineInputAssemblyStateCreateInfo GraphicsPipelineBuilder::initInputAssemblyState(VkPrimitiveTopology topology, VkBool32 primitiveRestart)
 {
     return VkPipelineInputAssemblyStateCreateInfo{

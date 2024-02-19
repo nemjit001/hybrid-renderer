@@ -21,11 +21,53 @@ namespace hri
         std::vector<VkDescriptorSetLayoutBinding> bindings;
     };
 
-    /// @brief A Pipeline Layout Description is used to generate an entire pipeline's layout.
+    /// @brief A Pipeline Layout Description is used to generate a pipeline layout object.
     struct PipelineLayoutDescription
     {
         std::vector<VkPushConstantRange> pushConstants;
         std::vector<DescriptorSetLayoutDescription> descriptorSetLayouts;
+    };
+
+    /// @brief The Pipeline Layout Description Builder allows for incremental layout construction using function calls.
+    class PipelineLayoutDescriptionBuilder
+    {
+    public:
+        /// @brief Create a new Pipeline Layout Description Builder.
+        PipelineLayoutDescriptionBuilder();
+
+        /// @brief Destroy this Pipeline Layout Description Builder instance
+        virtual ~PipelineLayoutDescriptionBuilder() = default;
+
+        /// @brief Add a new push constant to the pipeline layout.
+        /// @param size Size of the push constant.
+        /// @param shaderStages Shader stages where this constant is used.
+        /// @return A reference to this class.
+        PipelineLayoutDescriptionBuilder& addPushConstant(size_t size, VkShaderStageFlags shaderStages);
+
+        /// @brief Add a descriptor binding to the currently active descriptor set layout.
+        /// @param binding Binding index.
+        /// @param type Type of descriptor.
+        /// @param count Number of descriptors.
+        /// @param shaderStages Shader stages where this descriptor is used.
+        /// @return A reference to this class.
+        PipelineLayoutDescriptionBuilder& addDescriptorBinding(uint32_t binding, VkDescriptorType type, uint32_t count, VkShaderStageFlags shaderStages);
+
+        /// @brief Start a new descriptor set.
+        /// @return A reference to this class.
+        PipelineLayoutDescriptionBuilder& nextDescriptorSet();
+
+        /// @brief Set the flags used in descriptor set layout creation.
+        /// @param flags Flags to set.
+        /// @return A reference to this class.
+        PipelineLayoutDescriptionBuilder& setDescriptorSetFlags(VkDescriptorSetLayoutCreateFlags flags);
+
+        /// @brief Build the specified pipeline layout description.
+        /// @return A pipeline layout description.
+        PipelineLayoutDescription build();
+
+    private:
+        size_t m_pushConstantOffset = 0;
+        PipelineLayoutDescription m_layoutDescription = PipelineLayoutDescription{}; 
     };
 
     /// @brief The Graphics Pipeline Builder allows easy configuration & initialization of fixed function state.
