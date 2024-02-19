@@ -23,14 +23,14 @@ public:
                 VK_ATTACHMENT_STORE_OP_STORE
             )
             .addAttachment( // World Pos target
-                VK_FORMAT_R8G8B8A8_SNORM,
+                VK_FORMAT_R16G16B16_SFLOAT,
                 VK_SAMPLE_COUNT_1_BIT,
                 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                 VK_ATTACHMENT_LOAD_OP_CLEAR,
                 VK_ATTACHMENT_STORE_OP_STORE
             )
             .addAttachment( // Normal target
-                VK_FORMAT_R8G8B8A8_SNORM,
+                VK_FORMAT_R16G16B16_SFLOAT,
                 VK_SAMPLE_COUNT_1_BIT,
                 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                 VK_ATTACHMENT_LOAD_OP_CLEAR,
@@ -49,7 +49,69 @@ public:
             .setAttachmentReference(hri::AttachmentType::DepthStencil, VkAttachmentReference{ 3, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL })
             .build();
 
-        // TODO: set up PSO & shaders
+        // Set up color blend state
+        std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments = {
+            VkPipelineColorBlendAttachmentState{
+                VK_FALSE,
+                VK_BLEND_FACTOR_ONE, VK_BLEND_FACTOR_ZERO, VK_BLEND_OP_ADD,
+                VK_BLEND_FACTOR_ONE, VK_BLEND_FACTOR_ZERO, VK_BLEND_OP_ADD,
+                VK_COLOR_COMPONENT_R_BIT
+                | VK_COLOR_COMPONENT_G_BIT
+                | VK_COLOR_COMPONENT_B_BIT
+                | VK_COLOR_COMPONENT_A_BIT
+            },
+            VkPipelineColorBlendAttachmentState{
+                VK_FALSE,
+                VK_BLEND_FACTOR_ONE, VK_BLEND_FACTOR_ZERO, VK_BLEND_OP_ADD,
+                VK_BLEND_FACTOR_ONE, VK_BLEND_FACTOR_ZERO, VK_BLEND_OP_ADD,
+                VK_COLOR_COMPONENT_R_BIT
+                | VK_COLOR_COMPONENT_G_BIT
+                | VK_COLOR_COMPONENT_B_BIT
+                | VK_COLOR_COMPONENT_A_BIT
+            },
+            VkPipelineColorBlendAttachmentState{
+                VK_FALSE,
+                VK_BLEND_FACTOR_ONE, VK_BLEND_FACTOR_ZERO, VK_BLEND_OP_ADD,
+                VK_BLEND_FACTOR_ONE, VK_BLEND_FACTOR_ZERO, VK_BLEND_OP_ADD,
+                VK_COLOR_COMPONENT_R_BIT
+                | VK_COLOR_COMPONENT_G_BIT
+                | VK_COLOR_COMPONENT_B_BIT
+                | VK_COLOR_COMPONENT_A_BIT
+            },
+        };
+
+        // Set up pipeline descriptor layout
+        hri::PipelineLayoutDescriptionBuilder layoutBuilder = hri::PipelineLayoutDescriptionBuilder();
+        hri::PipelineLayoutDescription gbufferPipelineLayout = layoutBuilder
+            .addDescriptorBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT)
+            .addDescriptorBinding(1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT)
+            .build();
+
+        // Configure graphics pipeline
+        hri::GraphicsPipelineBuilder gbufferPipelineBuilder = hri::GraphicsPipelineBuilder{};
+        gbufferPipelineBuilder.vertexInputBindings = { VkVertexInputBindingDescription{ 0, sizeof(hri::Vertex), VK_VERTEX_INPUT_RATE_VERTEX } };
+        gbufferPipelineBuilder.vertexInputAttributes = {
+            VkVertexInputAttributeDescription{ 0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(hri::Vertex, position) },
+            VkVertexInputAttributeDescription{ 1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(hri::Vertex, normal) },
+            VkVertexInputAttributeDescription{ 2, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(hri::Vertex, tangent) },
+            VkVertexInputAttributeDescription{ 3, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(hri::Vertex, textureCoord) },
+        };
+        gbufferPipelineBuilder.inputAssemblyState = hri::GraphicsPipelineBuilder::initInputAssemblyState(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, false);
+        gbufferPipelineBuilder.viewport = hri::GraphicsPipelineBuilder::initDefaultViewport(1.0f, 1.0f);
+        gbufferPipelineBuilder.scissor = hri::GraphicsPipelineBuilder::initDefaultScissor(1, 1);
+        gbufferPipelineBuilder.rasterizationState = hri::GraphicsPipelineBuilder::initRasterizationState(false, VK_POLYGON_MODE_FILL, VK_CULL_MODE_NONE, VK_FRONT_FACE_COUNTER_CLOCKWISE);
+        gbufferPipelineBuilder.multisampleState = hri::GraphicsPipelineBuilder::initMultisampleState(VK_SAMPLE_COUNT_1_BIT);
+        gbufferPipelineBuilder.depthStencilState = hri::GraphicsPipelineBuilder::initDepthStencilState(true, true);
+        gbufferPipelineBuilder.colorBlendState = hri::GraphicsPipelineBuilder::initColorBlendState(colorBlendAttachments);
+        gbufferPipelineBuilder.dynamicStates = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
+        gbufferPipelineBuilder.renderPass = m_renderPass;
+        gbufferPipelineBuilder.subpass = 0;
+
+        // Register shaders & create PSO
+        shaderDB->registerShader("StaticVert", hri::Shader::loadFile(m_pCtx, "./shaders/static.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
+        shaderDB->registerShader("GBufferLayoutFrag", hri::Shader::loadFile(m_pCtx, "./shaders/gbuffer_layout.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
+        shaderDB->createPipeline("GBufferLayoutPipeline", { "StaticVert", "GBufferLayoutFrag" }, gbufferPipelineLayout, gbufferPipelineBuilder);
+        m_pGbufferPSO = shaderDB->getPipeline("GBufferLayoutPipeline");
 
         createFrameResources();
     }
@@ -81,7 +143,7 @@ public:
         VkImageCreateInfo wPosTargetCreateInfo = VkImageCreateInfo{ VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
         wPosTargetCreateInfo.flags = 0;
         wPosTargetCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-        wPosTargetCreateInfo.format = VK_FORMAT_R8G8B8A8_SNORM;
+        wPosTargetCreateInfo.format = VK_FORMAT_R16G16B16_SFLOAT;
         wPosTargetCreateInfo.extent = VkExtent3D{ swapExtent.width, swapExtent.height, 1 };
         wPosTargetCreateInfo.mipLevels = 1;
         wPosTargetCreateInfo.arrayLayers = 1;
@@ -94,7 +156,7 @@ public:
         VkImageCreateInfo normalTargetCreateInfo = VkImageCreateInfo{ VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
         normalTargetCreateInfo.flags = 0;
         normalTargetCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-        normalTargetCreateInfo.format = VK_FORMAT_R8G8B8A8_SNORM;
+        normalTargetCreateInfo.format = VK_FORMAT_R16G16B16_SFLOAT;
         normalTargetCreateInfo.extent = VkExtent3D{ swapExtent.width, swapExtent.height, 1 };
         normalTargetCreateInfo.mipLevels = 1;
         normalTargetCreateInfo.arrayLayers = 1;
@@ -197,7 +259,7 @@ public:
         passBeginInfo.pClearValues = clearValues;
         vkCmdBeginRenderPass(frame.commandBuffer, &passBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-        // TODO: record draw commands
+        // TODO: record draw commands (retrive scene data from somewhere?)
 
         vkCmdEndRenderPass(frame.commandBuffer);
     }
