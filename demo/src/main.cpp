@@ -4,6 +4,7 @@
 #include <tiny_obj_loader.h>
 
 #include "demo.h"
+#include "subsystems.h"
 #include "timer.h"
 #include "window_manager.h"
 
@@ -164,18 +165,97 @@ int main()
 	hri::ShaderDatabase shaderDB = hri::ShaderDatabase(&renderContext);
 	hri::RenderSubsystemManager subsystemManager = hri::RenderSubsystemManager(&renderContext);
 
-	// TODO: Set up render subsystems here
+	// Set up render pass builders, attachments, and resource managers
+	hri::RenderPassBuilder gbufferLayoutPassBuilder = hri::RenderPassBuilder(&renderContext)
+		.addAttachment(
+			VK_FORMAT_R8G8B8A8_UNORM,
+			VK_SAMPLE_COUNT_1_BIT,
+			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			VK_ATTACHMENT_LOAD_OP_CLEAR,
+			VK_ATTACHMENT_STORE_OP_STORE
+		)
+		.addAttachment(
+			VK_FORMAT_R8G8B8A8_UNORM,
+			VK_SAMPLE_COUNT_1_BIT,
+			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			VK_ATTACHMENT_LOAD_OP_CLEAR,
+			VK_ATTACHMENT_STORE_OP_STORE
+		)
+		.addAttachment(
+			VK_FORMAT_R8G8B8A8_UNORM,
+			VK_SAMPLE_COUNT_1_BIT,
+			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			VK_ATTACHMENT_LOAD_OP_CLEAR,
+			VK_ATTACHMENT_STORE_OP_STORE
+		)
+		.addAttachment(
+			VK_FORMAT_D32_SFLOAT,
+			VK_SAMPLE_COUNT_1_BIT,
+			VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+			VK_ATTACHMENT_LOAD_OP_CLEAR,
+			VK_ATTACHMENT_STORE_OP_STORE
+		)
+		.setAttachmentReference(hri::AttachmentType::Color, VkAttachmentReference{ 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL })
+		.setAttachmentReference(hri::AttachmentType::Color, VkAttachmentReference{ 1, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL })
+		.setAttachmentReference(hri::AttachmentType::Color, VkAttachmentReference{ 2, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL })
+		.setAttachmentReference(hri::AttachmentType::DepthStencil, VkAttachmentReference{ 3, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL });
+
+	hri::RenderPassBuilder presentPassBuilder = hri::RenderPassBuilder(&renderContext)
+		.addAttachment(
+			renderContext.swapFormat(),
+			VK_SAMPLE_COUNT_1_BIT,
+			VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+			VK_ATTACHMENT_LOAD_OP_CLEAR,
+			VK_ATTACHMENT_STORE_OP_STORE
+		)
+		.setAttachmentReference(hri::AttachmentType::Color,	VkAttachmentReference{ 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
+
+	std::vector<hri::RenderAttachmentConfig> gbufferAttachmentConfigs = {
+		hri::RenderAttachmentConfig{ VK_FORMAT_R8G8B8A8_UNORM, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_IMAGE_ASPECT_COLOR_BIT },
+		hri::RenderAttachmentConfig{ VK_FORMAT_R8G8B8A8_UNORM, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_IMAGE_ASPECT_COLOR_BIT },
+		hri::RenderAttachmentConfig{ VK_FORMAT_R8G8B8A8_UNORM, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_IMAGE_ASPECT_COLOR_BIT },
+		hri::RenderAttachmentConfig{ VK_FORMAT_D32_SFLOAT, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_IMAGE_ASPECT_DEPTH_BIT },
+	};
+
+	hri::RenderPassResourceManager gbufferLayoutPassManager = hri::RenderPassResourceManager(
+		&renderContext,
+		gbufferLayoutPassBuilder.build(),
+		gbufferAttachmentConfigs
+	);
+
+	hri::SwapchainPassResourceManager presentPassManager = hri::SwapchainPassResourceManager(
+		&renderContext,
+		presentPassBuilder.build(),
+		{}
+	);
+
+	// Set clear values for pass attachments
+	gbufferLayoutPassManager.setClearValue(0, VkClearValue{ { 0.0f, 0.0f, 0.0f, 1.0f } });
+	gbufferLayoutPassManager.setClearValue(1, VkClearValue{ { 0.0f, 0.0f, 0.0f, 1.0f } });
+	gbufferLayoutPassManager.setClearValue(2, VkClearValue{ { 0.0f, 0.0f, 0.0f, 1.0f } });
+	gbufferLayoutPassManager.setClearValue(3, VkClearValue{ { 1.0f, 0x00 } });
+	presentPassManager.setClearValue(0, VkClearValue{ { 0.0f, 0.0f, 0.0f, 1.0f } });
+
+	// Set up render subsystems & register with render manager
+	GBufferLayoutSubsystem gbufferLayoutSystem = GBufferLayoutSubsystem(&renderContext, &shaderDB, gbufferLayoutPassManager.renderPass());
+	PresentationSubsystem presentationSystem = PresentationSubsystem(&renderContext, &shaderDB, presentPassManager.renderPass());
+
+	subsystemManager.registerSubsystem("GBufferLayoutSystem", &gbufferLayoutSystem);
+	subsystemManager.registerSubsystem("PresentationSystem", &presentationSystem);
 
 	// Register a callback for when the swap chain is invalidated (recreates swap dependent resources for render passes)
-	renderCore.setOnSwapchainInvalidateCallback([](vkb::Swapchain _swapchain) {
-		//
+	renderCore.setOnSwapchainInvalidateCallback([&gbufferLayoutPassManager, &presentPassManager](vkb::Swapchain _swapchain) {
+		gbufferLayoutPassManager.recreateResources();
+		presentPassManager.recreateResources();
 	});
 
-	// Load scene file
+	// Load scene file & set up virtual camera
 	hri::Scene scene = loadScene("assets/test_scene.obj");
-
-	// Set up virtual camera
-	hri::Camera camera = hri::Camera();
+	hri::Camera camera = hri::Camera(
+		hri::CameraParameters{ 60.0f },
+		hri::Float3(0.0f, 1.0f, -5.0f),
+		hri::Float3(0.0f, 0.0f, 0.0f)
+	);
 
 	printf("Startup complete\n");
 
@@ -190,8 +270,17 @@ int main()
 		renderCore.startFrame();
 
 		hri::ActiveFrame frame = renderCore.getActiveFrame();
-		subsystemManager.recordFrame(frame);
+		frame.beginCommands();
 
+		gbufferLayoutPassManager.beginRenderPass(frame);
+		subsystemManager.recordSubsystem("GBufferLayoutSystem", frame);
+		gbufferLayoutPassManager.endRenderPass(frame);
+
+		presentPassManager.beginRenderPass(frame);
+		subsystemManager.recordSubsystem("PresentationSystem", frame);
+		presentPassManager.endRenderPass(frame);
+
+		frame.endCommands();
 		renderCore.endFrame();
 	}
 

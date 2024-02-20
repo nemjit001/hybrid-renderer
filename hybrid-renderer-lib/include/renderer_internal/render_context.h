@@ -96,6 +96,10 @@ namespace hri
         ///     NOTE: does not free any allocated swap images or views!
         void recreateSwapchain();
 
+        /// @brief Retrieve the swapchain format.
+        /// @return The active swapchain format.
+        inline VkFormat swapFormat() const { return swapchain.image_format; }
+
     private:
         static SwapchainPresentSetup getSwapPresentSetup(VSyncMode vsyncMode);
 

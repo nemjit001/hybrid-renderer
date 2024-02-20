@@ -16,26 +16,23 @@ RenderSubsystemManager::RenderSubsystemManager(RenderContext* ctx)
     assert(m_pCtx != nullptr);
 }
 
-void RenderSubsystemManager::recordFrame(ActiveFrame& frame) const
+void RenderSubsystemManager::recordSubsystem(const std::string& name, ActiveFrame& frame) const
 {
-    frame.beginCommands();
+    auto const& it = m_subsystems.find(name);
+    assert(it != m_subsystems.end());
+ 
+    // TODO: bind subsystem renderpass IO
+    hri::IRenderSubsystem* pSubsystem = m_subsystems.at(name);
+    assert(pSubsystem != nullptr);
 
-    for (auto const& [ name, subsystem ] : m_subsystems)
-    {
-        // TODO: bind IO descriptor set for pass here
-        subsystem->record(frame);
-    }
-
-    frame.endCommands();
+    pSubsystem->record(frame);
 }
 
-void RenderSubsystemManager::registerSubsystem(const std::string& name, IRenderSubsystem* subsystem, RenderPassIO* subsystemIO)
+void RenderSubsystemManager::registerSubsystem(const std::string& name, IRenderSubsystem* subsystem)
 {
     assert(subsystem != nullptr);
-    assert(subsystemIO != nullptr);
 
     // TODO: fail case handling where name already exists in render system
-    m_subsystemIO.insert(std::make_pair(name, subsystemIO));
     m_subsystems.insert(std::make_pair(name, subsystem));
 }
 

@@ -11,43 +11,55 @@
 
 namespace hri
 {
-    class IRenderSubsystem;
-
-    // TODO: create RenderPassIO manager that has a descriptor set & input views / output views & samplers for views
-    // TODO: create RenderPassIOBuilder that allows for high level IO construction & specifying sampler modes per input.
-    class RenderPassIO;
-    class RenderPassIOBuilder;
-
-    class RenderSubsystemManager
+    /// @brief A Render Subsystem manages a render pipeline, layout, and subsystem descriptors.
+    ///     A Render Subsystem bases its pipeline config on a render pass.
+    class IRenderSubsystem
     {
     public:
-        RenderSubsystemManager(RenderContext* ctx);
-
-        virtual ~RenderSubsystemManager() = default;
-
-        virtual void recordFrame(ActiveFrame& frame) const;
-
-        void registerSubsystem(const std::string& name, IRenderSubsystem* subsystem, RenderPassIO* subsystemIO);
-
-    private:
-        RenderContext* m_pCtx = nullptr;
-        std::unordered_map<std::string, RenderPassIO*> m_subsystemIO = {};
-        std::unordered_map<std::string, IRenderSubsystem*> m_subsystems = {};
-    };
-
-	class IRenderSubsystem
-	{
-	public:
+        /// @brief Create a new render subsystem.
+        /// @param ctx Render Context to use.
+        /// @param shaderDB Shader Database to use.
+        /// @param renderPass Render Pass to use for render pipeline.
         IRenderSubsystem(RenderContext* ctx, ShaderDatabase* shaderDB, VkRenderPass renderPass);
 
+        /// @brief Destroy this subsystem.
         virtual ~IRenderSubsystem() = default;
 
+        /// @brief Record this subsystem's render commands.
+        /// @param frame 
         virtual void record(ActiveFrame& frame) const = 0;
 
-	protected:
-		RenderContext* m_pCtx = nullptr;
+    protected:
+        RenderContext* m_pCtx = nullptr;
         VkRenderPass m_renderPass = VK_NULL_HANDLE;
         VkPipelineLayout m_layout = VK_NULL_HANDLE;
         PipelineStateObject* m_pPSO = nullptr;
-	};
+    };
+
+    /// @brief The Render Subsystem Manager manages subsystems, allowing registration by name.
+    ///     Different subsystem commands can be recorded using the subsystem manager.
+    class RenderSubsystemManager
+    {
+    public:
+        /// @brief Create a new subsystem manager.
+        /// @param ctx Render Context to use.
+        RenderSubsystemManager(RenderContext* ctx);
+
+        /// @brief Destroy this Subsystem Manager.
+        virtual ~RenderSubsystemManager() = default;
+
+        /// @brief Record a subsystem's render commands.
+        /// @param name Name of the subsystem to record commands for.
+        /// @param frame Active Frame given by Render Core.
+        virtual void recordSubsystem(const std::string& name, ActiveFrame& frame) const;
+
+        /// @brief Register a new subsystem.
+        /// @param name Name of the subsystem, MUST be unique.
+        /// @param subsystem Subsystem to register.
+        void registerSubsystem(const std::string& name, IRenderSubsystem* subsystem);
+
+    private:
+        RenderContext* m_pCtx = nullptr;
+        std::unordered_map<std::string, IRenderSubsystem*> m_subsystems = {};
+    };
 }

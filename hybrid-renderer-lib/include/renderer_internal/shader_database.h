@@ -15,17 +15,30 @@ namespace hri
     constexpr float DefaultViewportMinDepth = 0.0f;
     constexpr float DefaultViewportMaxDepth = 1.0f;
 
+    /// @brief The Pipeline Layout Builder allows easy building of pipeline layouts.
     class PipelineLayoutBuilder
     {
     public:
+        /// @brief Create a new pipeline layout builder.
+        /// @param ctx Render Context to use.
         PipelineLayoutBuilder(RenderContext* ctx);
 
+        /// @brief Destroy this pipeline layout builder.
         virtual ~PipelineLayoutBuilder() = default;
 
+        /// @brief Add a push constant to the pipeline layout.
+        /// @param size Size of the push constant to add.
+        /// @param shaderStages Shader stages where this constant is active.
+        /// @return A reference to this class.
         PipelineLayoutBuilder& addPushConstant(size_t size, VkShaderStageFlags shaderStages);
 
+        /// @brief Add a new Descriptor Set Layout to the pipeline layout.
+        /// @param setLayout Desriptor Set Layout to add.
+        /// @return A reference to this class.
         PipelineLayoutBuilder& addDescriptorSetLayout(const DescriptorSetLayout& setLayout);
 
+        /// @brief Build the configured pipeline layout.
+        /// @return A new Pipeline Layout handle.
         VkPipelineLayout build();
 
     private:
