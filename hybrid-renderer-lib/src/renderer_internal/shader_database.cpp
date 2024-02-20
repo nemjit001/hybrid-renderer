@@ -281,7 +281,6 @@ PipelineStateObject* ShaderDatabase::createPipeline(
     // Create PSO object
     PipelineStateObject pso = PipelineStateObject{};
     pso.bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    pso.layout = pipelineBuilder.layout;
 
     // Generate pipeline state from builder
     VkPipelineVertexInputStateCreateInfo vertexInputState = VkPipelineVertexInputStateCreateInfo{ VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO };
@@ -317,7 +316,7 @@ PipelineStateObject* ShaderDatabase::createPipeline(
     pipelineCreateInfo.pDepthStencilState = &pipelineBuilder.depthStencilState;
     pipelineCreateInfo.pColorBlendState = &pipelineBuilder.colorBlendState;
     pipelineCreateInfo.pDynamicState = &dynamicState;
-    pipelineCreateInfo.layout = pso.layout;
+    pipelineCreateInfo.layout = pipelineBuilder.layout;
     pipelineCreateInfo.renderPass = pipelineBuilder.renderPass;
     pipelineCreateInfo.subpass = pipelineBuilder.subpass;
     pipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;

@@ -62,6 +62,9 @@ namespace hri
 
         virtual ~DescriptorSetAllocator();
 
+        DescriptorSetAllocator(const DescriptorSetAllocator&) = delete;
+        DescriptorSetAllocator& operator=(const DescriptorSetAllocator&) = delete;
+
         void allocateDescriptorSet(const DescriptorSetLayout& setlayout, VkDescriptorSet& descriptorSet);
 
         void freeDescriptorSet(VkDescriptorSet& descriptorSet);

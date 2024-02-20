@@ -109,6 +109,9 @@ namespace hri
 		/// @brief Destroy this resource manager base.
 		virtual ~IRenderPassResourceManagerBase();
 
+		IRenderPassResourceManagerBase(IRenderPassResourceManagerBase&) = delete;
+		IRenderPassResourceManagerBase& operator=(IRenderPassResourceManagerBase&) = delete;
+
 		/// @brief Begin a new render pass (override in child classes).
 		/// @param frame Active Frame for which to record commands.
 		virtual void beginRenderPass(ActiveFrame& frame) const = 0;

@@ -107,12 +107,10 @@ namespace hri
         static void destroy(RenderContext* ctx, Shader& shader);
     };
 
-    /// @brief A pipeline state object (PSO) maintains a pipeline, its layout, and its bind point.
+    /// @brief A pipeline state object (PSO) stores a pipeline and its bind point.
     struct PipelineStateObject
     {
         VkPipelineBindPoint bindPoint                   = VK_PIPELINE_BIND_POINT_MAX_ENUM;
-        std::vector<VkDescriptorSetLayout> setLayouts   = {};
-        VkPipelineLayout layout                         = VK_NULL_HANDLE;
         VkPipeline pipeline                             = VK_NULL_HANDLE;
     };
 
@@ -126,6 +124,9 @@ namespace hri
 
         /// @brief Destroy this Shader Database instance.
         virtual ~ShaderDatabase();
+
+        ShaderDatabase(const ShaderDatabase&) = delete;
+        ShaderDatabase& operator=(const ShaderDatabase&) = delete;
 
         /// @brief Register a Shader in the Shader Database.
         /// @param name Shader name to use. MUST be unique.

@@ -56,6 +56,9 @@ namespace hri
 		/// @brief Destroy this render core instance.
 		virtual ~RenderCore();
 
+		RenderCore(const RenderCore&) = delete;
+		RenderCore& operator=(const RenderCore&) = delete;
+
 		/// @brief Start a new frame.
 		void startFrame();
 

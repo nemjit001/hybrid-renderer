@@ -23,6 +23,9 @@ namespace hri
         /// @brief Destroy this subsystem.
         virtual ~IRenderSubsystem();
 
+        IRenderSubsystem(const IRenderSubsystem&) = delete;
+        IRenderSubsystem& operator=(const IRenderSubsystem&) = delete;
+
         /// @brief Record this subsystem's render commands.
         /// @param frame 
         virtual void record(ActiveFrame& frame) const = 0;
