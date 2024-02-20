@@ -15,12 +15,20 @@ namespace hri
         VkDescriptorSetLayout setLayout = VK_NULL_HANDLE;
         std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings = {};
 
+        /// @brief Create a new descriptor set layout.
+        /// @param ctx Render context to use.
+        /// @param bindings Layout Bindings for this descriptor set.
+        /// @param flags Create flags.
+        /// @return A new Descriptor Set Layout.
         static DescriptorSetLayout init(
             RenderContext *ctx,
             std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings,
             VkDescriptorSetLayoutCreateFlags flags = 0
         );
 
+        /// @brief Destroy a descriptor set layout.
+        /// @param ctx Render context used to create the set layout.
+        /// @param layout Layout to destroy.
         static void destroy(RenderContext* ctx, DescriptorSetLayout& layout);
     };
 
@@ -28,8 +36,11 @@ namespace hri
     class DescriptorSetLayoutBuilder
     {
     public:
+        /// @brief Create a new builder instance.
+        /// @param ctx Render context to use.
         DescriptorSetLayoutBuilder(RenderContext* ctx);
 
+        /// @brief Destroy this builder instance.
         virtual ~DescriptorSetLayoutBuilder() = default;
 
         /// @brief Add a descriptor binding to the descriptor set layout.
@@ -55,23 +66,35 @@ namespace hri
         std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> m_bindings = {};
     };
 
+    /// @brief The Descriptor Set Allocator handles allocation of Descriptor Sets from descriptor pools.
     class DescriptorSetAllocator
     {
     public:
+        /// @brief Create a new descriptor set allocator.
+        /// @param ctx Render context to use.
         DescriptorSetAllocator(RenderContext* ctx);
 
+        /// @brief Destroy this descriptor set allocator.
         virtual ~DescriptorSetAllocator();
 
         DescriptorSetAllocator(const DescriptorSetAllocator&) = delete;
         DescriptorSetAllocator& operator=(const DescriptorSetAllocator&) = delete;
 
+        /// @brief Allocate a new descriptor set.
+        /// @param setlayout Set layout to use.
+        /// @param descriptorSet Descriptor set handle to allocate into.
         void allocateDescriptorSet(const DescriptorSetLayout& setlayout, VkDescriptorSet& descriptorSet);
 
+        /// @brief Free a descriptor set.
+        /// @param descriptorSet Descriptor set to free.
         void freeDescriptorSet(VkDescriptorSet& descriptorSet);
 
+        /// @brief Reset the descriptor allocator, invalidating all sets allocated using this allocator.
         void reset();
 
     private:
+        /// @brief Create a new descriptor pool with the default pool sizes.
+        /// @param pool Pool handle to store new pool in.
         void createDescriptorPool(VkDescriptorPool& pool);
 
     private:
