@@ -9,11 +9,13 @@
 
 using namespace hri;
 
-IRenderSubsystem::IRenderSubsystem(RenderContext* ctx)
+IRenderSubsystem::IRenderSubsystem(RenderContext* ctx, DescriptorSetAllocator* descriptorSetAllocator)
     :
-    m_pCtx(ctx)
+    m_pCtx(ctx),
+    m_pDescriptorSetAllocator(descriptorSetAllocator)
 {
     assert(m_pCtx != nullptr);
+    assert(m_pDescriptorSetAllocator != nullptr);
 }
 
 IRenderSubsystem::~IRenderSubsystem()

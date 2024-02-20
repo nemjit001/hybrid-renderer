@@ -113,7 +113,7 @@ void DescriptorSetAllocator::reset()
 void DescriptorSetAllocator::createDescriptorPool(VkDescriptorPool& pool)
 {
     VkDescriptorPoolCreateInfo poolCreateInfo = VkDescriptorPoolCreateInfo{ VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
-    poolCreateInfo.flags = 0;
+    poolCreateInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
     poolCreateInfo.maxSets = HRI_MAX_DESCRIPTOR_SET_COUNT;
     poolCreateInfo.poolSizeCount = static_cast<uint32_t>(c_poolSizes.size());
     poolCreateInfo.pPoolSizes = c_poolSizes.data();
@@ -135,6 +135,35 @@ DescriptorSetManager::DescriptorSetManager(RenderContext* ctx, DescriptorSetAllo
 DescriptorSetManager::~DescriptorSetManager()
 {
     m_pAllocator->freeDescriptorSet(m_set);
+}
+
+DescriptorSetManager::DescriptorSetManager(DescriptorSetManager&& other) noexcept
+    :
+    m_pCtx(other.m_pCtx),
+    m_pAllocator(other.m_pAllocator),
+    m_set(other.m_set),
+    m_bindings(other.m_bindings),
+    m_writeSets(other.m_writeSets)
+{
+    other.m_set = VK_NULL_HANDLE;
+}
+
+DescriptorSetManager& DescriptorSetManager::operator=(DescriptorSetManager&& other) noexcept
+{
+    if (this == &other)
+    {
+        return *this;
+    }
+
+    m_pCtx = other.m_pCtx;
+    m_pAllocator = other.m_pAllocator;
+    m_set = other.m_set;
+    m_bindings = other.m_bindings;
+    m_writeSets = other.m_writeSets;
+
+    other.m_set = VK_NULL_HANDLE;
+
+    return *this;
 }
 
 void DescriptorSetManager::writeBuffer(uint32_t binding, VkDescriptorBufferInfo* bufferInfo)

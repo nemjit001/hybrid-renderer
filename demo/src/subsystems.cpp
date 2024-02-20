@@ -4,12 +4,12 @@
 
 GBufferLayoutSubsystem::GBufferLayoutSubsystem(
 	hri::RenderContext* ctx,
-	hri::ShaderDatabase* shaderDB,
 	hri::DescriptorSetAllocator* descriptorSetAllocator,
+	hri::ShaderDatabase* shaderDB,
 	VkRenderPass renderPass
 )
 	:
-	hri::IRenderSubsystem(ctx)
+	hri::IRenderSubsystem(ctx, descriptorSetAllocator)
 {
 	m_sceneDescriptorSetLayout = hri::DescriptorSetLayoutBuilder(m_pCtx)
 		.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
@@ -102,12 +102,12 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 
 PresentationSubsystem::PresentationSubsystem(
 	hri::RenderContext* ctx,
-	hri::ShaderDatabase* shaderDB,
 	hri::DescriptorSetAllocator* descriptorSetAllocator,
+	hri::ShaderDatabase* shaderDB,
 	VkRenderPass renderPass
 )
 	:
-	hri::IRenderSubsystem(ctx)
+	hri::IRenderSubsystem(ctx, descriptorSetAllocator)
 {
 	m_renderResultDescriptorSetLayout = hri::DescriptorSetLayoutBuilder(m_pCtx)
 		.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
@@ -149,6 +149,8 @@ PresentationSubsystem::PresentationSubsystem(
 		{ "PresentVert", "PresentFrag" },
 		presentPipelineConfig
 	);
+
+	m_renderResultDescriptorSet = std::move(hri::DescriptorSetManager(m_pCtx, m_pDescriptorSetAllocator, m_renderResultDescriptorSetLayout));
 }
 
 PresentationSubsystem::~PresentationSubsystem()
@@ -176,6 +178,18 @@ void PresentationSubsystem::record(hri::ActiveFrame& frame) const
 
 	vkCmdSetViewport(frame.commandBuffer, 0, 1, &viewport);
 	vkCmdSetScissor(frame.commandBuffer, 0, 1, &scissor);
+
+	VkDescriptorSet descriptorSets[] = {
+		m_renderResultDescriptorSet.descriptorSet()
+	};
+
+	vkCmdBindDescriptorSets(
+		frame.commandBuffer,
+		m_pPSO->bindPoint,
+		m_layout,
+		0, HRI_SIZEOF_ARRAY(descriptorSets), descriptorSets,
+		0, nullptr
+	);
 
 	vkCmdBindPipeline(frame.commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
 	vkCmdDraw(frame.commandBuffer, 3, 1, 0, 0);

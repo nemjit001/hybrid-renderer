@@ -9,8 +9,8 @@ class GBufferLayoutSubsystem
 public:
 	GBufferLayoutSubsystem(
 		hri::RenderContext* ctx,
-		hri::ShaderDatabase* shaderDB,
 		hri::DescriptorSetAllocator* descriptorSetAllocator,
+		hri::ShaderDatabase* shaderDB,
 		VkRenderPass renderPass
 	);
 
@@ -30,8 +30,8 @@ class PresentationSubsystem
 public:
 	PresentationSubsystem(
 		hri::RenderContext* ctx,
-		hri::ShaderDatabase* shaderDB,
 		hri::DescriptorSetAllocator* descriptorSetAllocator,
+		hri::ShaderDatabase* shaderDB,
 		VkRenderPass renderPass
 	);
 
@@ -41,4 +41,5 @@ public:
 
 protected:
 	hri::DescriptorSetLayout m_renderResultDescriptorSetLayout;
+	hri::DescriptorSetManager m_renderResultDescriptorSet;
 };

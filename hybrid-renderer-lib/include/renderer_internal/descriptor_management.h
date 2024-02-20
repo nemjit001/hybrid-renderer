@@ -95,9 +95,18 @@ namespace hri
     class DescriptorSetManager
     {
     public:
+        DescriptorSetManager() = default;
+
         DescriptorSetManager(RenderContext* ctx, DescriptorSetAllocator* allocator, const DescriptorSetLayout& layout);
 
         virtual ~DescriptorSetManager();
+
+        DescriptorSetManager(const DescriptorSetManager&) = delete;
+        DescriptorSetManager& operator=(const DescriptorSetManager&) = delete;
+
+        DescriptorSetManager(DescriptorSetManager&& other) noexcept;
+
+        DescriptorSetManager& operator=(DescriptorSetManager&& other) noexcept;
 
         void writeBuffer(uint32_t binding, VkDescriptorBufferInfo* bufferInfo);
 

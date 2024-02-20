@@ -244,8 +244,8 @@ int main()
 	presentPassManager.setClearValue(0, VkClearValue{ { 0.0f, 0.0f, 0.0f, 1.0f } });
 
 	// Set up render subsystems & register with render manager
-	GBufferLayoutSubsystem gbufferLayoutSystem = GBufferLayoutSubsystem(&renderContext, &shaderDB, &descriptorSetAllocator, gbufferLayoutPassManager.renderPass());
-	PresentationSubsystem presentationSystem = PresentationSubsystem(&renderContext, &shaderDB, &descriptorSetAllocator, presentPassManager.renderPass());
+	GBufferLayoutSubsystem gbufferLayoutSystem = GBufferLayoutSubsystem(&renderContext, &descriptorSetAllocator, &shaderDB, gbufferLayoutPassManager.renderPass());
+	PresentationSubsystem presentationSystem = PresentationSubsystem(&renderContext, &descriptorSetAllocator, &shaderDB, presentPassManager.renderPass());
 
 	subsystemManager.registerSubsystem("GBufferLayoutSystem", &gbufferLayoutSystem);
 	subsystemManager.registerSubsystem("PresentationSystem", &presentationSystem);
