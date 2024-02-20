@@ -29,6 +29,7 @@ namespace hri
         VkPipelineLayout build();
 
     private:
+        RenderContext* m_pCtx = nullptr;
         size_t m_pushConstantOffset = 0;
         std::vector<VkPushConstantRange> m_pushConstants = {};
         std::vector<VkDescriptorSetLayout> m_setLayouts = {};

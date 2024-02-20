@@ -1,7 +1,7 @@
 #pragma once
 
 #include "platform.h"
-#include "renderer_internal/hri_math.h"
+#include "hri_math.h"
 
 namespace hri
 {

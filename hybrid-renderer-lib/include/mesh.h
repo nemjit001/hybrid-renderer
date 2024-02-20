@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <vector>
 
-#include "renderer_internal/hri_math.h"
+#include "hri_math.h"
 
 namespace hri
 {

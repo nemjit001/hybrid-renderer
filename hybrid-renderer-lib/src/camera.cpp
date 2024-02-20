@@ -1,6 +1,6 @@
-#include "renderer_internal/camera.h"
+#include "camera.h"
 
-#include "renderer_internal/hri_math.h"
+#include "hri_math.h"
 
 using namespace hri;
 

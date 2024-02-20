@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "renderer_internal/material.h"
-#include "renderer_internal/mesh.h"
+#include "material.h"
+#include "mesh.h"
 
 #define HRI_INVALID_SCENE_INDEX	(uint32_t)(~0)
 

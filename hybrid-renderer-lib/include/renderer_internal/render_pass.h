@@ -17,21 +17,6 @@ namespace hri
 		DepthStencil,
 	};
 
-	struct RenderAttachment	// XXX: More like image -> move to separate header?
-	{
-		VkFormat format				= VK_FORMAT_UNDEFINED;
-		VkImage image				= VK_NULL_HANDLE;
-		VmaAllocation allocation	= VK_NULL_HANDLE;
-
-		static RenderAttachment init(RenderContext* ctx, VkImageCreateInfo* createInfo);
-
-		static void destroy(RenderContext* ctx, RenderAttachment& attachment);
-
-		VkImageView createView(RenderContext* ctx, VkImageViewType viewType, VkComponentMapping components, VkImageSubresourceRange subresourceRange);
-
-		void destroyView(RenderContext* ctx, VkImageView view);
-	};
-
 	/// @brief The RenderPassBuilder allows for easy setup of render passes.
 	class RenderPassBuilder
 	{
@@ -93,35 +78,5 @@ namespace hri
 		RenderContext* m_pCtx = nullptr;
 		std::vector<VkAttachmentDescription> m_attachments;
 		std::vector<SubpassData> m_subpasses;
-	};
-
-	/// @brief The Recordable Pass Interface is used to as a unifying interface for pass recording.
-	class IRecordablePass
-	{
-	public:
-		IRecordablePass(RenderContext* ctx) : m_pCtx(ctx) { assert(m_pCtx != nullptr); }
-
-		virtual ~IRecordablePass() = default;
-
-		virtual void createFrameResources() = 0;
-
-		virtual void destroyFrameResources() = 0;
-
-		inline virtual void recreateFrameResources()
-		{
-			destroyFrameResources();
-			createFrameResources();
-		}
-
-		virtual void setInputAttachment(uint32_t binding, const VkImageView& attachment) = 0;
-
-		virtual std::vector<VkImageView> getOutputAttachments() const = 0;
-
-		/// @brief Record a pass into an active frame's graphics command buffer.
-		/// @param frame Frame to record pass into.
-		virtual void record(const ActiveFrame& frame) const = 0;
-
-	protected:
-		RenderContext* m_pCtx = nullptr;
 	};
 }

@@ -9,53 +9,6 @@
 
 using namespace hri;
 
-RenderAttachment RenderAttachment::init(RenderContext* ctx, VkImageCreateInfo* createInfo)
-{
-	assert(ctx != nullptr);
-	assert(createInfo != nullptr);
-
-	RenderAttachment attachment = RenderAttachment{};
-	attachment.format = createInfo->format;
-
-	VmaAllocationCreateInfo allocationInfo = VmaAllocationCreateInfo{};
-	allocationInfo.flags = 0;
-	allocationInfo.usage = VMA_MEMORY_USAGE_AUTO;
-	HRI_VK_CHECK(vmaCreateImage(ctx->allocator, createInfo, &allocationInfo, &attachment.image, &attachment.allocation, nullptr));
-
-	return attachment;
-}
-
-void RenderAttachment::destroy(RenderContext* ctx, RenderAttachment& attachment)
-{
-	assert(ctx != nullptr);
-	vmaDestroyImage(ctx->allocator, attachment.image, attachment.allocation);
-
-	memset(&attachment, 0, sizeof(RenderAttachment));
-}
-
-VkImageView RenderAttachment::createView(RenderContext* ctx, VkImageViewType viewType, VkComponentMapping components, VkImageSubresourceRange subresourceRange)
-{
-	assert(ctx != nullptr);
-
-	VkImageViewCreateInfo createInfo = VkImageViewCreateInfo{ VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
-	createInfo.flags = 0;
-	createInfo.image = image;
-	createInfo.viewType = viewType;
-	createInfo.format = format;
-	createInfo.components = components;
-	createInfo.subresourceRange = subresourceRange;
-
-	VkImageView view = VK_NULL_HANDLE;
-	HRI_VK_CHECK(vkCreateImageView(ctx->device, &createInfo, nullptr, &view));
-	return view;
-}
-
-void RenderAttachment::destroyView(RenderContext* ctx, VkImageView view)
-{
-	assert(ctx != nullptr);
-	vkDestroyImageView(ctx->device, view, nullptr);
-}
-
 RenderPassBuilder::RenderPassBuilder(RenderContext* ctx)
 	:
 	m_pCtx(ctx)

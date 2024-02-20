@@ -4,7 +4,6 @@
 #include <tiny_obj_loader.h>
 
 #include "demo.h"
-#include "passes.h"
 #include "timer.h"
 #include "window_manager.h"
 
@@ -163,17 +162,13 @@ int main()
 	// Create render core & shader database
 	hri::RenderCore renderCore = hri::RenderCore(&renderContext);
 	hri::ShaderDatabase shaderDB = hri::ShaderDatabase(&renderContext);
+	hri::RenderSubsystemManager subsystemManager = hri::RenderSubsystemManager(&renderContext);
 
-	// Set up render pass objects & link per pass I/O
-	GBufferLayoutPass gbufferLayoutPass = GBufferLayoutPass(&renderContext, &shaderDB);
-	PresentPass presentPass = PresentPass(&renderContext, &shaderDB);
-
-	presentPass.setInputAttachment(0, gbufferLayoutPass.getOutputAttachments()[0]);
+	// TODO: Set up render subsystems here
 
 	// Register a callback for when the swap chain is invalidated (recreates swap dependent resources for render passes)
-	renderCore.setOnSwapchainInvalidateCallback([&gbufferLayoutPass, &presentPass](vkb::Swapchain _swapchain) {
-		gbufferLayoutPass.recreateFrameResources();
-		presentPass.recreateFrameResources();
+	renderCore.setOnSwapchainInvalidateCallback([](vkb::Swapchain _swapchain) {
+		//
 	});
 
 	// Load scene file
@@ -195,10 +190,8 @@ int main()
 		renderCore.startFrame();
 
 		hri::ActiveFrame frame = renderCore.getActiveFrame();
-		frame.beginCommands();
-		gbufferLayoutPass.record(frame);
-		presentPass.record(frame);
-		frame.endCommands();
+		subsystemManager.recordFrame(frame);
+
 		renderCore.endFrame();
 	}
 

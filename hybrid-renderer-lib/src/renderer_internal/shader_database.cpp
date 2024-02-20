@@ -10,6 +10,47 @@
 
 using namespace hri;
 
+PipelineLayoutBuilder::PipelineLayoutBuilder(RenderContext* ctx)
+    :
+    m_pCtx(ctx)
+{
+    assert(m_pCtx != nullptr);
+}
+
+PipelineLayoutBuilder& PipelineLayoutBuilder::addPushConstant(size_t size, VkShaderStageFlags shaderStages)
+{
+    m_pushConstants.push_back(VkPushConstantRange{
+        shaderStages,
+        static_cast<uint32_t>(m_pushConstantOffset),
+        static_cast<uint32_t>(size),
+    });
+
+    m_pushConstantOffset += size;
+    return *this;
+}
+
+PipelineLayoutBuilder& PipelineLayoutBuilder::addDescriptorSetLayout(const DescriptorSetLayout& setLayout)
+{
+    m_setLayouts.push_back(setLayout.setLayout);
+
+    return *this;
+}
+
+VkPipelineLayout PipelineLayoutBuilder::build()
+{
+    VkPipelineLayoutCreateInfo createInfo = VkPipelineLayoutCreateInfo{ VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
+    createInfo.flags = 0;
+    createInfo.pushConstantRangeCount = static_cast<uint32_t>(m_pushConstants.size());
+    createInfo.pPushConstantRanges = m_pushConstants.data();
+    createInfo.setLayoutCount = static_cast<uint32_t>(m_setLayouts.size());
+    createInfo.pSetLayouts = m_setLayouts.data();
+
+    VkPipelineLayout layout = VK_NULL_HANDLE;
+    HRI_VK_CHECK(vkCreatePipelineLayout(m_pCtx->device, &createInfo, nullptr, &layout));
+
+    return layout;
+}
+
 VkViewport GraphicsPipelineBuilder::initDefaultViewport(float width, float height)
 {
     return VkViewport{

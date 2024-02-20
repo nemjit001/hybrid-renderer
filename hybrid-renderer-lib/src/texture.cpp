@@ -1,4 +1,4 @@
-#include "renderer_internal/texture.h"
+#include "texture.h"
 
 #include <cassert>
 #include <cstddef>

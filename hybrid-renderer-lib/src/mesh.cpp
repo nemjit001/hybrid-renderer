@@ -1,4 +1,4 @@
-#include "renderer_internal/mesh.h"
+#include "mesh.h"
 
 using namespace hri;
 

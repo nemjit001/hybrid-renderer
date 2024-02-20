@@ -1,6 +1,6 @@
 #pragma once
 
-#include "renderer_internal/hri_math.h"
+#include "hri_math.h"
 
 #define HRI_WORLD_FORWARD	hri::Float3(0.0f, 0.0f, 1.0f)
 #define HRI_WORLD_UP		hri::Float3(0.0f, 1.0f, 0.0f)

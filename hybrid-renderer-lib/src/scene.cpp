@@ -1,8 +1,8 @@
-#include "renderer_internal/scene.h"
+#include "scene.h"
 
 #include <vector>
 
-#include "renderer_internal/mesh.h"
+#include "mesh.h"
 
 using namespace hri;
 
