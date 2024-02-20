@@ -12,6 +12,10 @@ public:
 	virtual ~GBufferLayoutSubsystem();
 
 	virtual void record(hri::ActiveFrame& frame) const override;
+
+protected:
+	hri::DescriptorSetLayout m_sceneDescriptorSetLayout;
+	hri::DescriptorSetLayout m_objectDescriptorSetLayout;
 };
 
 class PresentationSubsystem
@@ -24,4 +28,7 @@ public:
 	virtual ~PresentationSubsystem();
 
 	virtual void record(hri::ActiveFrame& frame) const override;
+
+protected:
+	hri::DescriptorSetLayout m_renderResultDescriptorSetLayout;
 };

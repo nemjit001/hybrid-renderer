@@ -51,6 +51,17 @@ VkPipelineLayout PipelineLayoutBuilder::build()
     return layout;
 }
 
+VkPipelineInputAssemblyStateCreateInfo GraphicsPipelineBuilder::initInputAssemblyState(VkPrimitiveTopology topology, VkBool32 primitiveRestart)
+{
+    return VkPipelineInputAssemblyStateCreateInfo{
+        VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
+        nullptr,
+        0,
+        topology,
+        primitiveRestart,
+    };
+}
+
 VkViewport GraphicsPipelineBuilder::initDefaultViewport(float width, float height)
 {
     return VkViewport{

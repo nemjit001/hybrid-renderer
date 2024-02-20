@@ -18,12 +18,10 @@ namespace hri
     public:
         /// @brief Create a new render subsystem.
         /// @param ctx Render Context to use.
-        /// @param shaderDB Shader Database to use.
-        /// @param renderPass Render Pass to use for render pipeline.
-        IRenderSubsystem(RenderContext* ctx, ShaderDatabase* shaderDB, VkRenderPass renderPass);
+        IRenderSubsystem(RenderContext* ctx);
 
         /// @brief Destroy this subsystem.
-        virtual ~IRenderSubsystem() = default;
+        virtual ~IRenderSubsystem();
 
         /// @brief Record this subsystem's render commands.
         /// @param frame 
@@ -31,7 +29,6 @@ namespace hri
 
     protected:
         RenderContext* m_pCtx = nullptr;
-        VkRenderPass m_renderPass = VK_NULL_HANDLE;
         VkPipelineLayout m_layout = VK_NULL_HANDLE;
         PipelineStateObject* m_pPSO = nullptr;
     };
