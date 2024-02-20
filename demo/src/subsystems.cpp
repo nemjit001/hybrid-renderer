@@ -79,9 +79,6 @@ GBufferLayoutSubsystem::GBufferLayoutSubsystem(
 	gbufferLayoutPipelineConfig.renderPass = renderPass;
 	gbufferLayoutPipelineConfig.subpass = 0;
 
-	shaderDB->registerShader("StaticVert", hri::Shader::loadFile(m_pCtx, "./shaders/static.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
-	shaderDB->registerShader("GBufferLayoutFrag", hri::Shader::loadFile(m_pCtx, "./shaders/gbuffer_layout.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
-
 	m_pPSO = shaderDB->createPipeline(
 		"GBufferLayoutPipeline",
 		{ "StaticVert", "GBufferLayoutFrag" },
@@ -144,9 +141,6 @@ PresentationSubsystem::PresentationSubsystem(
 	presentPipelineConfig.layout = m_layout;
 	presentPipelineConfig.renderPass = renderPass;
 	presentPipelineConfig.subpass = 0;
-
-	shaderDB->registerShader("PresentVert", hri::Shader::loadFile(m_pCtx, "./shaders/present.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
-	shaderDB->registerShader("PresentFrag", hri::Shader::loadFile(m_pCtx, "./shaders/present.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
 
 	m_pPSO = shaderDB->createPipeline(
 		"PresentPipeline",

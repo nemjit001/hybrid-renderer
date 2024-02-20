@@ -165,6 +165,12 @@ int main()
 	hri::ShaderDatabase shaderDB = hri::ShaderDatabase(&renderContext);
 	hri::RenderSubsystemManager subsystemManager = hri::RenderSubsystemManager(&renderContext);
 
+	// Initialize shader database
+	shaderDB.registerShader("PresentVert", hri::Shader::loadFile(&renderContext, "./shaders/present.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
+	shaderDB.registerShader("StaticVert", hri::Shader::loadFile(&renderContext, "./shaders/static.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
+	shaderDB.registerShader("GBufferLayoutFrag", hri::Shader::loadFile(&renderContext, "./shaders/gbuffer_layout.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
+	shaderDB.registerShader("PresentFrag", hri::Shader::loadFile(&renderContext, "./shaders/present.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
+
 	// Set up render pass builders, attachments, and resource managers
 	hri::RenderPassBuilder gbufferLayoutPassBuilder = hri::RenderPassBuilder(&renderContext)
 		.addAttachment(
@@ -226,7 +232,7 @@ int main()
 	hri::SwapchainPassResourceManager presentPassManager = hri::SwapchainPassResourceManager(
 		&renderContext,
 		presentPassBuilder.build(),
-		{}
+		{}	// No extra attachments for swapchain pass
 	);
 
 	// Set clear values for pass attachments
