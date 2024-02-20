@@ -1,0 +1,15 @@
+<map id="hri::IRenderPassResourceManagerBase::getRenderExtent" name="hri::IRenderPassResourceManagerBase::getRenderExtent">
+<area shape="rect" id="Node000001" title="Get the render extent configured for this resouce manager." alt="" coords="803,85,1010,128"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_i_render_pass_resource_manager_base.html#a4391328fd9a0316ede758d338bee9fea" title="Create resources." alt="" coords="548,85,755,128"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="788,109,756,109,756,104,788,104"/>
+<area shape="rect" id="Node000003" href="$classhri_1_1_swapchain_pass_resource_manager.html#a47e6b8357bfa6232737e69cb478ef45e" title="Create resources." alt="" coords="295,17,486,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="551,83,474,63,476,58,553,78"/>
+<area shape="rect" id="Node000005" href="$classhri_1_1_render_pass_resource_manager.html#af1d3d90e346a5101ecb20e469206669c" title="Create resources." alt="" coords="281,85,500,128"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="532,109,501,109,501,104,532,104"/>
+<area shape="rect" id="Node000007" href="$classhri_1_1_i_render_pass_resource_manager_base.html#aad0340480a463f5e32539a201440e7b9" title="Recreate resources." alt="" coords="281,152,500,195"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="551,135,477,154,476,149,550,130"/>
+<area shape="rect" id="Node000004" href="$classhri_1_1_swapchain_pass_resource_manager.html#a912d7178588505a8d039d609b2d13179" title="Create a new Swapchain resource manager." alt="" coords="5,5,233,64"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="279,40,233,39,233,34,279,34"/>
+<area shape="rect" id="Node000006" href="$classhri_1_1_render_pass_resource_manager.html#a9864550c0c71c6d57cf5ad97041e8852" title="Create a new Render Pass Resource Manager." alt="" coords="9,88,229,131"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="265,111,229,111,229,106,265,105"/>
+</map>

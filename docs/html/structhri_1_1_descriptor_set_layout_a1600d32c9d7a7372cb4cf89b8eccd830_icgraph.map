@@ -1,0 +1,7 @@
+<map id="hri::DescriptorSetLayout::destroy" name="hri::DescriptorSetLayout::destroy">
+<area shape="rect" id="Node000001" title="Destroy a descriptor set layout." alt="" coords="239,39,400,81"/>
+<area shape="rect" id="Node000002" href="$class_g_buffer_layout_subsystem.html#af173ed6f83d89033dc9a836edf72ff28" title=" " alt="" coords="5,5,191,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="223,48,191,43,191,38,224,43"/>
+<area shape="rect" id="Node000003" href="$class_presentation_subsystem.html#a9a6689f2d460e9d4f62250bc03f1a9fc" title=" " alt="" coords="10,72,186,115"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="224,77,187,83,186,77,223,72"/>
+</map>

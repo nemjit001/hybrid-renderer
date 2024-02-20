@@ -1,0 +1,17 @@
+<map id="demo/src/window_manager.cpp" name="demo/src/window_manager.cpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="100,5,303,32"/>
+<area shape="rect" id="Node000002" href="$window__manager_8h.html" title=" " alt="" coords="136,80,267,107"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,33,204,64,199,64,199,33"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,155,70,181"/>
+<area shape="poly" id="edge6_Node000001_Node000003" title=" " alt="" coords="181,35,148,56,114,82,83,113,57,144,53,141,79,110,110,78,145,51,178,30"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="94,155,154,181"/>
+<area shape="poly" id="edge7_Node000001_Node000004" title=" " alt="" coords="176,35,148,54,127,81,120,110,121,139,116,139,114,109,122,79,145,50,173,30"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="178,155,281,181"/>
+<area shape="poly" id="edge8_Node000001_Node000005" title=" " alt="" coords="230,30,258,50,281,79,285,97,280,115,258,145,254,142,276,113,280,97,276,81,255,54,227,35"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="305,155,413,181"/>
+<area shape="poly" id="edge9_Node000001_Node000006" title=" " alt="" coords="229,30,265,50,301,78,327,109,347,140,343,143,323,112,297,82,262,55,227,35"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="174,110,81,150,79,145,172,105"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="190,109,150,146,147,142,186,105"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="209,106,222,139,217,141,204,108"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="230,105,319,145,316,150,228,110"/>
+</map>

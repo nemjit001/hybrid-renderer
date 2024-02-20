@@ -1,0 +1,19 @@
+<map id="PresentationSubsystem" name="PresentationSubsystem">
+<area shape="rect" id="Node000001" title=" " alt="" coords="367,1061,545,1173"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_i_render_subsystem.html" title="A Render Subsystem manages a render pipeline, layout, and subsystem descriptors. A Render Subsystem b..." alt="" coords="205,763,355,917"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="337,929,369,980,422,1060,417,1063,364,983,332,931"/>
+<area shape="rect" id="Node000003" href="$classhri_1_1_render_context.html" title="THe RenderContext manages the Vulkan instance, device, and swapchain state." alt="" coords="29,331,171,635"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="173,622,236,746,231,749,168,624"/>
+<area shape="rect" id="Node000004" href="$classhri_1_1_render_context_queue_state.html" title="The context queue state creates and maintains the device queue setup." alt="" coords="5,176,195,267"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="103,267,103,313,97,313,97,267"/>
+<area shape="rect" id="Node000005" href="$structhri_1_1_device_queue.html" title="A Device Queue is a queue on the logical device to which operations can be submitted." alt="" coords="45,5,155,96"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="103,96,103,159,97,159,97,96"/>
+<area shape="rect" id="Node000006" href="$classhri_1_1_descriptor_set_allocator.html" title="The Descriptor Set Allocator handles allocation of Descriptor Sets from descriptor pools." alt="" coords="195,384,365,581"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="283,581,283,746,277,746,277,581"/>
+<area shape="rect" id="Node000007" href="$structhri_1_1_pipeline_state_object.html" title="A pipeline state object (PSO) stores a pipeline and its bind point." alt="" coords="403,437,552,528"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="486,528,486,563,482,603,471,642,450,677,430,690,409,691,389,692,368,701,344,723,324,750,320,747,340,720,365,696,388,687,409,686,428,685,446,673,466,640,477,602,481,563,480,528"/>
+<area shape="rect" id="Node000008" href="$structhri_1_1_descriptor_set_layout.html" title="A Descriptor Set Layout is used to specify bind points for resource descriptors in shaders." alt="" coords="379,784,533,896"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="459,896,459,1044,453,1044,453,896"/>
+<area shape="rect" id="Node000009" href="$classhri_1_1_descriptor_set_manager.html" title=" " alt="" coords="564,699,732,981"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="647,982,637,1012,621,1039,594,1066,562,1086,559,1082,591,1062,617,1036,632,1009,642,980"/>
+</map>

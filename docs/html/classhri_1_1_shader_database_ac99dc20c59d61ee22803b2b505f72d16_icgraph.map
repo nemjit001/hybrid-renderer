@@ -1,0 +1,5 @@
+<map id="hri::ShaderDatabase::getShader" name="hri::ShaderDatabase::getShader">
+<area shape="rect" id="Node000001" title="Retrieve a Shader from the Shader Database." alt="" coords="193,5,332,48"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_shader_database.html#ad41a635689942c968eee852a49246878" title="Create a new pipeline object in the Shader Database." alt="" coords="5,5,145,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="177,29,145,29,145,24,177,24"/>
+</map>

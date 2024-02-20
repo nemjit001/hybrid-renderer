@@ -1,0 +1,9 @@
+<map id="hri::SwapchainPassResourceManager::~SwapchainPassResourceManager" name="hri::SwapchainPassResourceManager::~SwapchainPassResourceManager">
+<area shape="rect" id="Node000001" title="Destroy this swapchain resource manager." alt="" coords="5,5,241,64"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_swapchain_pass_resource_manager.html#a1e4f5f05c65cce95e723b0f40861d022" title="Destroy resources." alt="" coords="289,13,480,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="241,32,273,32,273,37,241,37"/>
+<area shape="rect" id="Node000003" href="$classhri_1_1_i_render_pass_resource_manager_base.html#a30f0100697124c38b641948896456521" title="Destroy resources." alt="" coords="528,13,742,56"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="481,32,512,32,512,37,481,37"/>
+<area shape="rect" id="Node000004" href="$structhri_1_1_image_resource.html#af4c1d34769d3beef7b748af443123088" title="Destroy an image resource." alt="" coords="790,13,924,56"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="743,32,775,32,775,37,743,37"/>
+</map>

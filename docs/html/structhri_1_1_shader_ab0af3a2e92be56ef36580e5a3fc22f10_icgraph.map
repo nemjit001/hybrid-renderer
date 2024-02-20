@@ -1,0 +1,5 @@
+<map id="hri::Shader::destroy" name="hri::Shader::destroy">
+<area shape="rect" id="Node000001" title="Destroy a shader object." alt="" coords="193,13,328,40"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_shader_database.html#a8ed47abdf57b70e3d5eb483b0d7b38f0" title="Destroy this Shader Database instance." alt="" coords="5,5,145,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="177,29,145,29,145,24,177,24"/>
+</map>

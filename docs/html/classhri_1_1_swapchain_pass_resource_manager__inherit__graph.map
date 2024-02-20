@@ -1,0 +1,5 @@
+<map id="hri::SwapchainPassResourceManager" name="hri::SwapchainPassResourceManager">
+<area shape="rect" id="Node000001" title="The Swapchain pass resource manager is a special type of resource manager that handles rendering to s..." alt="" coords="5,571,243,741"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_i_render_pass_resource_manager_base.html" title="The Render Pass Resource Manager Base is used to create and recreate render pass resources...." alt="" coords="19,5,229,523"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="127,537,127,571,121,571,121,537"/>
+</map>

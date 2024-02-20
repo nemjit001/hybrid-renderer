@@ -1,0 +1,7 @@
+<map id="Timer::tick" name="Timer::tick">
+<area shape="rect" id="Node000001" title="Tick the timer, updating the frame delta." alt="" coords="147,31,229,57"/>
+<area shape="rect" id="Node000002" href="$main_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4" title=" " alt="" coords="27,5,77,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="131,36,77,26,78,21,132,31"/>
+<area shape="rect" id="Node000003" href="$struct_timer.html#a5f16e8da27d2a5a5242dead46de05d97" title=" " alt="" coords="5,56,99,83"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="132,57,100,63,99,58,131,52"/>
+</map>

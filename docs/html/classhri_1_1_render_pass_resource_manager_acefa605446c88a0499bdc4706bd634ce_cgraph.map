@@ -1,0 +1,9 @@
+<map id="hri::RenderPassResourceManager::~RenderPassResourceManager" name="hri::RenderPassResourceManager::~RenderPassResourceManager">
+<area shape="rect" id="Node000001" title="Destroy this resource manager." alt="" coords="5,5,225,48"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_render_pass_resource_manager.html#ac0f58ff968e21cc1757033cabc3db6be" title="Destroy resources." alt="" coords="273,5,492,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="225,24,257,24,257,29,225,29"/>
+<area shape="rect" id="Node000003" href="$classhri_1_1_i_render_pass_resource_manager_base.html#a30f0100697124c38b641948896456521" title="Destroy resources." alt="" coords="540,5,754,48"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="493,24,524,24,524,29,493,29"/>
+<area shape="rect" id="Node000004" href="$structhri_1_1_image_resource.html#af4c1d34769d3beef7b748af443123088" title="Destroy an image resource." alt="" coords="802,5,936,48"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="755,24,787,24,787,29,755,29"/>
+</map>

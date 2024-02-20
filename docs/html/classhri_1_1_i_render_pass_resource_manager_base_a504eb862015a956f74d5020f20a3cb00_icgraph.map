@@ -1,0 +1,11 @@
+<map id="hri::IRenderPassResourceManagerBase::getImageResourceViews" name="hri::IRenderPassResourceManagerBase::getImageResourceViews">
+<area shape="rect" id="Node000001" title="Get image resource views." alt="" coords="548,51,800,93"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_swapchain_pass_resource_manager.html#a47e6b8357bfa6232737e69cb478ef45e" title="Create resources." alt="" coords="295,16,486,59"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="532,57,486,52,487,46,533,52"/>
+<area shape="rect" id="Node000004" href="$classhri_1_1_render_pass_resource_manager.html#af1d3d90e346a5101ecb20e469206669c" title="Create resources." alt="" coords="281,84,500,127"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="533,91,501,95,500,90,532,86"/>
+<area shape="rect" id="Node000003" href="$classhri_1_1_swapchain_pass_resource_manager.html#a912d7178588505a8d039d609b2d13179" title="Create a new Swapchain resource manager." alt="" coords="5,5,233,64"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="279,39,233,38,233,33,279,34"/>
+<area shape="rect" id="Node000005" href="$classhri_1_1_render_pass_resource_manager.html#a9864550c0c71c6d57cf5ad97041e8852" title="Create a new Render Pass Resource Manager." alt="" coords="9,88,229,131"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="265,110,229,110,229,105,265,105"/>
+</map>
