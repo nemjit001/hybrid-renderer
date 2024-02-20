@@ -5,7 +5,7 @@
 
 #include "renderer_internal/render_context.h"
 
-#define HRI_MAX_DESCRIPTOR_SET_COUNT    256
+#define HRI_MAX_DESCRIPTOR_SET_COUNT    128
 
 namespace hri
 {
@@ -55,12 +55,12 @@ namespace hri
         std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> m_bindings = {};
     };
 
-    class DescriptorAllocator
+    class DescriptorSetAllocator
     {
     public:
-        DescriptorAllocator(RenderContext* ctx);
+        DescriptorSetAllocator(RenderContext* ctx);
 
-        virtual ~DescriptorAllocator();
+        virtual ~DescriptorSetAllocator();
 
         void allocateDescriptorSet(const DescriptorSetLayout& setlayout, VkDescriptorSet& descriptorSet);
 
@@ -90,5 +90,31 @@ namespace hri
 
         RenderContext* m_pCtx = nullptr;
         VkDescriptorPool m_descriptorPool = VK_NULL_HANDLE;
+    };
+
+    class DescriptorSetManager
+    {
+    public:
+        DescriptorSetManager(RenderContext* ctx, DescriptorSetAllocator* allocator, const DescriptorSetLayout& layout);
+
+        virtual ~DescriptorSetManager();
+
+        void writeBuffer(uint32_t binding, VkDescriptorBufferInfo* bufferInfo);
+
+        void writeImage(uint32_t binding, VkDescriptorImageInfo* imageInfo);
+
+        void flush();
+
+        inline VkDescriptorSet descriptorSet() const { return m_set; }
+
+    private:
+        const VkDescriptorSetLayoutBinding& getLayoutBinding(uint32_t binding) const;
+
+    private:
+        RenderContext* m_pCtx = nullptr;
+        DescriptorSetAllocator* m_pAllocator = nullptr;
+        VkDescriptorSet m_set = VK_NULL_HANDLE;
+        std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> m_bindings = {};
+        std::vector<VkWriteDescriptorSet> m_writeSets = {};
     };
 }

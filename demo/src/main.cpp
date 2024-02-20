@@ -160,12 +160,13 @@ int main()
 	ctxCreateInfo.vsyncMode = hri::VSyncMode::Disabled;
 	hri::RenderContext renderContext = hri::RenderContext(ctxCreateInfo);
 
-	// Create render core & shader database
+	// Create render core, shader database, subsystem manager, and descriptor set allocator
 	hri::RenderCore renderCore = hri::RenderCore(&renderContext);
 	hri::ShaderDatabase shaderDB = hri::ShaderDatabase(&renderContext);
 	hri::RenderSubsystemManager subsystemManager = hri::RenderSubsystemManager(&renderContext);
+	hri::DescriptorSetAllocator descriptorSetAllocator = hri::DescriptorSetAllocator(&renderContext);
 
-	// Initialize shader database
+	// Initialize shader database w/ all shaders
 	shaderDB.registerShader("PresentVert", hri::Shader::loadFile(&renderContext, "./shaders/present.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
 	shaderDB.registerShader("StaticVert", hri::Shader::loadFile(&renderContext, "./shaders/static.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
 	shaderDB.registerShader("GBufferLayoutFrag", hri::Shader::loadFile(&renderContext, "./shaders/gbuffer_layout.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
@@ -243,8 +244,8 @@ int main()
 	presentPassManager.setClearValue(0, VkClearValue{ { 0.0f, 0.0f, 0.0f, 1.0f } });
 
 	// Set up render subsystems & register with render manager
-	GBufferLayoutSubsystem gbufferLayoutSystem = GBufferLayoutSubsystem(&renderContext, &shaderDB, gbufferLayoutPassManager.renderPass());
-	PresentationSubsystem presentationSystem = PresentationSubsystem(&renderContext, &shaderDB, presentPassManager.renderPass());
+	GBufferLayoutSubsystem gbufferLayoutSystem = GBufferLayoutSubsystem(&renderContext, &shaderDB, &descriptorSetAllocator, gbufferLayoutPassManager.renderPass());
+	PresentationSubsystem presentationSystem = PresentationSubsystem(&renderContext, &shaderDB, &descriptorSetAllocator, presentPassManager.renderPass());
 
 	subsystemManager.registerSubsystem("GBufferLayoutSystem", &gbufferLayoutSystem);
 	subsystemManager.registerSubsystem("PresentationSystem", &presentationSystem);

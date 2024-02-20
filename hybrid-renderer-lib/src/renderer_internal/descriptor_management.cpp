@@ -74,7 +74,7 @@ DescriptorSetLayout DescriptorSetLayoutBuilder::build()
     return DescriptorSetLayout::init(m_pCtx, m_bindings, m_flags);
 }
 
-DescriptorAllocator::DescriptorAllocator(RenderContext* ctx)
+DescriptorSetAllocator::DescriptorSetAllocator(RenderContext* ctx)
     :
     m_pCtx(ctx)
 {
@@ -83,12 +83,12 @@ DescriptorAllocator::DescriptorAllocator(RenderContext* ctx)
     createDescriptorPool(m_descriptorPool);
 }
 
-DescriptorAllocator::~DescriptorAllocator()
+DescriptorSetAllocator::~DescriptorSetAllocator()
 {
     vkDestroyDescriptorPool(m_pCtx->device, m_descriptorPool, nullptr);
 }
 
-void DescriptorAllocator::allocateDescriptorSet(const DescriptorSetLayout& setlayout, VkDescriptorSet& descriptorSet)
+void DescriptorSetAllocator::allocateDescriptorSet(const DescriptorSetLayout& setlayout, VkDescriptorSet& descriptorSet)
 {
     VkDescriptorSetAllocateInfo allocateInfo = VkDescriptorSetAllocateInfo{ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
     allocateInfo.descriptorPool = m_descriptorPool;
@@ -99,18 +99,18 @@ void DescriptorAllocator::allocateDescriptorSet(const DescriptorSetLayout& setla
     HRI_VK_CHECK(vkAllocateDescriptorSets(m_pCtx->device, &allocateInfo, &descriptorSet));
 }
 
-void DescriptorAllocator::freeDescriptorSet(VkDescriptorSet& descriptorSet)
+void DescriptorSetAllocator::freeDescriptorSet(VkDescriptorSet& descriptorSet)
 {
     HRI_VK_CHECK(vkFreeDescriptorSets(m_pCtx->device, m_descriptorPool, 1, &descriptorSet));
     descriptorSet = VK_NULL_HANDLE;
 }
 
-void DescriptorAllocator::reset()
+void DescriptorSetAllocator::reset()
 {
     vkResetDescriptorPool(m_pCtx->device, m_descriptorPool, 0 /* No reset flags */);
 }
 
-void DescriptorAllocator::createDescriptorPool(VkDescriptorPool& pool)
+void DescriptorSetAllocator::createDescriptorPool(VkDescriptorPool& pool)
 {
     VkDescriptorPoolCreateInfo poolCreateInfo = VkDescriptorPoolCreateInfo{ VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
     poolCreateInfo.flags = 0;
@@ -118,4 +118,72 @@ void DescriptorAllocator::createDescriptorPool(VkDescriptorPool& pool)
     poolCreateInfo.poolSizeCount = static_cast<uint32_t>(c_poolSizes.size());
     poolCreateInfo.pPoolSizes = c_poolSizes.data();
     HRI_VK_CHECK(vkCreateDescriptorPool(m_pCtx->device, &poolCreateInfo, nullptr, &pool));
+}
+
+DescriptorSetManager::DescriptorSetManager(RenderContext* ctx, DescriptorSetAllocator* allocator, const DescriptorSetLayout& layout)
+    :
+    m_pCtx(ctx),
+    m_pAllocator(allocator),
+    m_bindings(layout.bindings)
+{
+    assert(m_pCtx != nullptr);
+    assert(m_pAllocator != nullptr);
+
+    m_pAllocator->allocateDescriptorSet(layout, m_set);
+}
+
+DescriptorSetManager::~DescriptorSetManager()
+{
+    m_pAllocator->freeDescriptorSet(m_set);
+}
+
+void DescriptorSetManager::writeBuffer(uint32_t binding, VkDescriptorBufferInfo* bufferInfo)
+{
+    assert(bufferInfo != nullptr);
+
+    const VkDescriptorSetLayoutBinding& layoutBinding = getLayoutBinding(binding);
+    assert(layoutBinding.descriptorCount == 1);
+
+    VkWriteDescriptorSet writeSet = VkWriteDescriptorSet{ VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
+    writeSet.dstSet = m_set;
+    writeSet.dstBinding = binding;
+    writeSet.descriptorCount = layoutBinding.descriptorCount;
+    writeSet.descriptorType = layoutBinding.descriptorType;
+    writeSet.pBufferInfo = bufferInfo;
+}
+
+void DescriptorSetManager::writeImage(uint32_t binding, VkDescriptorImageInfo* imageInfo)
+{
+    assert(imageInfo != nullptr);
+
+    const VkDescriptorSetLayoutBinding& layoutBinding = getLayoutBinding(binding);
+    assert(layoutBinding.descriptorCount == 1);
+
+    VkWriteDescriptorSet writeSet = VkWriteDescriptorSet{ VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
+    writeSet.dstSet = m_set;
+    writeSet.dstBinding = binding;
+    writeSet.descriptorCount = layoutBinding.descriptorCount;
+    writeSet.descriptorType = layoutBinding.descriptorType;
+    writeSet.pImageInfo = imageInfo;
+}
+
+void DescriptorSetManager::flush()
+{
+    vkUpdateDescriptorSets(
+        m_pCtx->device,
+        static_cast<uint32_t>(m_writeSets.size()),
+        m_writeSets.data(),
+        0,
+        nullptr
+    );
+
+    m_writeSets.clear();
+}
+
+const VkDescriptorSetLayoutBinding& DescriptorSetManager::getLayoutBinding(uint32_t binding) const
+{
+    auto const& it = m_bindings.find(binding);
+    assert(it != m_bindings.end());
+
+    return it->second;
 }

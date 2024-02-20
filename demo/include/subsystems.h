@@ -7,7 +7,12 @@ class GBufferLayoutSubsystem
 	public hri::IRenderSubsystem
 {
 public:
-	GBufferLayoutSubsystem(hri::RenderContext* ctx, hri::ShaderDatabase* shaderDB, VkRenderPass renderPass);
+	GBufferLayoutSubsystem(
+		hri::RenderContext* ctx,
+		hri::ShaderDatabase* shaderDB,
+		hri::DescriptorSetAllocator* descriptorSetAllocator,
+		VkRenderPass renderPass
+	);
 
 	virtual ~GBufferLayoutSubsystem();
 
@@ -23,7 +28,12 @@ class PresentationSubsystem
 	public hri::IRenderSubsystem
 {
 public:
-	PresentationSubsystem(hri::RenderContext* ctx, hri::ShaderDatabase* shaderDB, VkRenderPass renderPass);
+	PresentationSubsystem(
+		hri::RenderContext* ctx,
+		hri::ShaderDatabase* shaderDB,
+		hri::DescriptorSetAllocator* descriptorSetAllocator,
+		VkRenderPass renderPass
+	);
 
 	virtual ~PresentationSubsystem();
 

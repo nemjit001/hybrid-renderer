@@ -5,6 +5,7 @@
 GBufferLayoutSubsystem::GBufferLayoutSubsystem(
 	hri::RenderContext* ctx,
 	hri::ShaderDatabase* shaderDB,
+	hri::DescriptorSetAllocator* descriptorSetAllocator,
 	VkRenderPass renderPass
 )
 	:
@@ -102,6 +103,7 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 PresentationSubsystem::PresentationSubsystem(
 	hri::RenderContext* ctx,
 	hri::ShaderDatabase* shaderDB,
+	hri::DescriptorSetAllocator* descriptorSetAllocator,
 	VkRenderPass renderPass
 )
 	:
