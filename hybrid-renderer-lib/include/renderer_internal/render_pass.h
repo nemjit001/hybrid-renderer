@@ -118,7 +118,7 @@ namespace hri
 
 		/// @brief End render pass.
 		/// @param frame Active Frame for which to record commands.
-		virtual void endRenderPass(ActiveFrame& frame);
+		virtual void endRenderPass(ActiveFrame& frame) const;
 
 		/// @brief Set an attachment clear value.
 		/// @param attachmentIndex Attachment for which to set clear value.
@@ -181,7 +181,7 @@ namespace hri
 		SwapchainPassResourceManager(
 			RenderContext* ctx,
 			VkRenderPass renderPass,
-			const std::vector<RenderAttachmentConfig>& attachmentConfigs
+			const std::vector<RenderAttachmentConfig>& attachmentConfigs = {}
 		);
 
 		/// @brief Destroy this swapchain resource manager.
@@ -217,7 +217,7 @@ namespace hri
 		RenderPassResourceManager(
 			RenderContext* ctx,
 			VkRenderPass renderPass,
-			const std::vector<RenderAttachmentConfig>& attachmentConfigs
+			const std::vector<RenderAttachmentConfig>& attachmentConfigs = {}
 		);
 
 		/// @brief Destroy this resource manager.

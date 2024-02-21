@@ -122,7 +122,7 @@ IRenderPassResourceManagerBase::~IRenderPassResourceManagerBase()
 	vkDestroyRenderPass(m_pCtx->device, m_renderPass, nullptr);
 }
 
-void IRenderPassResourceManagerBase::endRenderPass(ActiveFrame& frame)
+void IRenderPassResourceManagerBase::endRenderPass(ActiveFrame& frame) const
 {
 	vkCmdEndRenderPass(frame.commandBuffer);
 }

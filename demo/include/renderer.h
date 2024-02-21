@@ -1,0 +1,51 @@
+#pragma once
+
+#include <hybrid_renderer.h>
+#include <memory>
+
+#include "subsystems.h"
+
+class Renderer
+{
+public:
+	Renderer(hri::RenderContext& ctx);
+
+	virtual ~Renderer();
+
+	void drawFrame();
+
+private:
+	void initShaderDB();
+
+	void initRenderPasses();
+
+	void initSharedResources();
+
+	void initGlobalDescriptorSets();
+
+	void initRenderSubsystems();
+
+	void recreateSwapDependentResources();
+
+private:
+	hri::RenderContext& m_context;
+	hri::RenderCore m_renderCore;
+	hri::ShaderDatabase m_shaderDatabase;
+	hri::RenderSubsystemManager m_subsystemManager;
+	hri::DescriptorSetAllocator m_descriptorSetAllocator;
+
+	// Shared samplers for render result sampling
+	std::unique_ptr<hri::ImageSampler> m_renderResultLinearSampler;
+
+	// Global descriptor sets & layouts
+	std::unique_ptr<hri::DescriptorSetLayout> m_presentInputSetLayout;
+	std::unique_ptr<hri::DescriptorSetManager> m_presentInputSet;
+
+	// Render pass managers
+	std::unique_ptr<hri::RenderPassResourceManager> m_gbufferLayoutPassManager;
+	std::unique_ptr<hri::SwapchainPassResourceManager> m_presentPassManager;
+
+	// Render subsystems
+	std::unique_ptr<GBufferLayoutSubsystem> m_gbufferLayoutSubsystem;
+	std::unique_ptr<PresentationSubsystem> m_presentSubsystem;
+};

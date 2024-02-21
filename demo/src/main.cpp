@@ -4,7 +4,7 @@
 #include <tiny_obj_loader.h>
 
 #include "demo.h"
-#include "subsystems.h"
+#include "renderer.h"
 #include "timer.h"
 #include "window_manager.h"
 
@@ -160,174 +160,8 @@ int main()
 	ctxCreateInfo.vsyncMode = hri::VSyncMode::Disabled;
 	hri::RenderContext renderContext = hri::RenderContext(ctxCreateInfo);
 
-	// Create render core, shader database, subsystem manager, and descriptor set allocator
-	hri::RenderCore renderCore = hri::RenderCore(&renderContext);
-	hri::ShaderDatabase shaderDB = hri::ShaderDatabase(&renderContext);
-	hri::RenderSubsystemManager subsystemManager = hri::RenderSubsystemManager(&renderContext);
-	hri::DescriptorSetAllocator descriptorSetAllocator = hri::DescriptorSetAllocator(&renderContext);
-
-	// Initialize shader database w/ all shaders
-	shaderDB.registerShader("PresentVert", hri::Shader::loadFile(&renderContext, "./shaders/present.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
-	shaderDB.registerShader("StaticVert", hri::Shader::loadFile(&renderContext, "./shaders/static.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
-	shaderDB.registerShader("GBufferLayoutFrag", hri::Shader::loadFile(&renderContext, "./shaders/gbuffer_layout.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
-	shaderDB.registerShader("PresentFrag", hri::Shader::loadFile(&renderContext, "./shaders/present.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
-
-	// Set up render pass builders, attachments, and resource managers
-	hri::RenderPassBuilder gbufferLayoutPassBuilder = hri::RenderPassBuilder(&renderContext)
-		.addAttachment(
-			VK_FORMAT_R8G8B8A8_UNORM,
-			VK_SAMPLE_COUNT_1_BIT,
-			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-			VK_ATTACHMENT_LOAD_OP_CLEAR,
-			VK_ATTACHMENT_STORE_OP_STORE
-		)
-		.addAttachment(
-			VK_FORMAT_R8G8B8A8_SNORM,
-			VK_SAMPLE_COUNT_1_BIT,
-			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-			VK_ATTACHMENT_LOAD_OP_CLEAR,
-			VK_ATTACHMENT_STORE_OP_STORE
-		)
-		.addAttachment(
-			VK_FORMAT_R8G8B8A8_SNORM,
-			VK_SAMPLE_COUNT_1_BIT,
-			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-			VK_ATTACHMENT_LOAD_OP_CLEAR,
-			VK_ATTACHMENT_STORE_OP_STORE
-		)
-		.addAttachment(
-			VK_FORMAT_D24_UNORM_S8_UINT,
-			VK_SAMPLE_COUNT_1_BIT,
-			VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-			VK_ATTACHMENT_LOAD_OP_CLEAR,
-			VK_ATTACHMENT_STORE_OP_STORE
-		)
-		.setAttachmentReference(hri::AttachmentType::Color, VkAttachmentReference{ 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL })
-		.setAttachmentReference(hri::AttachmentType::Color, VkAttachmentReference{ 1, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL })
-		.setAttachmentReference(hri::AttachmentType::Color, VkAttachmentReference{ 2, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL })
-		.setAttachmentReference(hri::AttachmentType::DepthStencil, VkAttachmentReference{ 3, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL });
-
-	hri::RenderPassBuilder presentPassBuilder = hri::RenderPassBuilder(&renderContext)
-		.addAttachment(
-			renderContext.swapFormat(),
-			VK_SAMPLE_COUNT_1_BIT,
-			VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-			VK_ATTACHMENT_LOAD_OP_CLEAR,
-			VK_ATTACHMENT_STORE_OP_STORE
-		)
-		.setAttachmentReference(hri::AttachmentType::Color,	VkAttachmentReference{ 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
-
-	const std::vector<hri::RenderAttachmentConfig> gbufferAttachmentConfigs = {
-		hri::RenderAttachmentConfig{ // Albedo target
-			VK_FORMAT_R8G8B8A8_UNORM,
-			VK_SAMPLE_COUNT_1_BIT,
-			VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
-			| VK_IMAGE_USAGE_SAMPLED_BIT,
-			VK_IMAGE_ASPECT_COLOR_BIT
-		},
-		hri::RenderAttachmentConfig{ // wPos target
-			VK_FORMAT_R8G8B8A8_SNORM,
-			VK_SAMPLE_COUNT_1_BIT,
-			VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
-			| VK_IMAGE_USAGE_SAMPLED_BIT,
-			VK_IMAGE_ASPECT_COLOR_BIT
-		},
-		hri::RenderAttachmentConfig{ // Normal target
-			VK_FORMAT_R8G8B8A8_SNORM,
-			VK_SAMPLE_COUNT_1_BIT,
-			VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
-			| VK_IMAGE_USAGE_SAMPLED_BIT,
-			VK_IMAGE_ASPECT_COLOR_BIT
-		},
-		hri::RenderAttachmentConfig{ // Depth Stencil target
-			VK_FORMAT_D24_UNORM_S8_UINT,
-			VK_SAMPLE_COUNT_1_BIT,
-			VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT
-			| VK_IMAGE_USAGE_SAMPLED_BIT,
-			VK_IMAGE_ASPECT_DEPTH_BIT
-			| VK_IMAGE_ASPECT_STENCIL_BIT
-		},
-	};
-
-	hri::RenderPassResourceManager gbufferLayoutPassManager = hri::RenderPassResourceManager(
-		&renderContext,
-		gbufferLayoutPassBuilder.build(),
-		gbufferAttachmentConfigs
-	);
-
-	hri::SwapchainPassResourceManager presentPassManager = hri::SwapchainPassResourceManager(
-		&renderContext,
-		presentPassBuilder.build(),
-		{}	// No extra attachments for swapchain pass
-	);
-
-	// Set clear values for pass attachments
-	gbufferLayoutPassManager.setClearValue(0, VkClearValue{ { 0.0f, 0.0f, 0.0f, 1.0f } });
-	gbufferLayoutPassManager.setClearValue(1, VkClearValue{ { 0.0f, 0.0f, 0.0f, 1.0f } });
-	gbufferLayoutPassManager.setClearValue(2, VkClearValue{ { 0.0f, 0.0f, 0.0f, 1.0f } });
-	gbufferLayoutPassManager.setClearValue(3, VkClearValue{ { 1.0f, 0x00 } });
-	presentPassManager.setClearValue(0, VkClearValue{ { 0.0f, 0.0f, 0.0f, 1.0f } });
-
-	// Set up global descriptor layouts
-	hri::DescriptorSetLayout presentPassInputSetLayout = hri::DescriptorSetLayoutBuilder(&renderContext)
-		.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-		.build();
-
-	// Allocate descriptor sets
-	hri::DescriptorSetManager presentPassInputSet = hri::DescriptorSetManager(&renderContext, &descriptorSetAllocator, presentPassInputSetLayout);
-
-	// Set up render subsystems & register with render manager
-	GBufferLayoutSubsystem gbufferLayoutSystem = GBufferLayoutSubsystem(
-		&renderContext,
-		&descriptorSetAllocator,
-		&shaderDB,
-		gbufferLayoutPassManager.renderPass()
-	);
-
-	PresentationSubsystem presentationSystem = PresentationSubsystem(
-		&renderContext,
-		&descriptorSetAllocator,
-		&shaderDB,
-		presentPassManager.renderPass(),
-		presentPassInputSetLayout,
-		presentPassInputSet
-	);
-
-	subsystemManager.registerSubsystem("GBufferLayoutSystem", &gbufferLayoutSystem);
-	subsystemManager.registerSubsystem("PresentationSystem", &presentationSystem);
-
-	// Set up image samplers for render results
-	hri::ImageSampler renderResultSampler = hri::ImageSampler(&renderContext);
-
-	// Write & flush descriptor sets
-	VkDescriptorImageInfo renderResultImageInfo = VkDescriptorImageInfo{};
-	renderResultImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-	renderResultImageInfo.imageView = gbufferLayoutPassManager.getAttachmentResource(0).view;
-	renderResultImageInfo.sampler = renderResultSampler.sampler();
-
-	presentPassInputSet
-		.writeImage(0, &renderResultImageInfo)
-		.flush();
-
-	// Register a callback for when the swap chain is invalidated (recreates swap dependent resources for render passes)
-	renderCore.setOnSwapchainInvalidateCallback(
-		[&gbufferLayoutPassManager, &presentPassManager, &presentPassInputSet, &renderResultSampler]
-		(vkb::Swapchain _swapchain)
-		{
-			gbufferLayoutPassManager.recreateResources();
-			presentPassManager.recreateResources();
-
-			// render result descriptor should be updated to account for new image view handles
-			VkDescriptorImageInfo renderResultImageInfo = VkDescriptorImageInfo{};
-			renderResultImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			renderResultImageInfo.imageView = gbufferLayoutPassManager.getAttachmentResource(0).view;
-			renderResultImageInfo.sampler = renderResultSampler.sampler();
-
-			presentPassInputSet
-				.writeImage(0, &renderResultImageInfo)
-				.flush();
-		}
-	);
+	// Create renderer
+	Renderer renderer = Renderer(renderContext);
 
 	// Load scene file & set up virtual camera
 	hri::Scene scene = loadScene("assets/test_scene.obj");
@@ -347,36 +181,10 @@ int main()
 		if (windowManager.isWindowMinimized(gWindow))
 			continue;
 
-		renderCore.startFrame();
-
-		hri::ActiveFrame frame = renderCore.getActiveFrame();
-		frame.beginCommands();
-
-		gbufferLayoutPassManager.beginRenderPass(frame);
-		subsystemManager.recordSubsystem("GBufferLayoutSystem", frame);
-		gbufferLayoutPassManager.endRenderPass(frame);
-
-		frame.imageMemoryBarrier(
-			gbufferLayoutPassManager.getAttachmentResource(0).image,
-			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-			VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-			VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-			VK_ACCESS_SHADER_READ_BIT,
-			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 }
-		);
-
-		presentPassManager.beginRenderPass(frame);
-		subsystemManager.recordSubsystem("PresentationSystem", frame);
-		presentPassManager.endRenderPass(frame);
-
-		frame.endCommands();
-		renderCore.endFrame();
+		renderer.drawFrame();
 	}
 
 	printf("Shutting down\n");
-	renderCore.awaitFrameFinished();
 	windowManager.destroyWindow(gWindow);
 
 	printf("Goodbye!\n");
