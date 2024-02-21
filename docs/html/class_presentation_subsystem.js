@@ -1,8 +1,7 @@
 var class_presentation_subsystem =
 [
-    [ "PresentationSubsystem", "class_presentation_subsystem.html#a30f0b5c438290d150800c9655371c8f4", null ],
-    [ "~PresentationSubsystem", "class_presentation_subsystem.html#a9a6689f2d460e9d4f62250bc03f1a9fc", null ],
+    [ "PresentationSubsystem", "class_presentation_subsystem.html#ad5864d1140ebf0ecb3806016e78215f9", null ],
+    [ "~PresentationSubsystem", "class_presentation_subsystem.html#a8d72bf8a203447aae418bb0192c2b58d", null ],
     [ "record", "class_presentation_subsystem.html#aa08e6b3f6b728dd7e36648f0ffc7d269", null ],
-    [ "m_renderResultDescriptorSet", "class_presentation_subsystem.html#af1aa9b4644ddec45a9b0d6fd695b6de3", null ],
-    [ "m_renderResultDescriptorSetLayout", "class_presentation_subsystem.html#a71cf3375cfda812cfa8afeded2bc4fca", null ]
+    [ "m_globalDescriptorSet", "class_presentation_subsystem.html#aca9c6290f921b3a7972c71f96b23acfb", null ]
 ];

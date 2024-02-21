@@ -1,0 +1,5 @@
+<map id="hri::RenderCore::awaitFrameFinished" name="hri::RenderCore::awaitFrameFinished">
+<area shape="rect" id="Node000001" title="Await the finish of the currently active frame." alt="" coords="195,5,381,48"/>
+<area shape="rect" id="Node000002" href="$class_renderer.html#afeee408862d5bd6255a6882d47e6d5cd" title=" " alt="" coords="5,13,147,40"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="179,29,147,29,147,24,179,24"/>
+</map>

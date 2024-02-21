@@ -1,5 +1,5 @@
 <map id="hri::RenderPassResourceManager" name="hri::RenderPassResourceManager">
-<area shape="rect" id="Node000001" title="The Render Pass Resource manager handles drawing to a framebuffer constructed using the interface&#39;s c..." alt="" coords="5,571,221,725"/>
-<area shape="rect" id="Node000002" href="$classhri_1_1_i_render_pass_resource_manager_base.html" title="The Render Pass Resource Manager Base is used to create and recreate render pass resources...." alt="" coords="8,5,219,523"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="116,537,116,571,111,571,111,537"/>
+<area shape="rect" id="Node000001" title="The Render Pass Resource manager handles drawing to a framebuffer constructed using the interface&#39;s c..." alt="" coords="5,891,337,1173"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_i_render_pass_resource_manager_base.html" title="The Render Pass Resource Manager Base is used to create and recreate render pass resources...." alt="" coords="42,5,301,843"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,858,174,891,169,891,169,858"/>
 </map>

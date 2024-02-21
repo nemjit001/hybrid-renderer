@@ -1,7 +1,7 @@
 <map id="hri::IRenderSubsystem" name="hri::IRenderSubsystem">
-<area shape="rect" id="Node000001" title="A Render Subsystem manages a render pipeline, layout, and subsystem descriptors. A Render Subsystem b..." alt="" coords="123,5,301,224"/>
-<area shape="rect" id="Node000002" href="$class_g_buffer_layout_subsystem.html" title=" " alt="" coords="5,280,200,413"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="156,239,136,282,131,279,152,236"/>
-<area shape="rect" id="Node000003" href="$class_presentation_subsystem.html" title=" " alt="" coords="225,272,418,421"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="272,236,289,271,284,274,268,239"/>
+<area shape="rect" id="Node000001" title="A Render Subsystem manages a render pipeline, layout, and subsystem descriptors. A Render Subsystem b..." alt="" coords="189,5,422,384"/>
+<area shape="rect" id="Node000002" href="$class_g_buffer_layout_subsystem.html" title=" " alt="" coords="5,432,293,720"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="225,399,210,433,206,431,220,397"/>
+<area shape="rect" id="Node000003" href="$class_presentation_subsystem.html" title=" " alt="" coords="317,432,605,720"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="391,397,405,431,400,433,386,399"/>
 </map>

@@ -24,6 +24,23 @@ protected:
 	hri::DescriptorSetManager& m_globalDescriptorSet;
 };
 
+class UISubsystem
+	:
+	public hri::IRenderSubsystem
+{
+public:
+	UISubsystem(
+		hri::RenderContext* ctx,
+		hri::DescriptorSetAllocator* descriptorSetAllocator,
+		hri::ShaderDatabase* shaderDB,
+		VkRenderPass renderPass
+	);
+
+	virtual ~UISubsystem();
+
+	virtual void record(hri::ActiveFrame& frame) const override;
+};
+
 class PresentationSubsystem
 	:
 	public hri::IRenderSubsystem

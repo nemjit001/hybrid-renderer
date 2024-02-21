@@ -5,6 +5,7 @@ var annotated_dup =
       [ "BufferResource", "structhri_1_1_buffer_resource.html", "structhri_1_1_buffer_resource" ],
       [ "Camera", "classhri_1_1_camera.html", "classhri_1_1_camera" ],
       [ "CameraParameters", "structhri_1_1_camera_parameters.html", "structhri_1_1_camera_parameters" ],
+      [ "CameraShaderData", "structhri_1_1_camera_shader_data.html", "structhri_1_1_camera_shader_data" ],
       [ "DescriptorSetAllocator", "classhri_1_1_descriptor_set_allocator.html", "classhri_1_1_descriptor_set_allocator" ],
       [ "DescriptorSetLayout", "structhri_1_1_descriptor_set_layout.html", "structhri_1_1_descriptor_set_layout" ],
       [ "DescriptorSetLayoutBuilder", "classhri_1_1_descriptor_set_layout_builder.html", "classhri_1_1_descriptor_set_layout_builder" ],
@@ -13,6 +14,7 @@ var annotated_dup =
       [ "FrameState", "structhri_1_1_frame_state.html", "structhri_1_1_frame_state" ],
       [ "GraphicsPipelineBuilder", "structhri_1_1_graphics_pipeline_builder.html", "structhri_1_1_graphics_pipeline_builder" ],
       [ "ImageResource", "structhri_1_1_image_resource.html", "structhri_1_1_image_resource" ],
+      [ "ImageSampler", "classhri_1_1_image_sampler.html", "classhri_1_1_image_sampler" ],
       [ "IRenderPassResourceManagerBase", "classhri_1_1_i_render_pass_resource_manager_base.html", "classhri_1_1_i_render_pass_resource_manager_base" ],
       [ "IRenderSubsystem", "classhri_1_1_i_render_subsystem.html", "classhri_1_1_i_render_subsystem" ],
       [ "Material", "structhri_1_1_material.html", "structhri_1_1_material" ],
@@ -41,6 +43,7 @@ var annotated_dup =
     ] ],
     [ "GBufferLayoutSubsystem", "class_g_buffer_layout_subsystem.html", "class_g_buffer_layout_subsystem" ],
     [ "PresentationSubsystem", "class_presentation_subsystem.html", "class_presentation_subsystem" ],
+    [ "Renderer", "class_renderer.html", "class_renderer" ],
     [ "Timer", "struct_timer.html", "struct_timer" ],
     [ "WindowCreateInfo", "struct_window_create_info.html", "struct_window_create_info" ],
     [ "WindowManager", "class_window_manager.html", "class_window_manager" ]

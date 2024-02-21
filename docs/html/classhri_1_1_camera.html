@@ -106,7 +106,7 @@ $(function(){initNavTree('classhri_1_1_camera.html',''); initResizable(); });
 <div class="dynheader">
 Collaboration diagram for hri::Camera:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="classhri_1_1_camera__coll__graph.svg" width="95" height="208"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="classhri_1_1_camera__coll__graph.svg" width="211" height="310"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
@@ -123,6 +123,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ad6c4280ed1b45d33ee0db2a6d0d54ae7" id="r_ad6c4280ed1b45d33ee0db2a6d0d54ae7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad6c4280ed1b45d33ee0db2a6d0d54ae7">~Camera</a> ()=<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">default</a></td></tr>
 <tr class="memdesc:ad6c4280ed1b45d33ee0db2a6d0d54ae7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroy this camera instance.  <br /></td></tr>
 <tr class="separator:ad6c4280ed1b45d33ee0db2a6d0d54ae7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86d982164352fcf5f146274c23f5b17a" id="r_a86d982164352fcf5f146274c23f5b17a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structhri_1_1_camera_shader_data.html">CameraShaderData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a86d982164352fcf5f146274c23f5b17a">getShaderData</a> ()</td></tr>
+<tr class="memdesc:a86d982164352fcf5f146274c23f5b17a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the camera data in a shader ready layout.  <br /></td></tr>
+<tr class="separator:a86d982164352fcf5f146274c23f5b17a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
@@ -138,7 +141,7 @@ Public Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A virtual camera used in rendering operations. </p>
 
-<p class="definition">Definition at line <a class="el" href="camera_8h_source.html#l00018">18</a> of file <a class="el" href="camera_8h_source.html">camera.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="camera_8h_source.html#l00024">24</a> of file <a class="el" href="camera_8h_source.html">camera.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a02ae8e8496038da60af99a73b618f8d8" name="a02ae8e8496038da60af99a73b618f8d8"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a02ae8e8496038da60af99a73b618f8d8">&#9670;&#160;</a></span>Camera() <span class="overload">[1/3]</span></h2>
@@ -264,6 +267,34 @@ Here is the call graph for this function:</div>
 
 </div>
 </div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a86d982164352fcf5f146274c23f5b17a" name="a86d982164352fcf5f146274c23f5b17a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86d982164352fcf5f146274c23f5b17a">&#9670;&#160;</a></span>getShaderData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structhri_1_1_camera_shader_data.html">CameraShaderData</a> Camera::getShaderData </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Retrieve the camera data in a shader ready layout. </p>
+<dl class="section return"><dt>Returns</dt><dd>A <a class="el" href="classhri_1_1_camera.html" title="A virtual camera used in rendering operations.">Camera</a> <a class="el" href="structhri_1_1_shader.html" title="A Shader object represents a programmable pipeline stage.">Shader</a> Data struct. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="camera_8cpp_source.html#l00026">26</a> of file <a class="el" href="camera_8cpp_source.html">camera.cpp</a>.</p>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classhri_1_1_camera_a86d982164352fcf5f146274c23f5b17a_icgraph.svg" width="387" height="38"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
+</div>
+</div>
 <h2 class="groupheader">Member Data Documentation</h2>
 <a id="a7030f2a15e4671acb931627434fd773c" name="a7030f2a15e4671acb931627434fd773c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7030f2a15e4671acb931627434fd773c">&#9670;&#160;</a></span>forward</h2>
@@ -277,7 +308,7 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="camera_8h_source.html#l00039">39</a> of file <a class="el" href="camera_8h_source.html">camera.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="camera_8h_source.html#l00049">49</a> of file <a class="el" href="camera_8h_source.html">camera.h</a>.</p>
 
 </div>
 </div>
@@ -293,7 +324,7 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="camera_8h_source.html#l00038">38</a> of file <a class="el" href="camera_8h_source.html">camera.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="camera_8h_source.html#l00048">48</a> of file <a class="el" href="camera_8h_source.html">camera.h</a>.</p>
 
 </div>
 </div>
@@ -309,7 +340,7 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="camera_8h_source.html#l00040">40</a> of file <a class="el" href="camera_8h_source.html">camera.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="camera_8h_source.html#l00050">50</a> of file <a class="el" href="camera_8h_source.html">camera.h</a>.</p>
 
 </div>
 </div>
@@ -325,7 +356,7 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="camera_8h_source.html#l00041">41</a> of file <a class="el" href="camera_8h_source.html">camera.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="camera_8h_source.html#l00051">51</a> of file <a class="el" href="camera_8h_source.html">camera.h</a>.</p>
 
 </div>
 </div>

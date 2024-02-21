@@ -10,3 +10,6 @@
 [submodule "hybrid-renderer-lib/deps/VulkanMemoryAllocator"]
 	path = hybrid-renderer-lib/deps/VulkanMemoryAllocator
 	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator
+[submodule "demo/deps/imgui"]
+	path = demo/deps/imgui
+	url = https://github.com/ocornut/imgui

@@ -105,6 +105,10 @@ namespace hri
 
         /// @brief Reset the descriptor allocator, invalidating all sets allocated using this allocator.
         void reset();
+        
+        /// @brief Get a fixed pool that is guaranteed to exist. Useful for hooking in external libraries that require a pool handle.
+        /// @return A vk descriptor pool handle.
+        inline VkDescriptorPool fixedPool() const { return m_descriptorPool; }
 
     private:
         /// @brief Create a new descriptor pool with the default pool sizes.

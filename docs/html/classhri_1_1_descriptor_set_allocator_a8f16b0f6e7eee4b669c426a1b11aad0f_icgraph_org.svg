@@ -21,7 +21,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="classhri_1_1_descriptor_set_manager.html#a2bca2c8d14b5f4a7b8a94fec0da63f64" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="classhri_1_1_descriptor_set_manager.html#a2bca2c8d14b5f4a7b8a94fec0da63f64" target="_top" xlink:title="Destroy this descriptor set manager instance.">
 <polygon fill="white" stroke="#666666" points="129.25,-32 0,-32 0,0 129.25,0 129.25,-32"/>
 <text text-anchor="start" x="8" y="-18.5" font-family="Helvetica,sans-Serif" font-size="10.00">hri::DescriptorSetManager</text>
 <text text-anchor="middle" x="64.62" y="-6.5" font-family="Helvetica,sans-Serif" font-size="10.00">::~DescriptorSetManager</text>

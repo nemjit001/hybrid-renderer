@@ -8,7 +8,7 @@ var searchData=
   ['platform_5fid_5',['PLATFORM_ID',['../_c_make_c_compiler_id_8c.html#adbc5372f40838899018fadbc89bd588b',1,'PLATFORM_ID:&#160;CMakeCCompilerId.c'],['../_c_make_c_x_x_compiler_id_8cpp.html#adbc5372f40838899018fadbc89bd588b',1,'PLATFORM_ID:&#160;CMakeCXXCompilerId.cpp']]],
   ['pollevents_6',['pollEvents',['../class_window_manager.html#a2b7bac19d378ca482800234c0e375c58',1,'WindowManager']]],
   ['position_7',['position',['../classhri_1_1_camera.html#add4221fc845f2b19ba5d84685104a3ba',1,'hri::Camera::position'],['../structhri_1_1_vertex.html#a5d7fdd43fd6b351c1bf3214e0832a6ed',1,'hri::Vertex::position']]],
-  ['presentationsubsystem_8',['PresentationSubsystem',['../class_presentation_subsystem.html',1,'PresentationSubsystem'],['../class_presentation_subsystem.html#a30f0b5c438290d150800c9655371c8f4',1,'PresentationSubsystem::PresentationSubsystem()']]],
+  ['presentationsubsystem_8',['PresentationSubsystem',['../class_presentation_subsystem.html',1,'PresentationSubsystem'],['../class_presentation_subsystem.html#ad5864d1140ebf0ecb3806016e78215f9',1,'PresentationSubsystem::PresentationSubsystem()']]],
   ['presentmode_9',['presentMode',['../structhri_1_1_swapchain_present_setup.html#aa104b2ea121bc6893ce213be5015ece4',1,'hri::SwapchainPresentSetup']]],
   ['presentqueue_10',['presentQueue',['../classhri_1_1_render_context_queue_state.html#ac956aa54c1a1b71c8988ddd72379eacb',1,'hri::RenderContextQueueState']]],
   ['ptitle_11',['pTitle',['../struct_window_create_info.html#a634adca61d3c621c53acdf870e579e4a',1,'WindowCreateInfo']]],

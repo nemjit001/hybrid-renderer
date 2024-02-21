@@ -106,15 +106,26 @@ $(function(){initNavTree('structhri_1_1_active_frame.html',''); initResizable();
 <div class="dynheader">
 Collaboration diagram for hri::ActiveFrame:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="structhri_1_1_active_frame__coll__graph.svg" width="166" height="123"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="structhri_1_1_active_frame__coll__graph.svg" width="439" height="507"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a4a3c093f72eb04c992358080664336fa" id="r_a4a3c093f72eb04c992358080664336fa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4a3c093f72eb04c992358080664336fa">beginCommands</a> ()</td></tr>
+<tr class="memdesc:a4a3c093f72eb04c992358080664336fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Begin rendering commands for this frame.  <br /></td></tr>
 <tr class="separator:a4a3c093f72eb04c992358080664336fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac112cf17f6070800819cd6c930c2eb64" id="r_ac112cf17f6070800819cd6c930c2eb64"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac112cf17f6070800819cd6c930c2eb64">endCommands</a> ()</td></tr>
+<tr class="memdesc:ac112cf17f6070800819cd6c930c2eb64"><td class="mdescLeft">&#160;</td><td class="mdescRight">End rendering commands for this frame.  <br /></td></tr>
 <tr class="separator:ac112cf17f6070800819cd6c930c2eb64"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3c8fbefc10714817d0a651ae4762388e" id="r_a3c8fbefc10714817d0a651ae4762388e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3c8fbefc10714817d0a651ae4762388e">imageMemoryBarrier</a> (<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkImage</a> image, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkPipelineStageFlags</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">srcStage</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkPipelineStageFlags</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">dstStage</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkAccessFlags</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">srcAccessMask</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkAccessFlags</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">dstAccessMask</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkImageLayout</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">oldLayout</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkImageLayout</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">newLayout</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkImageSubresourceRange</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">subresourceRange</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">uint32_t</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">srcQueueFamily</a>=<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VK_QUEUE_FAMILY_IGNORED</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">uint32_t</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">dstQueueFamily</a>=<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VK_QUEUE_FAMILY_IGNORED</a>) <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a></td></tr>
+<tr class="memdesc:a3c8fbefc10714817d0a651ae4762388e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Insert an image memory barrier in the frame.  <br /></td></tr>
+<tr class="separator:a3c8fbefc10714817d0a651ae4762388e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a87fb506c18ecc56b0319d64c19b3ef98" id="r_a87fb506c18ecc56b0319d64c19b3ef98"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a87fb506c18ecc56b0319d64c19b3ef98">bufferMemoryBarrier</a> (<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkBuffer</a> buffer, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkPipelineStageFlags</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">srcStage</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkPipelineStageFlags</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">dstStage</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkAccessFlags</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">srcAccessMask</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkAccessFlags</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">dstAccessMask</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">size_t</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">offset</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">size_t</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">size</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">uint32_t</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">srcQueueFamily</a>=<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VK_QUEUE_FAMILY_IGNORED</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">uint32_t</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">dstQueueFamily</a>=<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VK_QUEUE_FAMILY_IGNORED</a>) <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a></td></tr>
+<tr class="memdesc:a87fb506c18ecc56b0319d64c19b3ef98"><td class="mdescLeft">&#160;</td><td class="mdescRight">Insert a buffer memory barrier in the frame.  <br /></td></tr>
+<tr class="separator:a87fb506c18ecc56b0319d64c19b3ef98"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a50e103dd98afa574d13a2d2071bc3829" id="r_a50e103dd98afa574d13a2d2071bc3829"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a50e103dd98afa574d13a2d2071bc3829">memoryBarrier</a> (<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkPipelineStageFlags</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">srcStage</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkPipelineStageFlags</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">dstStage</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkAccessFlags</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">srcAccessMask</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkAccessFlags</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">dstAccessMask</a>) <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a></td></tr>
+<tr class="memdesc:a50e103dd98afa574d13a2d2071bc3829"><td class="mdescLeft">&#160;</td><td class="mdescRight">Insert a memory barrier in the frame.  <br /></td></tr>
+<tr class="separator:a50e103dd98afa574d13a2d2071bc3829"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
@@ -151,12 +162,88 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="render__core_8h_source.html#l00034">34</a> of file <a class="el" href="render__core_8h_source.html">render_core.h</a>.</p>
+<p>Begin rendering commands for this frame. </p>
+
+<p class="definition">Definition at line <a class="el" href="render__core_8h_source.html#l00035">35</a> of file <a class="el" href="render__core_8h_source.html">render_core.h</a>.</p>
 <div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="structhri_1_1_active_frame_a4a3c093f72eb04c992358080664336fa_icgraph.svg" width="328" height="38"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="structhri_1_1_active_frame_a4a3c093f72eb04c992358080664336fa_icgraph.svg" width="424" height="38"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
+
+</div>
+</div>
+<a id="a87fb506c18ecc56b0319d64c19b3ef98" name="a87fb506c18ecc56b0319d64c19b3ef98"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a87fb506c18ecc56b0319d64c19b3ef98">&#9670;&#160;</a></span>bufferMemoryBarrier()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">void</a> ActiveFrame::bufferMemoryBarrier </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkBuffer</a></td>          <td class="paramname"><span class="paramname"><em>buffer</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkPipelineStageFlags</a></td>          <td class="paramname"><span class="paramname"><em>srcStage</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkPipelineStageFlags</a></td>          <td class="paramname"><span class="paramname"><em>dstStage</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkAccessFlags</a></td>          <td class="paramname"><span class="paramname"><em>srcAccessMask</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkAccessFlags</a></td>          <td class="paramname"><span class="paramname"><em>dstAccessMask</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">size_t</a></td>          <td class="paramname"><span class="paramname"><em>offset</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">size_t</a></td>          <td class="paramname"><span class="paramname"><em>size</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">uint32_t</a></td>          <td class="paramname"><span class="paramname"><em>srcQueueFamily</em><span class="paramdefsep"> = </span><span class="paramdefval"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VK_QUEUE_FAMILY_IGNORED</a></span>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">uint32_t</a></td>          <td class="paramname"><span class="paramname"><em>dstQueueFamily</em><span class="paramdefsep"> = </span><span class="paramdefval"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VK_QUEUE_FAMILY_IGNORED</a></span></span>&#160;) const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Insert a buffer memory barrier in the frame. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">buffer</td><td>Buffer for which this barrier is active. </td></tr>
+    <tr><td class="paramname">srcStage</td><td>Source pipeline stage. </td></tr>
+    <tr><td class="paramname">dstStage</td><td>Destination pipeline stage. </td></tr>
+    <tr><td class="paramname">srcAccessMask</td><td>Source access flags, when the buffer is no longer accessed. </td></tr>
+    <tr><td class="paramname">dstAccessMask</td><td>Destination access flags, when the buffer has to be accessible again. </td></tr>
+    <tr><td class="paramname">offset</td><td>Buffer region offset for the barrier. </td></tr>
+    <tr><td class="paramname">size</td><td>Buffer region size for the barrier, may be VK_WHOLE_SIZE. </td></tr>
+    <tr><td class="paramname">srcQueueFamily</td><td>Current queue family of image. </td></tr>
+    <tr><td class="paramname">dstQueueFamily</td><td>Target queue family of image. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="render__core_8cpp_source.html#l00084">84</a> of file <a class="el" href="render__core_8cpp_source.html">render_core.cpp</a>.</p>
 
 </div>
 </div>
@@ -183,7 +270,133 @@ Here is the caller graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="render__core_8h_source.html#l00042">42</a> of file <a class="el" href="render__core_8h_source.html">render_core.h</a>.</p>
+<p>End rendering commands for this frame. </p>
+
+<p class="definition">Definition at line <a class="el" href="render__core_8h_source.html#l00044">44</a> of file <a class="el" href="render__core_8h_source.html">render_core.h</a>.</p>
+
+</div>
+</div>
+<a id="a3c8fbefc10714817d0a651ae4762388e" name="a3c8fbefc10714817d0a651ae4762388e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3c8fbefc10714817d0a651ae4762388e">&#9670;&#160;</a></span>imageMemoryBarrier()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">void</a> ActiveFrame::imageMemoryBarrier </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkImage</a></td>          <td class="paramname"><span class="paramname"><em>image</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkPipelineStageFlags</a></td>          <td class="paramname"><span class="paramname"><em>srcStage</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkPipelineStageFlags</a></td>          <td class="paramname"><span class="paramname"><em>dstStage</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkAccessFlags</a></td>          <td class="paramname"><span class="paramname"><em>srcAccessMask</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkAccessFlags</a></td>          <td class="paramname"><span class="paramname"><em>dstAccessMask</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkImageLayout</a></td>          <td class="paramname"><span class="paramname"><em>oldLayout</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkImageLayout</a></td>          <td class="paramname"><span class="paramname"><em>newLayout</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkImageSubresourceRange</a></td>          <td class="paramname"><span class="paramname"><em>subresourceRange</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">uint32_t</a></td>          <td class="paramname"><span class="paramname"><em>srcQueueFamily</em><span class="paramdefsep"> = </span><span class="paramdefval"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VK_QUEUE_FAMILY_IGNORED</a></span>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">uint32_t</a></td>          <td class="paramname"><span class="paramname"><em>dstQueueFamily</em><span class="paramdefsep"> = </span><span class="paramdefval"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VK_QUEUE_FAMILY_IGNORED</a></span></span>&#160;) const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Insert an image memory barrier in the frame. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">image</td><td>Image for which this barrier is active. </td></tr>
+    <tr><td class="paramname">srcStage</td><td>Source pipeline stage. </td></tr>
+    <tr><td class="paramname">dstStage</td><td>Destination pipeline stage. </td></tr>
+    <tr><td class="paramname">srcAccessMask</td><td>Source access flags, when the image can be transitioned. </td></tr>
+    <tr><td class="paramname">dstAccessMask</td><td>Destination access flags, when the image has to be done transitioning. </td></tr>
+    <tr><td class="paramname">oldLayout</td><td>Old image layout. </td></tr>
+    <tr><td class="paramname">newLayout</td><td>New image layout. </td></tr>
+    <tr><td class="paramname">subresourceRange</td><td>Image subresource range to transition. </td></tr>
+    <tr><td class="paramname">srcQueueFamily</td><td>Current queue family of image. </td></tr>
+    <tr><td class="paramname">dstQueueFamily</td><td>Target queue family of image. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="render__core_8cpp_source.html#l00050">50</a> of file <a class="el" href="render__core_8cpp_source.html">render_core.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a50e103dd98afa574d13a2d2071bc3829" name="a50e103dd98afa574d13a2d2071bc3829"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a50e103dd98afa574d13a2d2071bc3829">&#9670;&#160;</a></span>memoryBarrier()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">void</a> ActiveFrame::memoryBarrier </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkPipelineStageFlags</a></td>          <td class="paramname"><span class="paramname"><em>srcStage</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkPipelineStageFlags</a></td>          <td class="paramname"><span class="paramname"><em>dstStage</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkAccessFlags</a></td>          <td class="paramname"><span class="paramname"><em>srcAccessMask</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkAccessFlags</a></td>          <td class="paramname"><span class="paramname"><em>dstAccessMask</em></span>&#160;) const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Insert a memory barrier in the frame. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">srcStage</td><td>Source pipeline stage. </td></tr>
+    <tr><td class="paramname">dstStage</td><td>Destination pipeline stage. </td></tr>
+    <tr><td class="paramname">srcAccessMask</td><td>Source access flags, when the memory is no longer accessed. </td></tr>
+    <tr><td class="paramname">dstAccessMask</td><td>Destination access flags, when the memory has to be accessible again. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="render__core_8cpp_source.html#l00116">116</a> of file <a class="el" href="render__core_8cpp_source.html">render_core.cpp</a>.</p>
 
 </div>
 </div>
@@ -220,8 +433,9 @@ Here is the caller graph for this function:</div>
 
 </div>
 </div>
-<hr/>The documentation for this struct was generated from the following file:<ul>
+<hr/>The documentation for this struct was generated from the following files:<ul>
 <li>hybrid-renderer-lib/include/renderer_internal/<a class="el" href="render__core_8h_source.html">render_core.h</a></li>
+<li>hybrid-renderer-lib/src/renderer_internal/<a class="el" href="render__core_8cpp_source.html">render_core.cpp</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

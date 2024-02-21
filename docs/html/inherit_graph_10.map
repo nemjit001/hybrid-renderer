@@ -1,3 +1,3 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$structhri_1_1_graphics_pipeline_builder.html" title="The Graphics Pipeline Builder allows easy configuration &amp; initialization of fixed function state." alt="" coords="5,5,187,32"/>
+<area shape="rect" id="Node000000" href="$structhri_1_1_frame_state.html" title="The Frame State manages per frame data such as buffers &amp; sync primitives." alt="" coords="5,5,117,32"/>
 </map>

@@ -1,7 +1,3 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$classhri_1_1_i_render_pass_resource_manager_base.html" title="The Render Pass Resource Manager Base is used to create and recreate render pass resources...." alt="" coords="5,27,178,69"/>
-<area shape="rect" id="Node000001" href="$classhri_1_1_render_pass_resource_manager.html" title="The Render Pass Resource manager handles drawing to a framebuffer constructed using the interface&#39;s c..." alt="" coords="226,5,445,32"/>
-<area shape="poly" id="edge1_Node000000_Node000001" title=" " alt="" coords="193,33,225,29,225,35,194,38"/>
-<area shape="rect" id="Node000002" href="$classhri_1_1_swapchain_pass_resource_manager.html" title="The Swapchain pass resource manager is a special type of resource manager that handles rendering to s..." alt="" coords="240,56,431,99"/>
-<area shape="poly" id="edge2_Node000000_Node000002" title=" " alt="" coords="194,58,240,63,239,68,193,63"/>
+<area shape="rect" id="Node000000" href="$structhri_1_1_image_resource.html" title="An image resource is a collection of a vk image, allocation, and optional view. The view can be insta..." alt="" coords="5,5,139,32"/>
 </map>

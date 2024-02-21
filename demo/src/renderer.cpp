@@ -77,6 +77,7 @@ void Renderer::drawFrame()
 
 	m_presentPassManager->beginRenderPass(frame);
 	m_subsystemManager.recordSubsystem("PresentationSystem", frame);
+	m_subsystemManager.recordSubsystem("UISystem", frame);	// Must be drawn after present as overlay
 	m_presentPassManager->endRenderPass(frame);
 
 	frame.endCommands();
@@ -255,6 +256,13 @@ void Renderer::initRenderSubsystems()
 		*m_sceneDataSet
 	);
 
+	m_uiSubsystem = std::make_unique<UISubsystem>(
+		&m_context,
+		&m_descriptorSetAllocator,
+		&m_shaderDatabase,
+		m_presentPassManager->renderPass()
+	);
+
 	m_presentSubsystem = std::make_unique<PresentationSubsystem>(
 		&m_context,
 		&m_descriptorSetAllocator,
@@ -265,6 +273,7 @@ void Renderer::initRenderSubsystems()
 	);
 
 	m_subsystemManager.registerSubsystem("GBufferLayoutSystem", m_gbufferLayoutSubsystem.get());
+	m_subsystemManager.registerSubsystem("UISystem", m_uiSubsystem.get());
 	m_subsystemManager.registerSubsystem("PresentationSystem", m_presentSubsystem.get());
 }
 

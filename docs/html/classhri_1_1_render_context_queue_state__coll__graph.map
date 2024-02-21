@@ -1,5 +1,5 @@
 <map id="hri::RenderContextQueueState" name="hri::RenderContextQueueState">
-<area shape="rect" id="Node000001" title="The context queue state creates and maintains the device queue setup." alt="" coords="5,176,195,267"/>
-<area shape="rect" id="Node000002" href="$structhri_1_1_device_queue.html" title="A Device Queue is a queue on the logical device to which operations can be submitted." alt="" coords="45,5,155,96"/>
+<area shape="rect" id="Node000001" title="The context queue state creates and maintains the device queue setup." alt="" coords="5,176,195,299"/>
+<area shape="rect" id="Node000002" href="$structhri_1_1_device_queue.html" title="A Device Queue is a queue on the logical device to which operations can be submitted." alt="" coords="40,5,160,96"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,96,103,159,97,159,97,96"/>
 </map>

@@ -28,7 +28,7 @@ var searchData=
   ['hri_5fworld_5fright_25',['HRI_WORLD_RIGHT',['../camera_8h.html#aaa4dbed52045814034bf52a4fd7c1c14',1,'camera.h']]],
   ['hri_5fworld_5fup_26',['HRI_WORLD_UP',['../camera_8h.html#a9023b543aa0dbb0b213c82e1b6d162ed',1,'camera.h']]],
   ['hriimmediatesubmitfunc_27',['HRIImmediateSubmitFunc',['../namespacehri.html#af406a524ff410660f734b08e41471847',1,'hri']]],
-  ['hrionswapchaininvalidatefunc_28',['HRIOnSwapchainInvalidateFunc',['../namespacehri.html#a100136dfda4e18615fa788c66759f6f6',1,'hri']]],
+  ['hrionswapchaininvalidatefunc_28',['HRIOnSwapchainInvalidateFunc',['../namespacehri.html#a675141032226859dbb7fa58555883a30',1,'hri']]],
   ['hrisurfacecreatefunc_29',['HRISurfaceCreateFunc',['../namespacehri.html#a506c1e315d13fefd91116d08c3615637',1,'hri']]],
   ['hybrid_20renderer_30',['Hybrid Renderer',['../md__r_e_a_d_m_e.html',1,'']]],
   ['hybrid_5frenderer_2ecpp_31',['hybrid_renderer.cpp',['../hybrid__renderer_8cpp.html',1,'']]],

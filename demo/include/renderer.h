@@ -55,5 +55,6 @@ private:
 
 	// Render subsystems
 	std::unique_ptr<GBufferLayoutSubsystem> m_gbufferLayoutSubsystem;
+	std::unique_ptr<UISubsystem> m_uiSubsystem;
 	std::unique_ptr<PresentationSubsystem> m_presentSubsystem;
 };

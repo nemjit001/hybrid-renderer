@@ -1,0 +1,5 @@
+<map id="hri::RenderCore::setOnSwapchainInvalidateCallback" name="hri::RenderCore::setOnSwapchainInvalidateCallback">
+<area shape="rect" id="Node000001" title="Register a callback for when the Swap Chain is invalidated. This callback can be used to recreate fra..." alt="" coords="187,5,404,48"/>
+<area shape="rect" id="Node000002" href="$class_renderer.html#a4ee3cc7784d1ad3d00884d9dd539268e" title=" " alt="" coords="5,13,139,40"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="171,29,139,29,139,24,171,24"/>
+</map>

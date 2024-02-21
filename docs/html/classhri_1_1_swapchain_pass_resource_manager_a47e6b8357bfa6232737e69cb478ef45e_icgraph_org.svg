@@ -21,7 +21,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="classhri_1_1_swapchain_pass_resource_manager.html#a912d7178588505a8d039d609b2d13179" target="_top" xlink:title="Create a new Swapchain resource manager.">
+<g id="a_Node000002"><a xlink:href="classhri_1_1_swapchain_pass_resource_manager.html#a804e2ab1ac08e83f7f17f7ef6b26b839" target="_top" xlink:title="Create a new Swapchain resource manager.">
 <polygon fill="white" stroke="#666666" points="170.5,-44 0,-44 0,0 170.5,0 170.5,-44"/>
 <text text-anchor="start" x="8" y="-30.5" font-family="Helvetica,sans-Serif" font-size="10.00">hri::SwapchainPassResource</text>
 <text text-anchor="start" x="8" y="-18.5" font-family="Helvetica,sans-Serif" font-size="10.00">Manager::SwapchainPassResource</text>

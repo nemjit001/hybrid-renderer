@@ -6,7 +6,7 @@ var classhri_1_1_i_render_pass_resource_manager_base =
     [ "beginRenderPass", "classhri_1_1_i_render_pass_resource_manager_base.html#a155cb35a5636b0132c7cefa8e1acb171", null ],
     [ "createResources", "classhri_1_1_i_render_pass_resource_manager_base.html#a4391328fd9a0316ede758d338bee9fea", null ],
     [ "destroyResources", "classhri_1_1_i_render_pass_resource_manager_base.html#a30f0100697124c38b641948896456521", null ],
-    [ "endRenderPass", "classhri_1_1_i_render_pass_resource_manager_base.html#a66ee49ad1a6d2a0e56e5a4109eb1e909", null ],
+    [ "endRenderPass", "classhri_1_1_i_render_pass_resource_manager_base.html#a2d9f3fb38897046e22428bc3bf9fc4e3", null ],
     [ "getAttachmentResource", "classhri_1_1_i_render_pass_resource_manager_base.html#a7c25964cca9c77563daf8a33a5a91d5d", null ],
     [ "getImageResourceViews", "classhri_1_1_i_render_pass_resource_manager_base.html#a504eb862015a956f74d5020f20a3cb00", null ],
     [ "getRenderExtent", "classhri_1_1_i_render_pass_resource_manager_base.html#aabea2269ebd554cf3d75885a4e4dec87", null ],

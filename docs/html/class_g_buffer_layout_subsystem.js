@@ -1,8 +1,7 @@
 var class_g_buffer_layout_subsystem =
 [
-    [ "GBufferLayoutSubsystem", "class_g_buffer_layout_subsystem.html#aa4bc140592cc3df5bbafdb5e2463921a", null ],
-    [ "~GBufferLayoutSubsystem", "class_g_buffer_layout_subsystem.html#af173ed6f83d89033dc9a836edf72ff28", null ],
+    [ "GBufferLayoutSubsystem", "class_g_buffer_layout_subsystem.html#a2256ebe444cbae68b140e734107f0edc", null ],
+    [ "~GBufferLayoutSubsystem", "class_g_buffer_layout_subsystem.html#a5e7600e08743c45337fa474e0c79717c", null ],
     [ "record", "class_g_buffer_layout_subsystem.html#a99e8e6d2ea238397874b4139821fee4f", null ],
-    [ "m_objectDescriptorSetLayout", "class_g_buffer_layout_subsystem.html#ab3db6ee10bd2e76ed6cfa41635002bfe", null ],
-    [ "m_sceneDescriptorSetLayout", "class_g_buffer_layout_subsystem.html#a7d416347ae3a49e8aa6bd8ed8f857690", null ]
+    [ "m_globalDescriptorSet", "class_g_buffer_layout_subsystem.html#ac3cf59cb3a33a452dae22270d8bef42c", null ]
 ];

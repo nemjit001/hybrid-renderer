@@ -1,0 +1,5 @@
+<map id="hri::Camera::getShaderData" name="hri::Camera::getShaderData">
+<area shape="rect" id="Node000001" title="Retrieve the camera data in a shader ready layout." alt="" coords="199,5,381,32"/>
+<area shape="rect" id="Node000002" href="$class_renderer.html#ae9ea22eef66c32118c1f96fc6e6d569e" title=" " alt="" coords="5,5,151,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,21,151,21,151,16,184,16"/>
+</map>

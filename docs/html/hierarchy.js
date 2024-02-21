@@ -4,6 +4,7 @@ var hierarchy =
     [ "hri::BufferResource", "structhri_1_1_buffer_resource.html", null ],
     [ "hri::Camera", "classhri_1_1_camera.html", null ],
     [ "hri::CameraParameters", "structhri_1_1_camera_parameters.html", null ],
+    [ "hri::CameraShaderData", "structhri_1_1_camera_shader_data.html", null ],
     [ "hri::DescriptorSetAllocator", "classhri_1_1_descriptor_set_allocator.html", null ],
     [ "hri::DescriptorSetLayout", "structhri_1_1_descriptor_set_layout.html", null ],
     [ "hri::DescriptorSetLayoutBuilder", "classhri_1_1_descriptor_set_layout_builder.html", null ],
@@ -12,6 +13,7 @@ var hierarchy =
     [ "hri::FrameState", "structhri_1_1_frame_state.html", null ],
     [ "hri::GraphicsPipelineBuilder", "structhri_1_1_graphics_pipeline_builder.html", null ],
     [ "hri::ImageResource", "structhri_1_1_image_resource.html", null ],
+    [ "hri::ImageSampler", "classhri_1_1_image_sampler.html", null ],
     [ "hri::IRenderPassResourceManagerBase", "classhri_1_1_i_render_pass_resource_manager_base.html", [
       [ "hri::RenderPassResourceManager", "classhri_1_1_render_pass_resource_manager.html", null ],
       [ "hri::SwapchainPassResourceManager", "classhri_1_1_swapchain_pass_resource_manager.html", null ]
@@ -29,6 +31,7 @@ var hierarchy =
     [ "hri::RenderContextCreateInfo", "structhri_1_1_render_context_create_info.html", null ],
     [ "hri::RenderContextQueueState", "classhri_1_1_render_context_queue_state.html", null ],
     [ "hri::RenderCore", "classhri_1_1_render_core.html", null ],
+    [ "Renderer", "class_renderer.html", null ],
     [ "hri::RenderPassBuilder", "classhri_1_1_render_pass_builder.html", null ],
     [ "hri::RenderSubsystemManager", "classhri_1_1_render_subsystem_manager.html", null ],
     [ "hri::Scene", "classhri_1_1_scene.html", null ],

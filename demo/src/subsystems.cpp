@@ -1,6 +1,7 @@
 #include "subsystems.h"
 
 #include <hybrid_renderer.h>
+#include <imgui_impl_vulkan.h>
 
 GBufferLayoutSubsystem::GBufferLayoutSubsystem(
 	hri::RenderContext* ctx,
@@ -115,6 +116,41 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 	);
 
 	vkCmdBindPipeline(frame.commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
+}
+
+UISubsystem::UISubsystem(
+	hri::RenderContext* ctx,
+	hri::DescriptorSetAllocator* descriptorSetAllocator,
+	hri::ShaderDatabase* shaderDB,
+	VkRenderPass renderPass
+)
+	:
+	hri::IRenderSubsystem(ctx, descriptorSetAllocator)
+{
+	ImGui_ImplVulkan_InitInfo initInfo = {};
+	initInfo.Instance = m_pCtx->instance;
+	initInfo.PhysicalDevice = m_pCtx->gpu;
+	initInfo.Device = m_pCtx->device;
+	initInfo.QueueFamily = m_pCtx->queues.graphicsQueue.family;
+	initInfo.Queue = m_pCtx->queues.graphicsQueue.handle;
+	initInfo.PipelineCache = VK_NULL_HANDLE;
+	initInfo.DescriptorPool = m_pDescriptorSetAllocator->fixedPool();
+	initInfo.Subpass = 0;
+	initInfo.MinImageCount = m_pCtx->swapchain.requested_min_image_count;
+	initInfo.ImageCount = m_pCtx->swapchain.image_count;
+	initInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+	initInfo.RenderPass = renderPass;
+	ImGui_ImplVulkan_Init(&initInfo);
+}
+
+UISubsystem::~UISubsystem()
+{
+	ImGui_ImplVulkan_Shutdown();
+}
+
+void UISubsystem::record(hri::ActiveFrame& frame) const
+{
+	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), frame.commandBuffer);
 }
 
 PresentationSubsystem::PresentationSubsystem(

@@ -2,10 +2,12 @@
 
 #include <iostream>
 #include <tiny_obj_loader.h>
+#include <imgui.h>
 
 #include "demo.h"
 #include "renderer.h"
 #include "timer.h"
+#include "ui_manager.h"
 #include "window_manager.h"
 
 static Timer gFrameTimer		= Timer();
@@ -142,6 +144,18 @@ hri::Scene loadScene(const char* path)
 	);
 }
 
+void drawStatusWindow(float deltaTime)
+{
+	if (ImGui::Begin("Status"))
+	{
+		ImGui::SetWindowSize(ImVec2(300.0f, 250.0f), ImGuiCond_FirstUseEver);
+		ImGui::Text("Frame Time: %8.2f", deltaTime * 1'000.0f);
+		ImGui::Text("FPS:        %8.2f", 1.0f / deltaTime);
+	}
+
+	ImGui::End();
+}
+
 int main()
 {
 	// Set up window manager & main window
@@ -154,11 +168,14 @@ int main()
 	windowCreateInfo.resizable = true;
 	gWindow = windowManager.createWindow(&windowCreateInfo);
 
+	// Set up UI manager
+	UIManager uiManager = UIManager(gWindow);
+
 	// Set up render context
 	hri::RenderContextCreateInfo ctxCreateInfo = hri::RenderContextCreateInfo{};
 	ctxCreateInfo.surfaceCreateFunc = [](VkInstance instance, VkSurfaceKHR* surface) { return WindowManager::createVulkanSurface(instance, gWindow, nullptr, surface); };
 	ctxCreateInfo.vsyncMode = hri::VSyncMode::Disabled;
-	hri::RenderContext renderContext = hri::RenderContext(ctxCreateInfo);
+	hri::RenderContext renderContext = hri::RenderContext(ctxCreateInfo);	
 
 	// Set up world cam
 	hri::Camera camera = hri::Camera(
@@ -183,6 +200,12 @@ int main()
 		if (windowManager.isWindowMinimized(gWindow))
 			continue;
 
+		// Record ImGUI draw commands
+		uiManager.startDraw();
+		drawStatusWindow(gFrameTimer.deltaTime);
+		uiManager.endDraw();
+
+		// Draw renderer frame
 		renderer.drawFrame();
 	}
 

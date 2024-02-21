@@ -1,0 +1,23 @@
+<map id="GBufferLayoutSubsystem::GBufferLayoutSubsystem" name="GBufferLayoutSubsystem::GBufferLayoutSubsystem">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,272,183,315"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_pipeline_layout_builder.html#a98ca63c2f88a41ce1d3bbdbc4dfb5643" title="Add a new Descriptor Set Layout to the pipeline layout." alt="" coords="237,5,406,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="100,270,117,226,144,170,181,110,204,82,229,58,234,54,237,59,232,62,208,86,185,113,148,172,122,228,105,272"/>
+<area shape="rect" id="Node000004" href="$classhri_1_1_pipeline_layout_builder.html#ad88e3add16c5f341425531e1db34c77d" title="Build the configured pipeline layout." alt="" coords="237,72,406,115"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="105,270,154,200,189,160,229,125,235,120,238,125,232,129,192,163,158,203,110,273"/>
+<area shape="rect" id="Node000005" href="$structhri_1_1_graphics_pipeline_builder.html#a6c9fa89e6b0675c7f460f67f2d674479" title=" " alt="" coords="231,139,412,181"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="119,269,168,230,229,191,240,186,242,190,232,196,171,235,122,274"/>
+<area shape="rect" id="Node000006" href="$structhri_1_1_graphics_pipeline_builder.html#aebf69250a889e1ac3196f3c54b147630" title=" " alt="" coords="231,205,412,248"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="168,269,231,250,232,255,170,274"/>
+<area shape="rect" id="Node000007" href="$structhri_1_1_graphics_pipeline_builder.html#a50539a9cc2f38a2da3416d07f069e8b3" title=" " alt="" coords="231,272,412,315"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="183,291,215,291,215,296,183,296"/>
+<area shape="rect" id="Node000008" href="$structhri_1_1_graphics_pipeline_builder.html#abd3ba37381aa860148b95c6feb6ca129" title=" " alt="" coords="231,339,412,381"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="170,313,232,331,231,336,168,318"/>
+<area shape="rect" id="Node000009" href="$structhri_1_1_graphics_pipeline_builder.html#ac7a8817225341e5268221226e0040b3b" title=" " alt="" coords="231,405,412,448"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="122,313,171,352,232,391,242,396,240,401,229,396,168,356,119,317"/>
+<area shape="rect" id="Node000010" href="$structhri_1_1_graphics_pipeline_builder.html#ac0e003f458114cb94bdce9d73d6b6526" title=" " alt="" coords="231,472,412,515"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="110,313,158,384,192,423,232,458,238,462,235,466,229,462,189,427,154,387,105,316"/>
+<area shape="rect" id="Node000011" href="$structhri_1_1_graphics_pipeline_builder.html#aaaa7a563067832f496b46ee8174db0ec" title=" " alt="" coords="231,539,412,581"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="105,314,122,358,148,415,185,473,208,501,232,525,237,528,234,532,229,529,204,504,181,477,144,417,117,360,100,316"/>
+<area shape="rect" id="Node000003" href="$structhri_1_1_descriptor_set_layout.html#a44d96a9bbc20103084787671af90b88d" title="Retrieve the set layout handle." alt="" coords="460,5,621,48"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="406,24,445,24,445,29,406,29"/>
+</map>

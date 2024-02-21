@@ -1,11 +1,11 @@
 <map id="hri::RenderPassResourceManager" name="hri::RenderPassResourceManager">
-<area shape="rect" id="Node000001" title="The Render Pass Resource manager handles drawing to a framebuffer constructed using the interface&#39;s c..." alt="" coords="5,1244,221,1399"/>
-<area shape="rect" id="Node000002" href="$classhri_1_1_i_render_pass_resource_manager_base.html" title="The Render Pass Resource Manager Base is used to create and recreate render pass resources...." alt="" coords="8,699,219,1195"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="116,1210,116,1244,111,1244,111,1210"/>
-<area shape="rect" id="Node000003" href="$classhri_1_1_render_context.html" title="THe RenderContext manages the Vulkan instance, device, and swapchain state." alt="" coords="43,331,184,635"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="116,634,116,682,111,682,111,634"/>
-<area shape="rect" id="Node000004" href="$classhri_1_1_render_context_queue_state.html" title="The context queue state creates and maintains the device queue setup." alt="" coords="19,176,208,267"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="116,267,116,313,111,313,111,267"/>
-<area shape="rect" id="Node000005" href="$structhri_1_1_device_queue.html" title="A Device Queue is a queue on the logical device to which operations can be submitted." alt="" coords="58,5,169,96"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="116,96,116,159,111,159,111,96"/>
+<area shape="rect" id="Node000001" title="The Render Pass Resource manager handles drawing to a framebuffer constructed using the interface&#39;s c..." alt="" coords="5,1692,337,1975"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_i_render_pass_resource_manager_base.html" title="The Render Pass Resource Manager Base is used to create and recreate render pass resources...." alt="" coords="42,827,301,1643"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,1658,174,1692,169,1692,169,1658"/>
+<area shape="rect" id="Node000003" href="$classhri_1_1_render_context.html" title="THe RenderContext manages the Vulkan instance, device, and swapchain state." alt="" coords="65,363,278,763"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="174,763,174,810,169,810,169,763"/>
+<area shape="rect" id="Node000004" href="$classhri_1_1_render_context_queue_state.html" title="The context queue state creates and maintains the device queue setup." alt="" coords="77,176,266,299"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="174,299,174,346,169,346,169,299"/>
+<area shape="rect" id="Node000005" href="$structhri_1_1_device_queue.html" title="A Device Queue is a queue on the logical device to which operations can be submitted." alt="" coords="111,5,231,96"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="174,96,174,159,169,159,169,96"/>
 </map>

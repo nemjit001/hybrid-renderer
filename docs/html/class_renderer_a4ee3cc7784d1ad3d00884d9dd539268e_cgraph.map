@@ -1,0 +1,5 @@
+<map id="Renderer::Renderer" name="Renderer::Renderer">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,13,139,40"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_render_core.html#a9baea667f47f366ce6acceaae113dac8" title="Register a callback for when the Swap Chain is invalidated. This callback can be used to recreate fra..." alt="" coords="187,5,404,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="139,24,171,24,171,29,139,29"/>
+</map>
