@@ -12,24 +12,38 @@ namespace hri
     /// @brief A Descriptor Set Layout is used to specify bind points for resource descriptors in shaders.
     struct DescriptorSetLayout
     {
-        VkDescriptorSetLayout setLayout = VK_NULL_HANDLE;
-        std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings = {};
-
         /// @brief Create a new descriptor set layout.
         /// @param ctx Render context to use.
         /// @param bindings Layout Bindings for this descriptor set.
         /// @param flags Create flags.
         /// @return A new Descriptor Set Layout.
-        static DescriptorSetLayout init(
+        DescriptorSetLayout(
             RenderContext *ctx,
             std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings,
             VkDescriptorSetLayoutCreateFlags flags = 0
         );
 
         /// @brief Destroy a descriptor set layout.
-        /// @param ctx Render context used to create the set layout.
-        /// @param layout Layout to destroy.
-        static void destroy(RenderContext* ctx, DescriptorSetLayout& layout);
+        virtual ~DescriptorSetLayout();
+
+        DescriptorSetLayout(const DescriptorSetLayout&) = delete;
+        DescriptorSetLayout& operator=(const DescriptorSetLayout&) = delete;
+
+        DescriptorSetLayout(DescriptorSetLayout&& other) noexcept;
+        DescriptorSetLayout& operator=(DescriptorSetLayout&& other) noexcept;
+
+        /// @brief Retrieve the set layout handle.
+        /// @return A vk descriptor set layout handle.
+        inline VkDescriptorSetLayout setLayout() const { return m_setLayout; }
+
+        /// @brief Retrieve the bindings stored in this descriptor set layout.
+        /// @return A map of bindings.
+        inline const std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding>& bindings() const { return m_bindings; }
+
+    private:
+        RenderContext* m_pCtx;
+        VkDescriptorSetLayout m_setLayout = VK_NULL_HANDLE;
+        std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> m_bindings = {};
     };
 
     /// @brief The Descriptor Set Layout Builder allows for efficient building of a descriptor set layout.
@@ -121,8 +135,6 @@ namespace hri
     class DescriptorSetManager
     {
     public:
-        DescriptorSetManager() = default;
-
         DescriptorSetManager(RenderContext* ctx, DescriptorSetAllocator* allocator, const DescriptorSetLayout& layout);
 
         virtual ~DescriptorSetManager();
@@ -134,11 +146,11 @@ namespace hri
 
         DescriptorSetManager& operator=(DescriptorSetManager&& other) noexcept;
 
-        void writeBuffer(uint32_t binding, VkDescriptorBufferInfo* bufferInfo);
+        DescriptorSetManager& writeBuffer(uint32_t binding, VkDescriptorBufferInfo* bufferInfo);
 
-        void writeImage(uint32_t binding, VkDescriptorImageInfo* imageInfo);
+        DescriptorSetManager& writeImage(uint32_t binding, VkDescriptorImageInfo* imageInfo);
 
-        void flush();
+        DescriptorSetManager& flush();
 
         inline VkDescriptorSet descriptorSet() const { return m_set; }
 

@@ -14,13 +14,12 @@ public:
 		VkRenderPass renderPass
 	);
 
-	virtual ~GBufferLayoutSubsystem();
+	virtual ~GBufferLayoutSubsystem() = default;
 
 	virtual void record(hri::ActiveFrame& frame) const override;
 
 protected:
-	hri::DescriptorSetLayout m_sceneDescriptorSetLayout;
-	hri::DescriptorSetLayout m_objectDescriptorSetLayout;
+	//
 };
 
 class PresentationSubsystem
@@ -32,14 +31,15 @@ public:
 		hri::RenderContext* ctx,
 		hri::DescriptorSetAllocator* descriptorSetAllocator,
 		hri::ShaderDatabase* shaderDB,
-		VkRenderPass renderPass
+		VkRenderPass renderPass,
+		hri::DescriptorSetLayout& globalSetLayout,
+		hri::DescriptorSetManager& globalDescriptorSet
 	);
 
-	virtual ~PresentationSubsystem();
+	virtual ~PresentationSubsystem() = default;
 
 	virtual void record(hri::ActiveFrame& frame) const override;
 
 protected:
-	hri::DescriptorSetLayout m_renderResultDescriptorSetLayout;
-	hri::DescriptorSetManager m_renderResultDescriptorSet;
+	hri::DescriptorSetManager& m_globalDescriptorSet;
 };

@@ -43,6 +43,38 @@ namespace hri
 		{
 			HRI_VK_CHECK(vkEndCommandBuffer(commandBuffer));
 		}
+
+		void imageMemoryBarrier(
+			VkImage image,
+			VkPipelineStageFlags srcStage,
+			VkPipelineStageFlags dstStage,
+			VkAccessFlags srcAccessMask,
+			VkAccessFlags dstAccessMask,
+			VkImageLayout oldLayout,
+			VkImageLayout newLayout,
+			VkImageSubresourceRange subresourceRange,
+			uint32_t srcQueueFamily = VK_QUEUE_FAMILY_IGNORED,
+			uint32_t dstQueueFamily = VK_QUEUE_FAMILY_IGNORED
+		) const;
+
+		void bufferMemoryBarrier(
+			VkBuffer buffer,
+			VkPipelineStageFlags srcStage,
+			VkPipelineStageFlags dstStage,
+			VkAccessFlags srcAccessMask,
+			VkAccessFlags dstAccessMask,
+			size_t offset,
+			size_t size,
+			uint32_t srcQueueFamily = VK_QUEUE_FAMILY_IGNORED,
+			uint32_t dstQueueFamily = VK_QUEUE_FAMILY_IGNORED
+		) const;
+
+		void memoryBarrier(
+			VkPipelineStageFlags srcStage,
+			VkPipelineStageFlags dstStage,
+			VkAccessFlags srcAccessMask,
+			VkAccessFlags dstAccessMask
+		) const;
 	};
 
 	/// @brief The Render Core handles frame state and work submission.

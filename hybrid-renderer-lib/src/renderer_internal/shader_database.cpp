@@ -31,7 +31,7 @@ PipelineLayoutBuilder& PipelineLayoutBuilder::addPushConstant(size_t size, VkSha
 
 PipelineLayoutBuilder& PipelineLayoutBuilder::addDescriptorSetLayout(const DescriptorSetLayout& setLayout)
 {
-    m_setLayouts.push_back(setLayout.setLayout);
+    m_setLayouts.push_back(setLayout.setLayout());
 
     return *this;
 }

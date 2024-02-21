@@ -7,15 +7,16 @@
 
 using namespace hri;
 
-DescriptorSetLayout DescriptorSetLayout::init(
+DescriptorSetLayout::DescriptorSetLayout(
     RenderContext* ctx,
     std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings,
     VkDescriptorSetLayoutCreateFlags flags
 )
+    :
+    m_pCtx(ctx),
+    m_bindings(bindings)
 {
-    assert(ctx != nullptr);
-    DescriptorSetLayout layout = DescriptorSetLayout{};
-    layout.bindings = bindings;
+    assert(m_pCtx != nullptr);
 
     std::vector<VkDescriptorSetLayoutBinding> setBindings; setBindings.reserve(bindings.size());
     for (auto const& [ bindingIdx, binding ] : bindings)
@@ -27,19 +28,37 @@ DescriptorSetLayout DescriptorSetLayout::init(
     createInfo.flags = flags;
     createInfo.bindingCount = static_cast<uint32_t>(setBindings.size());
     createInfo.pBindings = setBindings.data();
-    HRI_VK_CHECK(vkCreateDescriptorSetLayout(ctx->device, &createInfo, nullptr, &layout.setLayout));
-
-    return layout;
+    HRI_VK_CHECK(vkCreateDescriptorSetLayout(ctx->device, &createInfo, nullptr, &m_setLayout));
 }
 
-void DescriptorSetLayout::destroy(RenderContext* ctx, DescriptorSetLayout& layout)
+DescriptorSetLayout::~DescriptorSetLayout()
 {
-    assert(ctx != nullptr);
+    vkDestroyDescriptorSetLayout(m_pCtx->device, m_setLayout, nullptr);
+}
 
-    vkDestroyDescriptorSetLayout(ctx->device, layout.setLayout, nullptr);
+DescriptorSetLayout::DescriptorSetLayout(DescriptorSetLayout&& other) noexcept
+    :
+    m_pCtx(other.m_pCtx),
+    m_setLayout(other.m_setLayout),
+    m_bindings(other.m_bindings)
+{
+    other.m_setLayout = VK_NULL_HANDLE;
+}
 
-    layout.setLayout = VK_NULL_HANDLE;
-    layout.bindings.clear();
+DescriptorSetLayout& DescriptorSetLayout::operator=(DescriptorSetLayout&& other) noexcept
+{
+    if (this == &other)
+    {
+        return *this;
+    }
+
+    m_pCtx = other.m_pCtx;
+    m_setLayout = other.m_setLayout;
+    m_bindings = other.m_bindings;
+
+    other.m_setLayout = VK_NULL_HANDLE;
+
+    return *this;
 }
 
 DescriptorSetLayoutBuilder::DescriptorSetLayoutBuilder(RenderContext* ctx)
@@ -71,7 +90,7 @@ DescriptorSetLayoutBuilder& DescriptorSetLayoutBuilder::setDescriptorSetFlags(Vk
 
 DescriptorSetLayout DescriptorSetLayoutBuilder::build()
 {
-    return DescriptorSetLayout::init(m_pCtx, m_bindings, m_flags);
+    return std::move(DescriptorSetLayout(m_pCtx, m_bindings, m_flags));
 }
 
 DescriptorSetAllocator::DescriptorSetAllocator(RenderContext* ctx)
@@ -90,10 +109,12 @@ DescriptorSetAllocator::~DescriptorSetAllocator()
 
 void DescriptorSetAllocator::allocateDescriptorSet(const DescriptorSetLayout& setlayout, VkDescriptorSet& descriptorSet)
 {
+    VkDescriptorSetLayout setLayouts[] = { setlayout.setLayout() };
+
     VkDescriptorSetAllocateInfo allocateInfo = VkDescriptorSetAllocateInfo{ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
     allocateInfo.descriptorPool = m_descriptorPool;
-    allocateInfo.descriptorSetCount = 1;
-    allocateInfo.pSetLayouts = &setlayout.setLayout;
+    allocateInfo.descriptorSetCount = HRI_SIZEOF_ARRAY(setLayouts);
+    allocateInfo.pSetLayouts = setLayouts;
 
     // FIXME: may fail, handle fail case by allocating new pool & allocating from there
     HRI_VK_CHECK(vkAllocateDescriptorSets(m_pCtx->device, &allocateInfo, &descriptorSet));
@@ -124,7 +145,7 @@ DescriptorSetManager::DescriptorSetManager(RenderContext* ctx, DescriptorSetAllo
     :
     m_pCtx(ctx),
     m_pAllocator(allocator),
-    m_bindings(layout.bindings)
+    m_bindings(layout.bindings())
 {
     assert(m_pCtx != nullptr);
     assert(m_pAllocator != nullptr);
@@ -166,7 +187,7 @@ DescriptorSetManager& DescriptorSetManager::operator=(DescriptorSetManager&& oth
     return *this;
 }
 
-void DescriptorSetManager::writeBuffer(uint32_t binding, VkDescriptorBufferInfo* bufferInfo)
+DescriptorSetManager& DescriptorSetManager::writeBuffer(uint32_t binding, VkDescriptorBufferInfo* bufferInfo)
 {
     assert(bufferInfo != nullptr);
 
@@ -179,9 +200,12 @@ void DescriptorSetManager::writeBuffer(uint32_t binding, VkDescriptorBufferInfo*
     writeSet.descriptorCount = layoutBinding.descriptorCount;
     writeSet.descriptorType = layoutBinding.descriptorType;
     writeSet.pBufferInfo = bufferInfo;
+
+    m_writeSets.push_back(writeSet);
+    return *this;
 }
 
-void DescriptorSetManager::writeImage(uint32_t binding, VkDescriptorImageInfo* imageInfo)
+DescriptorSetManager& DescriptorSetManager::writeImage(uint32_t binding, VkDescriptorImageInfo* imageInfo)
 {
     assert(imageInfo != nullptr);
 
@@ -194,9 +218,12 @@ void DescriptorSetManager::writeImage(uint32_t binding, VkDescriptorImageInfo* i
     writeSet.descriptorCount = layoutBinding.descriptorCount;
     writeSet.descriptorType = layoutBinding.descriptorType;
     writeSet.pImageInfo = imageInfo;
+
+    m_writeSets.push_back(writeSet);
+    return *this;
 }
 
-void DescriptorSetManager::flush()
+DescriptorSetManager& DescriptorSetManager::flush()
 {
     vkUpdateDescriptorSets(
         m_pCtx->device,
@@ -207,6 +234,7 @@ void DescriptorSetManager::flush()
     );
 
     m_writeSets.clear();
+    return *this;
 }
 
 const VkDescriptorSetLayoutBinding& DescriptorSetManager::getLayoutBinding(uint32_t binding) const
