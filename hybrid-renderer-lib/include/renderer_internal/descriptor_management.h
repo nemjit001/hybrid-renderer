@@ -132,29 +132,51 @@ namespace hri
         VkDescriptorPool m_descriptorPool = VK_NULL_HANDLE;
     };
 
+    /// @brief A Descriptor Set Manager manages a single descriptor set and its updates.
     class DescriptorSetManager
     {
     public:
+        /// @brief Create a new descriptor set manager.
+        /// @param ctx Render Context to use.
+        /// @param allocator Descriptor Set Allocator to use.
+        /// @param layout Descriptor Set Layout to base the managed set on.
         DescriptorSetManager(RenderContext* ctx, DescriptorSetAllocator* allocator, const DescriptorSetLayout& layout);
 
+        /// @brief Destroy this descriptor set manager instance.
         virtual ~DescriptorSetManager();
 
+        /// dissalow copy behaviour.
         DescriptorSetManager(const DescriptorSetManager&) = delete;
         DescriptorSetManager& operator=(const DescriptorSetManager&) = delete;
 
+        // Allow move semantics.
         DescriptorSetManager(DescriptorSetManager&& other) noexcept;
-
         DescriptorSetManager& operator=(DescriptorSetManager&& other) noexcept;
 
+        /// @brief Queue a buffer write to the descriptor set.
+        /// @param binding Binding to write into.
+        /// @param bufferInfo Buffer info pointer, must live until the writes are flushed.
+        /// @return An instance of this class.
         DescriptorSetManager& writeBuffer(uint32_t binding, VkDescriptorBufferInfo* bufferInfo);
 
+        /// @brief Queue an image write to the descriptor set.
+        /// @param binding Binding to write into.
+        /// @param imageInfo Image info pointer, must live until the writes are flushed.
+        /// @return An instance of this class.
         DescriptorSetManager& writeImage(uint32_t binding, VkDescriptorImageInfo* imageInfo);
 
+        /// @brief Flush queued writes, updating the descriptor set.
+        /// @return Am instance of this class.
         DescriptorSetManager& flush();
 
+        /// @brief Retrieve the internal set handle.
+        /// @return A vk descriptor set handle.
         inline VkDescriptorSet descriptorSet() const { return m_set; }
 
     private:
+        /// @brief Find a layout binding in the internal bindings map.
+        /// @param binding Binding to retrieve.
+        /// @return A reference to the binding.
         const VkDescriptorSetLayoutBinding& getLayoutBinding(uint32_t binding) const;
 
     private:
