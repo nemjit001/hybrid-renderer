@@ -13,7 +13,7 @@ BufferResource BufferResource::init(RenderContext* ctx, size_t size, VkBufferUsa
 	assert(size > 0);
 
 	BufferResource buffer = BufferResource{};
-	buffer.size = size;
+	buffer.bufferSize = size;
 	buffer.hostVisible = true;
 
 	VkBufferCreateInfo bufferCreateInfo = VkBufferCreateInfo{ VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
@@ -44,4 +44,20 @@ void BufferResource::destroy(RenderContext* ctx, BufferResource& buffer)
 	vmaDestroyBuffer(ctx->allocator, buffer.buffer, buffer.allocation);
 
 	memset(&buffer, 0, sizeof(BufferResource));
+}
+
+void BufferResource::copyToBuffer(RenderContext* ctx, const void* pData, size_t size, size_t offset)
+{
+	assert(ctx != nullptr);
+	assert(pData != nullptr);
+	assert(offset + size <= bufferSize);
+
+	void* pBuffer = nullptr;
+	vmaMapMemory(ctx->allocator, allocation, &pBuffer);
+	assert(pBuffer != nullptr);
+
+	void* pBufferLocation = reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(pBuffer) + offset);
+	memcpy(pBufferLocation, pData, size);
+
+	vmaUnmapMemory(ctx->allocator, allocation);
 }

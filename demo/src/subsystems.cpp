@@ -6,12 +6,16 @@ GBufferLayoutSubsystem::GBufferLayoutSubsystem(
 	hri::RenderContext* ctx,
 	hri::DescriptorSetAllocator* descriptorSetAllocator,
 	hri::ShaderDatabase* shaderDB,
-	VkRenderPass renderPass
+	VkRenderPass renderPass,
+	hri::DescriptorSetLayout& globalSetLayout,
+	hri::DescriptorSetManager& globalDescriptorSet
 )
 	:
-	hri::IRenderSubsystem(ctx, descriptorSetAllocator)
+	hri::IRenderSubsystem(ctx, descriptorSetAllocator),
+	m_globalDescriptorSet(globalDescriptorSet)
 {
 	m_layout = hri::PipelineLayoutBuilder(ctx)
+		.addDescriptorSetLayout(globalSetLayout)
 		.build();
 
 	std::vector<VkVertexInputBindingDescription> vertexInputBindings = {
@@ -80,6 +84,35 @@ GBufferLayoutSubsystem::GBufferLayoutSubsystem(
 void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 {
 	assert(m_pPSO != nullptr);
+
+	VkExtent2D swapExtent = m_pCtx->swapchain.extent;
+
+	VkViewport viewport = VkViewport{
+		0.0f, 0.0f,
+		static_cast<float>(swapExtent.width), static_cast<float>(swapExtent.height),
+		hri::DefaultViewportMinDepth, hri::DefaultViewportMaxDepth
+	};
+
+	VkRect2D scissor = VkRect2D
+	{
+		VkOffset2D{ 0, 0 },
+		swapExtent
+	};
+
+	vkCmdSetViewport(frame.commandBuffer, 0, 1, &viewport);
+	vkCmdSetScissor(frame.commandBuffer, 0, 1, &scissor);
+
+	VkDescriptorSet descriptorSets[] = {
+		m_globalDescriptorSet.descriptorSet()
+	};
+
+	vkCmdBindDescriptorSets(
+		frame.commandBuffer,
+		m_pPSO->bindPoint,
+		m_layout,
+		0, HRI_SIZEOF_ARRAY(descriptorSets), descriptorSets,
+		0, nullptr
+	);
 
 	vkCmdBindPipeline(frame.commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
 }

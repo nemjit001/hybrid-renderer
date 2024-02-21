@@ -11,7 +11,9 @@ public:
 		hri::RenderContext* ctx,
 		hri::DescriptorSetAllocator* descriptorSetAllocator,
 		hri::ShaderDatabase* shaderDB,
-		VkRenderPass renderPass
+		VkRenderPass renderPass,
+		hri::DescriptorSetLayout& globalSetLayout,
+		hri::DescriptorSetManager& globalDescriptorSet
 	);
 
 	virtual ~GBufferLayoutSubsystem() = default;
@@ -19,7 +21,7 @@ public:
 	virtual void record(hri::ActiveFrame& frame) const override;
 
 protected:
-	//
+	hri::DescriptorSetManager& m_globalDescriptorSet;
 };
 
 class PresentationSubsystem

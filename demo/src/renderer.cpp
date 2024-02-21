@@ -5,13 +5,14 @@
 
 #include "subsystems.h"
 
-Renderer::Renderer(hri::RenderContext& ctx)
+Renderer::Renderer(hri::RenderContext& ctx, hri::Camera& camera)
 	:
 	m_context(ctx),
 	m_renderCore(&ctx),
 	m_shaderDatabase(&ctx),
 	m_subsystemManager(&ctx),
-	m_descriptorSetAllocator(&ctx)
+	m_descriptorSetAllocator(&ctx),
+	m_worldCam(camera)
 {
 	initShaderDB();
 	initRenderPasses();
@@ -22,6 +23,15 @@ Renderer::Renderer(hri::RenderContext& ctx)
 	m_renderCore.setOnSwapchainInvalidateCallback([this](const vkb::Swapchain& _swapchain) {
 		recreateSwapDependentResources();
 	});
+
+	VkDescriptorBufferInfo worldCamBufferInfo = VkDescriptorBufferInfo{};
+	worldCamBufferInfo.buffer = m_worldCameraUBO.buffer;
+	worldCamBufferInfo.offset = 0;
+	worldCamBufferInfo.range = VK_WHOLE_SIZE;
+
+	(*m_sceneDataSet)
+		.writeBuffer(0, &worldCamBufferInfo)
+		.flush();
 
 	VkDescriptorImageInfo renderResultImageInfo = VkDescriptorImageInfo{};
 	renderResultImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -36,10 +46,15 @@ Renderer::Renderer(hri::RenderContext& ctx)
 Renderer::~Renderer()
 {
 	m_renderCore.awaitFrameFinished();
+
+	hri::BufferResource::destroy(&m_context, m_worldCameraUBO);
 }
 
 void Renderer::drawFrame()
 {
+	hri::CameraShaderData worldCamShaderData = m_worldCam.getShaderData();
+	m_worldCameraUBO.copyToBuffer(&m_context, &worldCamShaderData, sizeof(hri::CameraShaderData));
+
 	m_renderCore.startFrame();
 
 	hri::ActiveFrame frame = m_renderCore.getActiveFrame();
@@ -187,9 +202,9 @@ void Renderer::initRenderPasses()
 		);
 	}
 
-	m_gbufferLayoutPassManager->setClearValue(0, VkClearValue{ { 0.0f, 0.0f, 0.0f, 1.0f } });
-	m_gbufferLayoutPassManager->setClearValue(1, VkClearValue{ { 0.0f, 0.0f, 0.0f, 1.0f } });
-	m_gbufferLayoutPassManager->setClearValue(2, VkClearValue{ { 0.0f, 0.0f, 0.0f, 1.0f } });
+	m_gbufferLayoutPassManager->setClearValue(0, VkClearValue{ { 0.0f, 0.0f, 0.0f, 0.0f } });
+	m_gbufferLayoutPassManager->setClearValue(1, VkClearValue{ { 0.0f, 0.0f, 0.0f, 0.0f } });
+	m_gbufferLayoutPassManager->setClearValue(2, VkClearValue{ { 0.0f, 0.0f, 0.0f, 0.0f } });
 	m_gbufferLayoutPassManager->setClearValue(3, VkClearValue{ { 1.0f, 0x00 } });
 
 	m_presentPassManager->setClearValue(0, VkClearValue{ { 0.0f, 0.0f, 0.0f, 1.0f } });
@@ -197,18 +212,33 @@ void Renderer::initRenderPasses()
 
 void Renderer::initSharedResources()
 {
+	// init shared samplers
 	m_renderResultLinearSampler = std::make_unique<hri::ImageSampler>(
 		&m_context,
 		VK_FILTER_LINEAR,
 		VK_FILTER_LINEAR,
 		VK_SAMPLER_MIPMAP_MODE_LINEAR
 	);
+
+	// init shared resources
+	m_worldCameraUBO = hri::BufferResource::init(
+		&m_context,
+		sizeof(hri::CameraShaderData),
+		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+		true	// FIXME: make this buffer device local
+	);
 }
 
 void Renderer::initGlobalDescriptorSets()
 {
+	hri::DescriptorSetLayoutBuilder sceneDataSetBuilder = hri::DescriptorSetLayoutBuilder(&m_context)
+		.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT);
+
 	hri::DescriptorSetLayoutBuilder presentInputSetBuilder = hri::DescriptorSetLayoutBuilder(&m_context)
 		.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
+
+	m_sceneDataSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(sceneDataSetBuilder.build()));
+	m_sceneDataSet = std::make_unique<hri::DescriptorSetManager>(&m_context, &m_descriptorSetAllocator, *m_sceneDataSetLayout);
 
 	m_presentInputSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(presentInputSetBuilder.build()));
 	m_presentInputSet = std::make_unique<hri::DescriptorSetManager>(&m_context, &m_descriptorSetAllocator, *m_presentInputSetLayout);
@@ -220,7 +250,9 @@ void Renderer::initRenderSubsystems()
 		&m_context,
 		&m_descriptorSetAllocator,
 		&m_shaderDatabase,
-		m_gbufferLayoutPassManager->renderPass()
+		m_gbufferLayoutPassManager->renderPass(),
+		*m_sceneDataSetLayout,
+		*m_sceneDataSet
 	);
 
 	m_presentSubsystem = std::make_unique<PresentationSubsystem>(

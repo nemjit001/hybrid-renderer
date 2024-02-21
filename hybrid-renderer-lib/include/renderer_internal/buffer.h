@@ -10,7 +10,7 @@ namespace hri
 	/// @brief A Buffer Resource is a collection of a vk buffer and its allocation.
 	struct BufferResource
 	{
-		size_t size					= 0;
+		size_t bufferSize			= 0;
 		bool hostVisible			= false;
 		VkBuffer buffer				= VK_NULL_HANDLE;
 		VmaAllocation allocation	= VK_NULL_HANDLE;
@@ -27,5 +27,7 @@ namespace hri
 		/// @param ctx Render Context used to create the resource.
 		/// @param buffer Buffer to be destroyed.
 		static void destroy(RenderContext* ctx, BufferResource& buffer);
+
+		void copyToBuffer(RenderContext* ctx, const void* pData, size_t size, size_t offset = 0);
 	};
 }

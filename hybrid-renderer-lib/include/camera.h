@@ -14,6 +14,12 @@ namespace hri
 		float fovYDegrees	= 60.0f;
 	};
 
+	/// @brief Shader layout of camera data
+	struct CameraShaderData
+	{
+		ALIGNAS(16) Float3 position;
+	};
+
 	/// @brief A virtual camera used in rendering operations.
 	class Camera
 	{
@@ -33,6 +39,10 @@ namespace hri
 
 		/// @brief Destroy this camera instance.
 		virtual ~Camera() = default;
+
+		/// @brief Retrieve the camera data in a shader ready layout.
+		/// @return A Camera Shader Data struct.
+		CameraShaderData getShaderData();
 
 	public:
 		Float3 position	= Float3(0.0f);

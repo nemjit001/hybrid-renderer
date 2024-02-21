@@ -22,3 +22,12 @@ Camera::Camera(CameraParameters parameters, const Float3& position, const Float3
 	up = normalize(cross(forward, _right));
 	right = normalize(cross(up, forward));
 }
+
+CameraShaderData Camera::getShaderData()
+{
+	return CameraShaderData{
+		position,
+		// view
+		// project
+	};
+}

@@ -8,7 +8,7 @@
 class Renderer
 {
 public:
-	Renderer(hri::RenderContext& ctx);
+	Renderer(hri::RenderContext& ctx, hri::Camera& camera);
 
 	virtual ~Renderer();
 
@@ -34,10 +34,18 @@ private:
 	hri::RenderSubsystemManager m_subsystemManager;
 	hri::DescriptorSetAllocator m_descriptorSetAllocator;
 
+	// Renderer state
+	hri::Camera& m_worldCam;
+
 	// Shared samplers for render result sampling
 	std::unique_ptr<hri::ImageSampler> m_renderResultLinearSampler;
 
+	// Shared resources for passes
+	hri::BufferResource m_worldCameraUBO;
+
 	// Global descriptor sets & layouts
+	std::unique_ptr<hri::DescriptorSetLayout> m_sceneDataSetLayout;
+	std::unique_ptr<hri::DescriptorSetManager> m_sceneDataSet;
 	std::unique_ptr<hri::DescriptorSetLayout> m_presentInputSetLayout;
 	std::unique_ptr<hri::DescriptorSetManager> m_presentInputSet;
 

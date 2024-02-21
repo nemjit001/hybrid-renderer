@@ -25,7 +25,7 @@ layout(set = 1, binding = 0) uniform MODEL
 
 void main()
 {
-    vec4 wPos = model.transform * vec4(VertexPosition, 1);
+    vec4 wPos = /* model.transform * */ vec4(VertexPosition, 1);
 
     vs_out.wPos = wPos;
     vs_out.normal = normalize(VertexNormal);
