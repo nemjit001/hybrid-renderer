@@ -16,7 +16,7 @@ Renderer::Renderer(hri::RenderContext& ctx)
 	initShaderDB();
 	initRenderPasses();
 	initSharedResources();
-	initGlobalDescriptors();
+	initGlobalDescriptorSets();
 	initRenderSubsystems();
 
 	m_renderCore.setOnSwapchainInvalidateCallback([this](const vkb::Swapchain& _swapchain) {
