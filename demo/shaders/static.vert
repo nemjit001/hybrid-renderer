@@ -15,7 +15,8 @@ layout(location = 0) out VS_OUT
 layout(set = 0, binding = 0) uniform CAMERA
 {
     vec3 position;
-    mat4 viewProject;
+    mat4 view;
+    mat4 project;
 } camera;
 
 layout(set = 1, binding = 0) uniform MODEL
@@ -31,5 +32,5 @@ void main()
     vs_out.normal = normalize(VertexNormal);
     vs_out.texCoord = VertexTexCoord;
 
-    gl_Position = camera.viewProject * vs_out.wPos;
+    gl_Position = camera.project * camera.view * vs_out.wPos;
 }

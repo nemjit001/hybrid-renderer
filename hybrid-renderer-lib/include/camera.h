@@ -18,6 +18,8 @@ namespace hri
 	struct CameraShaderData
 	{
 		ALIGNAS(16) Float3 position;
+		ALIGNAS(16) Float4x4 view;
+		ALIGNAS(16) Float4x4 project;
 	};
 
 	/// @brief A virtual camera used in rendering operations.
@@ -45,10 +47,12 @@ namespace hri
 		CameraShaderData getShaderData();
 
 	public:
-		Float3 position	= Float3(0.0f);
-		Float3 forward	= HRI_WORLD_FORWARD;
-		Float3 right	= HRI_WORLD_RIGHT;
-		Float3 up		= HRI_WORLD_UP;
+		Float3 position		= Float3(0.0f);
+		Float3 forward		= HRI_WORLD_FORWARD;
+		Float3 right		= HRI_WORLD_RIGHT;
+		Float3 up			= HRI_WORLD_UP;
+		Float4x4 view		= Float4x4(0.0f);
+		Float4x4 project	= Float4x4(0.0f);
 	
 	private:
 		CameraParameters m_parameters = CameraParameters{};

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <immintrin.h>
 
 #include "platform.h"
 
@@ -56,6 +57,42 @@ namespace hri
 			float xyzw[4];
 			struct { float x, y, z, w; };
 			struct { float r, g, b, a; };
+		};
+	};
+
+	struct ALIGNAS(4) Float3x3
+	{
+	public:
+		inline Float3x3() {};
+		inline Float3x3(float val) {};
+
+	public:
+		union {
+			struct {
+				float m0[3], m1[3], m2[3];
+			};
+
+			struct {
+				__m128 m04, m14, m24;
+			};
+		};
+	};
+
+	struct ALIGNAS(4) Float4x4
+	{
+	public:
+		inline Float4x4() {};
+		inline Float4x4(float val) {};
+
+	public:
+		union {
+			struct {
+				float m0[4], m1[4], m2[4], m3[4];
+			};
+
+			struct {
+				__m128 m04, m14, m24, m34;
+			};
 		};
 	};
 
