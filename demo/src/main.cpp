@@ -146,11 +146,17 @@ hri::Scene loadScene(const char* path)
 
 void drawStatusWindow(float deltaTime)
 {
+	static float AVG_FRAMETIME = 1.0f;
+	static float ALPHA = 1.0f;
+
+	AVG_FRAMETIME = (1.0f - ALPHA) * AVG_FRAMETIME + ALPHA * deltaTime;
+	if (ALPHA > 0.05f) ALPHA *= 0.5f;
+
 	if (ImGui::Begin("Status"))
 	{
 		ImGui::SetWindowSize(ImVec2(300.0f, 250.0f), ImGuiCond_FirstUseEver);
-		ImGui::Text("Frame Time: %8.2f", deltaTime * 1'000.0f);
-		ImGui::Text("FPS:        %8.2f", 1.0f / deltaTime);
+		ImGui::Text("Frame Time: %8.2f ms", AVG_FRAMETIME * 1'000.0f);
+		ImGui::Text("FPS:        %8.2f fps", 1.0f / AVG_FRAMETIME);
 	}
 
 	ImGui::End();
