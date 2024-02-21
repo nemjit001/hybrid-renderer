@@ -28,6 +28,11 @@ namespace hri
 		/// @param buffer Buffer to be destroyed.
 		static void destroy(RenderContext* ctx, BufferResource& buffer);
 
+		/// @brief Copy data to this buffer.
+		/// @param ctx Render context to use.
+		/// @param pData Data to copy.
+		/// @param size Size of the data to copy.
+		/// @param offset Offset into target buffer for data start.
 		void copyToBuffer(RenderContext* ctx, const void* pData, size_t size, size_t offset = 0);
 	};
 }

@@ -51,6 +51,7 @@ void BufferResource::copyToBuffer(RenderContext* ctx, const void* pData, size_t 
 	assert(ctx != nullptr);
 	assert(pData != nullptr);
 	assert(offset + size <= bufferSize);
+	assert(hostVisible);
 
 	void* pBuffer = nullptr;
 	vmaMapMemory(ctx->allocator, allocation, &pBuffer);
