@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['vertex_0',['Vertex',['../structhri_1_1_vertex.html',1,'hri']]]
+  ['uimanager_0',['UIManager',['../class_u_i_manager.html',1,'']]],
+  ['uisubsystem_1',['UISubsystem',['../class_u_i_subsystem.html',1,'']]]
 ];

@@ -45,6 +45,8 @@ var annotated_dup =
     [ "PresentationSubsystem", "class_presentation_subsystem.html", "class_presentation_subsystem" ],
     [ "Renderer", "class_renderer.html", "class_renderer" ],
     [ "Timer", "struct_timer.html", "struct_timer" ],
+    [ "UIManager", "class_u_i_manager.html", "class_u_i_manager" ],
+    [ "UISubsystem", "class_u_i_subsystem.html", "class_u_i_subsystem" ],
     [ "WindowCreateInfo", "struct_window_create_info.html", "struct_window_create_info" ],
     [ "WindowManager", "class_window_manager.html", "class_window_manager" ]
 ];

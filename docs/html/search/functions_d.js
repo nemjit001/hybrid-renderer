@@ -1,7 +1,7 @@
 var searchData=
 [
   ['radians_0',['radians',['../namespacehri.html#acd3a7c0c786cee7eb37afe8bfb309464',1,'hri']]],
-  ['record_1',['record',['../class_g_buffer_layout_subsystem.html#a99e8e6d2ea238397874b4139821fee4f',1,'GBufferLayoutSubsystem::record()'],['../class_presentation_subsystem.html#aa08e6b3f6b728dd7e36648f0ffc7d269',1,'PresentationSubsystem::record()'],['../classhri_1_1_i_render_subsystem.html#a2df7af9b04578bed2a23b2ef2a43a130',1,'hri::IRenderSubsystem::record()']]],
+  ['record_1',['record',['../class_g_buffer_layout_subsystem.html#a99e8e6d2ea238397874b4139821fee4f',1,'GBufferLayoutSubsystem::record()'],['../class_u_i_subsystem.html#a7b08236eb4a9bccdbdc15ca96a720564',1,'UISubsystem::record()'],['../class_presentation_subsystem.html#aa08e6b3f6b728dd7e36648f0ffc7d269',1,'PresentationSubsystem::record()'],['../classhri_1_1_i_render_subsystem.html#a2df7af9b04578bed2a23b2ef2a43a130',1,'hri::IRenderSubsystem::record()']]],
   ['recordsubsystem_2',['recordSubsystem',['../classhri_1_1_render_subsystem_manager.html#a3ac43dbf8182362d7621a4052de0e1e7',1,'hri::RenderSubsystemManager']]],
   ['recreateresources_3',['recreateResources',['../classhri_1_1_i_render_pass_resource_manager_base.html#aad0340480a463f5e32539a201440e7b9',1,'hri::IRenderPassResourceManagerBase']]],
   ['recreateswapchain_4',['recreateSwapchain',['../classhri_1_1_render_context.html#add095daf5c2e22f4250ac18c02fbbe50',1,'hri::RenderContext']]],

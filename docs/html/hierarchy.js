@@ -20,7 +20,8 @@ var hierarchy =
     ] ],
     [ "hri::IRenderSubsystem", "classhri_1_1_i_render_subsystem.html", [
       [ "GBufferLayoutSubsystem", "class_g_buffer_layout_subsystem.html", null ],
-      [ "PresentationSubsystem", "class_presentation_subsystem.html", null ]
+      [ "PresentationSubsystem", "class_presentation_subsystem.html", null ],
+      [ "UISubsystem", "class_u_i_subsystem.html", null ]
     ] ],
     [ "hri::Material", "structhri_1_1_material.html", null ],
     [ "hri::Mesh", "classhri_1_1_mesh.html", null ],
@@ -44,6 +45,7 @@ var hierarchy =
     [ "hri::Texture", "classhri_1_1_texture.html", null ],
     [ "hri::TextureExtent", "structhri_1_1_texture_extent.html", null ],
     [ "Timer", "struct_timer.html", null ],
+    [ "UIManager", "class_u_i_manager.html", null ],
     [ "hri::Vertex", "structhri_1_1_vertex.html", null ],
     [ "WindowCreateInfo", "struct_window_create_info.html", null ],
     [ "WindowManager", "class_window_manager.html", null ]

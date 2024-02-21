@@ -27,5 +27,6 @@ var searchData=
   ['dot_24',['dot',['../namespacehri.html#a3f539220562b091be4c7e5409dd4c80e',1,'hri::dot(const Float2 &amp;a, const Float2 &amp;b)'],['../namespacehri.html#acd460f5ddeee786ccb85916f0bfbe76b',1,'hri::dot(const Float3 &amp;a, const Float3 &amp;b)'],['../namespacehri.html#a1d42407ba5ef59ef18f45862a058839b',1,'hri::dot(const Float4 &amp;a, const Float4 &amp;b)']]],
   ['doublebuffering_25',['DoubleBuffering',['../namespacehri.html#a721d6a9d311acee543c48d9f6d7739dcae9ee25231d213b90f5e7b6ccc42e5386',1,'hri']]],
   ['drawframe_26',['drawFrame',['../class_renderer.html#ae9ea22eef66c32118c1f96fc6e6d569e',1,'Renderer']]],
-  ['dynamicstates_27',['dynamicStates',['../structhri_1_1_graphics_pipeline_builder.html#aae3551ab5b21b78a45c4eac6949d173e',1,'hri::GraphicsPipelineBuilder']]]
+  ['drawstatuswindow_27',['drawStatusWindow',['../main_8cpp.html#a35e8d6288acc82b4b239080f7ec483a0',1,'main.cpp']]],
+  ['dynamicstates_28',['dynamicStates',['../structhri_1_1_graphics_pipeline_builder.html#aae3551ab5b21b78a45c4eac6949d173e',1,'hri::GraphicsPipelineBuilder']]]
 ];

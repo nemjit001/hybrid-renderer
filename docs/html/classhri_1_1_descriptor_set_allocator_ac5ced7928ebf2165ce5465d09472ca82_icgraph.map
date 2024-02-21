@@ -1,0 +1,5 @@
+<map id="hri::DescriptorSetAllocator::fixedPool" name="hri::DescriptorSetAllocator::fixedPool">
+<area shape="rect" id="Node000001" title="Get a fixed pool that is guaranteed to exist. Useful for hooking in external libraries that require a..." alt="" coords="239,5,412,48"/>
+<area shape="rect" id="Node000002" href="$class_u_i_subsystem.html#a17082296a13fa1ca45e608888fc202ce" title=" " alt="" coords="5,13,191,40"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="223,29,191,29,191,24,223,24"/>
+</map>

@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['window_5fmanager_2ecpp_0',['window_manager.cpp',['../window__manager_8cpp.html',1,'']]],
-  ['window_5fmanager_2eh_1',['window_manager.h',['../window__manager_8h.html',1,'']]]
+  ['vma_5fusage_2ecpp_0',['vma_usage.cpp',['../vma__usage_8cpp.html',1,'']]]
 ];

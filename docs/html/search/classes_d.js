@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['windowcreateinfo_0',['WindowCreateInfo',['../struct_window_create_info.html',1,'']]],
-  ['windowmanager_1',['WindowManager',['../class_window_manager.html',1,'']]]
+  ['vertex_0',['Vertex',['../structhri_1_1_vertex.html',1,'hri']]]
 ];

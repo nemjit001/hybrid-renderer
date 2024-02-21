@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['vma_5fusage_2ecpp_0',['vma_usage.cpp',['../vma__usage_8cpp.html',1,'']]]
+  ['ui_5fmanager_2ecpp_0',['ui_manager.cpp',['../ui__manager_8cpp.html',1,'']]],
+  ['ui_5fmanager_2eh_1',['ui_manager.h',['../ui__manager_8h.html',1,'']]]
 ];

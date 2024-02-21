@@ -1,7 +1,5 @@
 var searchData=
 [
-  ['windowmanager_0',['WindowManager',['../class_window_manager.html#a3a283b34c19aaa20296befaabad4d29b',1,'WindowManager']]],
-  ['windowshouldclose_1',['windowShouldClose',['../class_window_manager.html#a30b9e7566a4acbe037e4d79feb506255',1,'WindowManager']]],
-  ['writebuffer_2',['writeBuffer',['../classhri_1_1_descriptor_set_manager.html#aeeb9d41cff004771acf7a0c63081755f',1,'hri::DescriptorSetManager']]],
-  ['writeimage_3',['writeImage',['../classhri_1_1_descriptor_set_manager.html#a1886bd08dc7aee2807ef6e4fab89ddd0',1,'hri::DescriptorSetManager']]]
+  ['uimanager_0',['UIManager',['../class_u_i_manager.html#a9d1a87f21acb9df3ecadc517ec3b5b06',1,'UIManager']]],
+  ['uisubsystem_1',['UISubsystem',['../class_u_i_subsystem.html#a17082296a13fa1ca45e608888fc202ce',1,'UISubsystem']]]
 ];

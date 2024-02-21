@@ -11,5 +11,6 @@ var searchData=
   ['destroyview_8',['destroyView',['../structhri_1_1_image_resource.html#a17c89d045176d80484cf497e2846d180',1,'hri::ImageResource']]],
   ['destroywindow_9',['destroyWindow',['../class_window_manager.html#a0f310438a89846d083bd4c6ba82f2daa',1,'WindowManager']]],
   ['dot_10',['dot',['../namespacehri.html#a3f539220562b091be4c7e5409dd4c80e',1,'hri::dot(const Float2 &amp;a, const Float2 &amp;b)'],['../namespacehri.html#acd460f5ddeee786ccb85916f0bfbe76b',1,'hri::dot(const Float3 &amp;a, const Float3 &amp;b)'],['../namespacehri.html#a1d42407ba5ef59ef18f45862a058839b',1,'hri::dot(const Float4 &amp;a, const Float4 &amp;b)']]],
-  ['drawframe_11',['drawFrame',['../class_renderer.html#ae9ea22eef66c32118c1f96fc6e6d569e',1,'Renderer']]]
+  ['drawframe_11',['drawFrame',['../class_renderer.html#ae9ea22eef66c32118c1f96fc6e6d569e',1,'Renderer']]],
+  ['drawstatuswindow_12',['drawStatusWindow',['../main_8cpp.html#a35e8d6288acc82b4b239080f7ec483a0',1,'main.cpp']]]
 ];

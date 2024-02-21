@@ -46,7 +46,7 @@
   </g>
 </defs>
 <script type="application/ecmascript">
-var viewWidth = 458;
+var viewWidth = 654;
 var viewHeight = 544;
 var sectionId = 'dynsection-0';
 </script>
@@ -58,40 +58,40 @@ var sectionId = 'dynsection-0';
 <g id="Node000001" class="node">
 <title>Node1</title>
 <g id="a_Node000001"><a xlink:title="A Render Subsystem manages a render pipeline, layout, and subsystem descriptors. A Render Subsystem b...">
-<polygon fill="#999999" stroke="none" points="312.5,-536 137.5,-536 137.5,-252 312.5,-252 312.5,-536"/>
-<text text-anchor="start" x="175.5" y="-522.5" font-family="Helvetica,sans-Serif" font-size="10.00">hri::IRenderSubsystem</text>
-<text text-anchor="start" x="141.88" y="-506.5" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
-<text text-anchor="start" x="151.5" y="-506.5" font-family="Helvetica,sans-Serif" font-size="10.00">RenderContext * m_pCtx</text>
-<text text-anchor="start" x="141.88" y="-490.5" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
-<text text-anchor="start" x="151.5" y="-490.5" font-family="Helvetica,sans-Serif" font-size="10.00">DescriptorSetAllocator</text>
-<text text-anchor="start" x="151.5" y="-478.5" font-family="Helvetica,sans-Serif" font-size="10.00"> * m_pDescriptorSetAllocator</text>
-<text text-anchor="start" x="141.88" y="-462.5" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
-<text text-anchor="start" x="151.5" y="-462.5" font-family="Helvetica,sans-Serif" font-size="10.00">VkPipelineLayout m</text>
-<text text-anchor="start" x="151.5" y="-450.5" font-family="Helvetica,sans-Serif" font-size="10.00">_layout</text>
-<text text-anchor="start" x="141.88" y="-434.5" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
-<text text-anchor="start" x="151.5" y="-434.5" font-family="Helvetica,sans-Serif" font-size="10.00">PipelineStateObject</text>
-<text text-anchor="start" x="151.5" y="-422.5" font-family="Helvetica,sans-Serif" font-size="10.00"> * m_pPSO</text>
-<text text-anchor="start" x="141.5" y="-406.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="151.5" y="-406.5" font-family="Helvetica,sans-Serif" font-size="10.00">IRenderSubsystem(Render</text>
-<text text-anchor="start" x="151.5" y="-394.5" font-family="Helvetica,sans-Serif" font-size="10.00">Context *ctx, DescriptorSetAllocator</text>
-<text text-anchor="start" x="151.5" y="-382.5" font-family="Helvetica,sans-Serif" font-size="10.00"> *descriptorSetAllocator)</text>
-<text text-anchor="start" x="141.5" y="-366.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="151.5" y="-366.5" font-family="Helvetica,sans-Serif" font-size="10.00">virtual ~IRenderSubsystem()</text>
-<text text-anchor="start" x="141.5" y="-350.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="151.5" y="-350.5" font-family="Helvetica,sans-Serif" font-size="10.00">IRenderSubsystem(const</text>
-<text text-anchor="start" x="151.5" y="-338.5" font-family="Helvetica,sans-Serif" font-size="10.00"> IRenderSubsystem &amp;)=delete</text>
-<text text-anchor="start" x="141.5" y="-322.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="151.5" y="-322.5" font-family="Helvetica,sans-Serif" font-size="10.00">IRenderSubsystem &amp;</text>
-<text text-anchor="start" x="151.5" y="-310.5" font-family="Helvetica,sans-Serif" font-size="10.00"> operator=(const IRenderSubsystem</text>
-<text text-anchor="start" x="151.5" y="-298.5" font-family="Helvetica,sans-Serif" font-size="10.00"> &amp;)=delete</text>
-<text text-anchor="start" x="141.5" y="-282.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="151.5" y="-282.5" font-family="Helvetica,sans-Serif" font-size="10.00">virtual void record</text>
-<text text-anchor="start" x="151.5" y="-270.5" font-family="Helvetica,sans-Serif" font-size="10.00">(ActiveFrame &amp;frame)</text>
-<text text-anchor="start" x="151.5" y="-258.5" font-family="Helvetica,sans-Serif" font-size="10.00"> const =0</text>
-<polygon fill="#666666" stroke="#666666" points="137.5,-518 137.5,-518 312.5,-518 312.5,-518 137.5,-518"/>
-<polygon fill="#666666" stroke="#666666" points="137.5,-418 137.5,-418 149.5,-418 149.5,-418 137.5,-418"/>
-<polygon fill="#666666" stroke="#666666" points="149.5,-418 149.5,-418 312.5,-418 312.5,-418 149.5,-418"/>
-<polygon fill="none" stroke="#666666" points="137.5,-252 137.5,-536 312.5,-536 312.5,-252 137.5,-252"/>
+<polygon fill="#999999" stroke="none" points="429.5,-536 254.5,-536 254.5,-252 429.5,-252 429.5,-536"/>
+<text text-anchor="start" x="292.5" y="-522.5" font-family="Helvetica,sans-Serif" font-size="10.00">hri::IRenderSubsystem</text>
+<text text-anchor="start" x="258.88" y="-506.5" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
+<text text-anchor="start" x="268.5" y="-506.5" font-family="Helvetica,sans-Serif" font-size="10.00">RenderContext * m_pCtx</text>
+<text text-anchor="start" x="258.88" y="-490.5" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
+<text text-anchor="start" x="268.5" y="-490.5" font-family="Helvetica,sans-Serif" font-size="10.00">DescriptorSetAllocator</text>
+<text text-anchor="start" x="268.5" y="-478.5" font-family="Helvetica,sans-Serif" font-size="10.00"> * m_pDescriptorSetAllocator</text>
+<text text-anchor="start" x="258.88" y="-462.5" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
+<text text-anchor="start" x="268.5" y="-462.5" font-family="Helvetica,sans-Serif" font-size="10.00">VkPipelineLayout m</text>
+<text text-anchor="start" x="268.5" y="-450.5" font-family="Helvetica,sans-Serif" font-size="10.00">_layout</text>
+<text text-anchor="start" x="258.88" y="-434.5" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
+<text text-anchor="start" x="268.5" y="-434.5" font-family="Helvetica,sans-Serif" font-size="10.00">PipelineStateObject</text>
+<text text-anchor="start" x="268.5" y="-422.5" font-family="Helvetica,sans-Serif" font-size="10.00"> * m_pPSO</text>
+<text text-anchor="start" x="258.5" y="-406.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
+<text text-anchor="start" x="268.5" y="-406.5" font-family="Helvetica,sans-Serif" font-size="10.00">IRenderSubsystem(Render</text>
+<text text-anchor="start" x="268.5" y="-394.5" font-family="Helvetica,sans-Serif" font-size="10.00">Context *ctx, DescriptorSetAllocator</text>
+<text text-anchor="start" x="268.5" y="-382.5" font-family="Helvetica,sans-Serif" font-size="10.00"> *descriptorSetAllocator)</text>
+<text text-anchor="start" x="258.5" y="-366.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
+<text text-anchor="start" x="268.5" y="-366.5" font-family="Helvetica,sans-Serif" font-size="10.00">virtual ~IRenderSubsystem()</text>
+<text text-anchor="start" x="258.5" y="-350.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
+<text text-anchor="start" x="268.5" y="-350.5" font-family="Helvetica,sans-Serif" font-size="10.00">IRenderSubsystem(const</text>
+<text text-anchor="start" x="268.5" y="-338.5" font-family="Helvetica,sans-Serif" font-size="10.00"> IRenderSubsystem &amp;)=delete</text>
+<text text-anchor="start" x="258.5" y="-322.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
+<text text-anchor="start" x="268.5" y="-322.5" font-family="Helvetica,sans-Serif" font-size="10.00">IRenderSubsystem &amp;</text>
+<text text-anchor="start" x="268.5" y="-310.5" font-family="Helvetica,sans-Serif" font-size="10.00"> operator=(const IRenderSubsystem</text>
+<text text-anchor="start" x="268.5" y="-298.5" font-family="Helvetica,sans-Serif" font-size="10.00"> &amp;)=delete</text>
+<text text-anchor="start" x="258.5" y="-282.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
+<text text-anchor="start" x="268.5" y="-282.5" font-family="Helvetica,sans-Serif" font-size="10.00">virtual void record</text>
+<text text-anchor="start" x="268.5" y="-270.5" font-family="Helvetica,sans-Serif" font-size="10.00">(ActiveFrame &amp;frame)</text>
+<text text-anchor="start" x="268.5" y="-258.5" font-family="Helvetica,sans-Serif" font-size="10.00"> const =0</text>
+<polygon fill="#666666" stroke="#666666" points="254.5,-518 254.5,-518 429.5,-518 429.5,-518 254.5,-518"/>
+<polygon fill="#666666" stroke="#666666" points="254.5,-418 254.5,-418 266.5,-418 266.5,-418 254.5,-418"/>
+<polygon fill="#666666" stroke="#666666" points="266.5,-418 266.5,-418 429.5,-418 429.5,-418 266.5,-418"/>
+<polygon fill="none" stroke="#666666" points="254.5,-252 254.5,-536 429.5,-536 429.5,-252 254.5,-252"/>
 </a>
 </g>
 </g>
@@ -131,8 +131,8 @@ var sectionId = 'dynsection-0';
 <g id="edge1_Node000001_Node000002" class="edge">
 <title>Node1&#45;&gt;Node2</title>
 <g id="a_edge1_Node000001_Node000002"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M162.63,-241.61C159.04,-232.9 155.47,-224.24 151.98,-215.75"/>
-<polygon fill="none" stroke="#63b8ff" points="159.39,-242.94 166.44,-250.85 165.86,-240.27 159.39,-242.94"/>
+<path fill="none" stroke="#63b8ff" d="M247.33,-278.1C230.42,-257.58 212.86,-236.26 196.14,-215.97"/>
+<polygon fill="none" stroke="#63b8ff" points="244.51,-280.18 253.57,-285.68 249.91,-275.73 244.51,-280.18"/>
 </a>
 </g>
 </g>
@@ -172,8 +172,42 @@ var sectionId = 'dynsection-0';
 <g id="edge2_Node000001_Node000003" class="edge">
 <title>Node1&#45;&gt;Node3</title>
 <g id="a_edge2_Node000001_Node000003"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M287.37,-241.61C290.96,-232.9 294.53,-224.24 298.02,-215.75"/>
-<polygon fill="none" stroke="#63b8ff" points="284.14,-240.27 283.56,-250.85 290.61,-242.94 284.14,-240.27"/>
+<path fill="none" stroke="#63b8ff" d="M342,-240.75C342,-232.33 342,-223.96 342,-215.75"/>
+<polygon fill="none" stroke="#63b8ff" points="338.5,-240.73 342,-250.73 345.5,-240.73 338.5,-240.73"/>
+</a>
+</g>
+</g>
+<!-- Node4 -->
+<g id="Node000004" class="node">
+<title>Node4</title>
+<g id="a_Node000004"><a xlink:href="class_u_i_subsystem.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="none" points="645.5,-186 468.5,-186 468.5,-30 645.5,-30 645.5,-186"/>
+<text text-anchor="start" x="527.75" y="-172.5" font-family="Helvetica,sans-Serif" font-size="10.00">UISubsystem</text>
+<text text-anchor="start" x="555.5" y="-156.5" font-family="Helvetica,sans-Serif" font-size="10.00"> </text>
+<text text-anchor="start" x="472.5" y="-140.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
+<text text-anchor="start" x="482.5" y="-140.5" font-family="Helvetica,sans-Serif" font-size="10.00">UISubsystem(hri::Render</text>
+<text text-anchor="start" x="482.5" y="-128.5" font-family="Helvetica,sans-Serif" font-size="10.00">Context *ctx, hri::Descriptor</text>
+<text text-anchor="start" x="482.5" y="-116.5" font-family="Helvetica,sans-Serif" font-size="10.00">SetAllocator *descriptorSetAllocator,</text>
+<text text-anchor="start" x="482.5" y="-104.5" font-family="Helvetica,sans-Serif" font-size="10.00"> hri::ShaderDatabase *shaderDB,</text>
+<text text-anchor="start" x="482.5" y="-92.5" font-family="Helvetica,sans-Serif" font-size="10.00"> VkRenderPass renderPass)</text>
+<text text-anchor="start" x="472.5" y="-76.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
+<text text-anchor="start" x="482.5" y="-76.5" font-family="Helvetica,sans-Serif" font-size="10.00">virtual ~UISubsystem()</text>
+<text text-anchor="start" x="472.5" y="-60.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
+<text text-anchor="start" x="482.5" y="-60.5" font-family="Helvetica,sans-Serif" font-size="10.00">virtual void record</text>
+<text text-anchor="start" x="482.5" y="-48.5" font-family="Helvetica,sans-Serif" font-size="10.00">(hri::ActiveFrame &amp;frame)</text>
+<text text-anchor="start" x="482.5" y="-36.5" font-family="Helvetica,sans-Serif" font-size="10.00"> const override</text>
+<polygon fill="#666666" stroke="#666666" points="468.5,-168 468.5,-168 645.5,-168 645.5,-168 468.5,-168"/>
+<polygon fill="#666666" stroke="#666666" points="468.5,-152 468.5,-152 645.5,-152 645.5,-152 468.5,-152"/>
+<polygon fill="none" stroke="#666666" points="468.5,-30 468.5,-186 645.5,-186 645.5,-30 468.5,-30"/>
+</a>
+</g>
+</g>
+<!-- Node1&#45;&gt;Node4 -->
+<g id="edge3_Node000001_Node000004" class="edge">
+<title>Node1&#45;&gt;Node4</title>
+<g id="a_edge3_Node000001_Node000004"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M436.33,-268.4C457.6,-240.29 479.58,-211.27 498.85,-185.81"/>
+<polygon fill="none" stroke="#63b8ff" points="433.61,-266.19 430.36,-276.28 439.19,-270.42 433.61,-266.19"/>
 </a>
 </g>
 </g>

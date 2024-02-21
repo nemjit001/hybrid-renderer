@@ -10,7 +10,8 @@ var searchData=
   ['setonswapchaininvalidatecallback_7',['setOnSwapchainInvalidateCallback',['../classhri_1_1_render_core.html#a9baea667f47f366ce6acceaae113dac8',1,'hri::RenderCore']]],
   ['setvsyncmode_8',['setVSyncMode',['../classhri_1_1_render_context.html#ac97443dd7688d762d9a865c3b106ae3d',1,'hri::RenderContext']]],
   ['shaderdatabase_9',['ShaderDatabase',['../classhri_1_1_shader_database.html#a296cd10ed1e9624a9557d0cf416edb30',1,'hri::ShaderDatabase::ShaderDatabase(RenderContext *ctx)'],['../classhri_1_1_shader_database.html#ae85fff88f932eba3719b34f2e8f1d218',1,'hri::ShaderDatabase::ShaderDatabase(const ShaderDatabase &amp;)=delete']]],
-  ['startframe_10',['startFrame',['../classhri_1_1_render_core.html#a0effa6efd78811071c92ffb467678145',1,'hri::RenderCore']]],
-  ['swapchainpassresourcemanager_11',['SwapchainPassResourceManager',['../classhri_1_1_swapchain_pass_resource_manager.html#a804e2ab1ac08e83f7f17f7ef6b26b839',1,'hri::SwapchainPassResourceManager']]],
-  ['swapformat_12',['swapFormat',['../classhri_1_1_render_context.html#a15da2b72297ebb8cbddd247842d5640d',1,'hri::RenderContext']]]
+  ['startdraw_10',['startDraw',['../class_u_i_manager.html#af186903ad448358a2aa274c027baddcd',1,'UIManager']]],
+  ['startframe_11',['startFrame',['../classhri_1_1_render_core.html#a0effa6efd78811071c92ffb467678145',1,'hri::RenderCore']]],
+  ['swapchainpassresourcemanager_12',['SwapchainPassResourceManager',['../classhri_1_1_swapchain_pass_resource_manager.html#a804e2ab1ac08e83f7f17f7ef6b26b839',1,'hri::SwapchainPassResourceManager']]],
+  ['swapformat_13',['swapFormat',['../classhri_1_1_render_context.html#a15da2b72297ebb8cbddd247842d5640d',1,'hri::RenderContext']]]
 ];

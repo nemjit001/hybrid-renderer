@@ -105,7 +105,7 @@ $(function(){initNavTree('classhri_1_1_descriptor_set_allocator.html',''); initR
 <div class="dynheader">
 Collaboration diagram for hri::DescriptorSetAllocator:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="classhri_1_1_descriptor_set_allocator__coll__graph.svg" width="227" height="352"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="classhri_1_1_descriptor_set_allocator__coll__graph.svg" width="227" height="390"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
@@ -129,6 +129,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a4a0fd6788bc91d4dcc575d629d4d3f12" id="r_a4a0fd6788bc91d4dcc575d629d4d3f12"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4a0fd6788bc91d4dcc575d629d4d3f12">reset</a> ()</td></tr>
 <tr class="memdesc:a4a0fd6788bc91d4dcc575d629d4d3f12"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset the descriptor allocator, invalidating all sets allocated using this allocator.  <br /></td></tr>
 <tr class="separator:a4a0fd6788bc91d4dcc575d629d4d3f12"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac5ced7928ebf2165ce5465d09472ca82" id="r_ac5ced7928ebf2165ce5465d09472ca82"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkDescriptorPool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac5ced7928ebf2165ce5465d09472ca82">fixedPool</a> () <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a></td></tr>
+<tr class="memdesc:ac5ced7928ebf2165ce5465d09472ca82"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a fixed pool that is guaranteed to exist. Useful for hooking in external libraries that require a pool handle.  <br /></td></tr>
+<tr class="separator:ac5ced7928ebf2165ce5465d09472ca82"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The Descriptor Set Allocator handles allocation of Descriptor Sets from descriptor pools. </p>
@@ -250,6 +253,41 @@ Public Member Functions</h2></td></tr>
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
 <div class="center"><iframe scrolling="no" frameborder="0" src="classhri_1_1_descriptor_set_allocator_a016da40c7dec0d0664ec82e8658e5e22_icgraph.svg" width="404" height="54"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
+</div>
+</div>
+<a id="ac5ced7928ebf2165ce5465d09472ca82" name="ac5ced7928ebf2165ce5465d09472ca82"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac5ced7928ebf2165ce5465d09472ca82">&#9670;&#160;</a></span>fixedPool()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkDescriptorPool</a> hri::DescriptorSetAllocator::fixedPool </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get a fixed pool that is guaranteed to exist. Useful for hooking in external libraries that require a pool handle. </p>
+<dl class="section return"><dt>Returns</dt><dd>A vk descriptor pool handle. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="descriptor__management_8h_source.html#l00111">111</a> of file <a class="el" href="descriptor__management_8h_source.html">descriptor_management.h</a>.</p>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classhri_1_1_descriptor_set_allocator_ac5ced7928ebf2165ce5465d09472ca82_icgraph.svg" width="418" height="54"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
