@@ -83,6 +83,7 @@ GBufferLayoutSubsystem::GBufferLayoutSubsystem(
 void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 {
 	assert(m_pPSO != nullptr);
+	assert(m_currentFrameInfo.sceneDataSetHandle != VK_NULL_HANDLE);
 
 	VkExtent2D swapExtent = m_pCtx->swapchain.extent;
 
@@ -101,7 +102,13 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 	vkCmdSetViewport(frame.commandBuffer, 0, 1, &viewport);
 	vkCmdSetScissor(frame.commandBuffer, 0, 1, &scissor);
 
-	// TODO: bind global descriptor set
+	vkCmdBindDescriptorSets(
+		frame.commandBuffer,
+		m_pPSO->bindPoint,
+		m_layout,
+		0, 1, &m_currentFrameInfo.sceneDataSetHandle,
+		0, nullptr
+	);
 
 	vkCmdBindPipeline(frame.commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
 
@@ -194,6 +201,7 @@ PresentationSubsystem::PresentationSubsystem(
 void PresentationSubsystem::record(hri::ActiveFrame& frame) const
 {
 	assert(m_pPSO != nullptr);
+	assert(m_currentFrameInfo.presentInputSetHandle != VK_NULL_HANDLE);
 
 	VkExtent2D swapExtent = m_pCtx->swapchain.extent;
 
@@ -212,7 +220,13 @@ void PresentationSubsystem::record(hri::ActiveFrame& frame) const
 	vkCmdSetViewport(frame.commandBuffer, 0, 1, &viewport);
 	vkCmdSetScissor(frame.commandBuffer, 0, 1, &scissor);
 
-	// TODO: bind global descriptor set
+	vkCmdBindDescriptorSets(
+		frame.commandBuffer,
+		m_pPSO->bindPoint,
+		m_layout,
+		0, 1, &m_currentFrameInfo.presentInputSetHandle,
+		0, nullptr
+	);
 
 	vkCmdBindPipeline(frame.commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
 	vkCmdDraw(frame.commandBuffer, 3, 1, 0, 0);

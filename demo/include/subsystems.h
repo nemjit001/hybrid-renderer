@@ -9,6 +9,16 @@ struct TransformPushConstant
 	hri::Float3x3 normal;
 };
 
+struct GBufferLayoutFrameInfo
+{
+	VkDescriptorSet sceneDataSetHandle = VK_NULL_HANDLE;
+};
+
+struct PresentFrameInfo
+{
+	VkDescriptorSet presentInputSetHandle = VK_NULL_HANDLE;
+};
+
 /// @brief The GBuffer Layout Subsystem handles drawing a scene and storing the resulting geometry data (depth, world position, normal, etc.)
 ///		in its pass render attachments.
 class GBufferLayoutSubsystem
@@ -31,6 +41,11 @@ public:
 	virtual ~GBufferLayoutSubsystem() = default;
 
 	virtual void record(hri::ActiveFrame& frame) const override;
+
+	inline void updateFrameInfo(const GBufferLayoutFrameInfo& frameInfo) { m_currentFrameInfo = frameInfo; }
+
+protected:
+	GBufferLayoutFrameInfo m_currentFrameInfo = GBufferLayoutFrameInfo{};
 };
 
 /// @brief The UI Subsystem handles drawing an UI overlay to the swap render pass.
@@ -81,4 +96,9 @@ public:
 	/// @brief Record Present render commands.
 	/// @param frame Active Frame to record into.
 	virtual void record(hri::ActiveFrame& frame) const override;
+
+	inline void updateFrameInfo(const PresentFrameInfo& frameInfo) { m_currentFrameInfo = frameInfo; }
+
+protected:
+	PresentFrameInfo m_currentFrameInfo = PresentFrameInfo{};
 };

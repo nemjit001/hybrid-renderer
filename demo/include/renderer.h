@@ -5,6 +5,15 @@
 
 #include "subsystems.h"
 
+/// @brief The Renderer Frame Data structure contains per frame data for rendering.
+struct RendererFrameData
+{
+	hri::BufferResource cameraUBO;
+	std::unique_ptr<hri::DescriptorSetManager> sceneDataSet;
+	std::unique_ptr<hri::DescriptorSetManager> presentInputSet;
+	// TODO: add render objects & scene transforms
+};
+
 class Renderer
 {
 public:
@@ -27,6 +36,8 @@ private:
 
 	void initRenderSubsystems();
 
+	void initRendererFrameData();
+
 	void recreateSwapDependentResources();
 
 private:
@@ -37,7 +48,7 @@ private:
 	hri::DescriptorSetAllocator m_descriptorSetAllocator;
 
 	// Renderer state
-	hri::Camera& m_worldCam;
+	hri::Camera& m_camera;
 	hri::Scene& m_activeScene;
 
 	// Shared preinitialized samplers
@@ -55,4 +66,7 @@ private:
 	std::unique_ptr<GBufferLayoutSubsystem> m_gbufferLayoutSubsystem;
 	std::unique_ptr<UISubsystem> m_uiSubsystem;
 	std::unique_ptr<PresentationSubsystem> m_presentSubsystem;
+
+	// Renderer per frame data
+	RendererFrameData m_frames[hri::RenderCore::framesInFlight()] = {};
 };

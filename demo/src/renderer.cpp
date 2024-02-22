@@ -12,7 +12,7 @@ Renderer::Renderer(hri::RenderContext& ctx, hri::Camera& camera, hri::Scene& sce
 	m_shaderDatabase(&ctx),
 	m_subsystemManager(&ctx),
 	m_descriptorSetAllocator(&ctx),
-	m_worldCam(camera),
+	m_camera(camera),
 	m_activeScene(scene)
 {
 	initShaderDB();
@@ -20,6 +20,7 @@ Renderer::Renderer(hri::RenderContext& ctx, hri::Camera& camera, hri::Scene& sce
 	initSharedResources();
 	initGlobalDescriptorSets();
 	initRenderSubsystems();
+	initRendererFrameData();
 
 	m_renderCore.setOnSwapchainInvalidateCallback([this](const vkb::Swapchain& _swapchain) {
 		recreateSwapDependentResources();
@@ -29,6 +30,11 @@ Renderer::Renderer(hri::RenderContext& ctx, hri::Camera& camera, hri::Scene& sce
 Renderer::~Renderer()
 {
 	m_renderCore.awaitFrameFinished();
+
+	for (auto& frame : m_frames)
+	{
+		hri::BufferResource::destroy(&m_context, frame.cameraUBO);
+	}
 }
 
 void Renderer::setActiveScene(hri::Scene& scene)
@@ -41,6 +47,16 @@ void Renderer::drawFrame()
 	m_renderCore.startFrame();
 
 	hri::ActiveFrame frame = m_renderCore.getActiveFrame();
+	RendererFrameData& rendererFrameData = m_frames[frame.currentFrameIndex];
+
+	m_gbufferLayoutSubsystem->updateFrameInfo(GBufferLayoutFrameInfo{
+		rendererFrameData.sceneDataSet->set,
+	});
+
+	m_presentSubsystem->updateFrameInfo(PresentFrameInfo{
+		rendererFrameData.presentInputSet->set,
+	});
+
 	frame.beginCommands();
 
 	m_gbufferLayoutPassManager->beginRenderPass(frame);
@@ -210,8 +226,12 @@ void Renderer::initGlobalDescriptorSets()
 	hri::DescriptorSetLayoutBuilder sceneDataSetBuilder = hri::DescriptorSetLayoutBuilder(&m_context)
 		.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT);
 
+	m_sceneDataSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(sceneDataSetBuilder.build()));
+
 	hri::DescriptorSetLayoutBuilder presentInputSetBuilder = hri::DescriptorSetLayoutBuilder(&m_context)
 		.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
+
+	m_presentInputSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(sceneDataSetBuilder.build()));
 }
 
 void Renderer::initRenderSubsystems()
@@ -239,6 +259,32 @@ void Renderer::initRenderSubsystems()
 	m_subsystemManager.registerSubsystem("GBufferLayoutSystem", m_gbufferLayoutSubsystem.get());
 	m_subsystemManager.registerSubsystem("UISystem", m_uiSubsystem.get());
 	m_subsystemManager.registerSubsystem("PresentationSystem", m_presentSubsystem.get());
+}
+
+void Renderer::initRendererFrameData()
+{
+	for (size_t i = 0; i < hri::RenderCore::framesInFlight(); i++)
+	{
+		RendererFrameData& frame = m_frames[i];
+		frame.cameraUBO = hri::BufferResource::init(
+			&m_context,
+			sizeof(hri::CameraShaderData),
+			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+			true	// FIXME: make buffer device local & prepare resource before frame execution.
+		);
+
+		frame.presentInputSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(
+			&m_context,
+			&m_descriptorSetAllocator,
+			*m_presentInputSetLayout
+		));
+
+		frame.sceneDataSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(
+			&m_context,
+			&m_descriptorSetAllocator,
+			*m_sceneDataSetLayout
+		));
+	}
 }
 
 void Renderer::recreateSwapDependentResources()
