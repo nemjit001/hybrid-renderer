@@ -36,6 +36,10 @@ public:
 	/// @return A new Window handle.
 	WindowHandle* createWindow(WindowCreateInfo* createInfo);
 
+	/// @brief Close a window.
+	/// @param window Window to close.
+	void closeWindow(WindowHandle* window);
+
 	/// @brief Destroy a window.
 	/// @param window Window to be destroyed.
 	void destroyWindow(WindowHandle* window);

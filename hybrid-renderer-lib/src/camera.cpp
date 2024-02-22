@@ -6,7 +6,7 @@ using namespace hri;
 
 Camera::Camera(CameraParameters parameters)
 	:
-	m_parameters(parameters)
+	parameters(parameters)
 {
 	updateMatrices();
 }
@@ -15,7 +15,7 @@ Camera::Camera(CameraParameters parameters, const Float3& position, const Float3
 	:
 	position(position),
 	forward(normalize(target - position)),
-	m_parameters(parameters)
+	parameters(parameters)
 {
 	Float3 _right = normalize(cross(HRI_WORLD_UP, forward));
 
@@ -28,7 +28,7 @@ Camera::Camera(CameraParameters parameters, const Float3& position, const Float3
 void Camera::updateMatrices()
 {
 	view = lookAt(static_cast<glm::vec3>(position), static_cast<glm::vec3>(position + forward), static_cast<glm::vec3>(up));
-	project = perspective(radians(m_parameters.fovYDegrees), m_parameters.aspectRatio, m_parameters.zNear, m_parameters.zFar);
+	project = perspective(radians(parameters.fovYDegrees), parameters.aspectRatio, parameters.zNear, parameters.zFar);
 
 	project[1][1] *= -1;	// Flip Y to account for viewport flip
 }

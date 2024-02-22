@@ -13,6 +13,10 @@
 static Timer gFrameTimer		= Timer();
 static WindowHandle* gWindow	= nullptr;
 
+static bool gWindowResized  = false;
+static int gDisplayWidth 	= SCR_WIDTH;
+static int gDisplayHeight 	= SCR_HEIGHT;
+
 hri::Scene loadScene(const char* path)
 {
 	printf("Loading scenefile [%s]\n", path);
@@ -155,11 +159,53 @@ void drawStatusWindow(float deltaTime)
 	if (ImGui::Begin("Status"))
 	{
 		ImGui::SetWindowSize(ImVec2(300.0f, 250.0f), ImGuiCond_FirstUseEver);
+		ImGui::Text("Resolution: %d x %d", gDisplayWidth, gDisplayHeight);
 		ImGui::Text("Frame Time: %8.2f ms", AVG_FRAMETIME * 1'000.0f);
 		ImGui::Text("FPS:        %8.2f fps", 1.0f / AVG_FRAMETIME);
 	}
 
 	ImGui::End();
+}
+
+void windowResizeCallback(WindowHandle* window, int width, int height)
+{
+	gDisplayWidth = width;
+	gDisplayHeight = height;
+	gWindowResized = true;
+}
+
+void handleCameraInput(WindowHandle* window, float deltaTime, hri::Camera& camera)
+{
+	bool cameraUpdated = false;
+
+	hri::Float3 forward = camera.forward;
+	hri::Float3 right = camera.right;
+	hri::Float3 up = camera.up;
+
+	hri::Float3 positionDelta = hri::Float3(0.0f);
+	
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) positionDelta += forward * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true;
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) positionDelta -= forward * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true;
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) positionDelta += right * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true;
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) positionDelta -= right * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true;
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) positionDelta += up * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true;
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) positionDelta -= up * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true;
+
+	camera.position += positionDelta;
+	hri::Float3 target = camera.position + forward;
+
+	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) target += up * CAMERA_SPEED * deltaTime; cameraUpdated = true;
+	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) target -= up * CAMERA_SPEED * deltaTime; cameraUpdated = true;
+	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) target += right * CAMERA_SPEED * deltaTime; cameraUpdated = true;
+	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) target -= right * CAMERA_SPEED * deltaTime; cameraUpdated = true;
+
+	if (!cameraUpdated)
+		return;
+
+	camera.forward = hri::normalize(target - camera.position);
+	camera.right = hri::normalize(hri::cross(HRI_WORLD_UP, camera.forward));
+	camera.up = hri::normalize(hri::cross(camera.forward, camera.right));
+	camera.updateMatrices();
 }
 
 int main()
@@ -172,6 +218,7 @@ int main()
 	windowCreateInfo.height = SCR_HEIGHT;
 	windowCreateInfo.pTitle = DEMO_WINDOW_NAME;
 	windowCreateInfo.resizable = true;
+	windowCreateInfo.pfnResizeFunc = windowResizeCallback;
 	gWindow = windowManager.createWindow(&windowCreateInfo);
 
 	// Set up UI manager
@@ -187,7 +234,7 @@ int main()
 	hri::Camera camera = hri::Camera(
 		hri::CameraParameters{
 			60.0f,
-			static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT),
+			static_cast<float>(gDisplayWidth) / static_cast<float>(gDisplayHeight),
 		},
 		hri::Float3(0.0f, 1.0f, -5.0f),
 		hri::Float3(0.0f, 1.0f, 0.0f)
@@ -216,6 +263,18 @@ int main()
 
 		// Draw renderer frame
 		renderer.drawFrame();
+
+		// Update camera state
+		if (gWindowResized)
+			camera.parameters.aspectRatio = static_cast<float>(gDisplayWidth) / static_cast<float>(gDisplayHeight);
+
+		handleCameraInput(gWindow, gFrameTimer.deltaTime, camera);
+		
+		if (glfwGetKey(gWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+			windowManager.closeWindow(gWindow);
+
+		// Always set to false, resize dependent things should be handled here
+		gWindowResized = false;
 	}
 
 	printf("Shutting down\n");

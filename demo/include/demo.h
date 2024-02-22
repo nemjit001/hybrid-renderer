@@ -10,6 +10,7 @@
 #define DEMO_WINDOW_NAME	"Hybrid Rendering Demo"
 #define SCR_WIDTH			1280
 #define SCR_HEIGHT			720
+#define CAMERA_SPEED        1.5f
 
 #ifndef NDEBUG
 #define DEMO_DEBUG_OUTPUT	1
