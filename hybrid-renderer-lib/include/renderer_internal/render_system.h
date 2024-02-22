@@ -30,6 +30,10 @@ namespace hri
         /// @param frame 
         virtual void record(ActiveFrame& frame) const = 0;
 
+        /// @brief Retrieve this subsystem's pipeline layout.
+        /// @return A vk pipeline layout handle.
+        inline virtual VkPipelineLayout pipelineLayout() const { return m_layout; }
+
     protected:
         RenderContext* m_pCtx = nullptr;
         DescriptorSetAllocator* m_pDescriptorSetAllocator = nullptr;

@@ -73,7 +73,7 @@ namespace hri
 			};
 
 			struct {
-				__m128 m04, m14, m24;
+				__m128 m03, m13, m23;
 			};
 		};
 	};

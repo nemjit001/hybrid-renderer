@@ -60,6 +60,16 @@ void Renderer::drawFrame()
 	hri::ActiveFrame frame = m_renderCore.getActiveFrame();
 	frame.beginCommands();
 
+	// Bind scene data descriptor sets
+	VkDescriptorSet sceneDataInputSets[] = { m_sceneDataSet->descriptorSet() };
+	vkCmdBindDescriptorSets(
+		frame.commandBuffer,
+		VK_PIPELINE_BIND_POINT_GRAPHICS,
+		m_gbufferLayoutSubsystem->pipelineLayout(),
+		0, 1, sceneDataInputSets,
+		0, nullptr
+	);
+
 	m_gbufferLayoutPassManager->beginRenderPass(frame);
 	m_subsystemManager.recordSubsystem("GBufferLayoutSystem", frame);
 	m_gbufferLayoutPassManager->endRenderPass(frame);
@@ -75,6 +85,16 @@ void Renderer::drawFrame()
 		VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 }
 	);
 
+	// Bind presentation input descriptor sets
+	VkDescriptorSet presentInputSets[] = { m_presentInputSet->descriptorSet() };
+	vkCmdBindDescriptorSets(
+		frame.commandBuffer,
+		VK_PIPELINE_BIND_POINT_GRAPHICS,
+		m_presentSubsystem->pipelineLayout(),
+		0, 1, presentInputSets,
+		0, nullptr
+	);
+	
 	m_presentPassManager->beginRenderPass(frame);
 	m_subsystemManager.recordSubsystem("PresentationSystem", frame);
 	m_subsystemManager.recordSubsystem("UISystem", frame);	// Must be drawn after present as overlay
@@ -252,8 +272,7 @@ void Renderer::initRenderSubsystems()
 		&m_descriptorSetAllocator,
 		&m_shaderDatabase,
 		m_gbufferLayoutPassManager->renderPass(),
-		*m_sceneDataSetLayout,
-		*m_sceneDataSet
+		*m_sceneDataSetLayout
 	);
 
 	m_uiSubsystem = std::make_unique<UISubsystem>(
@@ -268,8 +287,7 @@ void Renderer::initRenderSubsystems()
 		&m_descriptorSetAllocator,
 		&m_shaderDatabase,
 		m_presentPassManager->renderPass(),
-		*m_presentInputSetLayout,
-		*m_presentInputSet
+		*m_presentInputSetLayout
 	);
 
 	m_subsystemManager.registerSubsystem("GBufferLayoutSystem", m_gbufferLayoutSubsystem.get());

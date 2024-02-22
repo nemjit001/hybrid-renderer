@@ -8,15 +8,13 @@ GBufferLayoutSubsystem::GBufferLayoutSubsystem(
 	hri::DescriptorSetAllocator* descriptorSetAllocator,
 	hri::ShaderDatabase* shaderDB,
 	VkRenderPass renderPass,
-	hri::DescriptorSetLayout& globalSetLayout,
-	hri::DescriptorSetManager& globalDescriptorSet
+	hri::DescriptorSetLayout& sceneDataSetLayout
 )
 	:
-	hri::IRenderSubsystem(ctx, descriptorSetAllocator),
-	m_globalDescriptorSet(globalDescriptorSet)
+	hri::IRenderSubsystem(ctx, descriptorSetAllocator)
 {
 	m_layout = hri::PipelineLayoutBuilder(ctx)
-		.addDescriptorSetLayout(globalSetLayout)
+		.addDescriptorSetLayout(sceneDataSetLayout)
 		.build();
 
 	std::vector<VkVertexInputBindingDescription> vertexInputBindings = {
@@ -103,19 +101,9 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 	vkCmdSetViewport(frame.commandBuffer, 0, 1, &viewport);
 	vkCmdSetScissor(frame.commandBuffer, 0, 1, &scissor);
 
-	VkDescriptorSet descriptorSets[] = {
-		m_globalDescriptorSet.descriptorSet()
-	};
-
-	vkCmdBindDescriptorSets(
-		frame.commandBuffer,
-		m_pPSO->bindPoint,
-		m_layout,
-		0, HRI_SIZEOF_ARRAY(descriptorSets), descriptorSets,
-		0, nullptr
-	);
-
 	vkCmdBindPipeline(frame.commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
+
+	// TODO: bind per object transform sets & draw objects
 }
 
 UISubsystem::UISubsystem(
@@ -158,15 +146,13 @@ PresentationSubsystem::PresentationSubsystem(
 	hri::DescriptorSetAllocator* descriptorSetAllocator,
 	hri::ShaderDatabase* shaderDB,
 	VkRenderPass renderPass,
-	hri::DescriptorSetLayout& globalSetLayout,
-	hri::DescriptorSetManager& globalDescriptorSet
+	hri::DescriptorSetLayout& presentInputSetLayout
 )
 	:
-	hri::IRenderSubsystem(ctx, descriptorSetAllocator),
-	m_globalDescriptorSet(globalDescriptorSet)
+	hri::IRenderSubsystem(ctx, descriptorSetAllocator)
 {
 	m_layout = hri::PipelineLayoutBuilder(ctx)
-		.addDescriptorSetLayout(globalSetLayout)
+		.addDescriptorSetLayout(presentInputSetLayout)
 		.build();
 
 	std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments = {
@@ -223,18 +209,6 @@ void PresentationSubsystem::record(hri::ActiveFrame& frame) const
 
 	vkCmdSetViewport(frame.commandBuffer, 0, 1, &viewport);
 	vkCmdSetScissor(frame.commandBuffer, 0, 1, &scissor);
-
-	VkDescriptorSet descriptorSets[] = {
-		m_globalDescriptorSet.descriptorSet()
-	};
-
-	vkCmdBindDescriptorSets(
-		frame.commandBuffer,
-		m_pPSO->bindPoint,
-		m_layout,
-		0, HRI_SIZEOF_ARRAY(descriptorSets), descriptorSets,
-		0, nullptr
-	);
 
 	vkCmdBindPipeline(frame.commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
 	vkCmdDraw(frame.commandBuffer, 3, 1, 0, 0);
