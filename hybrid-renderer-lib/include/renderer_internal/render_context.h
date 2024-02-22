@@ -38,6 +38,8 @@ namespace hri
     /// @brief The render context create info allows for specifying context settings & registering extensions for the created context.
     struct RenderContextCreateInfo
     {
+        const char* appName                         = "NONAME";
+        uint32_t appVersion                         = 0;
         HRISurfaceCreateFunc surfaceCreateFunc      = nullptr; 
         VSyncMode vsyncMode                         = VSyncMode::Disabled;
         std::vector<const char*> instanceExtensions = {};

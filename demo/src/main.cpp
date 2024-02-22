@@ -226,6 +226,8 @@ int main()
 
 	// Set up render context
 	hri::RenderContextCreateInfo ctxCreateInfo = hri::RenderContextCreateInfo{};
+	ctxCreateInfo.appName = DEMO_APP_NAME;
+	ctxCreateInfo.appVersion = DEMO_APP_VERSION;
 	ctxCreateInfo.surfaceCreateFunc = [](VkInstance instance, VkSurfaceKHR* surface) { return WindowManager::createVulkanSurface(instance, gWindow, nullptr, surface); };
 	ctxCreateInfo.vsyncMode = hri::VSyncMode::Disabled;
 	ctxCreateInfo.instanceExtensions = {};

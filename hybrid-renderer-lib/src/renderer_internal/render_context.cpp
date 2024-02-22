@@ -53,6 +53,8 @@ RenderContext::RenderContext(RenderContextCreateInfo& createInfo)
     vkb::InstanceBuilder instanceBuilder = vkb::InstanceBuilder();
     instance = instanceBuilder
         .require_api_version(HRI_VK_API_VERSION)
+        .set_app_name(createInfo.appName)
+        .set_app_version(createInfo.appVersion)
         .set_engine_name(HRI_ENGINE_NAME)
         .set_engine_version(HRI_ENGINE_VERSION)
         .enable_extensions(createInfo.instanceExtensions)

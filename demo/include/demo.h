@@ -8,6 +8,8 @@
 #include <hybrid_renderer.h>
 
 #define DEMO_WINDOW_NAME	"Hybrid Rendering Demo"
+#define DEMO_APP_NAME       "HybridRenderingDemo"
+#define DEMO_APP_VERSION    VK_MAKE_API_VERSION(0, 1, 0, 0)
 #define SCR_WIDTH			1280
 #define SCR_HEIGHT			720
 #define CAMERA_SPEED        1.5f
