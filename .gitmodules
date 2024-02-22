@@ -1,5 +1,6 @@
 [submodule "demo/deps/glfw"]
 	path = demo/deps/glfw
+	branch = 3.3-stable
 	url = https://github.com/glfw/glfw
 [submodule "demo/deps/tinyobjloader"]
 	path = demo/deps/tinyobjloader
