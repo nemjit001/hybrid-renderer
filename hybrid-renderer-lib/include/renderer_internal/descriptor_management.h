@@ -32,17 +32,15 @@ namespace hri
         DescriptorSetLayout(DescriptorSetLayout&& other) noexcept;
         DescriptorSetLayout& operator=(DescriptorSetLayout&& other) noexcept;
 
-        /// @brief Retrieve the set layout handle.
-        /// @return A vk descriptor set layout handle.
-        inline VkDescriptorSetLayout setLayout() const { return m_setLayout; }
-
         /// @brief Retrieve the bindings stored in this descriptor set layout.
         /// @return A map of bindings.
         inline const std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding>& bindings() const { return m_bindings; }
 
+    public:
+        VkDescriptorSetLayout setLayout = VK_NULL_HANDLE;
+
     private:
         RenderContext* m_pCtx;
-        VkDescriptorSetLayout m_setLayout = VK_NULL_HANDLE;
         std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> m_bindings = {};
     };
 
@@ -95,9 +93,9 @@ namespace hri
         DescriptorSetAllocator& operator=(const DescriptorSetAllocator&) = delete;
 
         /// @brief Allocate a new descriptor set.
-        /// @param setlayout Set layout to use.
+        /// @param setLayout Set layout to use.
         /// @param descriptorSet Descriptor set handle to allocate into.
-        void allocateDescriptorSet(const DescriptorSetLayout& setlayout, VkDescriptorSet& descriptorSet);
+        void allocateDescriptorSet(const DescriptorSetLayout& setLayout, VkDescriptorSet& descriptorSet);
 
         /// @brief Free a descriptor set.
         /// @param descriptorSet Descriptor set to free.
@@ -128,7 +126,6 @@ namespace hri
             VkDescriptorPoolSize{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, HRI_MAX_DESCRIPTOR_SET_COUNT },
             VkDescriptorPoolSize{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, HRI_MAX_DESCRIPTOR_SET_COUNT },
             VkDescriptorPoolSize{ VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, HRI_MAX_DESCRIPTOR_SET_COUNT },
-            VkDescriptorPoolSize{ VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK, HRI_MAX_DESCRIPTOR_SET_COUNT },
             VkDescriptorPoolSize{ VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, HRI_MAX_DESCRIPTOR_SET_COUNT },
         };
 

@@ -18,7 +18,7 @@ namespace hri
     public:
         /// @brief Create a new render subsystem.
         /// @param ctx Render Context to use.
-        IRenderSubsystem(RenderContext* ctx, DescriptorSetAllocator* descriptorSetAllocator);
+        IRenderSubsystem(RenderContext* ctx);
 
         /// @brief Destroy this subsystem.
         virtual ~IRenderSubsystem();
@@ -30,13 +30,8 @@ namespace hri
         /// @param frame 
         virtual void record(ActiveFrame& frame) const = 0;
 
-        /// @brief Retrieve this subsystem's pipeline layout.
-        /// @return A vk pipeline layout handle.
-        inline virtual VkPipelineLayout pipelineLayout() const { return m_layout; }
-
     protected:
         RenderContext* m_pCtx = nullptr;
-        DescriptorSetAllocator* m_pDescriptorSetAllocator = nullptr;
         VkPipelineLayout m_layout = VK_NULL_HANDLE;
         PipelineStateObject* m_pPSO = nullptr;
     };

@@ -39,23 +39,17 @@ private:
 	// Renderer state
 	hri::Camera& m_worldCam;
 	hri::Scene& m_activeScene;
-	hri::BatchedSceneData m_batchedSceneData;
 
-	// Shared samplers for render result sampling
+	// Shared preinitialized samplers
 	std::unique_ptr<hri::ImageSampler> m_renderResultLinearSampler;
 
-	// Shared resources for passes
-	hri::BufferResource m_worldCameraUBO;
-
-	// Global descriptor sets & layouts
+	// Global descriptor set layouts
 	std::unique_ptr<hri::DescriptorSetLayout> m_sceneDataSetLayout;
-	std::unique_ptr<hri::DescriptorSetManager> m_sceneDataSet;
 	std::unique_ptr<hri::DescriptorSetLayout> m_presentInputSetLayout;
-	std::unique_ptr<hri::DescriptorSetManager> m_presentInputSet;
 
 	// Render pass managers
 	std::unique_ptr<hri::RenderPassResourceManager> m_gbufferLayoutPassManager;
-	std::unique_ptr<hri::SwapchainPassResourceManager> m_presentPassManager;
+	std::unique_ptr<hri::SwapchainPassResourceManager> m_swapchainPassManager;
 
 	// Render subsystems
 	std::unique_ptr<GBufferLayoutSubsystem> m_gbufferLayoutSubsystem;

@@ -2,61 +2,83 @@
 
 #include <hybrid_renderer.h>
 
+/// @brief The Transform Push Constant is used to push transformation data for renderable objects to shaders.
+struct TransformPushConstant
+{
+	hri::Float4x4 model;
+	hri::Float3x3 normal;
+};
+
+/// @brief The GBuffer Layout Subsystem handles drawing a scene and storing the resulting geometry data (depth, world position, normal, etc.)
+///		in its pass render attachments.
 class GBufferLayoutSubsystem
 	:
 	public hri::IRenderSubsystem
 {
 public:
+	/// @brief Create a new GBuffer Layout subsystem.
+	/// @param ctx Render Context to use.
+	/// @param shaderDB Shader database to use.
+	/// @param renderPass Render pass to use.
+	/// @param sceneDataSetLayout Descriptor set layout describing scene data provided by renderer.
 	GBufferLayoutSubsystem(
 		hri::RenderContext* ctx,
-		hri::DescriptorSetAllocator* descriptorSetAllocator,
 		hri::ShaderDatabase* shaderDB,
 		VkRenderPass renderPass,
-		hri::DescriptorSetLayout& sceneDataSetLayout,
-		hri::BatchedSceneData& batchedScene
+		VkDescriptorSetLayout sceneDataSetLayout
 	);
 
 	virtual ~GBufferLayoutSubsystem() = default;
 
 	virtual void record(hri::ActiveFrame& frame) const override;
-
-	virtual void updatedBatchedScene(hri::BatchedSceneData& batchedScene);
-
-protected:
-	hri::BatchedSceneData& m_batchedScene;
 };
 
+/// @brief The UI Subsystem handles drawing an UI overlay to the swap render pass.
 class UISubsystem
 	:
 	public hri::IRenderSubsystem
 {
 public:
+	/// @brief Create a new UI Subsystem.
+	/// @param ctx Render Context to use.
+	/// @param renderPass Render pass to use. Preferably drawing straight to swapchain.
+	/// @param uiPool Descriptor pool to use for UI resources.
 	UISubsystem(
 		hri::RenderContext* ctx,
-		hri::DescriptorSetAllocator* descriptorSetAllocator,
-		hri::ShaderDatabase* shaderDB,
-		VkRenderPass renderPass
+		VkRenderPass renderPass,
+		VkDescriptorPool uiPool
 	);
 
+	/// @brief Destroy the UI Subsystem.
 	virtual ~UISubsystem();
 
+	/// @brief Record UI render commands.
+	/// @param frame Active Frame to record into.
 	virtual void record(hri::ActiveFrame& frame) const override;
 };
 
+/// @brief The Presentation Subsystem handles drawing offscreen render results to a swap image.
 class PresentationSubsystem
 	:
 	public hri::IRenderSubsystem
 {
 public:
+	/// @brief Create a new Presentation Subsystem.
+	/// @param ctx Render Context to use.
+	/// @param shaderDB Shader database to use.
+	/// @param renderPass Render pass to use.
+	/// @param presentInputSetLayout Descriptor set layout describing input images for presentation.
 	PresentationSubsystem(
 		hri::RenderContext* ctx,
-		hri::DescriptorSetAllocator* descriptorSetAllocator,
 		hri::ShaderDatabase* shaderDB,
 		VkRenderPass renderPass,
-		hri::DescriptorSetLayout& presentInputSetLayout
+		VkDescriptorSetLayout presentInputSetLayout
 	);
 
+	/// @brief Default destructor
 	virtual ~PresentationSubsystem() = default;
 
+	/// @brief Record Present render commands.
+	/// @param frame Active Frame to record into.
 	virtual void record(hri::ActiveFrame& frame) const override;
 };

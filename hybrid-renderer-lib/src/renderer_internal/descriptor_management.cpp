@@ -28,21 +28,21 @@ DescriptorSetLayout::DescriptorSetLayout(
     createInfo.flags = flags;
     createInfo.bindingCount = static_cast<uint32_t>(setBindings.size());
     createInfo.pBindings = setBindings.data();
-    HRI_VK_CHECK(vkCreateDescriptorSetLayout(ctx->device, &createInfo, nullptr, &m_setLayout));
+    HRI_VK_CHECK(vkCreateDescriptorSetLayout(ctx->device, &createInfo, nullptr, &setLayout));
 }
 
 DescriptorSetLayout::~DescriptorSetLayout()
 {
-    vkDestroyDescriptorSetLayout(m_pCtx->device, m_setLayout, nullptr);
+    vkDestroyDescriptorSetLayout(m_pCtx->device, setLayout, nullptr);
 }
 
 DescriptorSetLayout::DescriptorSetLayout(DescriptorSetLayout&& other) noexcept
     :
+    setLayout(other.setLayout),
     m_pCtx(other.m_pCtx),
-    m_setLayout(other.m_setLayout),
     m_bindings(other.m_bindings)
 {
-    other.m_setLayout = VK_NULL_HANDLE;
+    other.setLayout = VK_NULL_HANDLE;
 }
 
 DescriptorSetLayout& DescriptorSetLayout::operator=(DescriptorSetLayout&& other) noexcept
@@ -52,11 +52,11 @@ DescriptorSetLayout& DescriptorSetLayout::operator=(DescriptorSetLayout&& other)
         return *this;
     }
 
+    setLayout = other.setLayout;
     m_pCtx = other.m_pCtx;
-    m_setLayout = other.m_setLayout;
     m_bindings = other.m_bindings;
 
-    other.m_setLayout = VK_NULL_HANDLE;
+    other.setLayout = VK_NULL_HANDLE;
 
     return *this;
 }
@@ -107,14 +107,12 @@ DescriptorSetAllocator::~DescriptorSetAllocator()
     vkDestroyDescriptorPool(m_pCtx->device, m_descriptorPool, nullptr);
 }
 
-void DescriptorSetAllocator::allocateDescriptorSet(const DescriptorSetLayout& setlayout, VkDescriptorSet& descriptorSet)
+void DescriptorSetAllocator::allocateDescriptorSet(const DescriptorSetLayout& setLayout, VkDescriptorSet& descriptorSet)
 {
-    VkDescriptorSetLayout setLayouts[] = { setlayout.setLayout() };
-
     VkDescriptorSetAllocateInfo allocateInfo = VkDescriptorSetAllocateInfo{ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
     allocateInfo.descriptorPool = m_descriptorPool;
-    allocateInfo.descriptorSetCount = HRI_SIZEOF_ARRAY(setLayouts);
-    allocateInfo.pSetLayouts = setLayouts;
+    allocateInfo.descriptorSetCount = 1;
+    allocateInfo.pSetLayouts = &setLayout.setLayout;
 
     // FIXME: may fail, handle fail case by allocating new pool & allocating from there
     HRI_VK_CHECK(vkAllocateDescriptorSets(m_pCtx->device, &allocateInfo, &descriptorSet));

@@ -35,6 +35,11 @@ namespace hri
         /// @brief Add a new Descriptor Set Layout to the pipeline layout.
         /// @param setLayout Desriptor Set Layout to add.
         /// @return A reference to this class.
+        PipelineLayoutBuilder& addDescriptorSetLayout(VkDescriptorSetLayout setLayout);
+
+        /// @brief Add a new Descriptor Set Layout to the pipeline layout.
+        /// @param setLayout Desriptor Set Layout to add.
+        /// @return A reference to this class.
         PipelineLayoutBuilder& addDescriptorSetLayout(const DescriptorSetLayout& setLayout);
 
         /// @brief Build the configured pipeline layout.

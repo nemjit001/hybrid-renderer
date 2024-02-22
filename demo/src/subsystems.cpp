@@ -5,17 +5,15 @@
 
 GBufferLayoutSubsystem::GBufferLayoutSubsystem(
 	hri::RenderContext* ctx,
-	hri::DescriptorSetAllocator* descriptorSetAllocator,
 	hri::ShaderDatabase* shaderDB,
 	VkRenderPass renderPass,
-	hri::DescriptorSetLayout& sceneDataSetLayout,
-	hri::BatchedSceneData& batchedScene
+	VkDescriptorSetLayout sceneDataSetLayout
 )
 	:
-	hri::IRenderSubsystem(ctx, descriptorSetAllocator),
-	m_batchedScene(batchedScene)
+	hri::IRenderSubsystem(ctx)
 {
 	m_layout = hri::PipelineLayoutBuilder(ctx)
+		.addPushConstant(sizeof(TransformPushConstant), VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
 		.addDescriptorSetLayout(sceneDataSetLayout)
 		.build();
 
@@ -103,33 +101,22 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 	vkCmdSetViewport(frame.commandBuffer, 0, 1, &viewport);
 	vkCmdSetScissor(frame.commandBuffer, 0, 1, &scissor);
 
+	// TODO: bind global descriptor set
+
 	vkCmdBindPipeline(frame.commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
 
-	for (auto const& [ materialIdx, meshes ] : m_batchedScene.batchedMeshes)
-	{
-		for (auto const& mesh : meshes)
-		{
-			VkDeviceSize offsets[] = { 0 };
-			vkCmdBindVertexBuffers(frame.commandBuffer, 0, 1, &mesh.vertexBuffer.buffer, offsets);
-			vkCmdBindIndexBuffer(frame.commandBuffer, mesh.indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
-			vkCmdDrawIndexed(frame.commandBuffer, mesh.indexCount, 1, 0, 0, 0);
-		}
-	}
-}
-
-void GBufferLayoutSubsystem::updatedBatchedScene(hri::BatchedSceneData& batchedScene)
-{
-	m_batchedScene = batchedScene;
+	// TODO: draw scene
+	//	- for every object push transfrom / normal data
+	//	- for every object draw mesh
 }
 
 UISubsystem::UISubsystem(
 	hri::RenderContext* ctx,
-	hri::DescriptorSetAllocator* descriptorSetAllocator,
-	hri::ShaderDatabase* shaderDB,
-	VkRenderPass renderPass
+	VkRenderPass renderPass,
+	VkDescriptorPool uiPool
 )
 	:
-	hri::IRenderSubsystem(ctx, descriptorSetAllocator)
+	hri::IRenderSubsystem(ctx)
 {
 	ImGui_ImplVulkan_InitInfo initInfo = {};
 	initInfo.Instance = m_pCtx->instance;
@@ -138,7 +125,7 @@ UISubsystem::UISubsystem(
 	initInfo.QueueFamily = m_pCtx->queues.graphicsQueue.family;
 	initInfo.Queue = m_pCtx->queues.graphicsQueue.handle;
 	initInfo.PipelineCache = VK_NULL_HANDLE;
-	initInfo.DescriptorPool = m_pDescriptorSetAllocator->fixedPool();
+	initInfo.DescriptorPool = uiPool;
 	initInfo.Subpass = 0;
 	initInfo.MinImageCount = m_pCtx->swapchain.requested_min_image_count;
 	initInfo.ImageCount = m_pCtx->swapchain.image_count;
@@ -159,13 +146,12 @@ void UISubsystem::record(hri::ActiveFrame& frame) const
 
 PresentationSubsystem::PresentationSubsystem(
 	hri::RenderContext* ctx,
-	hri::DescriptorSetAllocator* descriptorSetAllocator,
 	hri::ShaderDatabase* shaderDB,
 	VkRenderPass renderPass,
-	hri::DescriptorSetLayout& presentInputSetLayout
+	VkDescriptorSetLayout presentInputSetLayout
 )
 	:
-	hri::IRenderSubsystem(ctx, descriptorSetAllocator)
+	hri::IRenderSubsystem(ctx)
 {
 	m_layout = hri::PipelineLayoutBuilder(ctx)
 		.addDescriptorSetLayout(presentInputSetLayout)
@@ -225,6 +211,8 @@ void PresentationSubsystem::record(hri::ActiveFrame& frame) const
 
 	vkCmdSetViewport(frame.commandBuffer, 0, 1, &viewport);
 	vkCmdSetScissor(frame.commandBuffer, 0, 1, &scissor);
+
+	// TODO: bind global descriptor set
 
 	vkCmdBindPipeline(frame.commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
 	vkCmdDraw(frame.commandBuffer, 3, 1, 0, 0);

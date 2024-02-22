@@ -13,8 +13,7 @@ Renderer::Renderer(hri::RenderContext& ctx, hri::Camera& camera, hri::Scene& sce
 	m_subsystemManager(&ctx),
 	m_descriptorSetAllocator(&ctx),
 	m_worldCam(camera),
-	m_activeScene(scene),
-	m_batchedSceneData(m_activeScene.generateBatchedSceneData(&m_context))
+	m_activeScene(scene)
 {
 	initShaderDB();
 	initRenderPasses();
@@ -25,62 +24,24 @@ Renderer::Renderer(hri::RenderContext& ctx, hri::Camera& camera, hri::Scene& sce
 	m_renderCore.setOnSwapchainInvalidateCallback([this](const vkb::Swapchain& _swapchain) {
 		recreateSwapDependentResources();
 	});
-
-	VkDescriptorBufferInfo worldCamBufferInfo = VkDescriptorBufferInfo{};
-	worldCamBufferInfo.buffer = m_worldCameraUBO.buffer;
-	worldCamBufferInfo.offset = 0;
-	worldCamBufferInfo.range = m_worldCameraUBO.bufferSize;
-
-	(*m_sceneDataSet)
-		.writeBuffer(0, &worldCamBufferInfo)
-		.flush();
-
-	VkDescriptorImageInfo renderResultImageInfo = VkDescriptorImageInfo{};
-	renderResultImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-	renderResultImageInfo.imageView = m_gbufferLayoutPassManager->getAttachmentResource(0).view;
-	renderResultImageInfo.sampler = m_renderResultLinearSampler->sampler();
-
-	(*m_presentInputSet)
-		.writeImage(0, &renderResultImageInfo)
-		.flush();
 }
 
 Renderer::~Renderer()
 {
 	m_renderCore.awaitFrameFinished();
-
-	m_activeScene.destroyBatchedSceneData(&m_context, m_batchedSceneData);
-	hri::BufferResource::destroy(&m_context, m_worldCameraUBO);
 }
 
 void Renderer::setActiveScene(hri::Scene& scene)
 {
-	m_activeScene.destroyBatchedSceneData(&m_context, m_batchedSceneData);
-
 	m_activeScene = scene;
-	m_batchedSceneData = m_activeScene.generateBatchedSceneData(&m_context);
-
-	m_gbufferLayoutSubsystem->updatedBatchedScene(m_batchedSceneData);
 }
 
 void Renderer::drawFrame()
 {
-	hri::CameraShaderData worldCamShaderData = m_worldCam.getShaderData();
-	m_worldCameraUBO.copyToBuffer(&m_context, &worldCamShaderData, sizeof(hri::CameraShaderData));
-
 	m_renderCore.startFrame();
 
 	hri::ActiveFrame frame = m_renderCore.getActiveFrame();
 	frame.beginCommands();
-
-	// Bind scene data descriptor sets
-	vkCmdBindDescriptorSets(
-		frame.commandBuffer,
-		VK_PIPELINE_BIND_POINT_GRAPHICS,
-		m_gbufferLayoutSubsystem->pipelineLayout(),
-		0, 1, &m_sceneDataSet->set,
-		0, nullptr
-	);
 
 	m_gbufferLayoutPassManager->beginRenderPass(frame);
 	m_subsystemManager.recordSubsystem("GBufferLayoutSystem", frame);
@@ -96,20 +57,11 @@ void Renderer::drawFrame()
 		VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 		VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 }
 	);
-
-	// Bind presentation input descriptor sets
-	vkCmdBindDescriptorSets(
-		frame.commandBuffer,
-		VK_PIPELINE_BIND_POINT_GRAPHICS,
-		m_presentSubsystem->pipelineLayout(),
-		0, 1, &m_presentInputSet->set,
-		0, nullptr
-	);
 	
-	m_presentPassManager->beginRenderPass(frame);
+	m_swapchainPassManager->beginRenderPass(frame);
 	m_subsystemManager.recordSubsystem("PresentationSystem", frame);
 	m_subsystemManager.recordSubsystem("UISystem", frame);	// Must be drawn after present as overlay
-	m_presentPassManager->endRenderPass(frame);
+	m_swapchainPassManager->endRenderPass(frame);
 
 	frame.endCommands();
 	m_renderCore.endFrame();
@@ -206,16 +158,16 @@ void Renderer::initRenderPasses()
 			},
 		};
 
-		m_gbufferLayoutPassManager = std::make_unique<hri::RenderPassResourceManager>(
+		m_gbufferLayoutPassManager = std::unique_ptr<hri::RenderPassResourceManager>(new hri::RenderPassResourceManager(
 			&m_context,
 			gbufferLayoutPassBuilder.build(),
 			gbufferAttachmentConfigs
-		);
+		));
 	}
 
-	// Present pass
+	// Swapchain pass pass
 	{
-		hri::RenderPassBuilder presentPassBuilder = hri::RenderPassBuilder(&m_context)
+		hri::RenderPassBuilder swapchainPassBuilder = hri::RenderPassBuilder(&m_context)
 			.addAttachment(
 				m_context.swapFormat(),
 				VK_SAMPLE_COUNT_1_BIT,
@@ -228,10 +180,10 @@ void Renderer::initRenderPasses()
 				VkAttachmentReference{ 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL }
 			);
 
-		m_presentPassManager = std::make_unique<hri::SwapchainPassResourceManager>(
+		m_swapchainPassManager = std::unique_ptr<hri::SwapchainPassResourceManager>(new hri::SwapchainPassResourceManager(
 			&m_context,
-			presentPassBuilder.build()
-		);
+			swapchainPassBuilder.build()
+		));
 	}
 
 	m_gbufferLayoutPassManager->setClearValue(0, VkClearValue{ { 0.0f, 0.0f, 0.0f, 0.0f } });
@@ -239,26 +191,18 @@ void Renderer::initRenderPasses()
 	m_gbufferLayoutPassManager->setClearValue(2, VkClearValue{ { 0.0f, 0.0f, 0.0f, 0.0f } });
 	m_gbufferLayoutPassManager->setClearValue(3, VkClearValue{ { 1.0f, 0x00 } });
 
-	m_presentPassManager->setClearValue(0, VkClearValue{ { 0.0f, 0.0f, 0.0f, 1.0f } });
+	m_swapchainPassManager->setClearValue(0, VkClearValue{ { 0.0f, 0.0f, 0.0f, 1.0f } });
 }
 
 void Renderer::initSharedResources()
 {
 	// init shared samplers
-	m_renderResultLinearSampler = std::make_unique<hri::ImageSampler>(
+	m_renderResultLinearSampler = std::unique_ptr<hri::ImageSampler>(new hri::ImageSampler(
 		&m_context,
 		VK_FILTER_LINEAR,
 		VK_FILTER_LINEAR,
 		VK_SAMPLER_MIPMAP_MODE_LINEAR
-	);
-
-	// init shared resources
-	m_worldCameraUBO = hri::BufferResource::init(
-		&m_context,
-		sizeof(hri::CameraShaderData),
-		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-		true	// FIXME: make this buffer device local
-	);
+	));
 }
 
 void Renderer::initGlobalDescriptorSets()
@@ -268,39 +212,29 @@ void Renderer::initGlobalDescriptorSets()
 
 	hri::DescriptorSetLayoutBuilder presentInputSetBuilder = hri::DescriptorSetLayoutBuilder(&m_context)
 		.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
-
-	m_sceneDataSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(sceneDataSetBuilder.build()));
-	m_sceneDataSet = std::make_unique<hri::DescriptorSetManager>(&m_context, &m_descriptorSetAllocator, *m_sceneDataSetLayout);
-
-	m_presentInputSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(presentInputSetBuilder.build()));
-	m_presentInputSet = std::make_unique<hri::DescriptorSetManager>(&m_context, &m_descriptorSetAllocator, *m_presentInputSetLayout);
 }
 
 void Renderer::initRenderSubsystems()
 {
-	m_gbufferLayoutSubsystem = std::make_unique<GBufferLayoutSubsystem>(
+	m_gbufferLayoutSubsystem = std::unique_ptr<GBufferLayoutSubsystem>(new GBufferLayoutSubsystem(
 		&m_context,
-		&m_descriptorSetAllocator,
 		&m_shaderDatabase,
 		m_gbufferLayoutPassManager->renderPass(),
-		*m_sceneDataSetLayout,
-		m_batchedSceneData
-	);
+		m_sceneDataSetLayout->setLayout
+	));
 
-	m_uiSubsystem = std::make_unique<UISubsystem>(
+	m_uiSubsystem = std::unique_ptr<UISubsystem>(new UISubsystem(
 		&m_context,
-		&m_descriptorSetAllocator,
-		&m_shaderDatabase,
-		m_presentPassManager->renderPass()
-	);
+		m_swapchainPassManager->renderPass(),
+		m_descriptorSetAllocator.fixedPool()
+	));
 
-	m_presentSubsystem = std::make_unique<PresentationSubsystem>(
+	m_presentSubsystem = std::unique_ptr<PresentationSubsystem>(new PresentationSubsystem(
 		&m_context,
-		&m_descriptorSetAllocator,
 		&m_shaderDatabase,
-		m_presentPassManager->renderPass(),
-		*m_presentInputSetLayout
-	);
+		m_swapchainPassManager->renderPass(),
+		m_presentInputSetLayout->setLayout
+	));
 
 	m_subsystemManager.registerSubsystem("GBufferLayoutSystem", m_gbufferLayoutSubsystem.get());
 	m_subsystemManager.registerSubsystem("UISystem", m_uiSubsystem.get());
@@ -310,15 +244,5 @@ void Renderer::initRenderSubsystems()
 void Renderer::recreateSwapDependentResources()
 {
 	m_gbufferLayoutPassManager->recreateResources();
-	m_presentPassManager->recreateResources();
-
-	// render result descriptor should be updated to account for new image view handles
-	VkDescriptorImageInfo renderResultImageInfo = VkDescriptorImageInfo{};
-	renderResultImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-	renderResultImageInfo.imageView = m_gbufferLayoutPassManager->getAttachmentResource(0).view;
-	renderResultImageInfo.sampler = m_renderResultLinearSampler->sampler();
-
-	(*m_presentInputSet)
-		.writeImage(0, &renderResultImageInfo)
-		.flush();
+	m_swapchainPassManager->recreateResources();
 }
