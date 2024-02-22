@@ -8,9 +8,11 @@
 class Renderer
 {
 public:
-	Renderer(hri::RenderContext& ctx, hri::Camera& camera);
+	Renderer(hri::RenderContext& ctx, hri::Camera& camera, hri::Scene& scene);
 
 	virtual ~Renderer();
+
+	void setActiveScene(hri::Scene& scene);
 
 	void drawFrame();
 
@@ -36,6 +38,8 @@ private:
 
 	// Renderer state
 	hri::Camera& m_worldCam;
+	hri::Scene& m_activeScene;
+	hri::BatchedSceneData m_batchedSceneData;
 
 	// Shared samplers for render result sampling
 	std::unique_ptr<hri::ImageSampler> m_renderResultLinearSampler;

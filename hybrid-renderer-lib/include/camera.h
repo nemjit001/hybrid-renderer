@@ -12,6 +12,9 @@ namespace hri
 	struct CameraParameters
 	{
 		float fovYDegrees	= 60.0f;
+		float aspectRatio	= 1.0f;
+		float zNear 		= 0.1f;
+		float zFar			= 100.0f;
 	};
 
 	/// @brief Shader layout of camera data
@@ -42,6 +45,9 @@ namespace hri
 		/// @brief Destroy this camera instance.
 		virtual ~Camera() = default;
 
+		/// @brief Update view & project matrices using basis vectors.
+		void updateMatrices();
+
 		/// @brief Retrieve the camera data in a shader ready layout.
 		/// @return A Camera Shader Data struct.
 		CameraShaderData getShaderData();
@@ -51,8 +57,8 @@ namespace hri
 		Float3 forward		= HRI_WORLD_FORWARD;
 		Float3 right		= HRI_WORLD_RIGHT;
 		Float3 up			= HRI_WORLD_UP;
-		Float4x4 view		= Float4x4(0.0f);
-		Float4x4 project	= Float4x4(0.0f);
+		Float4x4 view		= Float4x4(1.0f);
+		Float4x4 project	= Float4x4(1.0f);
 	
 	private:
 		CameraParameters m_parameters = CameraParameters{};

@@ -5,14 +5,16 @@
 
 #include "subsystems.h"
 
-Renderer::Renderer(hri::RenderContext& ctx, hri::Camera& camera)
+Renderer::Renderer(hri::RenderContext& ctx, hri::Camera& camera, hri::Scene& scene)
 	:
 	m_context(ctx),
 	m_renderCore(&ctx),
 	m_shaderDatabase(&ctx),
 	m_subsystemManager(&ctx),
 	m_descriptorSetAllocator(&ctx),
-	m_worldCam(camera)
+	m_worldCam(camera),
+	m_activeScene(scene),
+	m_batchedSceneData(m_activeScene.generateBatchedSceneData(&m_context))
 {
 	initShaderDB();
 	initRenderPasses();
@@ -27,7 +29,7 @@ Renderer::Renderer(hri::RenderContext& ctx, hri::Camera& camera)
 	VkDescriptorBufferInfo worldCamBufferInfo = VkDescriptorBufferInfo{};
 	worldCamBufferInfo.buffer = m_worldCameraUBO.buffer;
 	worldCamBufferInfo.offset = 0;
-	worldCamBufferInfo.range = VK_WHOLE_SIZE;
+	worldCamBufferInfo.range = m_worldCameraUBO.bufferSize;
 
 	(*m_sceneDataSet)
 		.writeBuffer(0, &worldCamBufferInfo)
@@ -47,7 +49,18 @@ Renderer::~Renderer()
 {
 	m_renderCore.awaitFrameFinished();
 
+	m_activeScene.destroyBatchedSceneData(&m_context, m_batchedSceneData);
 	hri::BufferResource::destroy(&m_context, m_worldCameraUBO);
+}
+
+void Renderer::setActiveScene(hri::Scene& scene)
+{
+	m_activeScene.destroyBatchedSceneData(&m_context, m_batchedSceneData);
+
+	m_activeScene = scene;
+	m_batchedSceneData = m_activeScene.generateBatchedSceneData(&m_context);
+
+	m_gbufferLayoutSubsystem->updatedBatchedScene(m_batchedSceneData);
 }
 
 void Renderer::drawFrame()
@@ -61,12 +74,11 @@ void Renderer::drawFrame()
 	frame.beginCommands();
 
 	// Bind scene data descriptor sets
-	VkDescriptorSet sceneDataInputSets[] = { m_sceneDataSet->descriptorSet() };
 	vkCmdBindDescriptorSets(
 		frame.commandBuffer,
 		VK_PIPELINE_BIND_POINT_GRAPHICS,
 		m_gbufferLayoutSubsystem->pipelineLayout(),
-		0, 1, sceneDataInputSets,
+		0, 1, &m_sceneDataSet->set,
 		0, nullptr
 	);
 
@@ -86,12 +98,11 @@ void Renderer::drawFrame()
 	);
 
 	// Bind presentation input descriptor sets
-	VkDescriptorSet presentInputSets[] = { m_presentInputSet->descriptorSet() };
 	vkCmdBindDescriptorSets(
 		frame.commandBuffer,
 		VK_PIPELINE_BIND_POINT_GRAPHICS,
 		m_presentSubsystem->pipelineLayout(),
-		0, 1, presentInputSets,
+		0, 1, &m_presentInputSet->set,
 		0, nullptr
 	);
 	
@@ -272,7 +283,8 @@ void Renderer::initRenderSubsystems()
 		&m_descriptorSetAllocator,
 		&m_shaderDatabase,
 		m_gbufferLayoutPassManager->renderPass(),
-		*m_sceneDataSetLayout
+		*m_sceneDataSetLayout,
+		m_batchedSceneData
 	);
 
 	m_uiSubsystem = std::make_unique<UISubsystem>(

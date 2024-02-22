@@ -150,23 +150,23 @@ DescriptorSetManager::DescriptorSetManager(RenderContext* ctx, DescriptorSetAllo
     assert(m_pCtx != nullptr);
     assert(m_pAllocator != nullptr);
 
-    m_pAllocator->allocateDescriptorSet(layout, m_set);
+    m_pAllocator->allocateDescriptorSet(layout, set);
 }
 
 DescriptorSetManager::~DescriptorSetManager()
 {
-    m_pAllocator->freeDescriptorSet(m_set);
+    m_pAllocator->freeDescriptorSet(set);
 }
 
 DescriptorSetManager::DescriptorSetManager(DescriptorSetManager&& other) noexcept
     :
     m_pCtx(other.m_pCtx),
     m_pAllocator(other.m_pAllocator),
-    m_set(other.m_set),
+    set(other.set),
     m_bindings(other.m_bindings),
     m_writeSets(other.m_writeSets)
 {
-    other.m_set = VK_NULL_HANDLE;
+    other.set = VK_NULL_HANDLE;
 }
 
 DescriptorSetManager& DescriptorSetManager::operator=(DescriptorSetManager&& other) noexcept
@@ -178,11 +178,11 @@ DescriptorSetManager& DescriptorSetManager::operator=(DescriptorSetManager&& oth
 
     m_pCtx = other.m_pCtx;
     m_pAllocator = other.m_pAllocator;
-    m_set = other.m_set;
+    set = other.set;
     m_bindings = other.m_bindings;
     m_writeSets = other.m_writeSets;
 
-    other.m_set = VK_NULL_HANDLE;
+    other.set = VK_NULL_HANDLE;
 
     return *this;
 }
@@ -195,7 +195,7 @@ DescriptorSetManager& DescriptorSetManager::writeBuffer(uint32_t binding, VkDesc
     assert(layoutBinding.descriptorCount == 1);
 
     VkWriteDescriptorSet writeSet = VkWriteDescriptorSet{ VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
-    writeSet.dstSet = m_set;
+    writeSet.dstSet = set;
     writeSet.dstBinding = binding;
     writeSet.descriptorCount = layoutBinding.descriptorCount;
     writeSet.descriptorType = layoutBinding.descriptorType;
@@ -213,7 +213,7 @@ DescriptorSetManager& DescriptorSetManager::writeImage(uint32_t binding, VkDescr
     assert(layoutBinding.descriptorCount == 1);
 
     VkWriteDescriptorSet writeSet = VkWriteDescriptorSet{ VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
-    writeSet.dstSet = m_set;
+    writeSet.dstSet = set;
     writeSet.dstBinding = binding;
     writeSet.descriptorCount = layoutBinding.descriptorCount;
     writeSet.descriptorType = layoutBinding.descriptorType;

@@ -8,10 +8,12 @@ GBufferLayoutSubsystem::GBufferLayoutSubsystem(
 	hri::DescriptorSetAllocator* descriptorSetAllocator,
 	hri::ShaderDatabase* shaderDB,
 	VkRenderPass renderPass,
-	hri::DescriptorSetLayout& sceneDataSetLayout
+	hri::DescriptorSetLayout& sceneDataSetLayout,
+	hri::BatchedSceneData& batchedScene
 )
 	:
-	hri::IRenderSubsystem(ctx, descriptorSetAllocator)
+	hri::IRenderSubsystem(ctx, descriptorSetAllocator),
+	m_batchedScene(batchedScene)
 {
 	m_layout = hri::PipelineLayoutBuilder(ctx)
 		.addDescriptorSetLayout(sceneDataSetLayout)
@@ -103,7 +105,21 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 
 	vkCmdBindPipeline(frame.commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
 
-	// TODO: bind per object transform sets & draw objects
+	for (auto const& [ materialIdx, meshes ] : m_batchedScene.batchedMeshes)
+	{
+		for (auto const& mesh : meshes)
+		{
+			VkDeviceSize offsets[] = { 0 };
+			vkCmdBindVertexBuffers(frame.commandBuffer, 0, 1, &mesh.vertexBuffer.buffer, offsets);
+			vkCmdBindIndexBuffer(frame.commandBuffer, mesh.indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+			vkCmdDrawIndexed(frame.commandBuffer, mesh.indexCount, 1, 0, 0, 0);
+		}
+	}
+}
+
+void GBufferLayoutSubsystem::updatedBatchedScene(hri::BatchedSceneData& batchedScene)
+{
+	m_batchedScene = batchedScene;
 }
 
 UISubsystem::UISubsystem(

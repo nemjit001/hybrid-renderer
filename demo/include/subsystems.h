@@ -12,12 +12,18 @@ public:
 		hri::DescriptorSetAllocator* descriptorSetAllocator,
 		hri::ShaderDatabase* shaderDB,
 		VkRenderPass renderPass,
-		hri::DescriptorSetLayout& sceneDataSetLayout
+		hri::DescriptorSetLayout& sceneDataSetLayout,
+		hri::BatchedSceneData& batchedScene
 	);
 
 	virtual ~GBufferLayoutSubsystem() = default;
 
 	virtual void record(hri::ActiveFrame& frame) const override;
+
+	virtual void updatedBatchedScene(hri::BatchedSceneData& batchedScene);
+
+protected:
+	hri::BatchedSceneData& m_batchedScene;
 };
 
 class UISubsystem

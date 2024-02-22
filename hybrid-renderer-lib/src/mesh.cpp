@@ -9,31 +9,27 @@
 
 using namespace hri;
 
-GPUMesh GPUMesh::init(RenderContext* ctx, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
+void GPUMesh::init(RenderContext* ctx, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices) noexcept
 {
-	assert(ctx != nullptr);
+	m_pCtx = ctx;
+	assert(m_pCtx != nullptr);
 
 	size_t indexBufferByteSize = sizeof(uint32_t) * indices.size();
 	size_t vertexBufferByteSize = sizeof(Vertex) * vertices.size();
 
-	GPUMesh mesh = GPUMesh{};
-	mesh.indexCount = indices.size();
-	mesh.vertexCount = vertices.size();
-	mesh.indexBuffer = BufferResource::init(ctx, indexBufferByteSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, true);
-	mesh.vertexBuffer = BufferResource::init(ctx, vertexBufferByteSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, true);
+	indexCount = indices.size();
+	vertexCount = vertices.size();
+	indexBuffer = BufferResource::init(m_pCtx, indexBufferByteSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, true);
+	vertexBuffer = BufferResource::init(m_pCtx, vertexBufferByteSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, true);
 
-	mesh.indexBuffer.copyToBuffer(ctx, indices.data(), indexBufferByteSize);
-	mesh.vertexBuffer.copyToBuffer(ctx, vertices.data(), vertexBufferByteSize);
-
-	return mesh;
+	indexBuffer.copyToBuffer(m_pCtx, indices.data(), indexBufferByteSize);
+	vertexBuffer.copyToBuffer(m_pCtx, vertices.data(), vertexBufferByteSize);
 }
 
-void GPUMesh::destroy(RenderContext* ctx, GPUMesh& mesh)
+void GPUMesh::destroy() noexcept
 {
-	BufferResource::destroy(ctx, mesh.indexBuffer);
-	BufferResource::destroy(ctx, mesh.vertexBuffer);
-
-	memset(&mesh, 0, sizeof(GPUMesh));
+	BufferResource::destroy(m_pCtx, indexBuffer);
+	BufferResource::destroy(m_pCtx, vertexBuffer);
 }
 
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
@@ -44,7 +40,10 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& ind
 	//
 }
 
-GPUMesh Mesh::createGPUMesh(RenderContext* ctx)
+GPUMesh Mesh::createGPUMesh(RenderContext* ctx) const
 {
-	return GPUMesh::init(ctx, vertices, indices);
+	GPUMesh mesh = GPUMesh();
+	mesh.init(ctx, vertices, indices);
+	
+	return mesh;
 }

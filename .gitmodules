@@ -13,3 +13,6 @@
 [submodule "demo/deps/imgui"]
 	path = demo/deps/imgui
 	url = https://github.com/ocornut/imgui
+[submodule "hybrid-renderer-lib/deps/glm"]
+	path = hybrid-renderer-lib/deps/glm
+	url = https://github.com/g-truc/glm

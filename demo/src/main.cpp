@@ -185,16 +185,19 @@ int main()
 
 	// Set up world cam
 	hri::Camera camera = hri::Camera(
-		hri::CameraParameters{ 60.0f },
+		hri::CameraParameters{
+			60.0f,
+			static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT),
+		},
 		hri::Float3(0.0f, 1.0f, -5.0f),
-		hri::Float3(0.0f, 0.0f, 0.0f)
+		hri::Float3(0.0f, 1.0f, 0.0f)
 	);
-
-	// Create renderer
-	Renderer renderer = Renderer(renderContext, camera);
 
 	// Load scene file
 	hri::Scene scene = loadScene("assets/test_scene.obj");
+
+	// Create renderer
+	Renderer renderer = Renderer(renderContext, camera, scene);
 
 	printf("Startup complete\n");
 

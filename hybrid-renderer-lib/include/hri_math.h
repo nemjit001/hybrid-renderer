@@ -1,7 +1,11 @@
 #pragma once
 
+#define GLM_FORCE_LEFT_HANDED
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+
 #include <cmath>
-#include <immintrin.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "platform.h"
 
@@ -9,6 +13,8 @@
 #define HRI_INV_PI		0.31830988618379067153777f
 #define HRI_2PI			6.28318530717958647692528f
 #define HRI_INV_2PI		0.15915494309189533576888f
+
+using namespace glm;
 
 namespace hri
 {
@@ -18,6 +24,8 @@ namespace hri
 		inline Float2() : x(0.0f), y(0.0f) {};
 		inline Float2(float val) : x(val), y(val) {};
 		inline Float2(float _x, float _y) : x(_x), y(_y) {};
+
+		inline operator glm::vec2() const { return glm::vec2(x, y); }
 
 	public:
 		union
@@ -35,6 +43,8 @@ namespace hri
 		inline Float3(float val) : x(val), y(val), z(val) {};
 		inline Float3(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {};
 
+		inline operator glm::vec3() const { return glm::vec3(x, y, z); }
+
 	public:
 		union
 		{
@@ -51,6 +61,8 @@ namespace hri
 		inline Float4(float val) : x(val), y(val), z(val), w(val) {};
 		inline Float4(float _x, float _y, float _z, float _w) : x(_x), y(_y), z(_z), w(_w) {};
 
+		inline operator glm::vec4() const { return glm::vec4(x, y, z, w); }
+
 	public:
 		union
 		{
@@ -60,41 +72,8 @@ namespace hri
 		};
 	};
 
-	struct ALIGNAS(4) Float3x3
-	{
-	public:
-		inline Float3x3() {};
-		inline Float3x3(float val) {};
-
-	public:
-		union {
-			struct {
-				float m0[3], m1[3], m2[3];
-			};
-
-			struct {
-				__m128 m03, m13, m23;
-			};
-		};
-	};
-
-	struct ALIGNAS(4) Float4x4
-	{
-	public:
-		inline Float4x4() {};
-		inline Float4x4(float val) {};
-
-	public:
-		union {
-			struct {
-				float m0[4], m1[4], m2[4], m3[4];
-			};
-
-			struct {
-				__m128 m04, m14, m24, m34;
-			};
-		};
-	};
+	typedef mat3 Float3x3;
+	typedef mat4 Float4x4;
 
 	/// @brief Simple inverse square root function.
 	/// @param val Value to calculate inverse sqrt for.

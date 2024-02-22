@@ -10,6 +10,8 @@ add_subdirectory("deps/vk-bootstrap/")
 
 add_subdirectory("deps/VulkanMemoryAllocator/")
 
+add_subdirectory("deps/glm/")
+
 # Project setup
 file(GLOB PROJECT_HEADERS "include/*.h" "include/**/*.h")
 file(GLOB PROJECT_SOURCES "src/*.cpp" "src/**/*.cpp")
@@ -37,6 +39,7 @@ target_include_directories(${LIB_NAME} PUBLIC
 	${Vulkan_INCLUDE_DIRS}
 	"deps/vk-bootstrap/src/"
 	"deps/VulkanMemoryAllocator/include/"
+	"deps/glm/"
 )
 
 target_link_libraries(${LIB_NAME}

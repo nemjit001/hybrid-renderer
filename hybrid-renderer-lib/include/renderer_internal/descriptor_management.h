@@ -173,20 +173,18 @@ namespace hri
         /// @return Am instance of this class.
         DescriptorSetManager& flush();
 
-        /// @brief Retrieve the internal set handle.
-        /// @return A vk descriptor set handle.
-        inline VkDescriptorSet descriptorSet() const { return m_set; }
-
     private:
         /// @brief Find a layout binding in the internal bindings map.
         /// @param binding Binding to retrieve.
         /// @return A reference to the binding.
         const VkDescriptorSetLayoutBinding& getLayoutBinding(uint32_t binding) const;
 
+    public:
+        VkDescriptorSet set = VK_NULL_HANDLE;
+
     private:
         RenderContext* m_pCtx = nullptr;
         DescriptorSetAllocator* m_pAllocator = nullptr;
-        VkDescriptorSet m_set = VK_NULL_HANDLE;
         std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> m_bindings = {};
         std::vector<VkWriteDescriptorSet> m_writeSets = {};
     };
