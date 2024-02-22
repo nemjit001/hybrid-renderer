@@ -47,15 +47,7 @@ void Renderer::drawFrame()
 	m_renderCore.startFrame();
 
 	hri::ActiveFrame frame = m_renderCore.getActiveFrame();
-	RendererFrameData& rendererFrameData = m_frames[frame.currentFrameIndex];
-
-	m_gbufferLayoutSubsystem->updateFrameInfo(GBufferLayoutFrameInfo{
-		rendererFrameData.sceneDataSet->set,
-	});
-
-	m_presentSubsystem->updateFrameInfo(PresentFrameInfo{
-		rendererFrameData.presentInputSet->set,
-	});
+	prepareFrameResources(frame);
 
 	frame.beginCommands();
 
@@ -231,7 +223,7 @@ void Renderer::initGlobalDescriptorSets()
 	hri::DescriptorSetLayoutBuilder presentInputSetBuilder = hri::DescriptorSetLayoutBuilder(&m_context)
 		.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
 
-	m_presentInputSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(sceneDataSetBuilder.build()));
+	m_presentInputSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(presentInputSetBuilder.build()));
 }
 
 void Renderer::initRenderSubsystems()
@@ -291,4 +283,41 @@ void Renderer::recreateSwapDependentResources()
 {
 	m_gbufferLayoutPassManager->recreateResources();
 	m_swapchainPassManager->recreateResources();
+}
+
+void Renderer::prepareFrameResources(const hri::ActiveFrame& frame)
+{
+	RendererFrameData& rendererFrameData = m_frames[frame.currentFrameIndex];
+
+	// Update UBOs
+	hri::CameraShaderData cameraData = m_camera.getShaderData();
+	rendererFrameData.cameraUBO.copyToBuffer(&m_context, &cameraData, sizeof(hri::CameraShaderData));
+
+	// Update subsystem frame info
+	m_gbufferLayoutSubsystem->updateFrameInfo(GBufferLayoutFrameInfo{
+		rendererFrameData.sceneDataSet->set,
+	});
+
+	m_presentSubsystem->updateFrameInfo(PresentFrameInfo{
+		rendererFrameData.presentInputSet->set,
+	});
+
+	// Update per frame descriptors
+	VkDescriptorBufferInfo cameraUBOInfo = VkDescriptorBufferInfo{};
+	cameraUBOInfo.buffer = rendererFrameData.cameraUBO.buffer;
+	cameraUBOInfo.offset = 0;
+	cameraUBOInfo.range = rendererFrameData.cameraUBO.bufferSize;
+
+	(*rendererFrameData.sceneDataSet)
+		.writeBuffer(0, &cameraUBOInfo)
+		.flush();
+
+	VkDescriptorImageInfo gbufferAlbedoResult = VkDescriptorImageInfo{};
+	gbufferAlbedoResult.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	gbufferAlbedoResult.imageView = m_gbufferLayoutPassManager->getAttachmentResource(0).view;
+	gbufferAlbedoResult.sampler = m_renderResultLinearSampler->sampler;
+
+	(*rendererFrameData.presentInputSet)
+		.writeImage(0, &gbufferAlbedoResult)
+		.flush();
 }

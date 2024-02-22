@@ -54,12 +54,10 @@ namespace hri
 		ImageSampler(const ImageSampler&) = delete;
 		ImageSampler& operator=(const ImageSampler&) = delete;
 
-		/// @brief Retrieve the internal sampler handle.
-		/// @return A vk image sampler handle.
-		inline VkSampler sampler() const { return m_sampler; }
+	public:
+		VkSampler sampler = VK_NULL_HANDLE;
 
 	private:
 		RenderContext* m_pCtx = nullptr;
-		VkSampler m_sampler = VK_NULL_HANDLE;
 	};
 }

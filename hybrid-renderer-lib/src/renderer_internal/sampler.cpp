@@ -47,10 +47,10 @@ ImageSampler::ImageSampler(
 	createInfo.maxLod = maxLod;
 	createInfo.borderColor = borderColor;
 	createInfo.unnormalizedCoordinates = unnormalizedCoordinates;
-	HRI_VK_CHECK(vkCreateSampler(m_pCtx->device, &createInfo, nullptr, &m_sampler));
+	HRI_VK_CHECK(vkCreateSampler(m_pCtx->device, &createInfo, nullptr, &sampler));
 }
 
 ImageSampler::~ImageSampler()
 {
-	vkDestroySampler(m_pCtx->device, m_sampler, nullptr);
+	vkDestroySampler(m_pCtx->device, sampler, nullptr);
 }

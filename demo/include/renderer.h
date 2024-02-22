@@ -40,6 +40,8 @@ private:
 
 	void recreateSwapDependentResources();
 
+	void prepareFrameResources(const hri::ActiveFrame& frame);
+
 private:
 	hri::RenderContext& m_context;
 	hri::RenderCore m_renderCore;
