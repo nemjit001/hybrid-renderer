@@ -26,9 +26,11 @@ namespace hri
 	};
 
 	/// @brief The Active Frame struct maintains information on frame state relevant for recording graphics commands.
+	///		NOTE: currentFrameIndex is in range [0, HRI_FRAMES_IN_FLIGHT - 1]
 	struct ActiveFrame
 	{
 		uint32_t activeSwapImageIndex	= 0;
+		uint32_t currentFrameIndex 		= 0;
 		VkCommandBuffer commandBuffer	= VK_NULL_HANDLE;
 
 		/// @brief Begin rendering commands for this frame.
@@ -140,7 +142,7 @@ namespace hri
 
 		/// @brief Retrive the currently active frame's data.
 		/// @return ActiveFrame struct.
-		inline const ActiveFrame getActiveFrame() const { return ActiveFrame{ m_activeSwapImage, m_frames[m_currentFrame].graphicsCommandBuffer }; }
+		inline const ActiveFrame getActiveFrame() const { return ActiveFrame{ m_activeSwapImage, m_currentFrame, m_frames[m_currentFrame].graphicsCommandBuffer }; }
 
 		static constexpr uint32_t framesInFlight() { return HRI_VK_FRAMES_IN_FLIGHT; }
 
