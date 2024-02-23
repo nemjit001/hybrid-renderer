@@ -246,9 +246,9 @@ int main()
 	ctxCreateInfo.instanceExtensions = {};
 	ctxCreateInfo.deviceExtensions = {
    		VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
-   		// VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
-   		// VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,
-   		// VK_KHR_RAY_QUERY_EXTENSION_NAME,
+   		VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
+   		VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,
+   		VK_KHR_RAY_QUERY_EXTENSION_NAME,
 	};
 
 	hri::RenderContext renderContext = hri::RenderContext(ctxCreateInfo);	
