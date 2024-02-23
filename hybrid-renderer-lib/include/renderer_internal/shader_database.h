@@ -86,30 +86,43 @@ namespace hri
     };
 
     /// @brief A Shader object represents a programmable pipeline stage.
-    struct Shader
+    class Shader
     {
-        VkShaderStageFlagBits stage = VK_SHADER_STAGE_FLAG_BITS_MAX_ENUM;
-        VkShaderModule module       = VK_NULL_HANDLE;
-
-        /// @brief Load a SPIR-V shader file from the filesystem.
-        /// @param ctx Render Context to use.
-        /// @param path Path to load file from.
-        /// @param stage Shader stage flag.
-        /// @return A new Shader object.
-        static Shader loadFile(RenderContext* ctx, const std::string& path, VkShaderStageFlagBits stage);
-
+    public:
         /// @brief Create a new Shader.
         /// @param ctx Render Context to use.
         /// @param pCode SPIR-V bytecode.
         /// @param codeSize Size in bytes for SPIR-V code block.
         /// @param stage Shader stage flag.
-        /// @return A new Shader object.
-        static Shader init(RenderContext* ctx, const uint32_t* pCode, size_t codeSize, VkShaderStageFlagBits stage);
+        Shader(RenderContext* ctx, const uint32_t* pCode, size_t codeSize, VkShaderStageFlagBits stage);
 
-        /// @brief Destroy a shader object.
+        /// @brief Destroy this shader object.
+        virtual ~Shader();
+
+        // Disallow copy behaviour
+        Shader(const Shader&) = delete;
+        Shader& operator=(const Shader&) = delete;
+
+        // Allow move semantics
+        Shader(Shader&& other) noexcept;
+        Shader& operator=(Shader&& other) noexcept;
+
+        /// @brief Load a SPIR-V shader file from the filesystem.
         /// @param ctx Render Context to use.
-        /// @param shader Shader to destroy.
-        static void destroy(RenderContext* ctx, Shader& shader);
+        /// @param path Path to load file from.
+        /// @param stage Shader stage flag.
+        /// @return a new Shader object.
+        static Shader loadFile(RenderContext* ctx, const std::string& path, VkShaderStageFlagBits stage);
+
+    private:
+        void release();
+
+    public:
+        VkShaderStageFlagBits stage = VK_SHADER_STAGE_FLAG_BITS_MAX_ENUM;
+        VkShaderModule module       = VK_NULL_HANDLE;
+
+    protected:
+        RenderContext* m_pCtx = nullptr;
     };
 
     /// @brief A pipeline state object (PSO) stores a pipeline and its bind point.
@@ -138,7 +151,7 @@ namespace hri
         /// @param name Shader name to use. MUST be unique.
         /// @param shader Shader object to register.
         /// @return A pointer to the Shader in the Shader Database.
-        Shader* registerShader(const std::string& name, const Shader& shader);
+        Shader* registerShader(const std::string& name, Shader&& shader);
 
         /// @brief Create a new pipeline object in the Shader Database.
         /// @param name Pipeline name to use. MUST be unique.

@@ -147,6 +147,52 @@ VkPipelineColorBlendStateCreateInfo GraphicsPipelineBuilder::initColorBlendState
     };
 }
 
+Shader::Shader(RenderContext* ctx, const uint32_t* pCode, size_t codeSize, VkShaderStageFlagBits stage)
+    :
+    m_pCtx(ctx),
+    stage(stage)
+{
+    assert(m_pCtx != nullptr);
+    assert(pCode != nullptr && codeSize > 0);
+
+    VkShaderModuleCreateInfo createInfo = VkShaderModuleCreateInfo{ VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO };
+    createInfo.flags = 0;
+    createInfo.codeSize = static_cast<uint32_t>(codeSize);
+    createInfo.pCode = pCode;
+    HRI_VK_CHECK(vkCreateShaderModule(ctx->device, &createInfo, nullptr, &module));
+}
+
+Shader::~Shader()
+{
+    release();
+}
+
+Shader::Shader(Shader&& other) noexcept
+    :
+    m_pCtx(other.m_pCtx),
+    stage(other.stage),
+    module(other.module)
+{
+    other.module = VK_NULL_HANDLE;
+}
+
+Shader& Shader::operator=(Shader&& other) noexcept
+{
+    if (this == &other)
+    {
+        return *this;
+    }
+
+    release();
+    m_pCtx = other.m_pCtx;
+    stage = other.stage;
+    module = other.module;
+
+    other.module = VK_NULL_HANDLE;
+
+    return *this;
+}
+
 Shader Shader::loadFile(RenderContext* ctx, const std::string& path, VkShaderStageFlagBits stage)
 {
     // Open code file
@@ -176,7 +222,7 @@ Shader Shader::loadFile(RenderContext* ctx, const std::string& path, VkShaderSta
     assert(readBytes == codeSize);
 
     // Initialize shader
-    Shader shader = Shader::init(ctx, reinterpret_cast<uint32_t*>(pCode), static_cast<size_t>(readBytes), stage);
+    Shader shader = Shader(ctx, reinterpret_cast<uint32_t*>(pCode), static_cast<size_t>(readBytes), stage);
 
     // Free resources
     fclose(file);
@@ -185,30 +231,9 @@ Shader Shader::loadFile(RenderContext* ctx, const std::string& path, VkShaderSta
     return shader;
 }
 
-Shader Shader::init(RenderContext* ctx, const uint32_t* pCode, size_t codeSize, VkShaderStageFlagBits stage)
+void Shader::release()
 {
-    assert(ctx != nullptr);
-    assert(pCode != nullptr && codeSize > 0);
-
-    Shader shader = Shader{};
-    shader.stage = stage;
-
-    VkShaderModuleCreateInfo createInfo = VkShaderModuleCreateInfo{ VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO };
-    createInfo.flags = 0;
-    createInfo.codeSize = static_cast<uint32_t>(codeSize);
-    createInfo.pCode = pCode;
-    HRI_VK_CHECK(vkCreateShaderModule(ctx->device, &createInfo, nullptr, &shader.module));
-    
-    return shader;
-}
-
-void Shader::destroy(RenderContext* ctx, Shader& shader)
-{
-    assert(ctx != nullptr);
-
-    vkDestroyShaderModule(ctx->device, shader.module, nullptr);
-
-    memset(&shader, 0, sizeof(Shader));
+    vkDestroyShaderModule(m_pCtx->device, module, nullptr);
 }
 
 ShaderDatabase::ShaderDatabase(RenderContext* ctx)
@@ -226,11 +251,6 @@ ShaderDatabase::ShaderDatabase(RenderContext* ctx)
 
 ShaderDatabase::~ShaderDatabase()
 {
-    for (auto& [name, shader] : m_shaderMap)
-    {
-        Shader::destroy(m_pCtx, shader);
-    }
-
     for (auto& [ name, pso ] : m_pipelineMap)
     {
         vkDestroyPipeline(m_pCtx->device, pso.pipeline, nullptr);
@@ -239,7 +259,7 @@ ShaderDatabase::~ShaderDatabase()
     vkDestroyPipelineCache(m_pCtx->device, m_pipelineCache, nullptr);
 }
 
-Shader* ShaderDatabase::registerShader(const std::string& name, const Shader& shader)
+Shader* ShaderDatabase::registerShader(const std::string& name, Shader&& shader)
 {
     if (isExistingShader(name))
     {
@@ -247,7 +267,7 @@ Shader* ShaderDatabase::registerShader(const std::string& name, const Shader& sh
         abort();
     }
 
-    const auto& [it, success] = m_shaderMap.insert(std::make_pair(name, shader));
+    const auto& [it, success] = m_shaderMap.insert(std::pair<std::string, Shader>(name, std::move(shader)));
     if (!success)
     {
         fprintf(stderr, "Failed to register Shader [%s] in DB!\n", name.c_str());
