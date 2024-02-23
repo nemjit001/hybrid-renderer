@@ -1,52 +1,65 @@
 #include "scene.h"
 
 #include <vector>
+#include <map>
 
+#include "camera.h"
+#include "material.h"
 #include "mesh.h"
+#include "renderer_internal/render_context.h"
 
 using namespace hri;
 
-Scene::Scene(SceneParameters sceneParameters, const SceneData& sceneData, const std::vector<SceneNode>& nodes)
+Scene::Scene(RenderContext* ctx, SceneParameters sceneParameters, const SceneData& sceneData, const std::vector<SceneNode>& nodes)
 	:
 	m_sceneParameters(sceneParameters),
 	m_sceneData(sceneData),
 	m_nodes(nodes)
 {
-	//
+	assert(ctx != nullptr);
+	m_gpuMeshes.reserve(m_sceneData.meshes.size());
+
+	for (auto const& mesh : m_sceneData.meshes)
+	{
+		m_gpuMeshes.push_back(mesh.createGPUMesh(ctx));
+	}
 }
 
-BatchedSceneData Scene::generateBatchedSceneData(RenderContext* ctx)
+Scene::~Scene()
 {
-	assert(ctx != nullptr);
+	for (auto& mesh : m_gpuMeshes)
+	{
+		mesh.destroy();
+	}
+}
 
-	std::unordered_map<uint32_t, std::vector<GPUMesh>> batchedMeshes = {};
-	for (size_t materialIdx = 0; materialIdx < m_sceneData.materials.size(); materialIdx++)
+RenderableScene Scene::generateRenderableScene(hri::Camera& camera) const
+{
+	std::vector<RenderableObject> renderables = {};
+
+	for (size_t matIdx = 0; matIdx < m_sceneData.materials.size(); matIdx++)
 	{
 		for (auto const& node : m_nodes)
 		{
-			auto const& mesh = m_sceneData.meshes[node.mesh];
+			auto const& material = m_sceneData.materials[node.mesh];
+			auto const& mesh = m_gpuMeshes[node.mesh];
 
-			if (node.material == materialIdx)
+			if (node.material == matIdx)
 			{
-				batchedMeshes[materialIdx].push_back(mesh.createGPUMesh(ctx));
+				// TODO: check dist camera -> mesh for LOD selection
+
+				RenderableObject renderObject = RenderableObject{
+					material,
+					mesh,
+				};
+
+				renderables.push_back(renderObject);
 			}
 		}
 	}
 
-	return BatchedSceneData{
-		batchedMeshes
+	return RenderableScene{
+		m_sceneParameters,
+		renderables,
 	};
-}
-
-void Scene::destroyBatchedSceneData(RenderContext* ctx, BatchedSceneData& sceneData)
-{
-	for (auto& [ material, meshes ] : sceneData.batchedMeshes)
-	{
-		for (auto& mesh : meshes)
-		{
-			mesh.destroy();
-		}
-	}
-
-	sceneData.batchedMeshes.clear();
 }

@@ -1,17 +1,19 @@
 #pragma once
 
 #include <hybrid_renderer.h>
+#include <vector>
 
 /// @brief The Transform Push Constant is used to push transformation data for renderable objects to shaders.
 struct TransformPushConstant
 {
-	hri::Float4x4 model;
-	hri::Float3x3 normal;
+	hri::Float4x4 model 	= hri::Float4x4(1.0f);
+	hri::Float3x3 normal 	= hri::Float3x3(1.0f);
 };
 
 struct GBufferLayoutFrameInfo
 {
-	VkDescriptorSet sceneDataSetHandle = VK_NULL_HANDLE;
+	VkDescriptorSet sceneDataSetHandle 	= VK_NULL_HANDLE;
+	hri::RenderableScene* scene			= nullptr;
 };
 
 struct PresentFrameInfo
@@ -38,10 +40,15 @@ public:
 		VkDescriptorSetLayout sceneDataSetLayout
 	);
 
+	/// @brief Destroy the GBufferLayoutSubsystem.
 	virtual ~GBufferLayoutSubsystem() = default;
 
+	/// @brief Record GBuffer Layout render commands.
+	/// @param frame Active Frame to record into.
 	virtual void record(hri::ActiveFrame& frame) const override;
 
+	/// @brief Update frame info for this subsystem. The FrameInfo will be used for any subsequent command recordings.
+	/// @param frameInfo FrameInfo to pass to the subsystem.
 	inline void updateFrameInfo(const GBufferLayoutFrameInfo& frameInfo) { m_currentFrameInfo = frameInfo; }
 
 protected:
@@ -97,6 +104,8 @@ public:
 	/// @param frame Active Frame to record into.
 	virtual void record(hri::ActiveFrame& frame) const override;
 
+	/// @brief Update frame info for this subsystem. The FrameInfo will be used for any subsequent command recordings.
+	/// @param frameInfo FrameInfo to pass to the subsystem.
 	inline void updateFrameInfo(const PresentFrameInfo& frameInfo) { m_currentFrameInfo = frameInfo; }
 
 protected:

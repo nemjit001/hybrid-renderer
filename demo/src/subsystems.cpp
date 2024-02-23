@@ -2,6 +2,7 @@
 
 #include <hybrid_renderer.h>
 #include <imgui_impl_vulkan.h>
+#include <vector>
 
 GBufferLayoutSubsystem::GBufferLayoutSubsystem(
 	hri::RenderContext* ctx,
@@ -13,7 +14,7 @@ GBufferLayoutSubsystem::GBufferLayoutSubsystem(
 	hri::IRenderSubsystem(ctx)
 {
 	m_layout = hri::PipelineLayoutBuilder(ctx)
-		.addPushConstant(sizeof(TransformPushConstant), VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
+		.addPushConstant(sizeof(TransformPushConstant), VK_SHADER_STAGE_VERTEX_BIT)
 		.addDescriptorSetLayout(sceneDataSetLayout)
 		.build();
 
@@ -112,9 +113,33 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 
 	vkCmdBindPipeline(frame.commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
 
-	// TODO: draw scene
-	//	- for every object push transfrom / normal data
-	//	- for every object draw mesh
+	// Nothing to draw
+	if (m_currentFrameInfo.scene == nullptr)
+		return;
+
+	for (auto const& renderable : m_currentFrameInfo.scene->renderables)
+	{
+		TransformPushConstant transform = TransformPushConstant{
+			hri::Float4x4(1.0f),
+			hri::Float3x3(1.0f),
+		};
+
+		vkCmdPushConstants(
+			frame.commandBuffer,
+			m_layout,
+			VK_SHADER_STAGE_VERTEX_BIT,
+			0,
+			sizeof(TransformPushConstant),
+			&transform
+		);
+
+		// TODO: bind material data
+
+		VkDeviceSize vertexBufferOffsets[] = { 0 };
+		vkCmdBindVertexBuffers(frame.commandBuffer, 0, 1, &renderable.mesh.vertexBuffer.buffer, vertexBufferOffsets);
+		vkCmdBindIndexBuffer(frame.commandBuffer, renderable.mesh.indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdDrawIndexed(frame.commandBuffer, renderable.mesh.indexCount, 1, 0, 0, 0);
+	}
 }
 
 UISubsystem::UISubsystem(

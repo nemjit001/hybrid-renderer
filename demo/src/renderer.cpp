@@ -289,13 +289,15 @@ void Renderer::prepareFrameResources(const hri::ActiveFrame& frame)
 {
 	RendererFrameData& rendererFrameData = m_frames[frame.currentFrameIndex];
 
-	// Update UBOs
+	// Update UBOs & scene renderables
 	hri::CameraShaderData cameraData = m_camera.getShaderData();
 	rendererFrameData.cameraUBO.copyToBuffer(&m_context, &cameraData, sizeof(hri::CameraShaderData));
+	rendererFrameData.renderableScene = m_activeScene.generateRenderableScene(m_camera);
 
 	// Update subsystem frame info
 	m_gbufferLayoutSubsystem->updateFrameInfo(GBufferLayoutFrameInfo{
 		rendererFrameData.sceneDataSet->set,
+		&rendererFrameData.renderableScene,
 	});
 
 	m_presentSubsystem->updateFrameInfo(PresentFrameInfo{

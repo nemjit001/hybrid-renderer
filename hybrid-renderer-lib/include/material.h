@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 #include "platform.h"
 #include "hri_math.h"
 

@@ -17,7 +17,7 @@ static bool gWindowResized  = false;
 static int gDisplayWidth 	= SCR_WIDTH;
 static int gDisplayHeight 	= SCR_HEIGHT;
 
-hri::Scene loadScene(const char* path)
+hri::Scene loadScene(hri::RenderContext& ctx, const char* path)
 {
 	printf("Loading scenefile [%s]\n", path);
 
@@ -142,6 +142,7 @@ hri::Scene loadScene(const char* path)
 	};
 
 	return hri::Scene(
+		&ctx,
 		hri::SceneParameters{},
 		sceneData,
 		sceneNodes
@@ -251,7 +252,7 @@ int main()
 	);
 
 	// Load scene file
-	hri::Scene scene = loadScene("assets/test_scene.obj");
+	hri::Scene scene = loadScene(renderContext, "assets/test_scene.obj");
 
 	// Create renderer
 	Renderer renderer = Renderer(renderContext, camera, scene);

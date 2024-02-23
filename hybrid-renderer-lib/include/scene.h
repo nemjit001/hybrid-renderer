@@ -3,10 +3,10 @@
 #include <vector>
 #include <map>
 
+#include "camera.h"
 #include "material.h"
 #include "mesh.h"
 #include "renderer_internal/render_context.h"
-#include "renderer_internal/buffer.h"
 
 #define HRI_INVALID_SCENE_INDEX	(uint32_t)(~0)
 
@@ -26,16 +26,25 @@ namespace hri
 		std::vector<Material> materials		= {};
 	};
 
-	/// @brief A scene node contains references into the scene data arrays.
+	/// @brief A scene node contains indices pointing to entries in the scene data arrays.
 	struct SceneNode
 	{
 		uint32_t mesh		= HRI_INVALID_SCENE_INDEX;
 		uint32_t material	= HRI_INVALID_SCENE_INDEX;
 	};
 
-	struct BatchedSceneData
+	/// @brief A Renderable Object represents a mesh and material ready for rendering.
+	struct RenderableObject
 	{
-		std::unordered_map<uint32_t, std::vector<GPUMesh>> batchedMeshes = {};
+		Material material;
+		GPUMesh mesh;
+	};
+
+	/// @brief The RenderableScene structure contains scene parameters as set in the Scene that produced it, as well as a list of renderable objects.
+	struct RenderableScene
+	{
+		SceneParameters sceneParameters;
+		std::vector<RenderableObject> renderables;
 	};
 
 	/// @brief The Scene class represents the renderable world and its contents.
@@ -46,21 +55,24 @@ namespace hri
 		Scene() = default;
 
 		/// @brief Instantiate a new Scene object.
+		/// @param ctx Render Context to use.
 		/// @param sceneParameters SceneParameters to use.
 		/// @param sceneData Data list containing resources that the scene nodes point to.
 		/// @param nodes SceneNode list with scene object entries.
-		Scene(SceneParameters sceneParameters, const SceneData& sceneData, const std::vector<SceneNode>& nodes);
+		Scene(RenderContext* ctx, SceneParameters sceneParameters, const SceneData& sceneData, const std::vector<SceneNode>& nodes);
 
 		/// @brief Destroy this Scene object.
-		virtual ~Scene() = default;
+		virtual ~Scene();
 
-		BatchedSceneData generateBatchedSceneData(RenderContext* ctx);
-
-		void destroyBatchedSceneData(RenderContext* ctx, BatchedSceneData& sceneData);
+		/// @brief Generate a renderable scene based on the camera position in the world.
+		/// @param camera Camera used for rendering the world.
+		/// @return A renderable scene structure.
+		RenderableScene generateRenderableScene(hri::Camera& camera) const;
 
 	private:
 		SceneParameters m_sceneParameters	= SceneParameters{};
 		SceneData m_sceneData				= SceneData{};
+		std::vector<GPUMesh> m_gpuMeshes	= {};
 		std::vector<SceneNode> m_nodes		= {};
 	};
 }
