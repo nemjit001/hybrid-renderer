@@ -11,17 +11,14 @@ struct RendererFrameData
 	std::unique_ptr<hri::BufferResource> cameraUBO;
 	std::unique_ptr<hri::DescriptorSetManager> sceneDataSet;
 	std::unique_ptr<hri::DescriptorSetManager> presentInputSet;
-	hri::RenderableScene renderableScene;
 };
 
 class Renderer
 {
 public:
-	Renderer(hri::RenderContext& ctx, hri::Camera& camera, hri::Scene& scene);
+	Renderer(hri::RenderContext& ctx, hri::Camera& camera);
 
 	virtual ~Renderer();
-
-	void setActiveScene(hri::Scene& scene);
 
 	void setVSyncMode(hri::VSyncMode vsyncMode);
 
@@ -53,7 +50,6 @@ private:
 
 	// Renderer state
 	hri::Camera& m_camera;
-	hri::Scene& m_activeScene;
 
 	// Shared preinitialized samplers
 	std::unique_ptr<hri::ImageSampler> m_renderResultLinearSampler;

@@ -17,6 +17,9 @@ namespace hri
 	class Texture
 	{
 	public:
+		/// @brief Create an empty texture with no allocated memory.
+		Texture() = default;
+
 		/// @brief Create an empty texture.
 		/// @param extent The texture's extent.
 		Texture(TextureExtent extent);

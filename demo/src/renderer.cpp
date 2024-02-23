@@ -5,15 +5,14 @@
 
 #include "subsystems.h"
 
-Renderer::Renderer(hri::RenderContext& ctx, hri::Camera& camera, hri::Scene& scene)
+Renderer::Renderer(hri::RenderContext& ctx, hri::Camera& camera)
 	:
 	m_context(ctx),
 	m_renderCore(&ctx),
 	m_shaderDatabase(&ctx),
 	m_subsystemManager(&ctx),
 	m_descriptorSetAllocator(&ctx),
-	m_camera(camera),
-	m_activeScene(scene)
+	m_camera(camera)
 {
 	initShaderDB();
 	initRenderPasses();
@@ -30,11 +29,6 @@ Renderer::Renderer(hri::RenderContext& ctx, hri::Camera& camera, hri::Scene& sce
 Renderer::~Renderer()
 {
 	m_renderCore.awaitFrameFinished();
-}
-
-void Renderer::setActiveScene(hri::Scene& scene)
-{
-	m_activeScene = std::move(scene);
 }
 
 void Renderer::setVSyncMode(hri::VSyncMode vsyncMode)
@@ -338,12 +332,10 @@ void Renderer::prepareFrameResources(const hri::ActiveFrame& frame)
 	// TODO: upload Device Local data to GPU
 	hri::CameraShaderData cameraData = m_camera.getShaderData();
 	rendererFrameData.cameraUBO->copyToBuffer(&cameraData, sizeof(hri::CameraShaderData));
-	rendererFrameData.renderableScene = m_activeScene.generateRenderableScene(m_camera);
 
 	// Update subsystem frame info
 	m_gbufferLayoutSubsystem->updateFrameInfo(GBufferLayoutFrameInfo{
-		rendererFrameData.sceneDataSet->set,
-		&rendererFrameData.renderableScene,
+		rendererFrameData.sceneDataSet->set
 	});
 
 	m_presentSubsystem->updateFrameInfo(PresentFrameInfo{

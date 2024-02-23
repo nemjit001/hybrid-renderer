@@ -5,7 +5,9 @@
 #include <imgui.h>
 
 #include "demo.h"
+#include "material.h"
 #include "renderer.h"
+#include "scene.h"
 #include "timer.h"
 #include "ui_manager.h"
 #include "window_manager.h"
@@ -23,7 +25,7 @@ static bool gWindowResized  = false;
 static int gDisplayWidth 	= SCR_WIDTH;
 static int gDisplayHeight 	= SCR_HEIGHT;
 
-hri::Scene loadScene(hri::RenderContext& ctx, const char* path)
+SceneGraph loadScene(hri::RenderContext& renderContext, const char* path)
 {
 	printf("Loading scenefile [%s]\n", path);
 
@@ -54,24 +56,29 @@ hri::Scene loadScene(hri::RenderContext& ctx, const char* path)
 	const std::vector<tinyobj::shape_t>& objShapes = reader.GetShapes();
 	const std::vector<tinyobj::material_t>& objMaterials = reader.GetMaterials();
 
-	// Actually loaded attributes
-	std::vector<hri::Material> materials; materials.reserve(objMaterials.size());
-	std::vector<hri::Mesh> meshes; meshes.reserve(objShapes.size());
+	std::vector<Material> materials = {}; materials.reserve(objMaterials.size());
+	std::vector<hri::Mesh> meshes = {}; meshes.reserve(objShapes.size());
 
-	// For now assume all nodes are meshes (i.e. no instancing or per node transform)
-	std::vector<hri::SceneNode> sceneNodes; sceneNodes.reserve(objShapes.size());
+	// For now assume all meshes are unqiue nodes (i.e. no instancing or per node transform)
+	std::vector<SceneNode> nodes; nodes.reserve(objShapes.size());
 
-	// Load material data into hri compatible format
+	// Load material data into compatible format
 	for (auto const& material : objMaterials)
 	{
-		// TODO: load texture files if a material contains texuture maps
-		hri::Material newMaterial = hri::Material{
+		// TODO: load texture files if a material contains texture maps
+		MaterialParameters materialParams = MaterialParameters{
 			hri::Float3(material.diffuse[0], material.diffuse[1], material.diffuse[2]),
 			hri::Float3(material.specular[0], material.specular[1], material.specular[2]),
 			hri::Float3(material.transmittance[0], material.transmittance[1], material.transmittance[2]),
 			hri::Float3(material.emission[0], material.emission[1], material.emission[2]),
 			material.shininess,
 			material.ior,
+		};
+
+		Material newMaterial = Material{
+			materialParams,
+			hri::Texture(),
+			hri::Texture(),
 		};
 
 		materials.push_back(newMaterial);
@@ -130,32 +137,34 @@ hri::Scene loadScene(hri::RenderContext& ctx, const char* path)
 			v2.tangent = normalize(tangent - dot(v2.normal, tangent) * v2.normal);
 		}
 
-		// Add scene node with mesh & material data
-		uint32_t materialIdx = static_cast<uint32_t>(shape.mesh.material_ids[0]);	// Assumes all faces share the same materials (maybe naive?)
-		uint32_t meshIdx = static_cast<uint32_t>(meshes.size());
-		sceneNodes.push_back(hri::SceneNode{ meshIdx, materialIdx });
+		meshes.push_back(std::move(hri::Mesh(&renderContext, vertices, indices)));
 
-		meshes.push_back(std::move(hri::Mesh(&ctx, vertices, indices)));
+		// TODO: set newly encountered LOD level in scene
+		nodes.push_back(SceneNode{
+			shape.name,
+			SceneTransform{},	// No transform support
+			static_cast<SceneNode::SceneId>(shape.mesh.material_ids[0]),	// assume 1 material per mesh
+			{ meshes.size(), INVALID_SCENE_ID, INVALID_SCENE_ID }
+		});
 	}
 
-	printf("Loaded scene file:\n");
-	printf("\t%zu materials\n", materials.size());
-	printf("\t%zu meshes\n", meshes.size());
-
-	struct hri::SceneData sceneData = hri::SceneData{
-		std::move(meshes),
-		std::move(materials),
-	};
-
-	return hri::Scene(
-		&ctx,
-		hri::SceneParameters{},
-		std::move(sceneData),
-		sceneNodes
-	);
+	return SceneGraph(std::move(materials), std::move(meshes), std::move(nodes));
 }
 
-void drawStatusWindow(float deltaTime)
+void drawSceneGraphNodeMenu(std::vector<SceneNode>& nodes)
+{
+	for (auto& node : nodes)
+	{
+		if (ImGui::TreeNode(node.name.c_str()))
+		{
+			ImGui::DragFloat3("Position", node.transform.position.xyz, 0.05f);
+			ImGui::DragFloat3("Scale", node.transform.scale.xyz, 0.05f);
+			ImGui::TreePop();
+		}
+	}
+}
+
+void drawConfigWindow(float deltaTime, SceneGraph& scene)
 {
 	static float AVG_FRAMETIME = 1.0f;
 	static float ALPHA = 1.0f;
@@ -163,12 +172,18 @@ void drawStatusWindow(float deltaTime)
 	AVG_FRAMETIME = (1.0f - ALPHA) * AVG_FRAMETIME + ALPHA * deltaTime;
 	if (ALPHA > 0.05f) ALPHA *= 0.5f;
 
-	if (ImGui::Begin("Status"))
+	if (ImGui::Begin("Config"))
 	{
-		ImGui::SetWindowSize(ImVec2(300.0f, 250.0f), ImGuiCond_FirstUseEver);
+		ImGui::SetWindowPos(ImVec2(10.0f, 10.0f), ImGuiCond_FirstUseEver);
+		ImGui::SetWindowSize(ImVec2(300.0f, 0.0f), ImGuiCond_FirstUseEver);
+
+		ImGui::SeparatorText("Status");
 		ImGui::Text("Resolution: %d x %d", gDisplayWidth, gDisplayHeight);
 		ImGui::Text("Frame Time: %8.2f ms", AVG_FRAMETIME * 1'000.0f);
 		ImGui::Text("FPS:        %8.2f fps", 1.0f / AVG_FRAMETIME);
+
+		ImGui::SeparatorText("Scene Nodes");
+		drawSceneGraphNodeMenu(scene.nodes);
 	}
 
 	ImGui::End();
@@ -264,10 +279,10 @@ int main()
 	);
 
 	// Load scene file
-	hri::Scene scene = loadScene(renderContext, "assets/test_scene.obj");
+	SceneGraph scene = loadScene(renderContext, "assets/test_scene.obj");
 
 	// Create renderer
-	Renderer renderer = Renderer(renderContext, camera, scene);
+	Renderer renderer = Renderer(renderContext, camera);
 
 	printf("Startup complete\n");
 
@@ -281,7 +296,7 @@ int main()
 
 		// Record ImGUI draw commands
 		uiManager.startDraw();
-		drawStatusWindow(gFrameTimer.deltaTime);
+		drawConfigWindow(gFrameTimer.deltaTime, scene);
 		uiManager.endDraw();
 
 		// Draw renderer frame
