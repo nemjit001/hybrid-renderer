@@ -120,8 +120,8 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 	for (auto const& renderable : m_currentFrameInfo.scene->renderables)
 	{
 		TransformPushConstant transform = TransformPushConstant{
-			hri::Float4x4(1.0f),
-			hri::Float3x3(1.0f),
+			renderable.transform,
+			transpose(inverse(hri::Float3x3(renderable.transform))),	// FIXME: this doesn't seem to work for normal matrix calculation?
 		};
 
 		vkCmdPushConstants(

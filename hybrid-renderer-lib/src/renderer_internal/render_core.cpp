@@ -47,92 +47,14 @@ void FrameState::destroy(RenderContext* ctx, FrameState& frameState)
 	memset(&frameState, 0, sizeof(FrameState));
 }
 
-void ActiveFrame::imageMemoryBarrier(
-	VkImage image,
-	VkPipelineStageFlags srcStage,
-	VkPipelineStageFlags dstStage,
-	VkAccessFlags srcAccessMask,
-	VkAccessFlags dstAccessMask,
-	VkImageLayout oldLayout,
-	VkImageLayout newLayout,
-	VkImageSubresourceRange subresourceRange,
-	uint32_t srcQueueFamily,
-	uint32_t dstQueueFamily
-) const
+void ActiveFrame::pipelineBarrier(const std::vector<VkImageMemoryBarrier2>& memoryBarriers, VkDependencyFlags flags) const
 {
-	VkImageMemoryBarrier imageBarrier = VkImageMemoryBarrier{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
-	imageBarrier.srcAccessMask = srcAccessMask;
-	imageBarrier.dstAccessMask = dstAccessMask;
-	imageBarrier.oldLayout = oldLayout;
-	imageBarrier.newLayout = newLayout;
-	imageBarrier.srcQueueFamilyIndex = srcQueueFamily;
-	imageBarrier.dstQueueFamilyIndex = dstQueueFamily;
-	imageBarrier.image = image;
-	imageBarrier.subresourceRange = subresourceRange;
+	VkDependencyInfo dependency = VkDependencyInfo{ VK_STRUCTURE_TYPE_DEPENDENCY_INFO };
+	dependency.dependencyFlags = flags;
+	dependency.imageMemoryBarrierCount = static_cast<uint32_t>(memoryBarriers.size());
+	dependency.pImageMemoryBarriers = memoryBarriers.data();
 
-	vkCmdPipelineBarrier(
-		commandBuffer,
-		srcStage,
-		dstStage,
-		0,
-		0, nullptr,
-		0, nullptr,
-		1, &imageBarrier
-	);
-}
-
-void ActiveFrame::bufferMemoryBarrier(
-	VkBuffer buffer,
-	VkPipelineStageFlags srcStage,
-	VkPipelineStageFlags dstStage,
-	VkAccessFlags srcAccessMask,
-	VkAccessFlags dstAccessMask,
-	size_t offset,
-	size_t size,
-	uint32_t srcQueueFamily,
-	uint32_t dstQueueFamily
-) const
-{
-	VkBufferMemoryBarrier bufferBarrier = VkBufferMemoryBarrier{ VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER };
-	bufferBarrier.srcAccessMask = srcAccessMask;
-	bufferBarrier.dstAccessMask = dstAccessMask;
-	bufferBarrier.srcQueueFamilyIndex = srcQueueFamily;
-	bufferBarrier.dstQueueFamilyIndex = dstQueueFamily;
-	bufferBarrier.buffer = buffer;
-	bufferBarrier.offset = offset;
-	bufferBarrier.size = size;
-
-	vkCmdPipelineBarrier(
-		commandBuffer,
-		srcStage,
-		dstStage,
-		0,
-		0, nullptr,
-		1, &bufferBarrier,
-		0, nullptr
-	);
-}
-
-void ActiveFrame::memoryBarrier(
-	VkPipelineStageFlags srcStage,
-	VkPipelineStageFlags dstStage,
-	VkAccessFlags srcAccessMask,
-	VkAccessFlags dstAccessMask
-) const
-{
-	VkMemoryBarrier barrier = VkMemoryBarrier{ VK_STRUCTURE_TYPE_MEMORY_BARRIER };
-	barrier.srcAccessMask = srcAccessMask;
-	barrier.dstAccessMask = dstAccessMask;
-
-	vkCmdPipelineBarrier(
-		commandBuffer,
-		srcStage,
-		dstStage,
-		0,
-		1, &barrier,
-		0, nullptr,
-		0, nullptr
-	);
+	vkCmdPipelineBarrier2(commandBuffer, &dependency);
 }
 
 RenderCore::RenderCore(RenderContext* ctx)

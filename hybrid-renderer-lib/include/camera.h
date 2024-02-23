@@ -20,9 +20,9 @@ namespace hri
 	/// @brief Shader layout of camera data
 	struct CameraShaderData
 	{
-		ALIGNAS(16) Float3 position;
-		ALIGNAS(16) Float4x4 view;
-		ALIGNAS(16) Float4x4 project;
+		HRI_ALIGNAS(16) Float3 position;
+		HRI_ALIGNAS(16) Float4x4 view;
+		HRI_ALIGNAS(16) Float4x4 project;
 	};
 
 	/// @brief A virtual camera used in rendering operations.

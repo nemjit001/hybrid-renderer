@@ -6,8 +6,8 @@
 /// @brief The Transform Push Constant is used to push transformation data for renderable objects to shaders.
 struct TransformPushConstant
 {
-	hri::Float4x4 model 	= hri::Float4x4(1.0f);
-	hri::Float3x3 normal 	= hri::Float3x3(1.0f);
+	HRI_ALIGNAS(16) hri::Float4x4 model 	= hri::Float4x4(1.0f);
+	HRI_ALIGNAS(16) hri::Float3x3 normal 	= hri::Float3x3(1.0f);
 };
 
 struct GBufferLayoutFrameInfo

@@ -51,21 +51,65 @@ void Renderer::drawFrame()
 
 	frame.beginCommands();
 
+	// Record GBufferLayout pass
 	m_gbufferLayoutPassManager->beginRenderPass(frame);
 	m_subsystemManager.recordSubsystem("GBufferLayoutSystem", frame);
 	m_gbufferLayoutPassManager->endRenderPass(frame);
 
-	frame.imageMemoryBarrier(
-		m_gbufferLayoutPassManager->getAttachmentResource(0).image,
-		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-		VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-		VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-		VK_ACCESS_SHADER_READ_BIT,
-		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-		VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-		VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 }
-	);
+	// Transition GBuffer output resources
+	{
+		VkImageMemoryBarrier2 gbufferAlbedoBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
+		gbufferAlbedoBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+		gbufferAlbedoBarrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
+		gbufferAlbedoBarrier.srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
+		gbufferAlbedoBarrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
+		gbufferAlbedoBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		gbufferAlbedoBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		gbufferAlbedoBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		gbufferAlbedoBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		gbufferAlbedoBarrier.image = m_gbufferLayoutPassManager->getAttachmentResource(0).image;
+		gbufferAlbedoBarrier.subresourceRange = VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+
+		VkImageMemoryBarrier2 gbufferWPosBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
+		gbufferWPosBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+		gbufferWPosBarrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
+		gbufferWPosBarrier.srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
+		gbufferWPosBarrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
+		gbufferWPosBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		gbufferWPosBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		gbufferWPosBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		gbufferWPosBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		gbufferWPosBarrier.image = m_gbufferLayoutPassManager->getAttachmentResource(1).image;
+		gbufferWPosBarrier.subresourceRange = VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+
+		VkImageMemoryBarrier2 gbufferNormalBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
+		gbufferNormalBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+		gbufferNormalBarrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
+		gbufferNormalBarrier.srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
+		gbufferNormalBarrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
+		gbufferNormalBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		gbufferNormalBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		gbufferNormalBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		gbufferNormalBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		gbufferNormalBarrier.image = m_gbufferLayoutPassManager->getAttachmentResource(2).image;
+		gbufferNormalBarrier.subresourceRange = VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+
+		VkImageMemoryBarrier2 gbufferDepthBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
+		gbufferDepthBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+		gbufferDepthBarrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
+		gbufferDepthBarrier.srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
+		gbufferDepthBarrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
+		gbufferDepthBarrier.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		gbufferDepthBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		gbufferDepthBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		gbufferDepthBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		gbufferDepthBarrier.image = m_gbufferLayoutPassManager->getAttachmentResource(3).image;
+		gbufferDepthBarrier.subresourceRange = VkImageSubresourceRange{ VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT, 0, 1, 0, 1 };
+
+		frame.pipelineBarrier({ gbufferAlbedoBarrier, gbufferWPosBarrier, gbufferNormalBarrier, gbufferDepthBarrier });
+	}
 	
+	// Record swapchain output passes
 	m_swapchainPassManager->beginRenderPass(frame);
 	m_subsystemManager.recordSubsystem("PresentationSystem", frame);
 	m_subsystemManager.recordSubsystem("UISystem", frame);	// Must be drawn after present as overlay
@@ -262,7 +306,7 @@ void Renderer::initRendererFrameData()
 			&m_context,
 			sizeof(hri::CameraShaderData),
 			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-			true	// FIXME: make buffer device local & prepare resource before frame execution.
+			true
 		);
 
 		frame.presentInputSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(
@@ -290,6 +334,7 @@ void Renderer::prepareFrameResources(const hri::ActiveFrame& frame)
 	RendererFrameData& rendererFrameData = m_frames[frame.currentFrameIndex];
 
 	// Update UBOs & scene renderables
+	// TODO: upload Device Local data to GPU
 	hri::CameraShaderData cameraData = m_camera.getShaderData();
 	rendererFrameData.cameraUBO.copyToBuffer(&m_context, &cameraData, sizeof(hri::CameraShaderData));
 	rendererFrameData.renderableScene = m_activeScene.generateRenderableScene(m_camera);

@@ -49,6 +49,7 @@ RenderableScene Scene::generateRenderableScene(hri::Camera& camera) const
 				// TODO: check dist camera -> mesh for LOD selection
 
 				RenderableObject renderObject = RenderableObject{
+					Float4x4(1.0f),
 					material,
 					mesh,
 				};

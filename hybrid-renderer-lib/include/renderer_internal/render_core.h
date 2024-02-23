@@ -48,63 +48,10 @@ namespace hri
 			HRI_VK_CHECK(vkEndCommandBuffer(commandBuffer));
 		}
 
-		/// @brief Insert an image memory barrier in the frame.
-		/// @param image Image for which this barrier is active.
-		/// @param srcStage Source pipeline stage.
-		/// @param dstStage Destination pipeline stage.
-		/// @param srcAccessMask Source access flags, when the image can be transitioned.
-		/// @param dstAccessMask Destination access flags, when the image has to be done transitioning.
-		/// @param oldLayout Old image layout.
-		/// @param newLayout New image layout.
-		/// @param subresourceRange Image subresource range to transition.
-		/// @param srcQueueFamily Current queue family of image.
-		/// @param dstQueueFamily Target queue family of image.
-		void imageMemoryBarrier(
-			VkImage image,
-			VkPipelineStageFlags srcStage,
-			VkPipelineStageFlags dstStage,
-			VkAccessFlags srcAccessMask,
-			VkAccessFlags dstAccessMask,
-			VkImageLayout oldLayout,
-			VkImageLayout newLayout,
-			VkImageSubresourceRange subresourceRange,
-			uint32_t srcQueueFamily = VK_QUEUE_FAMILY_IGNORED,
-			uint32_t dstQueueFamily = VK_QUEUE_FAMILY_IGNORED
-		) const;
-
-		/// @brief Insert a buffer memory barrier in the frame.
-		/// @param buffer Buffer for which this barrier is active.
-		/// @param srcStage Source pipeline stage.
-		/// @param dstStage Destination pipeline stage.
-		/// @param srcAccessMask Source access flags, when the buffer is no longer accessed.
-		/// @param dstAccessMask Destination access flags, when the buffer has to be accessible again.
-		/// @param offset Buffer region offset for the barrier.
-		/// @param size Buffer region size for the barrier, may be VK_WHOLE_SIZE.
-		/// @param srcQueueFamily Current queue family of image.
-		/// @param dstQueueFamily Target queue family of image.
-		void bufferMemoryBarrier(
-			VkBuffer buffer,
-			VkPipelineStageFlags srcStage,
-			VkPipelineStageFlags dstStage,
-			VkAccessFlags srcAccessMask,
-			VkAccessFlags dstAccessMask,
-			size_t offset,
-			size_t size,
-			uint32_t srcQueueFamily = VK_QUEUE_FAMILY_IGNORED,
-			uint32_t dstQueueFamily = VK_QUEUE_FAMILY_IGNORED
-		) const;
-
-		/// @brief Insert a memory barrier in the frame.
-		/// @param srcStage Source pipeline stage.
-		/// @param dstStage Destination pipeline stage.
-		/// @param srcAccessMask Source access flags, when the memory is no longer accessed.
-		/// @param dstAccessMask Destination access flags, when the memory has to be accessible again.
-		void memoryBarrier(
-			VkPipelineStageFlags srcStage,
-			VkPipelineStageFlags dstStage,
-			VkAccessFlags srcAccessMask,
-			VkAccessFlags dstAccessMask
-		) const;
+		/// @brief Insert an image pipeline barrier in the frame.
+		/// @param memoryBarriers Image Memory Barriers list.
+		/// @param flags Dependency flags to use.
+		void pipelineBarrier(const std::vector<VkImageMemoryBarrier2>& memoryBarriers, VkDependencyFlags flags = 0) const;
 	};
 
 	/// @brief The Render Core handles frame state and work submission.

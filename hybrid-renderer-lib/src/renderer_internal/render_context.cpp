@@ -82,6 +82,7 @@ RenderContext::RenderContext(RenderContextCreateInfo& createInfo)
     VkPhysicalDeviceVulkan12Features deviceFeatures12 = VkPhysicalDeviceVulkan12Features{};
     VkPhysicalDeviceVulkan13Features deviceFeatures13 = VkPhysicalDeviceVulkan13Features{};
     deviceFeatures.samplerAnisotropy = true;
+    deviceFeatures13.synchronization2 = true;
 
     vkb::PhysicalDeviceSelector gpuSelector = vkb::PhysicalDeviceSelector(instance, surface);
     gpu = gpuSelector

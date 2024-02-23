@@ -36,6 +36,7 @@ namespace hri
 	/// @brief A Renderable Object represents a mesh and material ready for rendering.
 	struct RenderableObject
 	{
+		Float4x4 transform;
 		Material material;
 		GPUMesh mesh;
 	};
