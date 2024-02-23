@@ -13,9 +13,19 @@ add_subdirectory("deps/glfw/")
 
 add_subdirectory("deps/tinyobjloader/")
 
+file(GLOB IMGUI_HEADERS "deps/imgui/*.h")
+file(GLOB IMGUI_SOURCES "deps/imgui/*.cpp")
+set(IMGUI_HEADERS ${IMGUI_HEADERS} "deps/imgui/backends/imgui_impl_glfw.h" "deps/imgui/backends/imgui_impl_vulkan.h")
+set(IMGUI_SOURCES ${IMGUI_SOURCES} "deps/imgui/backends/imgui_impl_glfw.cpp" "deps/imgui/backends/imgui_impl_vulkan.cpp")
+
 add_executable(${TARGET_NAME}
 	${PROJECT_HEADERS}
 	${PROJECT_SOURCES}
+	${PROJECT_SHADERS}
+
+	# imgui dependency
+	${IMGUI_HEADERS}
+	${IMGUI_SOURCES}
 )
 
 target_link_libraries(${TARGET_NAME} PRIVATE
@@ -26,8 +36,10 @@ target_link_libraries(${TARGET_NAME} PRIVATE
 
 target_include_directories(${TARGET_NAME} PRIVATE
 	"include/"
-	"/deps/glfw/include/"
+	"deps/glfw/include/"
 	"deps/tinyobjloader/"
+	"deps/imgui/"
+	"deps/imgui/backends"
 	"../hybrid-renderer-lib/include/"
 )
 
@@ -39,3 +51,17 @@ add_custom_target(custom-commands-${TARGET_NAME} ALL
 add_custom_command(TARGET custom-commands-${TARGET_NAME}
 	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/assets/ $<TARGET_FILE_DIR:${TARGET_NAME}>/assets/
 )
+
+# Create shader output directory
+add_custom_command(TARGET custom-commands-${TARGET_NAME}
+	COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${TARGET_NAME}>/shaders/
+)
+
+# Compile shaders & deposit in shader directory
+foreach(SHADER_PATH IN LISTS PROJECT_SHADERS)
+	cmake_path(GET SHADER_PATH FILENAME SHADER_FILE)
+
+	add_custom_command(TARGET custom-commands-${TARGET_NAME}
+		COMMAND glslc ${SHADER_PATH} -o $<TARGET_FILE_DIR:${TARGET_NAME}>/shaders/${SHADER_FILE}.spv
+	)
+endforeach()

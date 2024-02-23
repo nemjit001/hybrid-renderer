@@ -33,6 +33,11 @@ WindowHandle* WindowManager::createWindow(WindowCreateInfo* createInfo)
 	return window;
 }
 
+void WindowManager::closeWindow(WindowHandle* window)
+{
+	glfwSetWindowShouldClose(window, true);
+}
+
 void WindowManager::destroyWindow(WindowHandle* window)
 {
 	assert(window != nullptr);

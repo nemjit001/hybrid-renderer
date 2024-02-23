@@ -1,0 +1,9 @@
+<map id="hri::DescriptorSetLayout::setLayout" name="hri::DescriptorSetLayout::setLayout">
+<area shape="rect" id="Node000001" title="Retrieve the set layout handle." alt="" coords="447,39,608,81"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_pipeline_layout_builder.html#a98ca63c2f88a41ce1d3bbdbc4dfb5643" title="Add a new Descriptor Set Layout to the pipeline layout." alt="" coords="231,39,399,81"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="432,63,400,63,400,57,432,57"/>
+<area shape="rect" id="Node000003" href="$class_g_buffer_layout_subsystem.html#a2256ebe444cbae68b140e734107f0edc" title=" " alt="" coords="5,5,183,48"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="215,48,183,43,184,37,216,42"/>
+<area shape="rect" id="Node000004" href="$class_presentation_subsystem.html#ad5864d1140ebf0ecb3806016e78215f9" title=" " alt="" coords="10,72,178,115"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="216,78,179,83,178,78,215,72"/>
+</map>

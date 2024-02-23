@@ -17,20 +17,16 @@
 
 using namespace hri;
 
-/// @brief Enabled & required Vulkan instance extensions
+/// @brief Enabled & required default Vulkan instance extensions
 static const std::vector<const char*> gInstanceExtensions = {
     VK_EXT_DEBUG_UTILS_EXTENSION_NAME,
     VK_KHR_SURFACE_EXTENSION_NAME,
     HRI_VK_PLATFORM_SURFACE_EXTENSION_NAME,
 };
 
-/// @brief Enabled & required Vulkan device extensions
+/// @brief Enabled & required default Vulkan device extensions
 static const std::vector<const char*> gDeviceExtensions = {
     VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-//    VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
-//    VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
-//    VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,
-//    VK_KHR_RAY_QUERY_EXTENSION_NAME,
 };
 
 RenderContextQueueState::RenderContextQueueState(vkb::Device device)
@@ -46,17 +42,22 @@ RenderContextQueueState::RenderContextQueueState(vkb::Device device)
     };
 }
 
-RenderContext::RenderContext(RenderContextCreateInfo createInfo)
+RenderContext::RenderContext(RenderContextCreateInfo& createInfo)
 {
     assert(createInfo.surfaceCreateFunc != nullptr);
     // TODO: error reporting for entire function
 
+    createInfo.instanceExtensions.insert(createInfo.instanceExtensions.end(), gInstanceExtensions.begin(), gInstanceExtensions.end());
+    createInfo.deviceExtensions.insert(createInfo.deviceExtensions.end(), gDeviceExtensions.begin(), gDeviceExtensions.end());
+
     vkb::InstanceBuilder instanceBuilder = vkb::InstanceBuilder();
     instance = instanceBuilder
         .require_api_version(HRI_VK_API_VERSION)
+        .set_app_name(createInfo.appName)
+        .set_app_version(createInfo.appVersion)
         .set_engine_name(HRI_ENGINE_NAME)
         .set_engine_version(HRI_ENGINE_VERSION)
-        .enable_extensions(gInstanceExtensions)
+        .enable_extensions(createInfo.instanceExtensions)
 #if HRI_DEBUG == 1
         .add_debug_messenger_severity(
             VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT
@@ -81,11 +82,12 @@ RenderContext::RenderContext(RenderContextCreateInfo createInfo)
     VkPhysicalDeviceVulkan12Features deviceFeatures12 = VkPhysicalDeviceVulkan12Features{};
     VkPhysicalDeviceVulkan13Features deviceFeatures13 = VkPhysicalDeviceVulkan13Features{};
     deviceFeatures.samplerAnisotropy = true;
+    deviceFeatures13.synchronization2 = true;
 
     vkb::PhysicalDeviceSelector gpuSelector = vkb::PhysicalDeviceSelector(instance, surface);
     gpu = gpuSelector
         .require_present(true)
-        .add_required_extensions(gDeviceExtensions)
+        .add_required_extensions(createInfo.deviceExtensions)
         .set_required_features(deviceFeatures)
         .set_required_features_11(deviceFeatures11)
         .set_required_features_12(deviceFeatures12)

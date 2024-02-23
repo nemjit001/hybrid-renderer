@@ -1,0 +1,9 @@
+<map id="hri::IRenderSubsystem" name="hri::IRenderSubsystem">
+<area shape="rect" id="Node000001" title="A Render Subsystem manages a render pipeline, layout, and subsystem descriptors. A Render Subsystem b..." alt="" coords="345,5,578,384"/>
+<area shape="rect" id="Node000002" href="$class_g_buffer_layout_subsystem.html" title=" " alt="" coords="5,432,293,720"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="337,351,269,434,265,430,333,348"/>
+<area shape="rect" id="Node000003" href="$class_presentation_subsystem.html" title=" " alt="" coords="317,432,605,720"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="464,399,464,432,459,432,459,399"/>
+<area shape="rect" id="Node000004" href="$class_u_i_subsystem.html" title=" " alt="" coords="630,472,866,680"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="589,361,673,471,668,474,585,364"/>
+</map>

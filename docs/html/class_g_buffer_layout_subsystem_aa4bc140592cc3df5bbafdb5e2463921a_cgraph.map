@@ -1,0 +1,27 @@
+<map id="GBufferLayoutSubsystem::GBufferLayoutSubsystem" name="GBufferLayoutSubsystem::GBufferLayoutSubsystem">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,339,183,381"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_descriptor_set_layout_builder.html#a6ca1066fc9cda68a188b464469ab237d" title="Add a descriptor binding to the descriptor set layout." alt="" coords="241,5,402,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="97,338,110,282,134,208,152,168,173,128,199,91,229,58,232,55,236,59,233,62,203,94,178,131,157,170,139,209,115,284,102,339"/>
+<area shape="rect" id="Node000003" href="$classhri_1_1_pipeline_layout_builder.html#a98ca63c2f88a41ce1d3bbdbc4dfb5643" title="Add a new Descriptor Set Layout to the pipeline layout." alt="" coords="237,72,406,115"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="100,337,117,293,144,236,181,177,204,149,229,125,234,121,237,125,232,129,208,153,185,180,148,239,122,295,105,339"/>
+<area shape="rect" id="Node000004" href="$classhri_1_1_descriptor_set_layout_builder.html#a9bfe5daf8d84003dcce380afb7e97fb0" title="Build the specified descriptor set layout." alt="" coords="241,139,402,181"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="105,337,154,266,189,226,229,191,235,187,238,191,232,195,192,230,158,270,110,340"/>
+<area shape="rect" id="Node000006" href="$classhri_1_1_pipeline_layout_builder.html#ad88e3add16c5f341425531e1db34c77d" title="Build the configured pipeline layout." alt="" coords="237,205,406,248"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="119,336,168,297,229,258,240,252,242,257,232,262,171,301,122,340"/>
+<area shape="rect" id="Node000007" href="$structhri_1_1_graphics_pipeline_builder.html#a6c9fa89e6b0675c7f460f67f2d674479" title=" " alt="" coords="231,272,412,315"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="168,336,231,317,232,322,170,341"/>
+<area shape="rect" id="Node000008" href="$structhri_1_1_graphics_pipeline_builder.html#aebf69250a889e1ac3196f3c54b147630" title=" " alt="" coords="231,339,412,381"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="183,357,215,357,215,363,183,363"/>
+<area shape="rect" id="Node000009" href="$structhri_1_1_graphics_pipeline_builder.html#a50539a9cc2f38a2da3416d07f069e8b3" title=" " alt="" coords="231,405,412,448"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="170,379,232,398,231,403,168,384"/>
+<area shape="rect" id="Node000010" href="$structhri_1_1_graphics_pipeline_builder.html#abd3ba37381aa860148b95c6feb6ca129" title=" " alt="" coords="231,472,412,515"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="122,380,171,419,232,458,242,463,240,468,229,462,168,423,119,384"/>
+<area shape="rect" id="Node000011" href="$structhri_1_1_graphics_pipeline_builder.html#ac7a8817225341e5268221226e0040b3b" title=" " alt="" coords="231,539,412,581"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="110,380,158,450,192,490,232,525,238,529,235,533,229,529,189,494,154,454,105,383"/>
+<area shape="rect" id="Node000012" href="$structhri_1_1_graphics_pipeline_builder.html#ac0e003f458114cb94bdce9d73d6b6526" title=" " alt="" coords="231,605,412,648"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="105,381,122,425,148,481,185,540,208,567,232,591,237,595,234,599,229,595,204,571,181,543,144,484,117,427,100,383"/>
+<area shape="rect" id="Node000013" href="$structhri_1_1_graphics_pipeline_builder.html#aaaa7a563067832f496b46ee8174db0ec" title=" " alt="" coords="231,672,412,715"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="102,381,115,436,139,511,157,550,178,589,203,626,233,658,236,661,232,665,229,662,199,629,173,592,152,552,134,512,110,438,97,382"/>
+<area shape="rect" id="Node000005" href="$structhri_1_1_descriptor_set_layout.html#aa4f8311cedbacba27dd1a82dd4d1e1cb" title="Create a new descriptor set layout." alt="" coords="460,139,621,181"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="402,157,444,157,444,163,402,163"/>
+</map>

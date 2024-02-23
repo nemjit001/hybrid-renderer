@@ -6,6 +6,7 @@
 #include <vulkan/vulkan.h>
 
 #include "renderer_internal/render_context.h"
+#include "renderer_internal/descriptor_management.h"
 
 #define HRI_SHADER_DB_BUILTIN_NAME(name) ("Builtin::" name)
 
@@ -14,18 +15,42 @@ namespace hri
     constexpr float DefaultViewportMinDepth = 0.0f;
     constexpr float DefaultViewportMaxDepth = 1.0f;
 
-    /// @brief A Descriptor Set Layout Description is used to generate the binding layout for a descriptor set.
-    struct DescriptorSetLayoutDescription
+    /// @brief The Pipeline Layout Builder allows easy building of pipeline layouts.
+    class PipelineLayoutBuilder
     {
-        VkDescriptorSetLayoutCreateFlags flags;
-        std::vector<VkDescriptorSetLayoutBinding> bindings;
-    };
+    public:
+        /// @brief Create a new pipeline layout builder.
+        /// @param ctx Render Context to use.
+        PipelineLayoutBuilder(RenderContext* ctx);
 
-    /// @brief A Pipeline Layout Description is used to generate an entire pipeline's layout.
-    struct PipelineLayoutDescription
-    {
-        std::vector<VkPushConstantRange> pushConstants;
-        std::vector<DescriptorSetLayoutDescription> descriptorSetLayouts;
+        /// @brief Destroy this pipeline layout builder.
+        virtual ~PipelineLayoutBuilder() = default;
+
+        /// @brief Add a push constant to the pipeline layout.
+        /// @param size Size of the push constant to add.
+        /// @param shaderStages Shader stages where this constant is active.
+        /// @return A reference to this class.
+        PipelineLayoutBuilder& addPushConstant(size_t size, VkShaderStageFlags shaderStages);
+
+        /// @brief Add a new Descriptor Set Layout to the pipeline layout.
+        /// @param setLayout Desriptor Set Layout to add.
+        /// @return A reference to this class.
+        PipelineLayoutBuilder& addDescriptorSetLayout(VkDescriptorSetLayout setLayout);
+
+        /// @brief Add a new Descriptor Set Layout to the pipeline layout.
+        /// @param setLayout Desriptor Set Layout to add.
+        /// @return A reference to this class.
+        PipelineLayoutBuilder& addDescriptorSetLayout(const DescriptorSetLayout& setLayout);
+
+        /// @brief Build the configured pipeline layout.
+        /// @return A new Pipeline Layout handle.
+        VkPipelineLayout build();
+
+    private:
+        RenderContext* m_pCtx = nullptr;
+        size_t m_pushConstantOffset = 0;
+        std::vector<VkPushConstantRange> m_pushConstants = {};
+        std::vector<VkDescriptorSetLayout> m_setLayouts = {};
     };
 
     /// @brief The Graphics Pipeline Builder allows easy configuration & initialization of fixed function state.
@@ -41,6 +66,7 @@ namespace hri
         VkPipelineDepthStencilStateCreateInfo depthStencilState;
         VkPipelineColorBlendStateCreateInfo colorBlendState;
         std::vector<VkDynamicState> dynamicStates;
+        VkPipelineLayout layout;
         VkRenderPass renderPass;
         uint32_t subpass;
 
@@ -86,12 +112,10 @@ namespace hri
         static void destroy(RenderContext* ctx, Shader& shader);
     };
 
-    /// @brief A pipeline state object (PSO) maintains a pipeline, its layout, and its bind point.
+    /// @brief A pipeline state object (PSO) stores a pipeline and its bind point.
     struct PipelineStateObject
     {
         VkPipelineBindPoint bindPoint                   = VK_PIPELINE_BIND_POINT_MAX_ENUM;
-        std::vector<VkDescriptorSetLayout> setLayouts   = {};
-        VkPipelineLayout layout                         = VK_NULL_HANDLE;
         VkPipeline pipeline                             = VK_NULL_HANDLE;
     };
 
@@ -106,33 +130,35 @@ namespace hri
         /// @brief Destroy this Shader Database instance.
         virtual ~ShaderDatabase();
 
+        ShaderDatabase(const ShaderDatabase&) = delete;
+        ShaderDatabase& operator=(const ShaderDatabase&) = delete;
+
         /// @brief Register a Shader in the Shader Database.
         /// @param name Shader name to use. MUST be unique.
         /// @param shader Shader object to register.
         /// @return A pointer to the Shader in the Shader Database.
-        const Shader* registerShader(const std::string& name, const Shader& shader);
+        Shader* registerShader(const std::string& name, const Shader& shader);
 
         /// @brief Create a new pipeline object in the Shader Database.
         /// @param name Pipeline name to use. MUST be unique.
         /// @param shaders Shader names to use.
         /// @param pipelineBuilder Pipeline Builder object to use for initialization.
         /// @return A pointer to the Pipeline in the Shader Database.
-        const PipelineStateObject* createPipeline(
+        PipelineStateObject* createPipeline(
             const std::string& name,
             const std::vector<std::string>& shaders,
-            const PipelineLayoutDescription& layoutDescription,
             const GraphicsPipelineBuilder& pipelineBuilder
         );
 
         /// @brief Retrieve a Shader from the Shader Database.
         /// @param name Shader name to retrieve.
         /// @return A pointer to the Shader in the Shader Database.
-        const Shader* getShader(const std::string& name) const;
+        Shader* getShader(const std::string& name);
 
         /// @brief Retrieve a Pipeline from the Shader Database.
         /// @param name Pipeline name to retrieve.
         /// @return A pointer to the Pipeline in the Shader Database.
-        const PipelineStateObject* getPipeline(const std::string& name) const;
+        PipelineStateObject* getPipeline(const std::string& name);
 
     private:
         /// @brief Check if a Shader already exists in the Database.

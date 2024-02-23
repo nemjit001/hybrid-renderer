@@ -1,5 +1,6 @@
 [submodule "demo/deps/glfw"]
 	path = demo/deps/glfw
+	branch = 3.3-stable
 	url = https://github.com/glfw/glfw
 [submodule "demo/deps/tinyobjloader"]
 	path = demo/deps/tinyobjloader
@@ -10,3 +11,9 @@
 [submodule "hybrid-renderer-lib/deps/VulkanMemoryAllocator"]
 	path = hybrid-renderer-lib/deps/VulkanMemoryAllocator
 	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator
+[submodule "demo/deps/imgui"]
+	path = demo/deps/imgui
+	url = https://github.com/ocornut/imgui
+[submodule "hybrid-renderer-lib/deps/glm"]
+	path = hybrid-renderer-lib/deps/glm
+	url = https://github.com/g-truc/glm

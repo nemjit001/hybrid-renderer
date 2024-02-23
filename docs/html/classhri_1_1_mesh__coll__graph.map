@@ -1,0 +1,3 @@
+<map id="hri::Mesh" name="hri::Mesh">
+<area shape="rect" id="Node000001" title="A Mesh represents a renderable object. It uses indexed drawing to reduce vertex array size." alt="" coords="5,5,176,219"/>
+</map>

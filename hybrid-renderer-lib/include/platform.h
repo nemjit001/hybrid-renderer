@@ -7,9 +7,9 @@
 #endif
 
 #if		HRI_PLATFORM_WINDOWS == 1
-#define ALIGNAS(size)	__declspec(align(size))
+#define HRI_ALIGNAS(size)	__declspec(align(size))
 #elif	HRI_PLATFORM_UNIX == 1
-#define ALIGNAS(size)	__attribute__((aligned(size)))
+#define HRI_ALIGNAS(size)	__attribute__((aligned(size)))
 #endif
 
 #ifndef NDEBUG

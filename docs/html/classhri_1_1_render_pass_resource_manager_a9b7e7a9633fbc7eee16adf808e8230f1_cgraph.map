@@ -1,0 +1,13 @@
+<map id="hri::RenderPassResourceManager::RenderPassResourceManager" name="hri::RenderPassResourceManager::RenderPassResourceManager">
+<area shape="rect" id="Node000001" title="Create a new Render Pass Resource Manager." alt="" coords="5,72,225,115"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_render_pass_resource_manager.html#af1d3d90e346a5101ecb20e469206669c" title="Create resources." alt="" coords="273,72,492,115"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="225,91,257,91,257,96,225,96"/>
+<area shape="rect" id="Node000003" href="$classhri_1_1_i_render_pass_resource_manager_base.html#a4391328fd9a0316ede758d338bee9fea" title="Create resources." alt="" coords="563,39,770,81"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="492,78,547,71,547,77,493,83"/>
+<area shape="rect" id="Node000006" href="$classhri_1_1_i_render_pass_resource_manager_base.html#a504eb862015a956f74d5020f20a3cb00" title="Get image resource views." alt="" coords="540,105,792,148"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="493,104,525,107,524,113,492,109"/>
+<area shape="rect" id="Node000004" href="$classhri_1_1_i_render_pass_resource_manager_base.html#aabea2269ebd554cf3d75885a4e4dec87" title="Get the render extent configured for this resouce manager." alt="" coords="840,5,1047,48"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="770,45,825,38,825,44,770,50"/>
+<area shape="rect" id="Node000005" href="$structhri_1_1_image_resource.html#a1d2b3ef1a0d2542bfea8f385b08ae4be" title="Initialize a new image resource." alt="" coords="877,72,1010,115"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="770,70,862,81,861,86,770,75"/>
+</map>

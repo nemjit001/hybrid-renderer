@@ -47,6 +47,16 @@ void FrameState::destroy(RenderContext* ctx, FrameState& frameState)
 	memset(&frameState, 0, sizeof(FrameState));
 }
 
+void ActiveFrame::pipelineBarrier(const std::vector<VkImageMemoryBarrier2>& memoryBarriers, VkDependencyFlags flags) const
+{
+	VkDependencyInfo dependency = VkDependencyInfo{ VK_STRUCTURE_TYPE_DEPENDENCY_INFO };
+	dependency.dependencyFlags = flags;
+	dependency.imageMemoryBarrierCount = static_cast<uint32_t>(memoryBarriers.size());
+	dependency.pImageMemoryBarriers = memoryBarriers.data();
+
+	vkCmdPipelineBarrier2(commandBuffer, &dependency);
+}
+
 RenderCore::RenderCore(RenderContext* ctx)
 	:
 	m_pCtx(ctx)
@@ -179,22 +189,6 @@ void RenderCore::immediateSubmit(HRIImmediateSubmitFunc submitFunc)
 	vkDeviceWaitIdle(m_pCtx->device);
 
 	vkFreeCommandBuffers(m_pCtx->device, m_submitPool, 1, &oneshotBuffer);
-}
-
-void RenderCore::recordFrameGraph(FrameGraph& frameGraph)
-{
-	FrameState& activeFrame = m_frames[m_currentFrame];
-
-	HRI_VK_CHECK(vkResetCommandBuffer(activeFrame.graphicsCommandBuffer, 0 /* No reset flags */));
-
-	VkCommandBufferBeginInfo frameBeginInfo = VkCommandBufferBeginInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
-	frameBeginInfo.flags = 0;
-	frameBeginInfo.pInheritanceInfo = nullptr;
-	HRI_VK_CHECK(vkBeginCommandBuffer(activeFrame.graphicsCommandBuffer, &frameBeginInfo));
-
-	frameGraph.execute(activeFrame.graphicsCommandBuffer, m_activeSwapImage);
-
-	HRI_VK_CHECK(vkEndCommandBuffer(activeFrame.graphicsCommandBuffer));
 }
 
 void RenderCore::validateSwapchainState(VkResult result)

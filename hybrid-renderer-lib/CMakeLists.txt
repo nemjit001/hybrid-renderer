@@ -10,10 +10,11 @@ add_subdirectory("deps/vk-bootstrap/")
 
 add_subdirectory("deps/VulkanMemoryAllocator/")
 
+add_subdirectory("deps/glm/")
+
 # Project setup
 file(GLOB PROJECT_HEADERS "include/*.h" "include/**/*.h")
 file(GLOB PROJECT_SOURCES "src/*.cpp" "src/**/*.cpp")
-file(GLOB PROJECT_SHADERS "shaders/*.glsl" "shaders/*.vert" "shaders/*.frag" "shaders/*.comp")
 file(GLOB PROJECT_CONFIG "config.h.in")
 
 # Project config variables
@@ -38,6 +39,7 @@ target_include_directories(${LIB_NAME} PUBLIC
 	${Vulkan_INCLUDE_DIRS}
 	"deps/vk-bootstrap/src/"
 	"deps/VulkanMemoryAllocator/include/"
+	"deps/glm/"
 )
 
 target_link_libraries(${LIB_NAME}
@@ -45,25 +47,3 @@ target_link_libraries(${LIB_NAME}
 	vk-bootstrap
 	VulkanMemoryAllocator
 )
-
-add_custom_target(custom-commands-${LIB_NAME} ALL
-	COMMAND ${CMAKE_COMMAND} -E echo "Running custom commands..."
-)
-
-# Create shader output directory
-add_custom_command(TARGET custom-commands-${LIB_NAME}
-	COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${LIB_NAME}>/shaders/
-)
-
-# Compile shaders & deposit in shader directory
-foreach(SHADER_PATH IN LISTS PROJECT_SHADERS)
-	cmake_path(GET SHADER_PATH FILENAME SHADER_FILE)
-
-	add_custom_command(TARGET custom-commands-${LIB_NAME}
-		COMMAND glslc ${SHADER_PATH} -o $<TARGET_FILE_DIR:${LIB_NAME}>/shaders/${SHADER_FILE}.spv
-	)
-
-	add_custom_command(TARGET custom-commands-${LIB_NAME}
-		COMMAND glslangValidator -V -x ${SHADER_PATH} -o $<TARGET_FILE_DIR:${LIB_NAME}>/shaders/${SHADER_FILE}.u32
-	)
-endforeach()

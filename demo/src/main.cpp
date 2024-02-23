@@ -2,15 +2,22 @@
 
 #include <iostream>
 #include <tiny_obj_loader.h>
+#include <imgui.h>
 
 #include "demo.h"
+#include "renderer.h"
 #include "timer.h"
+#include "ui_manager.h"
 #include "window_manager.h"
 
 static Timer gFrameTimer		= Timer();
 static WindowHandle* gWindow	= nullptr;
 
-hri::Scene loadScene(const char* path)
+static bool gWindowResized  = false;
+static int gDisplayWidth 	= SCR_WIDTH;
+static int gDisplayHeight 	= SCR_HEIGHT;
+
+hri::Scene loadScene(hri::RenderContext& ctx, const char* path)
 {
 	printf("Loading scenefile [%s]\n", path);
 
@@ -135,10 +142,71 @@ hri::Scene loadScene(const char* path)
 	};
 
 	return hri::Scene(
+		&ctx,
 		hri::SceneParameters{},
 		sceneData,
 		sceneNodes
 	);
+}
+
+void drawStatusWindow(float deltaTime)
+{
+	static float AVG_FRAMETIME = 1.0f;
+	static float ALPHA = 1.0f;
+
+	AVG_FRAMETIME = (1.0f - ALPHA) * AVG_FRAMETIME + ALPHA * deltaTime;
+	if (ALPHA > 0.05f) ALPHA *= 0.5f;
+
+	if (ImGui::Begin("Status"))
+	{
+		ImGui::SetWindowSize(ImVec2(300.0f, 250.0f), ImGuiCond_FirstUseEver);
+		ImGui::Text("Resolution: %d x %d", gDisplayWidth, gDisplayHeight);
+		ImGui::Text("Frame Time: %8.2f ms", AVG_FRAMETIME * 1'000.0f);
+		ImGui::Text("FPS:        %8.2f fps", 1.0f / AVG_FRAMETIME);
+	}
+
+	ImGui::End();
+}
+
+void windowResizeCallback(WindowHandle* window, int width, int height)
+{
+	gDisplayWidth = width;
+	gDisplayHeight = height;
+	gWindowResized = true;
+}
+
+void handleCameraInput(WindowHandle* window, float deltaTime, hri::Camera& camera)
+{
+	bool cameraUpdated = false;
+
+	hri::Float3 forward = camera.forward;
+	hri::Float3 right = camera.right;
+	hri::Float3 up = camera.up;
+
+	hri::Float3 positionDelta = hri::Float3(0.0f);
+	
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) positionDelta += forward * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true;
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) positionDelta -= forward * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true;
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) positionDelta += right * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true;
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) positionDelta -= right * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true;
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) positionDelta += up * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true;
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) positionDelta -= up * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true;
+
+	camera.position += positionDelta;
+	hri::Float3 target = camera.position + forward;
+
+	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) target += up * CAMERA_SPEED * deltaTime; cameraUpdated = true;
+	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) target -= up * CAMERA_SPEED * deltaTime; cameraUpdated = true;
+	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) target += right * CAMERA_SPEED * deltaTime; cameraUpdated = true;
+	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) target -= right * CAMERA_SPEED * deltaTime; cameraUpdated = true;
+
+	if (!cameraUpdated)
+		return;
+
+	camera.forward = hri::normalize(target - camera.position);
+	camera.right = hri::normalize(hri::cross(HRI_WORLD_UP, camera.forward));
+	camera.up = hri::normalize(hri::cross(camera.forward, camera.right));
+	camera.updateMatrices();
 }
 
 int main()
@@ -151,50 +219,43 @@ int main()
 	windowCreateInfo.height = SCR_HEIGHT;
 	windowCreateInfo.pTitle = DEMO_WINDOW_NAME;
 	windowCreateInfo.resizable = true;
+	windowCreateInfo.pfnResizeFunc = windowResizeCallback;
 	gWindow = windowManager.createWindow(&windowCreateInfo);
+
+	// Set up UI manager
+	UIManager uiManager = UIManager(gWindow);
 
 	// Set up render context
 	hri::RenderContextCreateInfo ctxCreateInfo = hri::RenderContextCreateInfo{};
+	ctxCreateInfo.appName = DEMO_APP_NAME;
+	ctxCreateInfo.appVersion = DEMO_APP_VERSION;
 	ctxCreateInfo.surfaceCreateFunc = [](VkInstance instance, VkSurfaceKHR* surface) { return WindowManager::createVulkanSurface(instance, gWindow, nullptr, surface); };
 	ctxCreateInfo.vsyncMode = hri::VSyncMode::Disabled;
-	hri::RenderContext renderContext = hri::RenderContext(ctxCreateInfo);
+	ctxCreateInfo.instanceExtensions = {};
+	ctxCreateInfo.deviceExtensions = {
+   		VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
+   		// VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
+   		// VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,
+   		// VK_KHR_RAY_QUERY_EXTENSION_NAME,
+	};
 
-	// Create render core, shader database, and frame graph
-	hri::RenderCore renderCore = hri::RenderCore(&renderContext);
-	hri::ShaderDatabase shaderDB = hri::ShaderDatabase(&renderContext);
-	hri::FrameGraph frameGraph = hri::FrameGraph(&renderContext, &shaderDB);
+	hri::RenderContext renderContext = hri::RenderContext(ctxCreateInfo);	
 
-	// Register a callback for when the swap chain is invalidated
-	renderCore.setOnSwapchainInvalidateCallback([&frameGraph](vkb::Swapchain _swapchain) {
-		frameGraph.generate();
-	});
-
-	// Set up frame graph nodes & associated resources
-	hri::VirtualResourceHandle albedoTarget = frameGraph.createTextureResource("Albedo Target", { SCR_WIDTH, SCR_HEIGHT }, VK_FORMAT_R8G8B8A8_UNORM);
-	hri::VirtualResourceHandle normalTarget = frameGraph.createTextureResource("Normal Target", { SCR_WIDTH, SCR_HEIGHT }, VK_FORMAT_R8G8B8A8_SNORM);
-	hri::VirtualResourceHandle depthTarget = frameGraph.createTextureResource("Depth Target", { SCR_WIDTH, SCR_HEIGHT }, VK_FORMAT_D24_UNORM_S8_UINT);
-
-	hri::RasterFrameGraphNode gbufferPass = hri::RasterFrameGraphNode("GBuffer Raster", frameGraph);
-	gbufferPass.renderTarget(albedoTarget, VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE);
-	gbufferPass.renderTarget(normalTarget, VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE);
-	gbufferPass.depthStencil(
-		depthTarget,
-		VK_IMAGE_ASPECT_DEPTH_BIT
-		| VK_IMAGE_ASPECT_STENCIL_BIT,
-		VK_ATTACHMENT_LOAD_OP_CLEAR,
-		VK_ATTACHMENT_STORE_OP_STORE,
-		VK_ATTACHMENT_LOAD_OP_CLEAR,
-		VK_ATTACHMENT_STORE_OP_STORE
+	// Set up world cam
+	hri::Camera camera = hri::Camera(
+		hri::CameraParameters{
+			60.0f,
+			static_cast<float>(gDisplayWidth) / static_cast<float>(gDisplayHeight),
+		},
+		hri::Float3(0.0f, 1.0f, -5.0f),
+		hri::Float3(0.0f, 1.0f, 0.0f)
 	);
 
-	frameGraph.markOutputNode("GBuffer Raster");
-	frameGraph.generate();
-
 	// Load scene file
-	hri::Scene scene = loadScene("assets/test_scene.obj");
+	hri::Scene scene = loadScene(renderContext, "assets/test_scene.obj");
 
-	// Set up virtual camera
-	hri::Camera camera = hri::Camera();
+	// Create renderer
+	Renderer renderer = Renderer(renderContext, camera, scene);
 
 	printf("Startup complete\n");
 
@@ -206,17 +267,28 @@ int main()
 		if (windowManager.isWindowMinimized(gWindow))
 			continue;
 
-		renderCore.startFrame();
+		// Record ImGUI draw commands
+		uiManager.startDraw();
+		drawStatusWindow(gFrameTimer.deltaTime);
+		uiManager.endDraw();
 
-		// TODO: draw scene
-		renderCore.recordFrameGraph(frameGraph);
+		// Draw renderer frame
+		renderer.drawFrame();
 
-		renderCore.endFrame();
+		// Update camera state
+		if (gWindowResized)
+			camera.parameters.aspectRatio = static_cast<float>(gDisplayWidth) / static_cast<float>(gDisplayHeight);
+
+		handleCameraInput(gWindow, gFrameTimer.deltaTime, camera);
+		
+		if (glfwGetKey(gWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+			windowManager.closeWindow(gWindow);
+
+		// Always set to false, resize dependent things should be handled here
+		gWindowResized = false;
 	}
 
 	printf("Shutting down\n");
-	renderCore.awaitFrameFinished();
-	frameGraph.clear();
 	windowManager.destroyWindow(gWindow);
 
 	printf("Goodbye!\n");

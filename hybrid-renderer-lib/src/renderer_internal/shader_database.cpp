@@ -10,6 +10,54 @@
 
 using namespace hri;
 
+PipelineLayoutBuilder::PipelineLayoutBuilder(RenderContext* ctx)
+    :
+    m_pCtx(ctx)
+{
+    assert(m_pCtx != nullptr);
+}
+
+PipelineLayoutBuilder& PipelineLayoutBuilder::addPushConstant(size_t size, VkShaderStageFlags shaderStages)
+{
+    m_pushConstants.push_back(VkPushConstantRange{
+        shaderStages,
+        static_cast<uint32_t>(m_pushConstantOffset),
+        static_cast<uint32_t>(size),
+    });
+
+    m_pushConstantOffset += size;
+    return *this;
+}
+
+PipelineLayoutBuilder& PipelineLayoutBuilder::addDescriptorSetLayout(VkDescriptorSetLayout setLayout)
+{
+    m_setLayouts.push_back(setLayout);
+
+    return *this;
+}
+
+PipelineLayoutBuilder& PipelineLayoutBuilder::addDescriptorSetLayout(const DescriptorSetLayout& setLayout)
+{
+    m_setLayouts.push_back(setLayout.setLayout);
+
+    return *this;
+}
+
+VkPipelineLayout PipelineLayoutBuilder::build()
+{
+    VkPipelineLayoutCreateInfo createInfo = VkPipelineLayoutCreateInfo{ VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
+    createInfo.flags = 0;
+    createInfo.pushConstantRangeCount = static_cast<uint32_t>(m_pushConstants.size());
+    createInfo.pPushConstantRanges = m_pushConstants.data();
+    createInfo.setLayoutCount = static_cast<uint32_t>(m_setLayouts.size());
+    createInfo.pSetLayouts = m_setLayouts.data();
+
+    VkPipelineLayout layout = VK_NULL_HANDLE;
+    HRI_VK_CHECK(vkCreatePipelineLayout(m_pCtx->device, &createInfo, nullptr, &layout));
+
+    return layout;
+}
+
 VkPipelineInputAssemblyStateCreateInfo GraphicsPipelineBuilder::initInputAssemblyState(VkPrimitiveTopology topology, VkBool32 primitiveRestart)
 {
     return VkPipelineInputAssemblyStateCreateInfo{
@@ -184,14 +232,13 @@ ShaderDatabase::~ShaderDatabase()
 
     for (auto& [ name, pso ] : m_pipelineMap)
     {
-        vkDestroyPipelineLayout(m_pCtx->device, pso.layout, nullptr);
         vkDestroyPipeline(m_pCtx->device, pso.pipeline, nullptr);
     }
 
     vkDestroyPipelineCache(m_pCtx->device, m_pipelineCache, nullptr);
 }
 
-const Shader* ShaderDatabase::registerShader(const std::string& name, const Shader& shader)
+Shader* ShaderDatabase::registerShader(const std::string& name, const Shader& shader)
 {
     if (isExistingShader(name))
     {
@@ -209,10 +256,9 @@ const Shader* ShaderDatabase::registerShader(const std::string& name, const Shad
     return &it->second;
 }
 
-const PipelineStateObject* ShaderDatabase::createPipeline(
+PipelineStateObject* ShaderDatabase::createPipeline(
     const std::string& name,
     const std::vector<std::string>& shaders,
-    const PipelineLayoutDescription& layoutDescription,
     const GraphicsPipelineBuilder& pipelineBuilder
 )
 {
@@ -242,29 +288,6 @@ const PipelineStateObject* ShaderDatabase::createPipeline(
     // Create PSO object
     PipelineStateObject pso = PipelineStateObject{};
     pso.bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-
-    // Create pipeline layout objects
-    pso.setLayouts = {}; pso.setLayouts.reserve(layoutDescription.descriptorSetLayouts.size());
-    for (auto const& layoutDescription : layoutDescription.descriptorSetLayouts)
-    {
-        VkDescriptorSetLayoutCreateInfo setLayoutCreateInfo = VkDescriptorSetLayoutCreateInfo{ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
-        setLayoutCreateInfo.flags = layoutDescription.flags;
-        setLayoutCreateInfo.bindingCount = static_cast<uint32_t>(layoutDescription.bindings.size());
-        setLayoutCreateInfo.pBindings = layoutDescription.bindings.data();
-
-        VkDescriptorSetLayout setLayout = VK_NULL_HANDLE;
-        HRI_VK_CHECK(vkCreateDescriptorSetLayout(m_pCtx->device, &setLayoutCreateInfo, nullptr, &setLayout));
-        pso.setLayouts.push_back(setLayout);
-    }
-
-    // Create pipeline layout
-    VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = VkPipelineLayoutCreateInfo{ VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
-    pipelineLayoutCreateInfo.flags = 0;
-    pipelineLayoutCreateInfo.pushConstantRangeCount = static_cast<uint32_t>(layoutDescription.pushConstants.size());
-    pipelineLayoutCreateInfo.pPushConstantRanges = layoutDescription.pushConstants.data();
-    pipelineLayoutCreateInfo.setLayoutCount = static_cast<uint32_t>(pso.setLayouts.size());
-    pipelineLayoutCreateInfo.pSetLayouts = pso.setLayouts.data();
-    HRI_VK_CHECK(vkCreatePipelineLayout(m_pCtx->device, &pipelineLayoutCreateInfo, nullptr, &pso.layout));
 
     // Generate pipeline state from builder
     VkPipelineVertexInputStateCreateInfo vertexInputState = VkPipelineVertexInputStateCreateInfo{ VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO };
@@ -300,7 +323,7 @@ const PipelineStateObject* ShaderDatabase::createPipeline(
     pipelineCreateInfo.pDepthStencilState = &pipelineBuilder.depthStencilState;
     pipelineCreateInfo.pColorBlendState = &pipelineBuilder.colorBlendState;
     pipelineCreateInfo.pDynamicState = &dynamicState;
-    pipelineCreateInfo.layout = pso.layout;
+    pipelineCreateInfo.layout = pipelineBuilder.layout;
     pipelineCreateInfo.renderPass = pipelineBuilder.renderPass;
     pipelineCreateInfo.subpass = pipelineBuilder.subpass;
     pipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
@@ -324,7 +347,7 @@ const PipelineStateObject* ShaderDatabase::createPipeline(
     return &it->second;
 }
 
-const Shader* ShaderDatabase::getShader(const std::string& name) const
+Shader* ShaderDatabase::getShader(const std::string& name)
 {
     if (!isExistingShader(name))
     {
@@ -336,7 +359,7 @@ const Shader* ShaderDatabase::getShader(const std::string& name) const
     return &it->second;
 }
 
-const PipelineStateObject* ShaderDatabase::getPipeline(const std::string& name) const
+PipelineStateObject* ShaderDatabase::getPipeline(const std::string& name)
 {
     if (!isExistingPipeline(name))
     {

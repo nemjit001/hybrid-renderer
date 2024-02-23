@@ -5,12 +5,11 @@
 #include "config.h"
 #include "platform.h"
 #include "renderer_internal/render_context.h"
-#include "renderer_internal/frame_graph.h"
 
 namespace hri
 {
 	typedef std::function<void(VkCommandBuffer)> HRIImmediateSubmitFunc;
-	typedef std::function<void(vkb::Swapchain)> HRIOnSwapchainInvalidateFunc;
+	typedef std::function<void(const vkb::Swapchain&)> HRIOnSwapchainInvalidateFunc;
 
 	/// @brief The Frame State manages per frame data such as buffers & sync primitives
 	struct FrameState
@@ -26,6 +25,35 @@ namespace hri
 		static void destroy(RenderContext* ctx, FrameState& frameState);
 	};
 
+	/// @brief The Active Frame struct maintains information on frame state relevant for recording graphics commands.
+	///		NOTE: currentFrameIndex is in range [0, HRI_FRAMES_IN_FLIGHT - 1]
+	struct ActiveFrame
+	{
+		uint32_t activeSwapImageIndex	= 0;
+		uint32_t currentFrameIndex 		= 0;
+		VkCommandBuffer commandBuffer	= VK_NULL_HANDLE;
+
+		/// @brief Begin rendering commands for this frame.
+		inline void beginCommands()
+		{
+			VkCommandBufferBeginInfo beginInfo = VkCommandBufferBeginInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
+			beginInfo.flags = 0;
+			beginInfo.pInheritanceInfo = nullptr;
+			vkBeginCommandBuffer(commandBuffer, &beginInfo);
+		}
+
+		/// @brief End rendering commands for this frame.
+		inline void endCommands()
+		{
+			HRI_VK_CHECK(vkEndCommandBuffer(commandBuffer));
+		}
+
+		/// @brief Insert an image pipeline barrier in the frame.
+		/// @param memoryBarriers Image Memory Barriers list.
+		/// @param flags Dependency flags to use.
+		void pipelineBarrier(const std::vector<VkImageMemoryBarrier2>& memoryBarriers, VkDependencyFlags flags = 0) const;
+	};
+
 	/// @brief The Render Core handles frame state and work submission.
 	class RenderCore
 	{
@@ -36,6 +64,9 @@ namespace hri
 
 		/// @brief Destroy this render core instance.
 		virtual ~RenderCore();
+
+		RenderCore(const RenderCore&) = delete;
+		RenderCore& operator=(const RenderCore&) = delete;
 
 		/// @brief Start a new frame.
 		void startFrame();
@@ -56,9 +87,11 @@ namespace hri
 		/// @param submitFunc The submit function to use.
 		void immediateSubmit(HRIImmediateSubmitFunc submitFunc);
 
-		/// @brief Record a frame graph using the render core builtin command buffers.
-		/// @param frameGraph The FrameGraph object to record commands with.
-		void recordFrameGraph(FrameGraph& frameGraph);
+		/// @brief Retrive the currently active frame's data.
+		/// @return ActiveFrame struct.
+		inline const ActiveFrame getActiveFrame() const { return ActiveFrame{ m_activeSwapImage, m_currentFrame, m_frames[m_currentFrame].graphicsCommandBuffer }; }
+
+		static constexpr uint32_t framesInFlight() { return HRI_VK_FRAMES_IN_FLIGHT; }
 
 	private:
 		/// @brief Validate a swap chain operation result, setting the recreate flag if necessary.

@@ -1,0 +1,5 @@
+<map id="Timer::Timer" name="Timer::Timer">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,99,32"/>
+<area shape="rect" id="Node000002" href="$struct_timer.html#a6f4dc6b9e9f333fa4c60ddf2ff33c801" title="Tick the timer, updating the frame delta." alt="" coords="147,5,229,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="99,16,131,16,131,21,99,21"/>
+</map>

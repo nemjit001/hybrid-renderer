@@ -1,0 +1,13 @@
+<map id="hri::IRenderPassResourceManagerBase::destroyResources" name="hri::IRenderPassResourceManagerBase::destroyResources">
+<area shape="rect" id="Node000001" title="Destroy resources." alt="" coords="556,85,770,128"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_swapchain_pass_resource_manager.html#a1e4f5f05c65cce95e723b0f40861d022" title="Destroy resources." alt="" coords="303,17,494,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="562,83,483,63,485,58,563,78"/>
+<area shape="rect" id="Node000004" href="$classhri_1_1_render_pass_resource_manager.html#ac0f58ff968e21cc1757033cabc3db6be" title="Destroy resources." alt="" coords="289,85,508,128"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="541,109,509,109,509,104,541,104"/>
+<area shape="rect" id="Node000006" href="$classhri_1_1_i_render_pass_resource_manager_base.html#aad0340480a463f5e32539a201440e7b9" title="Recreate resources." alt="" coords="289,152,508,195"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="562,135,487,154,485,149,560,130"/>
+<area shape="rect" id="Node000003" href="$classhri_1_1_swapchain_pass_resource_manager.html#a67cdd4933de1e9facee9c3e63083638c" title="Destroy this swapchain resource manager." alt="" coords="5,5,241,64"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="287,40,241,39,241,34,287,34"/>
+<area shape="rect" id="Node000005" href="$classhri_1_1_render_pass_resource_manager.html#acefa605446c88a0499bdc4706bd634ce" title="Destroy this resource manager." alt="" coords="13,88,233,131"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="273,111,233,111,233,106,273,105"/>
+</map>

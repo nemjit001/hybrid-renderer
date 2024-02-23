@@ -1,0 +1,13 @@
+<map id="hri::IRenderSubsystem" name="hri::IRenderSubsystem">
+<area shape="rect" id="Node000001" title="A Render Subsystem manages a render pipeline, layout, and subsystem descriptors. A Render Subsystem b..." alt="" coords="234,827,467,1109"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_render_context.html" title="THe RenderContext manages the Vulkan instance, device, and swapchain state." alt="" coords="5,363,219,763"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="221,742,261,811,257,813,216,745"/>
+<area shape="rect" id="Node000003" href="$classhri_1_1_render_context_queue_state.html" title="The context queue state creates and maintains the device queue setup." alt="" coords="17,176,207,299"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="115,299,115,346,109,346,109,299"/>
+<area shape="rect" id="Node000004" href="$structhri_1_1_device_queue.html" title="A Device Queue is a queue on the logical device to which operations can be submitted." alt="" coords="52,5,172,96"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="115,96,115,159,109,159,109,96"/>
+<area shape="rect" id="Node000005" href="$classhri_1_1_descriptor_set_allocator.html" title="The Descriptor Set Allocator handles allocation of Descriptor Sets from descriptor pools." alt="" coords="243,373,459,752"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="353,752,353,809,348,809,348,752"/>
+<area shape="rect" id="Node000006" href="$structhri_1_1_pipeline_state_object.html" title="A pipeline state object (PSO) stores a pipeline and its bind point." alt="" coords="483,509,632,616"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="562,616,560,658,555,706,544,756,525,804,505,836,481,866,476,863,501,833,520,801,539,755,550,706,555,658,557,616"/>
+</map>

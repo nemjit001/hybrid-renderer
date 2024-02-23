@@ -1,0 +1,7 @@
+<map id="hri::DescriptorSetLayoutBuilder::build" name="hri::DescriptorSetLayoutBuilder::build">
+<area shape="rect" id="Node000001" title="Build the specified descriptor set layout." alt="" coords="231,39,392,81"/>
+<area shape="rect" id="Node000002" href="$class_g_buffer_layout_subsystem.html#aa4bc140592cc3df5bbafdb5e2463921a" title=" " alt="" coords="5,5,183,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="215,48,183,43,184,38,216,43"/>
+<area shape="rect" id="Node000003" href="$class_presentation_subsystem.html#a30f0b5c438290d150800c9655371c8f4" title=" " alt="" coords="10,72,178,115"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="216,77,179,83,178,78,215,72"/>
+</map>

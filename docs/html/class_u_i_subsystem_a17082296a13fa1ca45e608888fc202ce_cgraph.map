@@ -1,0 +1,5 @@
+<map id="UISubsystem::UISubsystem" name="UISubsystem::UISubsystem">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,13,191,40"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_descriptor_set_allocator.html#ac5ced7928ebf2165ce5465d09472ca82" title="Get a fixed pool that is guaranteed to exist. Useful for hooking in external libraries that require a..." alt="" coords="239,5,412,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="191,24,223,24,223,29,191,29"/>
+</map>

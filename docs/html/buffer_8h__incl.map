@@ -1,0 +1,19 @@
+<map id="hybrid&#45;renderer&#45;lib/include/renderer_internal/buffer.h" name="hybrid&#45;renderer&#45;lib/include/renderer_internal/buffer.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="115,5,282,64"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,203,120,229"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="179,66,83,192,79,189,175,63"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="144,203,253,229"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="201,64,201,187,196,187,196,64"/>
+<area shape="rect" id="Node000004" href="$render__context_8h.html" title=" " alt="" coords="236,112,393,155"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="234,62,280,100,276,104,231,66"/>
+<area shape="poly" id="edge8_Node000004_Node000002" title=" " alt="" coords="250,158,117,200,116,195,249,153"/>
+<area shape="poly" id="edge9_Node000004_Node000003" title=" " alt="" coords="286,157,230,196,227,192,283,153"/>
+<area shape="rect" id="Node000005" href="$config_8h.html" title=" " alt="" coords="505,203,572,229"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="373,153,492,195,490,200,371,158"/>
+<area shape="rect" id="Node000006" href="$platform_8h.html" title=" " alt="" coords="595,203,674,229"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="394,152,581,199,580,204,393,157"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="276,203,353,229"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="317,155,317,187,312,187,312,155"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="377,203,481,229"/>
+<area shape="poly" id="edge7_Node000004_Node000008" title=" " alt="" coords="346,153,400,191,397,196,343,157"/>
+</map>

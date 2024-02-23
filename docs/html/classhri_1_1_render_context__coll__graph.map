@@ -1,0 +1,7 @@
+<map id="hri::RenderContext" name="hri::RenderContext">
+<area shape="rect" id="Node000001" title="THe RenderContext manages the Vulkan instance, device, and swapchain state." alt="" coords="5,363,219,763"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_render_context_queue_state.html" title="The context queue state creates and maintains the device queue setup." alt="" coords="17,176,207,299"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="115,299,115,346,109,346,109,299"/>
+<area shape="rect" id="Node000003" href="$structhri_1_1_device_queue.html" title="A Device Queue is a queue on the logical device to which operations can be submitted." alt="" coords="52,5,172,96"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="115,96,115,159,109,159,109,96"/>
+</map>

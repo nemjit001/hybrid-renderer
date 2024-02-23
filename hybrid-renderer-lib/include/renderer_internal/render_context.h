@@ -35,11 +35,15 @@ namespace hri
         TripleBuffering,
     };
 
-    /// @brief The render context create info allows for specifying context settings.
+    /// @brief The render context create info allows for specifying context settings & registering extensions for the created context.
     struct RenderContextCreateInfo
     {
-        HRISurfaceCreateFunc surfaceCreateFunc  = nullptr; 
-        VSyncMode vsyncMode                     = VSyncMode::Disabled;
+        const char* appName                         = "NONAME";
+        uint32_t appVersion                         = 0;
+        HRISurfaceCreateFunc surfaceCreateFunc      = nullptr; 
+        VSyncMode vsyncMode                         = VSyncMode::Disabled;
+        std::vector<const char*> instanceExtensions = {};
+        std::vector<const char*> deviceExtensions   = {};
     };
 
     /// @brief The swapchain present setup dictates available swap images for rendering, as well as the present mode.
@@ -78,7 +82,7 @@ namespace hri
     public:
         /// @brief Instantiate a new Render Context.
         /// @param createInfo Create info for this context.
-        RenderContext(RenderContextCreateInfo createInfo);
+        RenderContext(RenderContextCreateInfo& createInfo);
 
         /// @brief Destroy this Render Context instance.
         virtual ~RenderContext();
@@ -95,6 +99,16 @@ namespace hri
         /// @brief Recreate the swap chain, freeing old resources.
         ///     NOTE: does not free any allocated swap images or views!
         void recreateSwapchain();
+
+        template<typename _PFn>
+        _PFn getInstanceFunction(const char* name) const;
+
+        template<typename _PFn>
+        _PFn getDeviceFunction(const char* name) const;
+
+        /// @brief Retrieve the swapchain format.
+        /// @return The active swapchain format.
+        inline VkFormat swapFormat() const { return swapchain.image_format; }
 
     private:
         static SwapchainPresentSetup getSwapPresentSetup(VSyncMode vsyncMode);
@@ -130,5 +144,23 @@ namespace hri
 
         ContextConfig m_config = ContextConfig{};
     };
+
+    template<typename _PFn>
+    _PFn RenderContext::getInstanceFunction(const char* name) const
+    {
+        void* pFunction = vkGetInstanceProcAddr(instance, name);
+        assert(pFunction != nullptr);
+        
+        return reinterpret_cast<_PFn>(pFunction);
+    }
+
+    template<typename _PFn>
+    _PFn RenderContext::getDeviceFunction(const char* name) const
+    {
+        void* pFunction = vkGetDeviceProcAddr(device, name);
+        assert(pFunction != nullptr);
+        
+        return reinterpret_cast<_PFn>(pFunction);
+    }
 }
 

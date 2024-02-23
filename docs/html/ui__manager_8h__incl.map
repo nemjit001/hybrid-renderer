@@ -1,0 +1,19 @@
+<map id="demo/include/ui_manager.h" name="demo/include/ui_manager.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="142,5,322,32"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,80,69,107"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="199,35,84,77,83,72,197,30"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="93,80,216,107"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="220,34,181,71,177,67,216,31"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="240,80,378,107"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="247,31,286,67,283,71,243,34"/>
+<area shape="rect" id="Node000005" href="$window__manager_8h.html" title=" " alt="" coords="402,80,533,107"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="274,30,413,72,411,78,272,35"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="296,155,360,181"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="445,110,367,149,365,145,442,105"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="384,155,445,181"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="461,109,435,144,430,141,456,106"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="468,155,571,181"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="479,106,504,141,500,144,475,109"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="595,155,703,181"/>
+<area shape="poly" id="edge8_Node000005_Node000009" title=" " alt="" coords="500,105,604,146,602,151,498,110"/>
+</map>
