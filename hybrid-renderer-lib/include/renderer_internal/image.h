@@ -57,7 +57,6 @@ namespace hri
 		VkImageView createView(VkImageViewType viewType, VkComponentMapping components, VkImageSubresourceRange subresourceRange);
 
 		/// @brief Destroy the internal image view handle.
-		/// @param ctx Render context used to create the view.
 		void destroyView();
 
 	private:

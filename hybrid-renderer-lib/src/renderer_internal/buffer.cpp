@@ -7,18 +7,18 @@
 
 using namespace hri;
 
-BufferResource BufferResource::init(RenderContext* ctx, size_t size, VkBufferUsageFlags usage, bool hostVisible)
+BufferResource::BufferResource(RenderContext* ctx, size_t size, VkBufferUsageFlags usage, bool hostVisible)
+	:
+	m_pCtx(ctx),
+	bufferSize(size),
+	hostVisible(hostVisible)
 {
-	assert(ctx != nullptr);
-	assert(size > 0);
-
-	BufferResource buffer = BufferResource{};
-	buffer.bufferSize = size;
-	buffer.hostVisible = true;
+	assert(m_pCtx != nullptr);
+	assert(bufferSize > 0);
 
 	VkBufferCreateInfo bufferCreateInfo = VkBufferCreateInfo{ VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
 	bufferCreateInfo.flags = 0;
-	bufferCreateInfo.size = size;
+	bufferCreateInfo.size = bufferSize;
 	bufferCreateInfo.usage = usage;
 	bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	bufferCreateInfo.queueFamilyIndexCount = 0;
@@ -33,32 +33,64 @@ BufferResource BufferResource::init(RenderContext* ctx, size_t size, VkBufferUsa
 		allocateInfo.flags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
 	}
 
-	HRI_VK_CHECK(vmaCreateBuffer(ctx->allocator, &bufferCreateInfo, &allocateInfo, &buffer.buffer, &buffer.allocation, nullptr));
-	return buffer;
+	HRI_VK_CHECK(vmaCreateBuffer(m_pCtx->allocator, &bufferCreateInfo, &allocateInfo, &buffer, &m_allocation, nullptr));
 }
 
-void BufferResource::destroy(RenderContext* ctx, BufferResource& buffer)
+BufferResource::~BufferResource()
 {
-	assert(ctx != nullptr);
-
-	vmaDestroyBuffer(ctx->allocator, buffer.buffer, buffer.allocation);
-
-	memset(&buffer, 0, sizeof(BufferResource));
+	release();
 }
 
-void BufferResource::copyToBuffer(RenderContext* ctx, const void* pData, size_t size, size_t offset)
+BufferResource::BufferResource(BufferResource&& other) noexcept
+	:
+	m_pCtx(other.m_pCtx),
+	m_allocation(other.m_allocation),
+	bufferSize(other.bufferSize),
+	hostVisible(other.hostVisible),
+	buffer(other.buffer)
 {
-	assert(ctx != nullptr);
+	other.buffer = VK_NULL_HANDLE;
+	other.m_allocation = VK_NULL_HANDLE;
+}
+
+BufferResource& BufferResource::operator=(BufferResource&& other) noexcept
+{
+	if (this == &other)
+	{
+		return *this;
+	}
+
+	release();
+	m_pCtx = other.m_pCtx;
+	m_allocation = other.m_allocation;
+	bufferSize = other.bufferSize;
+	hostVisible = other.hostVisible;
+	buffer = other.buffer;
+
+	other.buffer = VK_NULL_HANDLE;
+	other.m_allocation = VK_NULL_HANDLE;
+
+	return *this;
+}
+
+void BufferResource::copyToBuffer(const void* pData, size_t size, size_t offset)
+{
+	assert(m_pCtx != nullptr);
 	assert(pData != nullptr);
 	assert(offset + size <= bufferSize);
-	assert(hostVisible);
+	assert(hostVisible == true);
 
 	void* pBuffer = nullptr;
-	vmaMapMemory(ctx->allocator, allocation, &pBuffer);
+	vmaMapMemory(m_pCtx->allocator, m_allocation, &pBuffer);
 	assert(pBuffer != nullptr);
 
 	void* pBufferLocation = reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(pBuffer) + offset);
 	memcpy(pBufferLocation, pData, size);
 
-	vmaUnmapMemory(ctx->allocator, allocation);
+	vmaUnmapMemory(m_pCtx->allocator, m_allocation);
+}
+
+void BufferResource::release()
+{
+	vmaDestroyBuffer(m_pCtx->allocator, buffer, m_allocation);
 }

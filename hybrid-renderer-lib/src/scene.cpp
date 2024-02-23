@@ -10,39 +10,25 @@
 
 using namespace hri;
 
-Scene::Scene(RenderContext* ctx, SceneParameters sceneParameters, const SceneData& sceneData, const std::vector<SceneNode>& nodes)
+Scene::Scene(RenderContext* ctx, SceneParameters sceneParameters, SceneData&& sceneData, const std::vector<SceneNode>& nodes)
 	:
 	m_sceneParameters(sceneParameters),
-	m_sceneData(sceneData),
+	m_sceneData(std::move(sceneData)),
 	m_nodes(nodes)
 {
-	assert(ctx != nullptr);
-	m_gpuMeshes.reserve(m_sceneData.meshes.size());
-
-	for (auto const& mesh : m_sceneData.meshes)
-	{
-		m_gpuMeshes.push_back(mesh.createGPUMesh(ctx));
-	}
+	//
 }
 
-Scene::~Scene()
-{
-	for (auto& mesh : m_gpuMeshes)
-	{
-		mesh.destroy();
-	}
-}
-
-RenderableScene Scene::generateRenderableScene(hri::Camera& camera) const
+RenderableScene Scene::generateRenderableScene(hri::Camera& camera)
 {
 	std::vector<RenderableObject> renderables = {};
 
 	for (size_t matIdx = 0; matIdx < m_sceneData.materials.size(); matIdx++)
 	{
-		for (auto const& node : m_nodes)
+		for (auto&& node : m_nodes)
 		{
-			auto const& material = m_sceneData.materials[node.mesh];
-			auto const& mesh = m_gpuMeshes[node.mesh];
+			auto& material = m_sceneData.materials[node.mesh];
+			auto& mesh = m_sceneData.meshes[node.mesh];
 
 			if (node.material == matIdx)
 			{
@@ -50,8 +36,8 @@ RenderableScene Scene::generateRenderableScene(hri::Camera& camera) const
 
 				RenderableObject renderObject = RenderableObject{
 					Float4x4(1.0f),
-					material,
-					mesh,
+					&material,
+					&mesh,
 				};
 
 				renderables.push_back(renderObject);

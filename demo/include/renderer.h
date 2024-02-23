@@ -8,7 +8,7 @@
 /// @brief The Renderer Frame Data structure contains per frame data for rendering.
 struct RendererFrameData
 {
-	hri::BufferResource cameraUBO;
+	std::unique_ptr<hri::BufferResource> cameraUBO;
 	std::unique_ptr<hri::DescriptorSetManager> sceneDataSet;
 	std::unique_ptr<hri::DescriptorSetManager> presentInputSet;
 	hri::RenderableScene renderableScene;

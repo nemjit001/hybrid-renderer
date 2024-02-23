@@ -135,7 +135,7 @@ hri::Scene loadScene(hri::RenderContext& ctx, const char* path)
 		uint32_t meshIdx = static_cast<uint32_t>(meshes.size());
 		sceneNodes.push_back(hri::SceneNode{ meshIdx, materialIdx });
 
-		meshes.push_back(hri::Mesh(vertices, indices));
+		meshes.push_back(std::move(hri::Mesh(&ctx, vertices, indices)));
 	}
 
 	printf("Loaded scene file:\n");
@@ -143,14 +143,14 @@ hri::Scene loadScene(hri::RenderContext& ctx, const char* path)
 	printf("\t%zu meshes\n", meshes.size());
 
 	struct hri::SceneData sceneData = hri::SceneData{
-		meshes,
-		materials,
+		std::move(meshes),
+		std::move(materials),
 	};
 
 	return hri::Scene(
 		&ctx,
 		hri::SceneParameters{},
-		sceneData,
+		std::move(sceneData),
 		sceneNodes
 	);
 }

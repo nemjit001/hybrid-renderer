@@ -30,16 +30,11 @@ Renderer::Renderer(hri::RenderContext& ctx, hri::Camera& camera, hri::Scene& sce
 Renderer::~Renderer()
 {
 	m_renderCore.awaitFrameFinished();
-
-	for (auto& frame : m_frames)
-	{
-		hri::BufferResource::destroy(&m_context, frame.cameraUBO);
-	}
 }
 
 void Renderer::setActiveScene(hri::Scene& scene)
 {
-	m_activeScene = scene;
+	m_activeScene = std::move(scene);
 }
 
 void Renderer::drawFrame()
@@ -302,12 +297,12 @@ void Renderer::initRendererFrameData()
 	for (size_t i = 0; i < hri::RenderCore::framesInFlight(); i++)
 	{
 		RendererFrameData& frame = m_frames[i];
-		frame.cameraUBO = hri::BufferResource::init(
+		frame.cameraUBO = std::unique_ptr<hri::BufferResource>(new hri::BufferResource(
 			&m_context,
 			sizeof(hri::CameraShaderData),
 			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 			true
-		);
+		));
 
 		frame.presentInputSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(
 			&m_context,
@@ -336,7 +331,7 @@ void Renderer::prepareFrameResources(const hri::ActiveFrame& frame)
 	// Update UBOs & scene renderables
 	// TODO: upload Device Local data to GPU
 	hri::CameraShaderData cameraData = m_camera.getShaderData();
-	rendererFrameData.cameraUBO.copyToBuffer(&m_context, &cameraData, sizeof(hri::CameraShaderData));
+	rendererFrameData.cameraUBO->copyToBuffer(&cameraData, sizeof(hri::CameraShaderData));
 	rendererFrameData.renderableScene = m_activeScene.generateRenderableScene(m_camera);
 
 	// Update subsystem frame info
@@ -351,9 +346,9 @@ void Renderer::prepareFrameResources(const hri::ActiveFrame& frame)
 
 	// Update per frame descriptors
 	VkDescriptorBufferInfo cameraUBOInfo = VkDescriptorBufferInfo{};
-	cameraUBOInfo.buffer = rendererFrameData.cameraUBO.buffer;
+	cameraUBOInfo.buffer = rendererFrameData.cameraUBO->buffer;
 	cameraUBOInfo.offset = 0;
-	cameraUBOInfo.range = rendererFrameData.cameraUBO.bufferSize;
+	cameraUBOInfo.range = rendererFrameData.cameraUBO->bufferSize;
 
 	(*rendererFrameData.sceneDataSet)
 		.writeBuffer(0, &cameraUBOInfo)

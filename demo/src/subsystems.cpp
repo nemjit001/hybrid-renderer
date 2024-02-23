@@ -136,9 +136,9 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 		// TODO: bind material descriptor set
 
 		VkDeviceSize vertexBufferOffsets[] = { 0 };
-		vkCmdBindVertexBuffers(frame.commandBuffer, 0, 1, &renderable.mesh.vertexBuffer.buffer, vertexBufferOffsets);
-		vkCmdBindIndexBuffer(frame.commandBuffer, renderable.mesh.indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
-		vkCmdDrawIndexed(frame.commandBuffer, renderable.mesh.indexCount, 1, 0, 0, 0);
+		vkCmdBindVertexBuffers(frame.commandBuffer, 0, 1, &renderable.mesh->vertexBuffer.buffer, vertexBufferOffsets);
+		vkCmdBindIndexBuffer(frame.commandBuffer, renderable.mesh->indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdDrawIndexed(frame.commandBuffer, renderable.mesh->indexCount, 1, 0, 0, 0);
 	}
 }
 

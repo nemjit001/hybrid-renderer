@@ -37,8 +37,8 @@ namespace hri
 	struct RenderableObject
 	{
 		Float4x4 transform;
-		Material material;
-		GPUMesh mesh;
+		Material* material;
+		Mesh* mesh;
 	};
 
 	/// @brief The RenderableScene structure contains scene parameters as set in the Scene that produced it, as well as a list of renderable objects.
@@ -60,20 +60,23 @@ namespace hri
 		/// @param sceneParameters SceneParameters to use.
 		/// @param sceneData Data list containing resources that the scene nodes point to.
 		/// @param nodes SceneNode list with scene object entries.
-		Scene(RenderContext* ctx, SceneParameters sceneParameters, const SceneData& sceneData, const std::vector<SceneNode>& nodes);
+		Scene(RenderContext* ctx, SceneParameters sceneParameters, SceneData&& sceneData, const std::vector<SceneNode>& nodes);
 
 		/// @brief Destroy this Scene object.
-		virtual ~Scene();
+		virtual ~Scene() = default;
+
+		// Allow move semantics
+		Scene(Scene&&) = default;
+		Scene& operator=(Scene&&) = default;
 
 		/// @brief Generate a renderable scene based on the camera position in the world.
 		/// @param camera Camera used for rendering the world.
 		/// @return A renderable scene structure.
-		RenderableScene generateRenderableScene(hri::Camera& camera) const;
+		RenderableScene generateRenderableScene(hri::Camera& camera);
 
 	private:
 		SceneParameters m_sceneParameters	= SceneParameters{};
 		SceneData m_sceneData				= SceneData{};
-		std::vector<GPUMesh> m_gpuMeshes	= {};
 		std::vector<SceneNode> m_nodes		= {};
 	};
 }
