@@ -23,6 +23,7 @@ namespace hri
         /// @brief Destroy this subsystem.
         virtual ~IRenderSubsystem();
 
+        // Disallow copy behaviour
         IRenderSubsystem(const IRenderSubsystem&) = delete;
         IRenderSubsystem& operator=(const IRenderSubsystem&) = delete;
 

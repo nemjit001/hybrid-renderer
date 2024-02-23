@@ -51,6 +51,7 @@ namespace hri
 		/// @brief Destroy this image sampler instance.
 		virtual ~ImageSampler();
 
+		// Disallow copy behaviour
 		ImageSampler(const ImageSampler&) = delete;
 		ImageSampler& operator=(const ImageSampler&) = delete;
 

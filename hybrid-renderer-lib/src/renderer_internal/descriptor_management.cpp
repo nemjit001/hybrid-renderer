@@ -33,7 +33,7 @@ DescriptorSetLayout::DescriptorSetLayout(
 
 DescriptorSetLayout::~DescriptorSetLayout()
 {
-    vkDestroyDescriptorSetLayout(m_pCtx->device, setLayout, nullptr);
+    release();
 }
 
 DescriptorSetLayout::DescriptorSetLayout(DescriptorSetLayout&& other) noexcept
@@ -52,6 +52,7 @@ DescriptorSetLayout& DescriptorSetLayout::operator=(DescriptorSetLayout&& other)
         return *this;
     }
 
+    release();
     setLayout = other.setLayout;
     m_pCtx = other.m_pCtx;
     m_bindings = other.m_bindings;
@@ -59,6 +60,11 @@ DescriptorSetLayout& DescriptorSetLayout::operator=(DescriptorSetLayout&& other)
     other.setLayout = VK_NULL_HANDLE;
 
     return *this;
+}
+
+void DescriptorSetLayout::release()
+{
+    vkDestroyDescriptorSetLayout(m_pCtx->device, setLayout, nullptr);
 }
 
 DescriptorSetLayoutBuilder::DescriptorSetLayoutBuilder(RenderContext* ctx)
@@ -153,7 +159,7 @@ DescriptorSetManager::DescriptorSetManager(RenderContext* ctx, DescriptorSetAllo
 
 DescriptorSetManager::~DescriptorSetManager()
 {
-    m_pAllocator->freeDescriptorSet(set);
+    release();
 }
 
 DescriptorSetManager::DescriptorSetManager(DescriptorSetManager&& other) noexcept
@@ -174,6 +180,7 @@ DescriptorSetManager& DescriptorSetManager::operator=(DescriptorSetManager&& oth
         return *this;
     }
 
+    release();
     m_pCtx = other.m_pCtx;
     m_pAllocator = other.m_pAllocator;
     set = other.set;
@@ -233,6 +240,11 @@ DescriptorSetManager& DescriptorSetManager::flush()
 
     m_writeSets.clear();
     return *this;
+}
+
+void DescriptorSetManager::release()
+{
+    m_pAllocator->freeDescriptorSet(set);
 }
 
 const VkDescriptorSetLayoutBinding& DescriptorSetManager::getLayoutBinding(uint32_t binding) const

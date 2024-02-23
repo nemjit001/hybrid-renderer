@@ -109,6 +109,7 @@ namespace hri
 		/// @brief Destroy this resource manager base.
 		virtual ~IRenderPassResourceManagerBase();
 
+		// Disallow copy behaviour
 		IRenderPassResourceManagerBase(IRenderPassResourceManagerBase&) = delete;
 		IRenderPassResourceManagerBase& operator=(IRenderPassResourceManagerBase&) = delete;
 

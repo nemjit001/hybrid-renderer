@@ -130,6 +130,7 @@ namespace hri
         /// @brief Destroy this Shader Database instance.
         virtual ~ShaderDatabase();
 
+        // Disallow copy behaviour
         ShaderDatabase(const ShaderDatabase&) = delete;
         ShaderDatabase& operator=(const ShaderDatabase&) = delete;
 

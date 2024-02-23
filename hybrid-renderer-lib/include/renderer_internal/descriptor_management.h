@@ -26,15 +26,21 @@ namespace hri
         /// @brief Destroy a descriptor set layout.
         virtual ~DescriptorSetLayout();
 
+        // Dissalow copy behaviour.
         DescriptorSetLayout(const DescriptorSetLayout&) = delete;
         DescriptorSetLayout& operator=(const DescriptorSetLayout&) = delete;
 
+        // Allow move semantics
         DescriptorSetLayout(DescriptorSetLayout&& other) noexcept;
         DescriptorSetLayout& operator=(DescriptorSetLayout&& other) noexcept;
 
         /// @brief Retrieve the bindings stored in this descriptor set layout.
         /// @return A map of bindings.
         inline const std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding>& bindings() const { return m_bindings; }
+
+    private:
+        /// @brief Release resources held by this class.
+        void release();
 
     public:
         VkDescriptorSetLayout setLayout = VK_NULL_HANDLE;
@@ -89,6 +95,7 @@ namespace hri
         /// @brief Destroy this descriptor set allocator.
         virtual ~DescriptorSetAllocator();
 
+        // Disallow copy behaviour
         DescriptorSetAllocator(const DescriptorSetAllocator&) = delete;
         DescriptorSetAllocator& operator=(const DescriptorSetAllocator&) = delete;
 
@@ -146,7 +153,7 @@ namespace hri
         /// @brief Destroy this descriptor set manager instance.
         virtual ~DescriptorSetManager();
 
-        /// dissalow copy behaviour.
+        // Dissalow copy behaviour.
         DescriptorSetManager(const DescriptorSetManager&) = delete;
         DescriptorSetManager& operator=(const DescriptorSetManager&) = delete;
 
@@ -171,6 +178,9 @@ namespace hri
         DescriptorSetManager& flush();
 
     private:
+        /// @brief Release resources held by this class.
+        void release();
+
         /// @brief Find a layout binding in the internal bindings map.
         /// @param binding Binding to retrieve.
         /// @return A reference to the binding.

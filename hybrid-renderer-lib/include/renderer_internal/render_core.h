@@ -65,6 +65,7 @@ namespace hri
 		/// @brief Destroy this render core instance.
 		virtual ~RenderCore();
 
+		// Disallow copy behaviour
 		RenderCore(const RenderCore&) = delete;
 		RenderCore& operator=(const RenderCore&) = delete;
 
