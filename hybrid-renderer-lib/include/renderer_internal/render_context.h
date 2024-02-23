@@ -91,6 +91,10 @@ namespace hri
         RenderContext(const RenderContext&) = delete;
         RenderContext& operator=(const RenderContext&) = delete;
 
+        // Allow move semantics
+        RenderContext(RenderContext&& other) noexcept;
+        RenderContext& operator=(RenderContext&& other) noexcept;
+
         /// @brief Set the VSync mode for the swap chain. Recreates the swap chain.
         ///     NOTE: does not free any allocated swap images or views!
         /// @param vsyncMode The new VSync mode to use.
@@ -111,6 +115,9 @@ namespace hri
         inline VkFormat swapFormat() const { return swapchain.image_format; }
 
     private:
+        /// @brief Release resources held by this context.
+        void release();
+
         static SwapchainPresentSetup getSwapPresentSetup(VSyncMode vsyncMode);
 
         /// @brief Debug callback for the Vulkan API

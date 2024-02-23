@@ -18,7 +18,7 @@ namespace hri
         /// @param flags Create flags.
         /// @return A new Descriptor Set Layout.
         DescriptorSetLayout(
-            RenderContext *ctx,
+            RenderContext& ctx,
             std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings,
             VkDescriptorSetLayoutCreateFlags flags = 0
         );
@@ -46,7 +46,7 @@ namespace hri
         VkDescriptorSetLayout setLayout = VK_NULL_HANDLE;
 
     private:
-        RenderContext* m_pCtx;
+        RenderContext& m_ctx;
         std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> m_bindings = {};
     };
 
@@ -56,7 +56,7 @@ namespace hri
     public:
         /// @brief Create a new builder instance.
         /// @param ctx Render context to use.
-        DescriptorSetLayoutBuilder(RenderContext* ctx);
+        DescriptorSetLayoutBuilder(RenderContext& ctx);
 
         /// @brief Destroy this builder instance.
         virtual ~DescriptorSetLayoutBuilder() = default;
@@ -79,7 +79,7 @@ namespace hri
         DescriptorSetLayout build();
 
     private:
-        RenderContext* m_pCtx = nullptr;
+        RenderContext& m_ctx;
         VkDescriptorSetLayoutCreateFlags m_flags = 0;
         std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> m_bindings = {};
     };
@@ -90,7 +90,7 @@ namespace hri
     public:
         /// @brief Create a new descriptor set allocator.
         /// @param ctx Render context to use.
-        DescriptorSetAllocator(RenderContext* ctx);
+        DescriptorSetAllocator(RenderContext& ctx);
 
         /// @brief Destroy this descriptor set allocator.
         virtual ~DescriptorSetAllocator();
@@ -98,6 +98,10 @@ namespace hri
         // Disallow copy behaviour
         DescriptorSetAllocator(const DescriptorSetAllocator&) = delete;
         DescriptorSetAllocator& operator=(const DescriptorSetAllocator&) = delete;
+
+        // Allow move semantics
+        DescriptorSetAllocator(DescriptorSetAllocator&& other) noexcept;
+        DescriptorSetAllocator& operator=(DescriptorSetAllocator&& other) noexcept;
 
         /// @brief Allocate a new descriptor set.
         /// @param setLayout Set layout to use.
@@ -116,6 +120,8 @@ namespace hri
         inline VkDescriptorPool fixedPool() const { return m_descriptorPool; }
 
     private:
+        void release();
+
         /// @brief Create a new descriptor pool with the default pool sizes.
         /// @param pool Pool handle to store new pool in.
         void createDescriptorPool(VkDescriptorPool& pool);
@@ -136,7 +142,7 @@ namespace hri
             VkDescriptorPoolSize{ VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, HRI_MAX_DESCRIPTOR_SET_COUNT },
         };
 
-        RenderContext* m_pCtx = nullptr;
+        RenderContext& m_ctx;
         VkDescriptorPool m_descriptorPool = VK_NULL_HANDLE;
     };
 
@@ -148,7 +154,7 @@ namespace hri
         /// @param ctx Render Context to use.
         /// @param allocator Descriptor Set Allocator to use.
         /// @param layout Descriptor Set Layout to base the managed set on.
-        DescriptorSetManager(RenderContext* ctx, DescriptorSetAllocator* allocator, const DescriptorSetLayout& layout);
+        DescriptorSetManager(RenderContext& ctx, DescriptorSetAllocator& allocator, const DescriptorSetLayout& layout);
 
         /// @brief Destroy this descriptor set manager instance.
         virtual ~DescriptorSetManager();
@@ -190,8 +196,8 @@ namespace hri
         VkDescriptorSet set = VK_NULL_HANDLE;
 
     private:
-        RenderContext* m_pCtx = nullptr;
-        DescriptorSetAllocator* m_pAllocator = nullptr;
+        RenderContext& m_ctx;
+        DescriptorSetAllocator& m_allocator;
         std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> m_bindings = {};
         std::vector<VkWriteDescriptorSet> m_writeSets = {};
     };

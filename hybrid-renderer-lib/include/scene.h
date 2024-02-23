@@ -56,11 +56,10 @@ namespace hri
 		Scene() = default;
 
 		/// @brief Instantiate a new Scene object.
-		/// @param ctx Render Context to use.
 		/// @param sceneParameters SceneParameters to use.
 		/// @param sceneData Data list containing resources that the scene nodes point to.
 		/// @param nodes SceneNode list with scene object entries.
-		Scene(RenderContext* ctx, SceneParameters sceneParameters, SceneData&& sceneData, const std::vector<SceneNode>& nodes);
+		Scene(SceneParameters sceneParameters, SceneData&& sceneData, const std::vector<SceneNode>& nodes);
 
 		/// @brief Destroy this Scene object.
 		virtual ~Scene() = default;

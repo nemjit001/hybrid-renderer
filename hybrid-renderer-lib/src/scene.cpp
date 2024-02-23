@@ -10,7 +10,7 @@
 
 using namespace hri;
 
-Scene::Scene(RenderContext* ctx, SceneParameters sceneParameters, SceneData&& sceneData, const std::vector<SceneNode>& nodes)
+Scene::Scene(SceneParameters sceneParameters, SceneData&& sceneData, const std::vector<SceneNode>& nodes)
 	:
 	m_sceneParameters(sceneParameters),
 	m_sceneData(std::move(sceneData)),

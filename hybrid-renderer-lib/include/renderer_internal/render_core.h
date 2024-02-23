@@ -60,7 +60,7 @@ namespace hri
 	public:
 		/// @brief Create a new RenderCore instance.
 		/// @param ctx The render context to use for this Renderer.
-		RenderCore(RenderContext* ctx);
+		RenderCore(RenderContext& ctx);
 
 		/// @brief Destroy this render core instance.
 		virtual ~RenderCore();
@@ -100,7 +100,7 @@ namespace hri
 		void validateSwapchainState(VkResult result);
 
 	private:
-		RenderContext* m_pCtx			= nullptr;
+		RenderContext& m_ctx;
 		uint32_t m_previousFrame		= 0;
 		uint32_t m_currentFrame			= 0;
 		uint32_t m_activeSwapImage		= 0;

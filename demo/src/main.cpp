@@ -135,7 +135,7 @@ hri::Scene loadScene(hri::RenderContext& ctx, const char* path)
 		uint32_t meshIdx = static_cast<uint32_t>(meshes.size());
 		sceneNodes.push_back(hri::SceneNode{ meshIdx, materialIdx });
 
-		meshes.push_back(std::move(hri::Mesh(&ctx, vertices, indices)));
+		meshes.push_back(std::move(hri::Mesh(ctx, vertices, indices)));
 	}
 
 	printf("Loaded scene file:\n");
@@ -148,7 +148,6 @@ hri::Scene loadScene(hri::RenderContext& ctx, const char* path)
 	};
 
 	return hri::Scene(
-		&ctx,
 		hri::SceneParameters{},
 		std::move(sceneData),
 		sceneNodes
@@ -251,7 +250,7 @@ int main()
    		// VK_KHR_RAY_QUERY_EXTENSION_NAME,
 	};
 
-	hri::RenderContext renderContext = hri::RenderContext(ctxCreateInfo);	
+	hri::RenderContext renderContext = hri::RenderContext(ctxCreateInfo);
 
 	// Set up world cam
 	hri::Camera camera = hri::Camera(

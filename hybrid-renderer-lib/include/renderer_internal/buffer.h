@@ -16,7 +16,7 @@ namespace hri
 		/// @param size Size of the buffer to be created, cannot be 0.
 		/// @param usage Intended buffer usage.
 		/// @param hostVisible If the buffer is host visible and can be mapped to memory.
-		BufferResource(RenderContext* ctx, size_t size, VkBufferUsageFlags usage, bool hostVisible = false);
+		BufferResource(RenderContext& ctx, size_t size, VkBufferUsageFlags usage, bool hostVisible = false);
 
 		/// @brief Destroy this Buffer Resource.
 		virtual ~BufferResource();
@@ -44,7 +44,7 @@ namespace hri
 		VkBuffer buffer				= VK_NULL_HANDLE;
 
 	private:
-		RenderContext* m_pCtx		= nullptr;
+		RenderContext& m_ctx;
 		VmaAllocation m_allocation	= VK_NULL_HANDLE;
 	};
 }

@@ -130,11 +130,51 @@ RenderContext::RenderContext(RenderContextCreateInfo& createInfo)
 
 RenderContext::~RenderContext()
 {
-    vkb::destroy_swapchain(swapchain);
-    vmaDestroyAllocator(allocator);
-    vkb::destroy_device(device);
-    vkb::destroy_surface(instance, surface);
-    vkb::destroy_instance(instance);
+    release();
+}
+
+RenderContext::RenderContext(RenderContext&& other) noexcept
+    :
+    instance(other.instance),
+    surface(other.surface),
+    gpu(other.gpu),
+    device(other.device),
+    allocator(other.allocator),
+    swapchain(other.swapchain),
+    queues(other.queues)
+{
+    other.instance = vkb::Instance();
+    other.surface = VK_NULL_HANDLE;
+    other.gpu = vkb::PhysicalDevice();
+    other.device = vkb::Device();
+    other.allocator = VK_NULL_HANDLE;
+    other.swapchain = vkb::Swapchain();
+}
+
+RenderContext& RenderContext::operator=(RenderContext&& other) noexcept
+{
+    if (this == &other)
+    {
+        return *this;
+    }
+
+    release();
+    instance = other.instance;
+    surface = other.surface;
+    gpu = other.gpu;
+    device = other.device;
+    allocator = other.allocator;
+    swapchain = other.swapchain;
+    queues = other.queues;
+
+    other.instance = vkb::Instance();
+    other.surface = VK_NULL_HANDLE;
+    other.gpu = vkb::PhysicalDevice();
+    other.device = vkb::Device();
+    other.allocator = VK_NULL_HANDLE;
+    other.swapchain = vkb::Swapchain();
+
+    return *this;
 }
 
 void RenderContext::setVSyncMode(VSyncMode vsyncMode)
@@ -165,6 +205,15 @@ void RenderContext::recreateSwapchain()
         .build().value();
 
     vkb::destroy_swapchain(oldSwapchain);
+}
+
+void RenderContext::release()
+{
+    vkb::destroy_swapchain(swapchain);
+    vmaDestroyAllocator(allocator);
+    vkb::destroy_device(device);
+    vkb::destroy_surface(instance, surface);
+    vkb::destroy_instance(instance);
 }
 
 SwapchainPresentSetup RenderContext::getSwapPresentSetup(VSyncMode vsyncMode)
