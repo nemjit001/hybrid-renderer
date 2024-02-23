@@ -133,7 +133,7 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 			&transform
 		);
 
-		// TODO: bind material data
+		// TODO: bind material descriptor set
 
 		VkDeviceSize vertexBufferOffsets[] = { 0 };
 		vkCmdBindVertexBuffers(frame.commandBuffer, 0, 1, &renderable.mesh.vertexBuffer.buffer, vertexBufferOffsets);
