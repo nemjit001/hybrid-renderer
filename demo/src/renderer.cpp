@@ -37,6 +37,12 @@ void Renderer::setActiveScene(hri::Scene& scene)
 	m_activeScene = std::move(scene);
 }
 
+void Renderer::setVSyncMode(hri::VSyncMode vsyncMode)
+{
+	m_context.setVSyncMode(vsyncMode);
+	recreateSwapDependentResources();
+}
+
 void Renderer::drawFrame()
 {
 	m_renderCore.startFrame();

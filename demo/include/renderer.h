@@ -23,6 +23,8 @@ public:
 
 	void setActiveScene(hri::Scene& scene);
 
+	void setVSyncMode(hri::VSyncMode vsyncMode);
+
 	void drawFrame();
 
 private:
