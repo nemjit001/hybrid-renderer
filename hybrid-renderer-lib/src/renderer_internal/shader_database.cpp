@@ -172,10 +172,11 @@ Shader Shader::loadFile(RenderContext* ctx, const std::string& path, VkShaderSta
     // Read shader binary blob
     fseek(file, 0, SEEK_SET);
     char* pCode = new char[codeSize + 1] {};
-    fread(pCode, sizeof(char), codeSize, file);
+    size_t readBytes = fread(pCode, sizeof(char), codeSize, file);
+    assert(readBytes == codeSize);
 
     // Initialize shader
-    Shader shader = Shader::init(ctx, reinterpret_cast<uint32_t*>(pCode), static_cast<size_t>(codeSize), stage);
+    Shader shader = Shader::init(ctx, reinterpret_cast<uint32_t*>(pCode), static_cast<size_t>(readBytes), stage);
 
     // Free resources
     fclose(file);
