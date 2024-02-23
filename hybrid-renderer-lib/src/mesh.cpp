@@ -17,8 +17,8 @@ void GPUMesh::init(RenderContext* ctx, const std::vector<Vertex>& vertices, cons
 	size_t indexBufferByteSize = sizeof(uint32_t) * indices.size();
 	size_t vertexBufferByteSize = sizeof(Vertex) * vertices.size();
 
-	indexCount = indices.size();
-	vertexCount = vertices.size();
+	indexCount = static_cast<uint32_t>(indices.size());
+	vertexCount = static_cast<uint32_t>(vertices.size());
 	indexBuffer = BufferResource::init(m_pCtx, indexBufferByteSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, true);
 	vertexBuffer = BufferResource::init(m_pCtx, vertexBufferByteSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, true);
 

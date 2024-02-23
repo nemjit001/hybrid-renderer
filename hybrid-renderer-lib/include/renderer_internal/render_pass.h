@@ -133,7 +133,7 @@ namespace hri
 		/// @brief Get a managed attachment resource.
 		/// @param attachmentIndex Attachment resource index to retrieve.
 		/// @return An ImageResource managed by this resource manager.
-		inline virtual ImageResource getAttachmentResource(uint32_t attachmentIndex) const {
+		inline virtual const ImageResource& getAttachmentResource(uint32_t attachmentIndex) const {
 			assert(attachmentIndex < m_imageResources.size());
 			return m_imageResources[attachmentIndex];
 		}

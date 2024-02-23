@@ -7,7 +7,7 @@
 
 using namespace hri;
 
-ImageResource ImageResource::init(
+ImageResource::ImageResource(
 	RenderContext* ctx,
 	VkImageType type,
 	VkFormat format,
@@ -20,12 +20,12 @@ ImageResource ImageResource::init(
 	VkImageCreateFlags flags,
 	VkImageLayout initialLayout
 )
+	:
+	m_pCtx(ctx),
+	extent(extent),
+	format(format)
 {
-	assert(ctx != nullptr);
-
-	ImageResource image = ImageResource{};
-    image.extent = extent;
-	image.format = format;
+	assert(m_pCtx != nullptr);
 
 	VkImageCreateInfo imageCreateInfo = VkImageCreateInfo{ VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
     imageCreateInfo.flags = flags;
@@ -45,26 +45,54 @@ ImageResource ImageResource::init(
 	VmaAllocationCreateInfo allocationInfo = VmaAllocationCreateInfo{};
 	allocationInfo.flags = 0;
 	allocationInfo.usage = VMA_MEMORY_USAGE_AUTO;
-	HRI_VK_CHECK(vmaCreateImage(ctx->allocator, &imageCreateInfo, &allocationInfo, &image.image, &image.allocation, nullptr));
-
-	return image;
+	HRI_VK_CHECK(vmaCreateImage(m_pCtx->allocator, &imageCreateInfo, &allocationInfo, &image, &m_allocation, nullptr));
 }
 
-void ImageResource::destroy(RenderContext* ctx, ImageResource& image)
+ImageResource::~ImageResource()
 {
-	assert(ctx != nullptr);
-	vmaDestroyImage(ctx->allocator, image.image, image.allocation);
-    vkDestroyImageView(ctx->device, image.view, nullptr);
-
-	memset(&image, 0, sizeof(ImageResource));
+	release();
 }
 
-VkImageView ImageResource::createView(RenderContext* ctx, VkImageViewType viewType, VkComponentMapping components, VkImageSubresourceRange subresourceRange)
+ImageResource::ImageResource(ImageResource&& other) noexcept
+	:
+	m_pCtx(other.m_pCtx),
+	m_allocation(other.m_allocation),
+	extent(other.extent),
+	format(other.format),
+	image(other.image),
+	view(other.view)
 {
-	assert(ctx != nullptr);
+	other.image = VK_NULL_HANDLE;
+	other.view = VK_NULL_HANDLE;
+	other.m_allocation = VK_NULL_HANDLE;
+}
 
+ImageResource& ImageResource::operator=(ImageResource&& other) noexcept
+{
+	if (this == &other)
+	{
+		return *this;
+	}
+
+	release();
+	m_pCtx = other.m_pCtx;
+	m_allocation = other.m_allocation;
+	extent = other.extent;
+	format = other.format;
+	image = other.image;
+	view = other.view;
+
+	other.image = VK_NULL_HANDLE;
+	other.view = VK_NULL_HANDLE;
+	other.m_allocation = VK_NULL_HANDLE;
+
+	return *this;
+}
+
+VkImageView ImageResource::createView(VkImageViewType viewType, VkComponentMapping components, VkImageSubresourceRange subresourceRange)
+{
     if (this->view != VK_NULL_HANDLE)
-        destroyView(ctx);
+        destroyView();
 
 	VkImageViewCreateInfo createInfo = VkImageViewCreateInfo{ VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
 	createInfo.flags = 0;
@@ -74,13 +102,18 @@ VkImageView ImageResource::createView(RenderContext* ctx, VkImageViewType viewTy
 	createInfo.components = components;
 	createInfo.subresourceRange = subresourceRange;
 
-	HRI_VK_CHECK(vkCreateImageView(ctx->device, &createInfo, nullptr, &this->view));
+	HRI_VK_CHECK(vkCreateImageView(m_pCtx->device, &createInfo, nullptr, &this->view));
 	return this->view;
 }
 
-void ImageResource::destroyView(RenderContext* ctx)
+void ImageResource::destroyView()
 {
-	assert(ctx != nullptr);
-	vkDestroyImageView(ctx->device, this->view, nullptr);
+	vkDestroyImageView(m_pCtx->device, this->view, nullptr);
     this->view = VK_NULL_HANDLE;
+}
+
+void ImageResource::release()
+{
+	vmaDestroyImage(m_pCtx->allocator, image, m_allocation);
+	destroyView();
 }

@@ -143,7 +143,7 @@ void IRenderPassResourceManagerBase::createResources()
 
 	for (auto const& config : m_attachmentConfigs)
 	{
-		ImageResource attachment = ImageResource::init(
+		ImageResource attachment = ImageResource(
 			m_pCtx,
 			VK_IMAGE_TYPE_2D,
 			config.format,
@@ -154,7 +154,6 @@ void IRenderPassResourceManagerBase::createResources()
 		);
 
 		attachment.createView(
-			m_pCtx,
 			VK_IMAGE_VIEW_TYPE_2D,
 			VkComponentMapping{
 				VK_COMPONENT_SWIZZLE_IDENTITY,
@@ -169,7 +168,7 @@ void IRenderPassResourceManagerBase::createResources()
 			}
 		);
 
-		m_imageResources.push_back(attachment);
+		m_imageResources.push_back(std::move(attachment));
 	}
 }
 
@@ -177,8 +176,7 @@ void IRenderPassResourceManagerBase::destroyResources()
 {
 	for (auto& attachment : m_imageResources)
 	{
-		attachment.destroyView(m_pCtx);
-		ImageResource::destroy(m_pCtx, attachment);
+		attachment.destroyView();
 	}
 
 	m_imageResources.clear();
