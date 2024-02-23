@@ -10,6 +10,12 @@
 #include "ui_manager.h"
 #include "window_manager.h"
 
+#if DEMO_DEBUG == 1 && HRI_PLATFORM_WINDOWS == 1
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#endif
+
 static Timer gFrameTimer		= Timer();
 static WindowHandle* gWindow	= nullptr;
 
@@ -211,6 +217,12 @@ void handleCameraInput(WindowHandle* window, float deltaTime, hri::Camera& camer
 
 int main()
 {
+#if DEMO_DEBUG == 1 && HRI_PLATFORM_WINDOWS == 1
+	// Enable debug memory leak detection on windows
+	_CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_DEBUG );
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif
+
 	// Set up window manager & main window
 	WindowManager windowManager = WindowManager();
 

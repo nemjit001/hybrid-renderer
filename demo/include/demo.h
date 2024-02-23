@@ -15,8 +15,10 @@
 #define CAMERA_SPEED        1.5f
 
 #ifndef NDEBUG
+#define DEMO_DEBUG			1
 #define DEMO_DEBUG_OUTPUT	1
 #else
+#define DEMO_DEBUG			0
 #define DEMO_DEBUG_OUTPUT	0
 #endif
 
