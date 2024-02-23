@@ -242,6 +242,8 @@ int main()
 	ctxCreateInfo.appVersion = DEMO_APP_VERSION;
 	ctxCreateInfo.surfaceCreateFunc = [](VkInstance instance, VkSurfaceKHR* surface) { return WindowManager::createVulkanSurface(instance, gWindow, nullptr, surface); };
 	ctxCreateInfo.vsyncMode = hri::VSyncMode::Disabled;
+
+	// Set required extensions
 	ctxCreateInfo.instanceExtensions = {};
 	ctxCreateInfo.deviceExtensions = {
    		VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
@@ -249,6 +251,9 @@ int main()
    		// VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,
    		// VK_KHR_RAY_QUERY_EXTENSION_NAME,
 	};
+
+	// Enable required features
+	ctxCreateInfo.deviceFeatures13.synchronization2 = true;
 
 	hri::RenderContext renderContext = hri::RenderContext(ctxCreateInfo);
 

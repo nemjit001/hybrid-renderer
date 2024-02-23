@@ -38,12 +38,16 @@ namespace hri
     /// @brief The render context create info allows for specifying context settings & registering extensions for the created context.
     struct RenderContextCreateInfo
     {
-        const char* appName                         = "NONAME";
-        uint32_t appVersion                         = 0;
-        HRISurfaceCreateFunc surfaceCreateFunc      = nullptr; 
-        VSyncMode vsyncMode                         = VSyncMode::Disabled;
-        std::vector<const char*> instanceExtensions = {};
-        std::vector<const char*> deviceExtensions   = {};
+        const char* appName                                 = "NONAME";
+        uint32_t appVersion                                 = 0;
+        HRISurfaceCreateFunc surfaceCreateFunc              = nullptr; 
+        VSyncMode vsyncMode                                 = VSyncMode::Disabled;
+        std::vector<const char*> instanceExtensions         = {};
+        std::vector<const char*> deviceExtensions           = {};
+        VkPhysicalDeviceFeatures deviceFeatures             = {};
+        VkPhysicalDeviceVulkan11Features deviceFeatures11   = {};
+        VkPhysicalDeviceVulkan12Features deviceFeatures12   = {};
+        VkPhysicalDeviceVulkan13Features deviceFeatures13   = {};
     };
 
     /// @brief The swapchain present setup dictates available swap images for rendering, as well as the present mode.
