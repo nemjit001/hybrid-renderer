@@ -118,3 +118,75 @@ public:
 private:
 	RayTracingContext& m_ctx;
 };
+
+class AccelerationStructureGeometryBuilder
+{
+public:
+	AccelerationStructureGeometryBuilder(RayTracingContext& ctx);
+
+	AccelerationStructureGeometryBuilder& setBuildFlags(VkBuildAccelerationStructureFlagsKHR flags)
+	{
+		m_flags = flags;
+
+		return *this;
+	}
+
+	AccelerationStructureGeometryBuilder& addGeometry(
+		VkFormat vertexFormat,
+		VkIndexType indexType,
+		size_t vertexStride,
+		uint32_t maxVertexIdx,
+		const hri::BufferResource& vertexBuffer,
+		const hri::BufferResource& indexBuffer,
+		VkGeometryFlagsKHR flags = 0
+	)
+	{
+		VkBufferDeviceAddressInfo vertexBufferAddressInfo = vertexBuffer.deviceAddressInfo();
+		VkBufferDeviceAddressInfo indexBufferAddressInfo = indexBuffer.deviceAddressInfo();
+
+		VkDeviceOrHostAddressConstKHR vertexData = {};
+		vertexData.deviceAddress = vkGetBufferDeviceAddress(m_ctx.renderContext.device, &vertexBufferAddressInfo);
+
+		VkDeviceOrHostAddressConstKHR indexData = {};
+		indexData.deviceAddress = vkGetBufferDeviceAddress(m_ctx.renderContext.device, &indexBufferAddressInfo);
+
+		VkAccelerationStructureGeometryTrianglesDataKHR triangles = VkAccelerationStructureGeometryTrianglesDataKHR{};
+		triangles.vertexFormat = vertexFormat;
+		triangles.vertexData = vertexData;
+		triangles.vertexStride = vertexStride;
+		triangles.maxVertex = maxVertexIdx;
+		triangles.indexType = indexType;
+		triangles.indexData = indexData;
+		triangles.transformData = VkDeviceOrHostAddressConstKHR{};
+
+		VkAccelerationStructureGeometryDataKHR geometryData = VkAccelerationStructureGeometryDataKHR{};
+		geometryData.triangles = triangles;
+
+		VkAccelerationStructureGeometryKHR geometry = VkAccelerationStructureGeometryKHR{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR };
+		geometry.flags = flags;
+		geometry.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
+		geometry.geometry = geometryData;
+
+		m_geometries.push_back(geometry);
+		return *this;
+	}
+
+	VkAccelerationStructureBuildGeometryInfoKHR getBuildGeometryInfo(VkBuildAccelerationStructureModeKHR buildMode) const
+	{
+		VkAccelerationStructureBuildGeometryInfoKHR buildInfo = VkAccelerationStructureBuildGeometryInfoKHR{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR };
+		buildInfo.flags = m_flags;
+		buildInfo.mode = buildMode;
+		buildInfo.srcAccelerationStructure = VK_NULL_HANDLE;
+		buildInfo.dstAccelerationStructure = VK_NULL_HANDLE;
+		buildInfo.geometryCount = static_cast<uint32_t>(m_geometries.size());
+		buildInfo.pGeometries = m_geometries.data();
+		buildInfo.scratchData = VkDeviceOrHostAddressKHR{};
+		
+		return buildInfo;
+	}
+
+private:
+	RayTracingContext m_ctx;
+	VkBuildAccelerationStructureFlagsKHR m_flags = 0;
+	std::vector<VkAccelerationStructureGeometryKHR> m_geometries = {};
+};
