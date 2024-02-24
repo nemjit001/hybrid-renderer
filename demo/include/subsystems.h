@@ -2,7 +2,8 @@
 
 #include <hybrid_renderer.h>
 
-#include <scene.h>
+#include "detail/raytracing.h"
+#include "scene.h"
 
 /// @brief The Transform Push Constant is used to push transformation data for renderable objects to shaders.
 struct TransformPushConstant
@@ -54,6 +55,21 @@ public:
 
 protected:
 	GBufferLayoutFrameInfo m_currentFrameInfo = GBufferLayoutFrameInfo{};
+};
+
+class SoftShadowsRTSubsystem
+	:
+	public hri::IRenderSubsystem
+{
+public:
+	SoftShadowsRTSubsystem(
+		RayTracingContext& ctx,
+		hri::ShaderDatabase& shaderDB
+	);
+
+	virtual ~SoftShadowsRTSubsystem() = default;
+
+	virtual void record(hri::ActiveFrame& frame) const override;
 };
 
 /// @brief The UI Subsystem handles drawing an UI overlay to the swap render pass.

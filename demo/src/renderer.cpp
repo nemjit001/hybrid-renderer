@@ -8,6 +8,7 @@
 Renderer::Renderer(hri::RenderContext& ctx, hri::Camera& camera, SceneGraph& activeScene)
 	:
 	m_context(ctx),
+	m_raytracingContext(ctx),
 	m_renderCore(ctx),
 	m_shaderDatabase(ctx),
 	m_subsystemManager(),
@@ -107,6 +108,7 @@ void Renderer::drawFrame()
 	
 	// Record swapchain output passes
 	m_swapchainPassManager->beginRenderPass(frame);
+	m_subsystemManager.recordSubsystem("SoftShadowsRTSystem", frame);
 	m_subsystemManager.recordSubsystem("PresentationSystem", frame);
 	m_subsystemManager.recordSubsystem("UISystem", frame);	// Must be drawn after present as overlay
 	m_swapchainPassManager->endRenderPass(frame);
@@ -117,9 +119,14 @@ void Renderer::drawFrame()
 
 void Renderer::initShaderDB()
 {
+	// Raytracing Shaders
+	// TODO: load all raytracing shaders
+
+	// Vertex shaders
 	m_shaderDatabase.registerShader("PresentVert", hri::Shader::loadFile(m_context, "./shaders/present.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
 	m_shaderDatabase.registerShader("StaticVert", hri::Shader::loadFile(m_context, "./shaders/static.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
 
+	// Fragment shaders
 	m_shaderDatabase.registerShader("GBufferLayoutFrag", hri::Shader::loadFile(m_context, "./shaders/gbuffer_layout.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
 	m_shaderDatabase.registerShader("PresentFrag", hri::Shader::loadFile(m_context, "./shaders/present.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
 }
@@ -275,6 +282,11 @@ void Renderer::initRenderSubsystems()
 		m_sceneDataSetLayout->setLayout
 	));
 
+	m_softShadowsRTSubsystem = std::unique_ptr<SoftShadowsRTSubsystem>(new SoftShadowsRTSubsystem(
+		m_raytracingContext,
+		m_shaderDatabase
+	));
+
 	m_uiSubsystem = std::unique_ptr<UISubsystem>(new UISubsystem(
 		m_context,
 		m_swapchainPassManager->renderPass(),
@@ -289,6 +301,7 @@ void Renderer::initRenderSubsystems()
 	));
 
 	m_subsystemManager.registerSubsystem("GBufferLayoutSystem", m_gbufferLayoutSubsystem.get());
+	m_subsystemManager.registerSubsystem("SoftShadowsRTSystem", m_softShadowsRTSubsystem.get());
 	m_subsystemManager.registerSubsystem("UISystem", m_uiSubsystem.get());
 	m_subsystemManager.registerSubsystem("PresentationSystem", m_presentSubsystem.get());
 }

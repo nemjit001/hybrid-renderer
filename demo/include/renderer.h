@@ -45,6 +45,7 @@ private:
 
 private:
 	hri::RenderContext& m_context;
+	RayTracingContext m_raytracingContext;
 	hri::RenderCore m_renderCore;
 	hri::ShaderDatabase m_shaderDatabase;
 	hri::RenderSubsystemManager m_subsystemManager;
@@ -67,6 +68,7 @@ private:
 
 	// Render subsystems
 	std::unique_ptr<GBufferLayoutSubsystem> m_gbufferLayoutSubsystem;
+	std::unique_ptr<SoftShadowsRTSubsystem> m_softShadowsRTSubsystem;
 	std::unique_ptr<UISubsystem> m_uiSubsystem;
 	std::unique_ptr<PresentationSubsystem> m_presentSubsystem;
 

@@ -3,7 +3,7 @@ set(TARGET_NAME hrdemo)
 
 file(GLOB PROJECT_HEADERS "include/*.h" "include/**/*.h")
 file(GLOB PROJECT_SOURCES "src/*.cpp" "src/**/*.cpp")
-file(GLOB PROJECT_SHADERS "shaders/*.vert" "shaders/*.frag")
+file(GLOB PROJECT_SHADERS "shaders/*.vert" "shaders/*.frag" "shaders/*.comp" "shaders/*.rgen" "shaders/*.rmiss" "shaders/*.rchit" "shaders/*.rahit")
 
 # Add dependencies
 option(GLFW_BUILD_DOCS OFF)

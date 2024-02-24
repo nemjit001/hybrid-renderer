@@ -135,6 +135,31 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 	}
 }
 
+SoftShadowsRTSubsystem::SoftShadowsRTSubsystem(
+	RayTracingContext& ctx,
+	hri::ShaderDatabase& shaderDB
+)
+	:
+	hri::IRenderSubsystem(ctx.renderContext)
+{
+	m_layout = hri::PipelineLayoutBuilder(ctx.renderContext)
+		.build();
+
+	// TODO: set up raytracing shaders for soft shadows
+
+	VkPipeline raytracingPipeline = RayTracingPipelineBuilder(ctx)
+		.setMaxRecursionDepth()
+		.setLayout(m_layout)
+		.build();
+
+	shaderDB.registerPipeline("SoftShadowsRTPipeline", VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, raytracingPipeline);
+}
+
+void SoftShadowsRTSubsystem::record(hri::ActiveFrame& frame) const
+{
+	//
+}
+
 UISubsystem::UISubsystem(
 	hri::RenderContext& ctx,
 	VkRenderPass renderPass,

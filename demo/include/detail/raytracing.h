@@ -74,10 +74,10 @@ public:
 		uint32_t intersectionShader = VK_SHADER_UNUSED_KHR
 	);
 
-	/// @brief Set the maximum recursion depth for raytracing (default is DEMO_MAX_RT_RECURSION_DEPTH)
+	/// @brief Set the maximum recursion depth for raytracing (default is DEMO_DEFAULT_RT_RECURSION_DEPTH)
 	/// @param depth Maximum recursion depth.
 	/// @return A reference to this class.
-	RayTracingPipelineBuilder& setMaxRecursionDepth(uint32_t depth);
+	RayTracingPipelineBuilder& setMaxRecursionDepth(uint32_t depth = DEMO_DEFAULT_RT_RECURSION_DEPTH);
 
 	/// @brief Add dynamic states to this pipeline.
 	/// @param dynamicStates Dynamic states to add.
