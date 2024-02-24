@@ -5,14 +5,15 @@
 
 #include "subsystems.h"
 
-Renderer::Renderer(hri::RenderContext& ctx, hri::Camera& camera)
+Renderer::Renderer(hri::RenderContext& ctx, hri::Camera& camera, SceneGraph& activeScene)
 	:
 	m_context(ctx),
 	m_renderCore(&ctx),
 	m_shaderDatabase(&ctx),
 	m_subsystemManager(&ctx),
 	m_descriptorSetAllocator(&ctx),
-	m_camera(camera)
+	m_camera(camera),
+	m_activeScene(activeScene)
 {
 	initShaderDB();
 	initRenderPasses();
@@ -332,10 +333,12 @@ void Renderer::prepareFrameResources(const hri::ActiveFrame& frame)
 	// TODO: upload Device Local data to GPU
 	hri::CameraShaderData cameraData = m_camera.getShaderData();
 	rendererFrameData.cameraUBO->copyToBuffer(&cameraData, sizeof(hri::CameraShaderData));
+	rendererFrameData.renderables = m_activeScene.generateDrawData(m_camera);
 
 	// Update subsystem frame info
 	m_gbufferLayoutSubsystem->updateFrameInfo(GBufferLayoutFrameInfo{
-		rendererFrameData.sceneDataSet->set
+		rendererFrameData.sceneDataSet->set,
+		rendererFrameData.renderables,
 	});
 
 	m_presentSubsystem->updateFrameInfo(PresentFrameInfo{

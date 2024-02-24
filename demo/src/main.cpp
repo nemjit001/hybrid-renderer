@@ -65,7 +65,9 @@ SceneGraph loadScene(hri::RenderContext& renderContext, const char* path)
 	// Load material data into compatible format
 	for (auto const& material : objMaterials)
 	{
-		// TODO: load texture files if a material contains texture maps
+		bool hasAlbedoMap = !material.diffuse_texname.empty();
+		bool hasNormalMap = !material.diffuse_texname.empty();
+
 		MaterialParameters materialParams = MaterialParameters{
 			hri::Float3(material.diffuse[0], material.diffuse[1], material.diffuse[2]),
 			hri::Float3(material.specular[0], material.specular[1], material.specular[2]),
@@ -139,12 +141,13 @@ SceneGraph loadScene(hri::RenderContext& renderContext, const char* path)
 
 		meshes.push_back(std::move(hri::Mesh(&renderContext, vertices, indices)));
 
-		// TODO: set newly encountered LOD level in scene
+		// TODO: set LOD levels instead of always primary
+		size_t meshIdx = meshes.size() - 1;
 		nodes.push_back(SceneNode{
 			shape.name,
 			SceneTransform{},	// No transform support
 			static_cast<SceneNode::SceneId>(shape.mesh.material_ids[0]),	// assume 1 material per mesh
-			{ meshes.size(), INVALID_SCENE_ID, INVALID_SCENE_ID }
+			{ meshIdx, INVALID_SCENE_ID, INVALID_SCENE_ID }
 		});
 	}
 
@@ -164,7 +167,7 @@ void drawSceneGraphNodeMenu(std::vector<SceneNode>& nodes)
 	}
 }
 
-void drawConfigWindow(float deltaTime, SceneGraph& scene)
+void drawConfigWindow(float deltaTime, hri::Camera& camera, SceneGraph& scene)
 {
 	static float AVG_FRAMETIME = 1.0f;
 	static float ALPHA = 1.0f;
@@ -181,6 +184,13 @@ void drawConfigWindow(float deltaTime, SceneGraph& scene)
 		ImGui::Text("Resolution: %d x %d", gDisplayWidth, gDisplayHeight);
 		ImGui::Text("Frame Time: %8.2f ms", AVG_FRAMETIME * 1'000.0f);
 		ImGui::Text("FPS:        %8.2f fps", 1.0f / AVG_FRAMETIME);
+
+		ImGui::SeparatorText("Camera");
+		ImGui::Text("Position: %.2f %.2f %.2f", camera.position.x, camera.position.y, camera.position.z);
+		ImGui::Text("Forward:  %.2f %.2f %.2f", camera.forward.x, camera.forward.y, camera.forward.z);
+		ImGui::DragFloat("FOV Y", &camera.parameters.fovYDegrees, 1.0f);
+		ImGui::DragFloat("Near Plane", &camera.parameters.zNear, 0.05f);
+		ImGui::DragFloat("Far Plane", &camera.parameters.zFar, 0.05f);
 
 		ImGui::SeparatorText("Scene Nodes");
 		drawSceneGraphNodeMenu(scene.nodes);
@@ -227,7 +237,6 @@ void handleCameraInput(WindowHandle* window, float deltaTime, hri::Camera& camer
 	camera.forward = hri::normalize(target - camera.position);
 	camera.right = hri::normalize(hri::cross(HRI_WORLD_UP, camera.forward));
 	camera.up = hri::normalize(hri::cross(camera.forward, camera.right));
-	camera.updateMatrices();
 }
 
 int main()
@@ -282,7 +291,7 @@ int main()
 	SceneGraph scene = loadScene(renderContext, "assets/test_scene.obj");
 
 	// Create renderer
-	Renderer renderer = Renderer(renderContext, camera);
+	Renderer renderer = Renderer(renderContext, camera, scene);
 
 	printf("Startup complete\n");
 
@@ -296,7 +305,7 @@ int main()
 
 		// Record ImGUI draw commands
 		uiManager.startDraw();
-		drawConfigWindow(gFrameTimer.deltaTime, scene);
+		drawConfigWindow(gFrameTimer.deltaTime, camera, scene);
 		uiManager.endDraw();
 
 		// Draw renderer frame
@@ -307,6 +316,7 @@ int main()
 			camera.parameters.aspectRatio = static_cast<float>(gDisplayWidth) / static_cast<float>(gDisplayHeight);
 
 		handleCameraInput(gWindow, gFrameTimer.deltaTime, camera);
+		camera.updateMatrices();
 		
 		if (glfwGetKey(gWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 			windowManager.closeWindow(gWindow);

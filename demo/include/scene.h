@@ -26,6 +26,12 @@ struct SceneNode
 	SceneId meshLODs[MAX_LOD_LEVELS]	= { INVALID_SCENE_ID, INVALID_SCENE_ID, INVALID_SCENE_ID };
 };
 
+struct Renderable
+{
+	hri::Float4x4 modelMatrix;
+	hri::Mesh* pMesh;
+};
+
 class SceneGraph
 {
 public:
@@ -37,7 +43,14 @@ public:
 
 	virtual ~SceneGraph() = default;
 
+	std::vector<Renderable> generateDrawData(const hri::Camera& camera);
+
+private:
+	SceneNode::SceneId calculateLODLevel(const hri::Camera& camera, const SceneNode& node);
+
 public:
+	std::vector<Material> materials;
+	std::vector<hri::Mesh> meshes;
 	std::vector<SceneNode> nodes;
 };
 
