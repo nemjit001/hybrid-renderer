@@ -6,7 +6,7 @@
 #include "demo.h"
 #include "detail/dispatch.h"
 
-RayTracingContext::RayTracingContext(RayTracingContext&& other)
+RayTracingContext::RayTracingContext(RayTracingContext&& other) noexcept
 	:
 	renderContext(other.renderContext),
 	deferredHostDispatch(other.deferredHostDispatch),
@@ -16,7 +16,7 @@ RayTracingContext::RayTracingContext(RayTracingContext&& other)
 	//
 }
 
-RayTracingContext& RayTracingContext::operator=(RayTracingContext&& other)
+RayTracingContext& RayTracingContext::operator=(RayTracingContext&& other) noexcept
 {
 	if (this == &other)
 	{
@@ -29,6 +29,26 @@ RayTracingContext& RayTracingContext::operator=(RayTracingContext&& other)
 	rayTracingDispatch = other.rayTracingDispatch;
 
 	return *this;
+}
+
+VkDeviceOrHostAddressKHR RayTracingUtils::getDeviceAddress(const RayTracingContext& ctx, const hri::BufferResource& resource)
+{
+	VkBufferDeviceAddressInfo addressInfo = resource.deviceAddressInfo();
+	VkDeviceAddress deviceAddress = vkGetBufferDeviceAddress(ctx.renderContext.device, &addressInfo);
+	VkDeviceOrHostAddressKHR address = {};
+	address.deviceAddress = deviceAddress;
+
+	return address;
+}
+
+VkDeviceOrHostAddressConstKHR RayTracingUtils::getConstDeviceAddress(const RayTracingContext& ctx, const hri::BufferResource& resource)
+{
+	VkBufferDeviceAddressInfo addressInfo = resource.deviceAddressInfo();
+	VkDeviceAddress deviceAddress = vkGetBufferDeviceAddress(ctx.renderContext.device, &addressInfo);
+	VkDeviceOrHostAddressConstKHR address = {};
+	address.deviceAddress = deviceAddress;
+
+	return address;
 }
 
 RayTracingPipelineBuilder::RayTracingPipelineBuilder(RayTracingContext& ctx)
@@ -190,4 +210,88 @@ AccelerationStructure& AccelerationStructure::operator=(AccelerationStructure&& 
 void AccelerationStructure::release()
 {
 	m_ctx.accelStructDispatch.vkDestroyAccelerationStructure(m_ctx.renderContext.device, accelerationStructure, nullptr);
+}
+
+AccelerationStructureGeometryBuilder::AccelerationStructureGeometryBuilder(RayTracingContext& ctx)
+	:
+	m_ctx(ctx)
+{
+	//
+}
+
+AccelerationStructureGeometryBuilder& AccelerationStructureGeometryBuilder::setBuildFlags(VkBuildAccelerationStructureFlagsKHR flags)
+{
+	m_flags = flags;
+
+	return *this;
+}
+
+AccelerationStructureGeometryBuilder& AccelerationStructureGeometryBuilder::addGeometry(
+	size_t aabbStride,
+	const hri::BufferResource& aabbBuffer,
+	VkGeometryFlagsKHR flags
+)
+{
+	VkAccelerationStructureGeometryAabbsDataKHR aabbs = VkAccelerationStructureGeometryAabbsDataKHR{};
+	aabbs.data = RayTracingUtils::getConstDeviceAddress(m_ctx, aabbBuffer);
+	aabbs.stride = aabbStride;
+
+	VkAccelerationStructureGeometryDataKHR geometryData = VkAccelerationStructureGeometryDataKHR{};
+	geometryData.aabbs = aabbs;
+
+	VkAccelerationStructureGeometryKHR geometry = VkAccelerationStructureGeometryKHR{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR };
+	geometry.flags = flags;
+	geometry.geometryType = VK_GEOMETRY_TYPE_AABBS_KHR;
+	geometry.geometry = geometryData;
+
+	m_geometries.push_back(geometry);
+	return *this;
+}
+
+AccelerationStructureGeometryBuilder& AccelerationStructureGeometryBuilder::addGeometry(
+	VkFormat vertexFormat,
+	VkIndexType indexType,
+	size_t vertexStride,
+	uint32_t maxVertexIdx,
+	const hri::BufferResource& vertexBuffer,
+	const hri::BufferResource& indexBuffer,
+	VkGeometryFlagsKHR flags
+)
+{
+	VkAccelerationStructureGeometryTrianglesDataKHR triangles = VkAccelerationStructureGeometryTrianglesDataKHR{};
+	triangles.vertexFormat = vertexFormat;
+	triangles.vertexData = RayTracingUtils::getConstDeviceAddress(m_ctx, vertexBuffer);
+	triangles.vertexStride = vertexStride;
+	triangles.maxVertex = maxVertexIdx;
+	triangles.indexType = indexType;
+	triangles.indexData = RayTracingUtils::getConstDeviceAddress(m_ctx, indexBuffer);;
+	triangles.transformData = VkDeviceOrHostAddressConstKHR{};
+
+	VkAccelerationStructureGeometryDataKHR geometryData = VkAccelerationStructureGeometryDataKHR{};
+	geometryData.triangles = triangles;
+
+	VkAccelerationStructureGeometryKHR geometry = VkAccelerationStructureGeometryKHR{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR };
+	geometry.flags = flags;
+	geometry.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
+	geometry.geometry = geometryData;
+
+	m_geometries.push_back(geometry);
+	return *this;
+}
+
+VkAccelerationStructureBuildGeometryInfoKHR AccelerationStructureGeometryBuilder::getBuildGeometryInfo(
+	VkBuildAccelerationStructureModeKHR buildMode,
+	VkAccelerationStructureKHR accelerationStructure
+) const
+{
+	VkAccelerationStructureBuildGeometryInfoKHR buildInfo = VkAccelerationStructureBuildGeometryInfoKHR{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR };
+	buildInfo.flags = m_flags;
+	buildInfo.mode = buildMode;
+	buildInfo.srcAccelerationStructure = accelerationStructure;
+	buildInfo.dstAccelerationStructure = accelerationStructure;
+	buildInfo.geometryCount = static_cast<uint32_t>(m_geometries.size());
+	buildInfo.pGeometries = m_geometries.data();
+	buildInfo.scratchData = VkDeviceOrHostAddressKHR{};
+
+	return buildInfo;
 }

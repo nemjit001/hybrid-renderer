@@ -16,13 +16,20 @@ struct RayTracingContext
 	RayTracingContext(RayTracingContext&) = delete;
 	RayTracingContext& operator=(RayTracingContext&) = delete;
 
-	RayTracingContext(RayTracingContext&& other);
-	RayTracingContext& operator=(RayTracingContext&& other);
+	RayTracingContext(RayTracingContext&& other) noexcept;
+	RayTracingContext& operator=(RayTracingContext&& other) noexcept;
 
 	hri::RenderContext& renderContext;
 	DeferredHostOperationsExtensionDispatchTable deferredHostDispatch	= DeferredHostOperationsExtensionDispatchTable(renderContext);
 	AccelerationStructureExtensionDispatchTable accelStructDispatch		= AccelerationStructureExtensionDispatchTable(renderContext);
 	RayTracingExtensionDispatchTable rayTracingDispatch					= RayTracingExtensionDispatchTable(renderContext);
+};
+
+struct RayTracingUtils
+{
+	static VkDeviceOrHostAddressKHR getDeviceAddress(const RayTracingContext& ctx, const hri::BufferResource& resource);
+
+	static VkDeviceOrHostAddressConstKHR getConstDeviceAddress(const RayTracingContext& ctx, const hri::BufferResource& resource);
 };
 
 /// @brief The raytracing pipeline builder manages pipeline create info state for ray tracing pipelines.
@@ -95,20 +102,29 @@ private:
 	VkPipelineLayout m_layout = VK_NULL_HANDLE;
 };
 
+/// @brief An acceleration structure is used for ray tracing to improve ray traversal performance.
 class AccelerationStructure
 {
 public:
+	/// @brief Create a new acceleration structure.
+	/// @param ctx Ray Tracing Context to use.
+	/// @param type Acceleration structure type.
+	/// @param size Size of the acceleration structure.
 	AccelerationStructure(RayTracingContext& ctx, VkAccelerationStructureTypeKHR type, size_t size);
 
+	/// @brief Destroy this acceleration structure.
 	virtual ~AccelerationStructure();
 
+	// Disallow copy behaviour
 	AccelerationStructure(const AccelerationStructure&) = delete;
 	AccelerationStructure& operator=(const AccelerationStructure&) = delete;
 
+	// Allow move semantics
 	AccelerationStructure(AccelerationStructure&& other) noexcept;
 	AccelerationStructure& operator=(AccelerationStructure&& other) noexcept;
 
 private:
+	/// @brief Release resources held by this acceleration structure.
 	void release();
 
 public:
@@ -119,18 +135,39 @@ private:
 	RayTracingContext& m_ctx;
 };
 
+/// @brief The Acceleration Structure Geometry Builder handles state for generating as geometry,
 class AccelerationStructureGeometryBuilder
 {
 public:
+	/// @brief Create a new Acceleration Structure Geometry Builder.
+	/// @param ctx Ray Tracing Context to use.
 	AccelerationStructureGeometryBuilder(RayTracingContext& ctx);
 
-	AccelerationStructureGeometryBuilder& setBuildFlags(VkBuildAccelerationStructureFlagsKHR flags)
-	{
-		m_flags = flags;
+	/// @brief Set build flags for this acceleration structure geometry.
+	/// @param flags Build flags to set.
+	/// @return A reference to this class.
+	AccelerationStructureGeometryBuilder& setBuildFlags(VkBuildAccelerationStructureFlagsKHR flags);
 
-		return *this;
-	}
+	/// @brief Add AABB geometry data to this acceleration structure geometry.
+	/// @param aabbStride Stride of the AABB.
+	/// @param aabbBuffer Buffer resource containing AABB data.
+	/// @param flags Geometry flags to set.
+	/// @return A reference to this class.
+	AccelerationStructureGeometryBuilder& addGeometry(
+		size_t aabbStride,
+		const hri::BufferResource& aabbBuffer,
+		VkGeometryFlagsKHR flags = 0
+	);
 
+	/// @brief Add Triangle geometry data to this acceleration structure geometry.
+	/// @param vertexFormat Format of the vertex position data.
+	/// @param indexType Type of index used in the indices buffer.
+	/// @param vertexStride Size of the vertex data type.
+	/// @param maxVertexIdx Maximum vertex index in the index buffer.
+	/// @param vertexBuffer Vertex buffer resource.
+	/// @param indexBuffer Index buffer resource.
+	/// @param flags Geometry flags to set.
+	/// @return A reference to this class.
 	AccelerationStructureGeometryBuilder& addGeometry(
 		VkFormat vertexFormat,
 		VkIndexType indexType,
@@ -139,54 +176,20 @@ public:
 		const hri::BufferResource& vertexBuffer,
 		const hri::BufferResource& indexBuffer,
 		VkGeometryFlagsKHR flags = 0
-	)
-	{
-		VkBufferDeviceAddressInfo vertexBufferAddressInfo = vertexBuffer.deviceAddressInfo();
-		VkBufferDeviceAddressInfo indexBufferAddressInfo = indexBuffer.deviceAddressInfo();
+	);
 
-		VkDeviceOrHostAddressConstKHR vertexData = {};
-		vertexData.deviceAddress = vkGetBufferDeviceAddress(m_ctx.renderContext.device, &vertexBufferAddressInfo);
-
-		VkDeviceOrHostAddressConstKHR indexData = {};
-		indexData.deviceAddress = vkGetBufferDeviceAddress(m_ctx.renderContext.device, &indexBufferAddressInfo);
-
-		VkAccelerationStructureGeometryTrianglesDataKHR triangles = VkAccelerationStructureGeometryTrianglesDataKHR{};
-		triangles.vertexFormat = vertexFormat;
-		triangles.vertexData = vertexData;
-		triangles.vertexStride = vertexStride;
-		triangles.maxVertex = maxVertexIdx;
-		triangles.indexType = indexType;
-		triangles.indexData = indexData;
-		triangles.transformData = VkDeviceOrHostAddressConstKHR{};
-
-		VkAccelerationStructureGeometryDataKHR geometryData = VkAccelerationStructureGeometryDataKHR{};
-		geometryData.triangles = triangles;
-
-		VkAccelerationStructureGeometryKHR geometry = VkAccelerationStructureGeometryKHR{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR };
-		geometry.flags = flags;
-		geometry.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
-		geometry.geometry = geometryData;
-
-		m_geometries.push_back(geometry);
-		return *this;
-	}
-
-	VkAccelerationStructureBuildGeometryInfoKHR getBuildGeometryInfo(VkBuildAccelerationStructureModeKHR buildMode) const
-	{
-		VkAccelerationStructureBuildGeometryInfoKHR buildInfo = VkAccelerationStructureBuildGeometryInfoKHR{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR };
-		buildInfo.flags = m_flags;
-		buildInfo.mode = buildMode;
-		buildInfo.srcAccelerationStructure = VK_NULL_HANDLE;
-		buildInfo.dstAccelerationStructure = VK_NULL_HANDLE;
-		buildInfo.geometryCount = static_cast<uint32_t>(m_geometries.size());
-		buildInfo.pGeometries = m_geometries.data();
-		buildInfo.scratchData = VkDeviceOrHostAddressKHR{};
-		
-		return buildInfo;
-	}
+	/// @brief Get the Build Geometry Info generated by this builder.
+	/// @param buildMode Build mode used for the acceleration structure.
+	/// @param accelerationStructure Optional acceleration structure handle.
+	///		Required for building, not required for size queries.
+	/// @return An Acceleration Structure Build Geometry Info structure based on the provided configuration data.
+	VkAccelerationStructureBuildGeometryInfoKHR getBuildGeometryInfo(
+		VkBuildAccelerationStructureModeKHR buildMode,
+		VkAccelerationStructureKHR accelerationStructure = VK_NULL_HANDLE
+	) const;
 
 private:
-	RayTracingContext m_ctx;
+	RayTracingContext& m_ctx;
 	VkBuildAccelerationStructureFlagsKHR m_flags = 0;
 	std::vector<VkAccelerationStructureGeometryKHR> m_geometries = {};
 };

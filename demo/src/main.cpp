@@ -288,6 +288,8 @@ int main()
 	VkPhysicalDeviceRayTracingPipelineFeaturesKHR rtPipelineFeatures = VkPhysicalDeviceRayTracingPipelineFeaturesKHR{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR };
 	rtPipelineFeatures.rayTracingPipeline = true;
 
+	ctxCreateInfo.deviceFeatures12.bufferDeviceAddress = true;
+	ctxCreateInfo.deviceFeatures12.descriptorIndexing = true;
 	ctxCreateInfo.deviceFeatures13.synchronization2 = true;
 	ctxCreateInfo.extensionFeatures = {
 		rayQueryFeatures,
