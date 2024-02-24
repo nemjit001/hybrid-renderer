@@ -1,5 +1,36 @@
 #include "detail/raytracing.h"
 
+#include <hybrid_renderer.h>
+#include <vector>
+
+#include "demo.h"
+#include "detail/dispatch.h"
+
+RayTracingContext::RayTracingContext(RayTracingContext&& other)
+	:
+	renderContext(other.renderContext),
+	deferredHostDispatch(other.deferredHostDispatch),
+	accelStructDispatch(other.accelStructDispatch),
+	rayTracingDispatch(other.rayTracingDispatch)
+{
+	//
+}
+
+RayTracingContext& RayTracingContext::operator=(RayTracingContext&& other)
+{
+	if (this == &other)
+	{
+		return *this;
+	}
+
+	renderContext = std::move(other.renderContext);
+	deferredHostDispatch = other.deferredHostDispatch;
+	accelStructDispatch = other.accelStructDispatch;
+	rayTracingDispatch = other.rayTracingDispatch;
+
+	return *this;
+}
+
 RayTracingPipelineBuilder::RayTracingPipelineBuilder(RayTracingContext& ctx)
 	:
 	m_ctx(ctx)
@@ -101,4 +132,62 @@ VkPipeline RayTracingPipelineBuilder::build(VkPipelineCache cache, VkDeferredOpe
 	));
 
 	return pipeline;
+}
+
+AccelerationStructure::AccelerationStructure(RayTracingContext& ctx, VkAccelerationStructureTypeKHR type, size_t size)
+	:
+	m_ctx(ctx),
+	buffer(m_ctx.renderContext, size, VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR)
+{
+	VkAccelerationStructureCreateInfoKHR createInfo = VkAccelerationStructureCreateInfoKHR{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR };
+	createInfo.createFlags = 0;
+    createInfo.buffer = buffer.buffer;
+    createInfo.offset = 0;
+    createInfo.size = buffer.bufferSize;
+    createInfo.type = type;
+    createInfo.deviceAddress = 0;
+
+	VkAccelerationStructureKHR accelerationStructure = VK_NULL_HANDLE;
+	HRI_VK_CHECK(m_ctx.accelStructDispatch.vkCreateAccelerationStructure(
+		m_ctx.renderContext.device,
+		&createInfo,
+		nullptr,
+		&accelerationStructure
+	));
+}
+
+AccelerationStructure::~AccelerationStructure()
+{
+	release();
+}
+
+AccelerationStructure::AccelerationStructure(AccelerationStructure&& other) noexcept
+	:
+	m_ctx(other.m_ctx),
+	buffer(std::move(other.buffer)),
+	accelerationStructure(other.accelerationStructure)
+{
+	other.accelerationStructure = VK_NULL_HANDLE;
+}
+
+AccelerationStructure& AccelerationStructure::operator=(AccelerationStructure&& other) noexcept
+{
+	if (this == &other)
+	{
+		return *this;
+	}
+
+	release();	
+	m_ctx = std::move(other.m_ctx);
+	buffer = std::move(other.buffer);
+	accelerationStructure = other.accelerationStructure;
+
+	other.accelerationStructure = VK_NULL_HANDLE;
+
+	return *this;
+}
+
+void AccelerationStructure::release()
+{
+	m_ctx.accelStructDispatch.vkDestroyAccelerationStructure(m_ctx.renderContext.device, accelerationStructure, nullptr);
 }

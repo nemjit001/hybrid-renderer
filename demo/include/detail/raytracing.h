@@ -13,6 +13,12 @@ struct RayTracingContext
 	RayTracingContext() = delete;
 	RayTracingContext(hri::RenderContext& ctx) : renderContext(ctx) {}
 
+	RayTracingContext(RayTracingContext&) = delete;
+	RayTracingContext& operator=(RayTracingContext&) = delete;
+
+	RayTracingContext(RayTracingContext&& other);
+	RayTracingContext& operator=(RayTracingContext&& other);
+
 	hri::RenderContext& renderContext;
 	DeferredHostOperationsExtensionDispatchTable deferredHostDispatch	= DeferredHostOperationsExtensionDispatchTable(renderContext);
 	AccelerationStructureExtensionDispatchTable accelStructDispatch		= AccelerationStructureExtensionDispatchTable(renderContext);
@@ -75,7 +81,7 @@ public:
 
 	/// @brief Build a ray tracing pipeline using the configuration provided.
 	/// @param cache Pipeline cache to use for building.
-	/// @param deferredOperation Deferred Operation handle that allows postponing this operation to a later point in time.
+	/// @param deferredOperation Deferred Operation handle that allows postponing the actual build operation to a later point in time.
 	/// @return A new vk pipeline handle.
 	VkPipeline build(VkPipelineCache cache = VK_NULL_HANDLE, VkDeferredOperationKHR deferredOperation = VK_NULL_HANDLE);
 
@@ -87,4 +93,28 @@ private:
 	uint32_t m_maxRecursionDepth = DEMO_DEFAULT_RT_RECURSION_DEPTH;
 	std::vector<VkDynamicState> m_dynamicStates = {};
 	VkPipelineLayout m_layout = VK_NULL_HANDLE;
+};
+
+class AccelerationStructure
+{
+public:
+	AccelerationStructure(RayTracingContext& ctx, VkAccelerationStructureTypeKHR type, size_t size);
+
+	virtual ~AccelerationStructure();
+
+	AccelerationStructure(const AccelerationStructure&) = delete;
+	AccelerationStructure& operator=(const AccelerationStructure&) = delete;
+
+	AccelerationStructure(AccelerationStructure&& other) noexcept;
+	AccelerationStructure& operator=(AccelerationStructure&& other) noexcept;
+
+private:
+	void release();
+
+public:
+	hri::BufferResource buffer;
+	VkAccelerationStructureKHR accelerationStructure	= VK_NULL_HANDLE;
+
+private:
+	RayTracingContext& m_ctx;
 };
