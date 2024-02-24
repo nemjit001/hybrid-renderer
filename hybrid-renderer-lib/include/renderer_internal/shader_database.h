@@ -154,7 +154,7 @@ namespace hri
         /// @return A pointer to the Shader in the Shader Database.
         Shader* registerShader(const std::string& name, Shader&& shader);
 
-        /// @brief Create a new pipeline object in the Shader Database.
+        /// @brief Create a new graphics pipeline object in the Shader Database.
         /// @param name Pipeline name to use. MUST be unique.
         /// @param shaders Shader names to use.
         /// @param pipelineBuilder Pipeline Builder object to use for initialization.
@@ -163,6 +163,28 @@ namespace hri
             const std::string& name,
             const std::vector<std::string>& shaders,
             const GraphicsPipelineBuilder& pipelineBuilder
+        );
+
+        /// @brief Create a new compute pipeline object in the Shader Database.
+        /// @param name Pipeline name to use. MUST be unique.
+        /// @param computeShader Compute Shader used by this pipeline.
+        /// @prarm layout Pipeline Layout to use for this pipeline.
+        /// @return A pointer to the Pipeline in the Shader Database.
+        PipelineStateObject* createPipeline(
+            const std::string& name,
+            const std::string& computeShader,
+            VkPipelineLayout layout
+        );
+
+        /// @brief Register a pipeline with the Shader Database.
+        /// @param name Pipeline name to use. MUST be unique.
+        /// @param bindpoint Pipeline Bind Point.
+        /// @param pipelineHandle Pipeline Handle to register.
+        /// @return A pointer to the Pipeline in the Shader Database.
+        PipelineStateObject* registerPipeline(
+            const std::string& name,
+            VkPipelineBindPoint bindPoint,
+            VkPipeline pipelineHandle
         );
 
         /// @brief Retrieve a Shader from the Shader Database.

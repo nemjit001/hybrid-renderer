@@ -365,6 +365,87 @@ PipelineStateObject* ShaderDatabase::createPipeline(
     return &it->second;
 }
 
+PipelineStateObject* ShaderDatabase::createPipeline(
+    const std::string& name,
+    const std::string& computeShader,
+    VkPipelineLayout layout
+)
+{
+    if (isExistingPipeline(name))
+    {
+        fprintf(stderr, "Pipeline [%s] already exists in DB!\n", name.c_str());
+        abort();
+    }
+
+    // Get shader
+    const Shader* shader = getShader(computeShader);
+    assert(shader != nullptr);
+
+    VkPipelineShaderStageCreateInfo shaderStage = VkPipelineShaderStageCreateInfo{ VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
+    shaderStage.flags = 0;
+    shaderStage.stage = shader->stage;
+    shaderStage.module = shader->module;
+    shaderStage.pName = "main";
+    shaderStage.pSpecializationInfo = nullptr;
+
+    // Create PSO object
+    PipelineStateObject pso = PipelineStateObject{};
+    pso.bindPoint = VK_PIPELINE_BIND_POINT_COMPUTE;
+
+    VkComputePipelineCreateInfo pipelineCreateInfo = VkComputePipelineCreateInfo{ VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO };
+    pipelineCreateInfo.flags = 0;
+    pipelineCreateInfo.stage = shaderStage;
+    pipelineCreateInfo.layout = layout;
+    pipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
+    pipelineCreateInfo.basePipelineIndex = 0;
+    HRI_VK_CHECK(vkCreateComputePipelines(
+        m_ctx.device,
+        m_pipelineCache,
+        1,
+        &pipelineCreateInfo,
+        nullptr,
+        &pso.pipeline
+    ));
+
+    const auto& [it, success] = m_pipelineMap.insert(std::make_pair(name, pso));
+    if (!success)
+    {
+        fprintf(stderr, "Failed to register Pipeline [%s] in DB!\n", name.c_str());
+        abort();
+    }
+
+    return &it->second;
+}
+
+PipelineStateObject* ShaderDatabase::registerPipeline(
+    const std::string& name,
+    VkPipelineBindPoint bindPoint,
+    VkPipeline pipelineHandle
+)
+{
+    assert(pipelineHandle != VK_NULL_HANDLE);
+
+    if (isExistingPipeline(name))
+    {
+        fprintf(stderr, "Pipeline [%s] already exists in DB!\n", name.c_str());
+        abort();
+    }
+
+    // Create PSO object
+    PipelineStateObject pso = PipelineStateObject{};
+    pso.bindPoint = bindPoint;
+    pso.pipeline = pipelineHandle;
+
+    const auto& [it, success] = m_pipelineMap.insert(std::make_pair(name, pso));
+    if (!success)
+    {
+        fprintf(stderr, "Failed to register Pipeline [%s] in DB!\n", name.c_str());
+        abort();
+    }
+
+    return &it->second;
+}
+
 Shader* ShaderDatabase::getShader(const std::string& name)
 {
     if (!isExistingShader(name))
