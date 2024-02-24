@@ -75,8 +75,9 @@ public:
 
 	/// @brief Build a ray tracing pipeline using the configuration provided.
 	/// @param cache Pipeline cache to use for building.
+	/// @param deferredOperation Deferred Operation handle that allows postponing this operation to a later point in time.
 	/// @return A new vk pipeline handle.
-	VkPipeline build(VkPipelineCache cache = VK_NULL_HANDLE);
+	VkPipeline build(VkPipelineCache cache = VK_NULL_HANDLE, VkDeferredOperationKHR deferredOperation = VK_NULL_HANDLE);
 
 private:
 	RayTracingContext& m_ctx;

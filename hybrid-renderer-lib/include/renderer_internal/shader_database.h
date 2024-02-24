@@ -197,6 +197,10 @@ namespace hri
         /// @return A pointer to the Pipeline in the Shader Database.
         PipelineStateObject* getPipeline(const std::string& name);
 
+        /// @brief Get the pipeline cache handle used by this shader database.
+        /// @return The pipeline cache used for this shader database.
+        inline VkPipelineCache pipelineCache() const { return m_pipelineCache; }
+
     private:
         /// @brief Check if a Shader already exists in the Database.
         /// @param name Shader name to check.

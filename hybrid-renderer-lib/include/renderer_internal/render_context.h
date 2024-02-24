@@ -48,6 +48,7 @@ namespace hri
         VkPhysicalDeviceVulkan11Features deviceFeatures11   = {};
         VkPhysicalDeviceVulkan12Features deviceFeatures12   = {};
         VkPhysicalDeviceVulkan13Features deviceFeatures13   = {};
+        std::vector<void*> extensionFeatures                = {};
     };
 
     /// @brief The swapchain present setup dictates available swap images for rendering, as well as the present mode.

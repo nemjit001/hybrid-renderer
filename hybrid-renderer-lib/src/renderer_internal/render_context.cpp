@@ -77,15 +77,18 @@ RenderContext::RenderContext(RenderContextCreateInfo& createInfo)
 
     HRI_VK_CHECK(createInfo.surfaceCreateFunc(instance, &surface));
 
-    vkb::PhysicalDeviceSelector gpuSelector = vkb::PhysicalDeviceSelector(instance, surface);
-    gpu = gpuSelector
+    vkb::PhysicalDeviceSelector gpuSelector = vkb::PhysicalDeviceSelector(instance, surface)
         .require_present(true)
         .add_required_extensions(createInfo.deviceExtensions)
         .set_required_features(createInfo.deviceFeatures)
         .set_required_features_11(createInfo.deviceFeatures11)
         .set_required_features_12(createInfo.deviceFeatures12)
-        .set_required_features_13(createInfo.deviceFeatures13)
-        .select().value();
+        .set_required_features_13(createInfo.deviceFeatures13);
+
+    for (auto const& feature : createInfo.extensionFeatures)
+        gpuSelector.add_required_extension_features(feature);
+
+    gpu = gpuSelector.select().value();
 
     vkb::DeviceBuilder deviceBuilder = vkb::DeviceBuilder(gpu);
     device = deviceBuilder

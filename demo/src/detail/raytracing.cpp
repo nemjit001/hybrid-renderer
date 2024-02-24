@@ -71,7 +71,7 @@ RayTracingPipelineBuilder& RayTracingPipelineBuilder::setCreateFlags(VkPipelineC
 	return *this;
 }
 
-VkPipeline RayTracingPipelineBuilder::build(VkPipelineCache cache)
+VkPipeline RayTracingPipelineBuilder::build(VkPipelineCache cache, VkDeferredOperationKHR deferredOperation)
 {
 	VkPipelineDynamicStateCreateInfo dynamicState = VkPipelineDynamicStateCreateInfo{ VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO };
 	dynamicState.dynamicStateCount = static_cast<uint32>(m_dynamicStates.size());
