@@ -139,7 +139,7 @@ SceneGraph loadScene(hri::RenderContext& renderContext, const char* path)
 			v2.tangent = normalize(tangent - dot(v2.normal, tangent) * v2.normal);
 		}
 
-		meshes.push_back(std::move(hri::Mesh(&renderContext, vertices, indices)));
+		meshes.push_back(std::move(hri::Mesh(renderContext, vertices, indices)));
 
 		// TODO: set LOD levels instead of always primary
 		size_t meshIdx = meshes.size() - 1;
