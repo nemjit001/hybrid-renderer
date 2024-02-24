@@ -27,8 +27,16 @@ struct RayTracingContext
 
 struct RayTracingUtils
 {
+	/// @brief Get a device or host address from a buffer resource.
+	/// @param ctx Ray Tracing Context to use.
+	/// @param resource Buffer Resource to query.
+	/// @return A Device Or Host Address.
 	static VkDeviceOrHostAddressKHR getDeviceAddress(const RayTracingContext& ctx, const hri::BufferResource& resource);
 
+	/// @brief Get a constant device or host address from a buffer resource.
+	/// @param ctx Ray Tracing Context to use.
+	/// @param resource Buffer Resource to query.
+	/// @return A Constant Device Or Host Address.
 	static VkDeviceOrHostAddressConstKHR getConstDeviceAddress(const RayTracingContext& ctx, const hri::BufferResource& resource);
 };
 
@@ -185,7 +193,17 @@ public:
 	/// @return An Acceleration Structure Build Geometry Info structure based on the provided configuration data.
 	VkAccelerationStructureBuildGeometryInfoKHR getBuildGeometryInfo(
 		VkBuildAccelerationStructureModeKHR buildMode,
-		VkAccelerationStructureKHR accelerationStructure = VK_NULL_HANDLE
+		VkAccelerationStructureKHR accelerationStructure = VK_NULL_HANDLE,
+		VkDeviceOrHostAddressKHR scratchData = VkDeviceOrHostAddressKHR{}
+	) const;
+
+	/// @brief Get the build size info for an acceleration structure geometry.
+	/// @param buildType Build Type used for the geometry.
+	/// @param geometry Geometry info.
+	/// @return A Build Sizes Info containing sizes needed for acceleration structure creation, building, & updating.
+	VkAccelerationStructureBuildSizesInfoKHR getAccelerationStructureBuildSizesInfo(
+		VkAccelerationStructureBuildTypeKHR buildType,
+		const VkAccelerationStructureBuildGeometryInfoKHR& geometry
 	) const;
 
 private:

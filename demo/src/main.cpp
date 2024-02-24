@@ -283,7 +283,6 @@ int main()
 
 	VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeatures = VkPhysicalDeviceAccelerationStructureFeaturesKHR{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR };
 	accelerationStructureFeatures.accelerationStructure = true;
-	accelerationStructureFeatures.accelerationStructureHostCommands = false; // TODO: check if required?
 
 	VkPhysicalDeviceRayTracingPipelineFeaturesKHR rtPipelineFeatures = VkPhysicalDeviceRayTracingPipelineFeaturesKHR{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR };
 	rtPipelineFeatures.rayTracingPipeline = true;

@@ -281,7 +281,8 @@ AccelerationStructureGeometryBuilder& AccelerationStructureGeometryBuilder::addG
 
 VkAccelerationStructureBuildGeometryInfoKHR AccelerationStructureGeometryBuilder::getBuildGeometryInfo(
 	VkBuildAccelerationStructureModeKHR buildMode,
-	VkAccelerationStructureKHR accelerationStructure
+	VkAccelerationStructureKHR accelerationStructure,
+	VkDeviceOrHostAddressKHR scratchData
 ) const
 {
 	VkAccelerationStructureBuildGeometryInfoKHR buildInfo = VkAccelerationStructureBuildGeometryInfoKHR{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR };
@@ -291,7 +292,24 @@ VkAccelerationStructureBuildGeometryInfoKHR AccelerationStructureGeometryBuilder
 	buildInfo.dstAccelerationStructure = accelerationStructure;
 	buildInfo.geometryCount = static_cast<uint32_t>(m_geometries.size());
 	buildInfo.pGeometries = m_geometries.data();
-	buildInfo.scratchData = VkDeviceOrHostAddressKHR{};
+	buildInfo.scratchData = scratchData;
 
 	return buildInfo;
+}
+
+VkAccelerationStructureBuildSizesInfoKHR AccelerationStructureGeometryBuilder::getAccelerationStructureBuildSizesInfo(
+	VkAccelerationStructureBuildTypeKHR buildType,
+	const VkAccelerationStructureBuildGeometryInfoKHR& geometry
+) const
+{
+	VkAccelerationStructureBuildSizesInfoKHR sizeInfo = VkAccelerationStructureBuildSizesInfoKHR{};
+	m_ctx.accelStructDispatch.vkGetAccelerationStructureBuildSizes(
+		m_ctx.renderContext.device,
+		buildType,
+		&geometry,
+		nullptr,
+		&sizeInfo
+	);
+
+	return sizeInfo;
 }
