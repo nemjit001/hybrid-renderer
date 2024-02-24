@@ -9,9 +9,9 @@
 
 using namespace hri;
 
-RenderPassBuilder::RenderPassBuilder(RenderContext* ctx)
+RenderPassBuilder::RenderPassBuilder(RenderContext& ctx)
 	:
-	m_pCtx(ctx)
+	m_ctx(ctx)
 {
 	// Start first subpass
 	this->nextSubpass();
@@ -67,16 +67,8 @@ RenderPassBuilder& RenderPassBuilder::setAttachmentReference(AttachmentType type
 	return *this;
 }
 
-RenderPassBuilder& RenderPassBuilder::setContext(RenderContext* ctx)
-{
-	m_pCtx = ctx;
-	return *this;
-}
-
 VkRenderPass RenderPassBuilder::build()
 {
-	assert(m_pCtx != nullptr);
-
 	std::vector<VkSubpassDescription> subpasses = {}; subpasses.reserve(m_subpasses.size());
 	for (auto const& pass : m_subpasses)
 	{
@@ -99,27 +91,27 @@ VkRenderPass RenderPassBuilder::build()
 	createInfo.pDependencies = nullptr;
 
 	VkRenderPass newPass = VK_NULL_HANDLE;
-	HRI_VK_CHECK(vkCreateRenderPass(m_pCtx->device, &createInfo, nullptr, &newPass));
+	HRI_VK_CHECK(vkCreateRenderPass(m_ctx.device, &createInfo, nullptr, &newPass));
 
 	return newPass;
 }
 
 IRenderPassResourceManagerBase::IRenderPassResourceManagerBase(
-	RenderContext* ctx,
+	RenderContext& ctx,
 	VkRenderPass renderPass,
 	const std::vector<RenderAttachmentConfig>& attachmentConfigs
 )
 	:
-	m_pCtx(ctx),
+	m_ctx(ctx),
 	m_renderPass(renderPass),
 	m_attachmentConfigs(attachmentConfigs)
 {
-	assert(m_pCtx != nullptr);
+	//
 }
 
 IRenderPassResourceManagerBase::~IRenderPassResourceManagerBase()
 {
-	vkDestroyRenderPass(m_pCtx->device, m_renderPass, nullptr);
+	vkDestroyRenderPass(m_ctx.device, m_renderPass, nullptr);
 }
 
 void IRenderPassResourceManagerBase::endRenderPass(ActiveFrame& frame) const
@@ -144,7 +136,7 @@ void IRenderPassResourceManagerBase::createResources()
 	for (auto const& config : m_attachmentConfigs)
 	{
 		ImageResource attachment = ImageResource(
-			m_pCtx,
+			m_ctx,
 			VK_IMAGE_TYPE_2D,
 			config.format,
 			config.samples,
@@ -196,11 +188,11 @@ std::vector<VkImageView> IRenderPassResourceManagerBase::getImageResourceViews()
 
 VkExtent2D IRenderPassResourceManagerBase::getRenderExtent() const
 {
-	return m_pCtx->swapchain.extent;
+	return m_ctx.swapchain.extent;
 }
 
 SwapchainPassResourceManager::SwapchainPassResourceManager(
-	RenderContext* ctx,
+	RenderContext& ctx,
 	VkRenderPass renderPass,
 	const std::vector<RenderAttachmentConfig>& attachmentConfigs
 )
@@ -231,7 +223,7 @@ void SwapchainPassResourceManager::beginRenderPass(ActiveFrame& frame) const
 void SwapchainPassResourceManager::createResources()
 {
 	IRenderPassResourceManagerBase::createResources();
-	m_swapViews = m_pCtx->swapchain.get_image_views().value();
+	m_swapViews = m_ctx.swapchain.get_image_views().value();
 
 	std::vector<VkImageView> resourceViews = getImageResourceViews();
 	for (auto const& swapView : m_swapViews)
@@ -249,7 +241,7 @@ void SwapchainPassResourceManager::createResources()
 		fbCreateInfo.layers = 1;
 
 		VkFramebuffer framebuffer = VK_NULL_HANDLE;
-		HRI_VK_CHECK(vkCreateFramebuffer(m_pCtx->device, &fbCreateInfo, nullptr, &framebuffer));
+		HRI_VK_CHECK(vkCreateFramebuffer(m_ctx.device, &fbCreateInfo, nullptr, &framebuffer));
 		m_swapFramebuffers.push_back(framebuffer);
 	}
 }
@@ -258,11 +250,11 @@ void SwapchainPassResourceManager::destroyResources()
 {
 	IRenderPassResourceManagerBase::destroyResources();
 
-	m_pCtx->swapchain.destroy_image_views(m_swapViews);
+	m_ctx.swapchain.destroy_image_views(m_swapViews);
 
 	for (auto const& framebuffer : m_swapFramebuffers)
 	{
-		vkDestroyFramebuffer(m_pCtx->device, framebuffer, nullptr);
+		vkDestroyFramebuffer(m_ctx.device, framebuffer, nullptr);
 	}
 
 	m_swapViews.clear();
@@ -270,7 +262,7 @@ void SwapchainPassResourceManager::destroyResources()
 }
 
 RenderPassResourceManager::RenderPassResourceManager(
-	RenderContext* ctx,
+	RenderContext& ctx,
 	VkRenderPass renderPass,
 	const std::vector<RenderAttachmentConfig>& attachmentConfigs
 )
@@ -309,11 +301,11 @@ void RenderPassResourceManager::createResources()
 	fbCreateInfo.width = m_renderExtent.width;
 	fbCreateInfo.height = m_renderExtent.height;
 	fbCreateInfo.layers = 1;
-	HRI_VK_CHECK(vkCreateFramebuffer(m_pCtx->device, &fbCreateInfo, nullptr, &m_framebuffer));
+	HRI_VK_CHECK(vkCreateFramebuffer(m_ctx.device, &fbCreateInfo, nullptr, &m_framebuffer));
 }
 
 void RenderPassResourceManager::destroyResources()
 {
 	IRenderPassResourceManagerBase::destroyResources();
-	vkDestroyFramebuffer(m_pCtx->device, m_framebuffer, nullptr);
+	vkDestroyFramebuffer(m_ctx.device, m_framebuffer, nullptr);
 }

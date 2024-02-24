@@ -5,8 +5,8 @@
 #include <vector>
 
 GBufferLayoutSubsystem::GBufferLayoutSubsystem(
-	hri::RenderContext* ctx,
-	hri::ShaderDatabase* shaderDB,
+	hri::RenderContext& ctx,
+	hri::ShaderDatabase& shaderDB,
 	VkRenderPass renderPass,
 	VkDescriptorSetLayout sceneDataSetLayout
 )
@@ -74,7 +74,7 @@ GBufferLayoutSubsystem::GBufferLayoutSubsystem(
 	gbufferLayoutPipelineConfig.renderPass = renderPass;
 	gbufferLayoutPipelineConfig.subpass = 0;
 
-	m_pPSO = shaderDB->createPipeline(
+	m_pPSO = shaderDB.createPipeline(
 		"GBufferLayoutPipeline",
 		{ "StaticVert", "GBufferLayoutFrag" },
 		gbufferLayoutPipelineConfig
@@ -86,7 +86,7 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 	assert(m_pPSO != nullptr);
 	assert(m_currentFrameInfo.sceneDataSetHandle != VK_NULL_HANDLE);
 
-	VkExtent2D swapExtent = m_pCtx->swapchain.extent;
+	VkExtent2D swapExtent = m_ctx.swapchain.extent;
 
 	VkViewport viewport = VkViewport{
 		0.0f, 0.0f,
@@ -136,7 +136,7 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 }
 
 UISubsystem::UISubsystem(
-	hri::RenderContext* ctx,
+	hri::RenderContext& ctx,
 	VkRenderPass renderPass,
 	VkDescriptorPool uiPool
 )
@@ -144,16 +144,16 @@ UISubsystem::UISubsystem(
 	hri::IRenderSubsystem(ctx)
 {
 	ImGui_ImplVulkan_InitInfo initInfo = {};
-	initInfo.Instance = m_pCtx->instance;
-	initInfo.PhysicalDevice = m_pCtx->gpu;
-	initInfo.Device = m_pCtx->device;
-	initInfo.QueueFamily = m_pCtx->queues.graphicsQueue.family;
-	initInfo.Queue = m_pCtx->queues.graphicsQueue.handle;
+	initInfo.Instance = m_ctx.instance;
+	initInfo.PhysicalDevice = m_ctx.gpu;
+	initInfo.Device = m_ctx.device;
+	initInfo.QueueFamily = m_ctx.queues.graphicsQueue.family;
+	initInfo.Queue = m_ctx.queues.graphicsQueue.handle;
 	initInfo.PipelineCache = VK_NULL_HANDLE;
 	initInfo.DescriptorPool = uiPool;
 	initInfo.Subpass = 0;
-	initInfo.MinImageCount = m_pCtx->swapchain.requested_min_image_count;
-	initInfo.ImageCount = m_pCtx->swapchain.image_count;
+	initInfo.MinImageCount = m_ctx.swapchain.requested_min_image_count;
+	initInfo.ImageCount = m_ctx.swapchain.image_count;
 	initInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 	initInfo.RenderPass = renderPass;
 	ImGui_ImplVulkan_Init(&initInfo);
@@ -170,8 +170,8 @@ void UISubsystem::record(hri::ActiveFrame& frame) const
 }
 
 PresentationSubsystem::PresentationSubsystem(
-	hri::RenderContext* ctx,
-	hri::ShaderDatabase* shaderDB,
+	hri::RenderContext& ctx,
+	hri::ShaderDatabase& shaderDB,
 	VkRenderPass renderPass,
 	VkDescriptorSetLayout presentInputSetLayout
 )
@@ -209,7 +209,7 @@ PresentationSubsystem::PresentationSubsystem(
 	presentPipelineConfig.renderPass = renderPass;
 	presentPipelineConfig.subpass = 0;
 
-	m_pPSO = shaderDB->createPipeline(
+	m_pPSO = shaderDB.createPipeline(
 		"PresentPipeline",
 		{ "PresentVert", "PresentFrag" },
 		presentPipelineConfig
@@ -221,7 +221,7 @@ void PresentationSubsystem::record(hri::ActiveFrame& frame) const
 	assert(m_pPSO != nullptr);
 	assert(m_currentFrameInfo.presentInputSetHandle != VK_NULL_HANDLE);
 
-	VkExtent2D swapExtent = m_pCtx->swapchain.extent;
+	VkExtent2D swapExtent = m_ctx.swapchain.extent;
 
 	VkViewport viewport = VkViewport{
 		0.0f, 0.0f,

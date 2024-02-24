@@ -139,7 +139,7 @@ SceneGraph loadScene(hri::RenderContext& renderContext, const char* path)
 			v2.tangent = normalize(tangent - dot(v2.normal, tangent) * v2.normal);
 		}
 
-		meshes.push_back(std::move(hri::Mesh(&renderContext, vertices, indices)));
+		meshes.push_back(std::move(hri::Mesh(renderContext, vertices, indices)));
 
 		// TODO: set LOD levels instead of always primary
 		size_t meshIdx = meshes.size() - 1;
@@ -267,6 +267,8 @@ int main()
 	ctxCreateInfo.appVersion = DEMO_APP_VERSION;
 	ctxCreateInfo.surfaceCreateFunc = [](VkInstance instance, VkSurfaceKHR* surface) { return WindowManager::createVulkanSurface(instance, gWindow, nullptr, surface); };
 	ctxCreateInfo.vsyncMode = hri::VSyncMode::Disabled;
+
+	// Set required extensions
 	ctxCreateInfo.instanceExtensions = {};
 	ctxCreateInfo.deviceExtensions = {
    		VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
@@ -275,7 +277,10 @@ int main()
    		VK_KHR_RAY_QUERY_EXTENSION_NAME,
 	};
 
-	hri::RenderContext renderContext = hri::RenderContext(ctxCreateInfo);	
+	// Enable required features
+	ctxCreateInfo.deviceFeatures13.synchronization2 = true;
+
+	hri::RenderContext renderContext = hri::RenderContext(ctxCreateInfo);
 
 	// Set up world cam
 	hri::Camera camera = hri::Camera(

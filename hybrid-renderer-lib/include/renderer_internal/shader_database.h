@@ -21,7 +21,7 @@ namespace hri
     public:
         /// @brief Create a new pipeline layout builder.
         /// @param ctx Render Context to use.
-        PipelineLayoutBuilder(RenderContext* ctx);
+        PipelineLayoutBuilder(RenderContext& ctx);
 
         /// @brief Destroy this pipeline layout builder.
         virtual ~PipelineLayoutBuilder() = default;
@@ -47,7 +47,7 @@ namespace hri
         VkPipelineLayout build();
 
     private:
-        RenderContext* m_pCtx = nullptr;
+        RenderContext& m_ctx;
         size_t m_pushConstantOffset = 0;
         std::vector<VkPushConstantRange> m_pushConstants = {};
         std::vector<VkDescriptorSetLayout> m_setLayouts = {};
@@ -94,7 +94,7 @@ namespace hri
         /// @param pCode SPIR-V bytecode.
         /// @param codeSize Size in bytes for SPIR-V code block.
         /// @param stage Shader stage flag.
-        Shader(RenderContext* ctx, const uint32_t* pCode, size_t codeSize, VkShaderStageFlagBits stage);
+        Shader(RenderContext& ctx, const uint32_t* pCode, size_t codeSize, VkShaderStageFlagBits stage);
 
         /// @brief Destroy this shader object.
         virtual ~Shader();
@@ -112,9 +112,10 @@ namespace hri
         /// @param path Path to load file from.
         /// @param stage Shader stage flag.
         /// @return a new Shader object.
-        static Shader loadFile(RenderContext* ctx, const std::string& path, VkShaderStageFlagBits stage);
+        static Shader loadFile(RenderContext& ctx, const std::string& path, VkShaderStageFlagBits stage);
 
     private:
+        /// @brief Release this shaders resources.
         void release();
 
     public:
@@ -122,14 +123,14 @@ namespace hri
         VkShaderModule module       = VK_NULL_HANDLE;
 
     protected:
-        RenderContext* m_pCtx = nullptr;
+        RenderContext& m_ctx;
     };
 
     /// @brief A pipeline state object (PSO) stores a pipeline and its bind point.
     struct PipelineStateObject
     {
-        VkPipelineBindPoint bindPoint                   = VK_PIPELINE_BIND_POINT_MAX_ENUM;
-        VkPipeline pipeline                             = VK_NULL_HANDLE;
+        VkPipelineBindPoint bindPoint   = VK_PIPELINE_BIND_POINT_MAX_ENUM;
+        VkPipeline pipeline             = VK_NULL_HANDLE;
     };
 
     /// @brief The Shader Database maintains a cache of Shader Modules and PSO's.
@@ -138,7 +139,7 @@ namespace hri
     public:
         /// @brief Create a new Shader Database.
         /// @param ctx Render Context to use.
-        ShaderDatabase(RenderContext* ctx);
+        ShaderDatabase(RenderContext& ctx);
 
         /// @brief Destroy this Shader Database instance.
         virtual ~ShaderDatabase();
@@ -186,8 +187,8 @@ namespace hri
         bool isExistingPipeline(const std::string& name) const;
 
     private:
-        RenderContext* m_pCtx               = nullptr;
-        VkPipelineCache m_pipelineCache     = VK_NULL_HANDLE;
+        RenderContext& m_ctx;
+        VkPipelineCache m_pipelineCache                             = VK_NULL_HANDLE;
         std::map<std::string, Shader> m_shaderMap                   = {};
         std::map<std::string, PipelineStateObject> m_pipelineMap    = {};
     };

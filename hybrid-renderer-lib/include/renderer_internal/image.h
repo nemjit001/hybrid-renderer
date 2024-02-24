@@ -25,7 +25,7 @@ namespace hri
 		/// @param flags 
 		/// @param initialLayout 
 		ImageResource(
-			RenderContext* ctx,
+			RenderContext& ctx,
 			VkImageType type,
 			VkFormat format,
 			VkSampleCountFlagBits samples,
@@ -69,7 +69,7 @@ namespace hri
         VkImageView view                = VK_NULL_HANDLE;
 
 	private:
-		RenderContext* m_pCtx			= nullptr;
+		RenderContext& m_ctx;
 		VmaAllocation m_allocation	    = VK_NULL_HANDLE;
 	};
 }

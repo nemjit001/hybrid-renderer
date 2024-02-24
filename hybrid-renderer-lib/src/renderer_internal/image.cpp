@@ -8,7 +8,7 @@
 using namespace hri;
 
 ImageResource::ImageResource(
-	RenderContext* ctx,
+	RenderContext& ctx,
 	VkImageType type,
 	VkFormat format,
 	VkSampleCountFlagBits samples,
@@ -21,12 +21,10 @@ ImageResource::ImageResource(
 	VkImageLayout initialLayout
 )
 	:
-	m_pCtx(ctx),
+	m_ctx(ctx),
 	extent(extent),
 	format(format)
 {
-	assert(m_pCtx != nullptr);
-
 	VkImageCreateInfo imageCreateInfo = VkImageCreateInfo{ VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
     imageCreateInfo.flags = flags;
     imageCreateInfo.imageType = type;
@@ -45,7 +43,7 @@ ImageResource::ImageResource(
 	VmaAllocationCreateInfo allocationInfo = VmaAllocationCreateInfo{};
 	allocationInfo.flags = 0;
 	allocationInfo.usage = VMA_MEMORY_USAGE_AUTO;
-	HRI_VK_CHECK(vmaCreateImage(m_pCtx->allocator, &imageCreateInfo, &allocationInfo, &image, &m_allocation, nullptr));
+	HRI_VK_CHECK(vmaCreateImage(m_ctx.allocator, &imageCreateInfo, &allocationInfo, &image, &m_allocation, nullptr));
 }
 
 ImageResource::~ImageResource()
@@ -55,7 +53,7 @@ ImageResource::~ImageResource()
 
 ImageResource::ImageResource(ImageResource&& other) noexcept
 	:
-	m_pCtx(other.m_pCtx),
+	m_ctx(other.m_ctx),
 	m_allocation(other.m_allocation),
 	extent(other.extent),
 	format(other.format),
@@ -75,7 +73,7 @@ ImageResource& ImageResource::operator=(ImageResource&& other) noexcept
 	}
 
 	release();
-	m_pCtx = other.m_pCtx;
+	m_ctx = std::move(other.m_ctx);
 	m_allocation = other.m_allocation;
 	extent = other.extent;
 	format = other.format;
@@ -102,18 +100,18 @@ VkImageView ImageResource::createView(VkImageViewType viewType, VkComponentMappi
 	createInfo.components = components;
 	createInfo.subresourceRange = subresourceRange;
 
-	HRI_VK_CHECK(vkCreateImageView(m_pCtx->device, &createInfo, nullptr, &this->view));
+	HRI_VK_CHECK(vkCreateImageView(m_ctx.device, &createInfo, nullptr, &this->view));
 	return this->view;
 }
 
 void ImageResource::destroyView()
 {
-	vkDestroyImageView(m_pCtx->device, this->view, nullptr);
+	vkDestroyImageView(m_ctx.device, this->view, nullptr);
     this->view = VK_NULL_HANDLE;
 }
 
 void ImageResource::release()
 {
-	vmaDestroyImage(m_pCtx->allocator, image, m_allocation);
+	vmaDestroyImage(m_ctx.allocator, image, m_allocation);
 	destroyView();
 }

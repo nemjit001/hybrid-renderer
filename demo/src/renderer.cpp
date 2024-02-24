@@ -8,10 +8,10 @@
 Renderer::Renderer(hri::RenderContext& ctx, hri::Camera& camera, SceneGraph& activeScene)
 	:
 	m_context(ctx),
-	m_renderCore(&ctx),
-	m_shaderDatabase(&ctx),
-	m_subsystemManager(&ctx),
-	m_descriptorSetAllocator(&ctx),
+	m_renderCore(ctx),
+	m_shaderDatabase(ctx),
+	m_subsystemManager(),
+	m_descriptorSetAllocator(ctx),
 	m_camera(camera),
 	m_activeScene(activeScene)
 {
@@ -117,18 +117,18 @@ void Renderer::drawFrame()
 
 void Renderer::initShaderDB()
 {
-	m_shaderDatabase.registerShader("PresentVert", hri::Shader::loadFile(&m_context, "./shaders/present.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
-	m_shaderDatabase.registerShader("StaticVert", hri::Shader::loadFile(&m_context, "./shaders/static.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
+	m_shaderDatabase.registerShader("PresentVert", hri::Shader::loadFile(m_context, "./shaders/present.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
+	m_shaderDatabase.registerShader("StaticVert", hri::Shader::loadFile(m_context, "./shaders/static.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
 
-	m_shaderDatabase.registerShader("GBufferLayoutFrag", hri::Shader::loadFile(&m_context, "./shaders/gbuffer_layout.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
-	m_shaderDatabase.registerShader("PresentFrag", hri::Shader::loadFile(&m_context, "./shaders/present.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
+	m_shaderDatabase.registerShader("GBufferLayoutFrag", hri::Shader::loadFile(m_context, "./shaders/gbuffer_layout.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
+	m_shaderDatabase.registerShader("PresentFrag", hri::Shader::loadFile(m_context, "./shaders/present.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
 }
 
 void Renderer::initRenderPasses()
 {
 	// GBuffer Layout pass
 	{
-		hri::RenderPassBuilder gbufferLayoutPassBuilder = hri::RenderPassBuilder(&m_context)
+		hri::RenderPassBuilder gbufferLayoutPassBuilder = hri::RenderPassBuilder(m_context)
 			.addAttachment(
 				VK_FORMAT_R8G8B8A8_UNORM,
 				VK_SAMPLE_COUNT_1_BIT,
@@ -207,7 +207,7 @@ void Renderer::initRenderPasses()
 		};
 
 		m_gbufferLayoutPassManager = std::unique_ptr<hri::RenderPassResourceManager>(new hri::RenderPassResourceManager(
-			&m_context,
+			m_context,
 			gbufferLayoutPassBuilder.build(),
 			gbufferAttachmentConfigs
 		));
@@ -215,7 +215,7 @@ void Renderer::initRenderPasses()
 
 	// Swapchain pass pass
 	{
-		hri::RenderPassBuilder swapchainPassBuilder = hri::RenderPassBuilder(&m_context)
+		hri::RenderPassBuilder swapchainPassBuilder = hri::RenderPassBuilder(m_context)
 			.addAttachment(
 				m_context.swapFormat(),
 				VK_SAMPLE_COUNT_1_BIT,
@@ -229,7 +229,7 @@ void Renderer::initRenderPasses()
 			);
 
 		m_swapchainPassManager = std::unique_ptr<hri::SwapchainPassResourceManager>(new hri::SwapchainPassResourceManager(
-			&m_context,
+			m_context,
 			swapchainPassBuilder.build()
 		));
 	}
@@ -246,7 +246,7 @@ void Renderer::initSharedResources()
 {
 	// init shared samplers
 	m_renderResultLinearSampler = std::unique_ptr<hri::ImageSampler>(new hri::ImageSampler(
-		&m_context,
+		m_context,
 		VK_FILTER_LINEAR,
 		VK_FILTER_LINEAR,
 		VK_SAMPLER_MIPMAP_MODE_LINEAR
@@ -255,12 +255,12 @@ void Renderer::initSharedResources()
 
 void Renderer::initGlobalDescriptorSets()
 {
-	hri::DescriptorSetLayoutBuilder sceneDataSetBuilder = hri::DescriptorSetLayoutBuilder(&m_context)
+	hri::DescriptorSetLayoutBuilder sceneDataSetBuilder = hri::DescriptorSetLayoutBuilder(m_context)
 		.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT);
 
 	m_sceneDataSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(sceneDataSetBuilder.build()));
 
-	hri::DescriptorSetLayoutBuilder presentInputSetBuilder = hri::DescriptorSetLayoutBuilder(&m_context)
+	hri::DescriptorSetLayoutBuilder presentInputSetBuilder = hri::DescriptorSetLayoutBuilder(m_context)
 		.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
 
 	m_presentInputSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(presentInputSetBuilder.build()));
@@ -269,21 +269,21 @@ void Renderer::initGlobalDescriptorSets()
 void Renderer::initRenderSubsystems()
 {
 	m_gbufferLayoutSubsystem = std::unique_ptr<GBufferLayoutSubsystem>(new GBufferLayoutSubsystem(
-		&m_context,
-		&m_shaderDatabase,
+		m_context,
+		m_shaderDatabase,
 		m_gbufferLayoutPassManager->renderPass(),
 		m_sceneDataSetLayout->setLayout
 	));
 
 	m_uiSubsystem = std::unique_ptr<UISubsystem>(new UISubsystem(
-		&m_context,
+		m_context,
 		m_swapchainPassManager->renderPass(),
 		m_descriptorSetAllocator.fixedPool()
 	));
 
 	m_presentSubsystem = std::unique_ptr<PresentationSubsystem>(new PresentationSubsystem(
-		&m_context,
-		&m_shaderDatabase,
+		m_context,
+		m_shaderDatabase,
 		m_swapchainPassManager->renderPass(),
 		m_presentInputSetLayout->setLayout
 	));
@@ -299,21 +299,21 @@ void Renderer::initRendererFrameData()
 	{
 		RendererFrameData& frame = m_frames[i];
 		frame.cameraUBO = std::unique_ptr<hri::BufferResource>(new hri::BufferResource(
-			&m_context,
+			m_context,
 			sizeof(hri::CameraShaderData),
 			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 			true
 		));
 
 		frame.presentInputSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(
-			&m_context,
-			&m_descriptorSetAllocator,
+			m_context,
+			m_descriptorSetAllocator,
 			*m_presentInputSetLayout
 		));
 
 		frame.sceneDataSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(
-			&m_context,
-			&m_descriptorSetAllocator,
+			m_context,
+			m_descriptorSetAllocator,
 			*m_sceneDataSetLayout
 		));
 	}

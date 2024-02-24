@@ -29,7 +29,7 @@ namespace hri
 		/// @param unnormalizedCoordinates 
 		/// @param flags 
 		ImageSampler(
-			RenderContext* ctx,
+			RenderContext& ctx,
 			VkFilter magFilter = VK_FILTER_NEAREST,
 			VkFilter minFilter = VK_FILTER_NEAREST,
 			VkSamplerMipmapMode mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST,
@@ -59,6 +59,6 @@ namespace hri
 		VkSampler sampler = VK_NULL_HANDLE;
 
 	private:
-		RenderContext* m_pCtx = nullptr;
+		RenderContext& m_ctx;
 	};
 }

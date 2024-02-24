@@ -38,12 +38,16 @@ namespace hri
     /// @brief The render context create info allows for specifying context settings & registering extensions for the created context.
     struct RenderContextCreateInfo
     {
-        const char* appName                         = "NONAME";
-        uint32_t appVersion                         = 0;
-        HRISurfaceCreateFunc surfaceCreateFunc      = nullptr; 
-        VSyncMode vsyncMode                         = VSyncMode::Disabled;
-        std::vector<const char*> instanceExtensions = {};
-        std::vector<const char*> deviceExtensions   = {};
+        const char* appName                                 = "NONAME";
+        uint32_t appVersion                                 = 0;
+        HRISurfaceCreateFunc surfaceCreateFunc              = nullptr; 
+        VSyncMode vsyncMode                                 = VSyncMode::Disabled;
+        std::vector<const char*> instanceExtensions         = {};
+        std::vector<const char*> deviceExtensions           = {};
+        VkPhysicalDeviceFeatures deviceFeatures             = {};
+        VkPhysicalDeviceVulkan11Features deviceFeatures11   = {};
+        VkPhysicalDeviceVulkan12Features deviceFeatures12   = {};
+        VkPhysicalDeviceVulkan13Features deviceFeatures13   = {};
     };
 
     /// @brief The swapchain present setup dictates available swap images for rendering, as well as the present mode.
@@ -91,6 +95,10 @@ namespace hri
         RenderContext(const RenderContext&) = delete;
         RenderContext& operator=(const RenderContext&) = delete;
 
+        // Allow move semantics
+        RenderContext(RenderContext&& other) noexcept;
+        RenderContext& operator=(RenderContext&& other) noexcept;
+
         /// @brief Set the VSync mode for the swap chain. Recreates the swap chain.
         ///     NOTE: does not free any allocated swap images or views!
         /// @param vsyncMode The new VSync mode to use.
@@ -111,6 +119,9 @@ namespace hri
         inline VkFormat swapFormat() const { return swapchain.image_format; }
 
     private:
+        /// @brief Release resources held by this context.
+        void release();
+
         static SwapchainPresentSetup getSwapPresentSetup(VSyncMode vsyncMode);
 
         /// @brief Debug callback for the Vulkan API

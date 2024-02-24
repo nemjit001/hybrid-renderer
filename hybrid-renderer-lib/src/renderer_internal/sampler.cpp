@@ -7,7 +7,7 @@
 using namespace hri;
 
 ImageSampler::ImageSampler(
-	RenderContext* ctx,
+	RenderContext& ctx,
 	VkFilter magFilter,
 	VkFilter minFilter,
 	VkSamplerMipmapMode mipmapMode,
@@ -26,10 +26,8 @@ ImageSampler::ImageSampler(
 	VkSamplerCreateFlags flags
 )
 	:
-	m_pCtx(ctx)
+	m_ctx(ctx)
 {
-	assert(m_pCtx != nullptr);
-
 	VkSamplerCreateInfo createInfo = VkSamplerCreateInfo{ VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
 	createInfo.flags = flags;
 	createInfo.magFilter = magFilter;
@@ -47,10 +45,10 @@ ImageSampler::ImageSampler(
 	createInfo.maxLod = maxLod;
 	createInfo.borderColor = borderColor;
 	createInfo.unnormalizedCoordinates = unnormalizedCoordinates;
-	HRI_VK_CHECK(vkCreateSampler(m_pCtx->device, &createInfo, nullptr, &sampler));
+	HRI_VK_CHECK(vkCreateSampler(m_ctx.device, &createInfo, nullptr, &sampler));
 }
 
 ImageSampler::~ImageSampler()
 {
-	vkDestroySampler(m_pCtx->device, sampler, nullptr);
+	vkDestroySampler(m_ctx.device, sampler, nullptr);
 }

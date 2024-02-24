@@ -9,23 +9,16 @@
 
 using namespace hri;
 
-IRenderSubsystem::IRenderSubsystem(RenderContext* ctx)
+IRenderSubsystem::IRenderSubsystem(RenderContext& ctx)
     :
-    m_pCtx(ctx)
+    m_ctx(ctx)
 {
-    assert(m_pCtx != nullptr);
+    //
 }
 
 IRenderSubsystem::~IRenderSubsystem()
 {
-    vkDestroyPipelineLayout(m_pCtx->device, m_layout, nullptr);
-}
-
-RenderSubsystemManager::RenderSubsystemManager(RenderContext* ctx)
-    :
-    m_pCtx(ctx)
-{
-    assert(m_pCtx != nullptr);
+    vkDestroyPipelineLayout(m_ctx.device, m_layout, nullptr);
 }
 
 void RenderSubsystemManager::recordSubsystem(const std::string& name, ActiveFrame& frame) const

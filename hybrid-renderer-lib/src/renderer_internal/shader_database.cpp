@@ -10,11 +10,11 @@
 
 using namespace hri;
 
-PipelineLayoutBuilder::PipelineLayoutBuilder(RenderContext* ctx)
+PipelineLayoutBuilder::PipelineLayoutBuilder(RenderContext& ctx)
     :
-    m_pCtx(ctx)
+    m_ctx(ctx)
 {
-    assert(m_pCtx != nullptr);
+    //
 }
 
 PipelineLayoutBuilder& PipelineLayoutBuilder::addPushConstant(size_t size, VkShaderStageFlags shaderStages)
@@ -53,7 +53,7 @@ VkPipelineLayout PipelineLayoutBuilder::build()
     createInfo.pSetLayouts = m_setLayouts.data();
 
     VkPipelineLayout layout = VK_NULL_HANDLE;
-    HRI_VK_CHECK(vkCreatePipelineLayout(m_pCtx->device, &createInfo, nullptr, &layout));
+    HRI_VK_CHECK(vkCreatePipelineLayout(m_ctx.device, &createInfo, nullptr, &layout));
 
     return layout;
 }
@@ -147,19 +147,18 @@ VkPipelineColorBlendStateCreateInfo GraphicsPipelineBuilder::initColorBlendState
     };
 }
 
-Shader::Shader(RenderContext* ctx, const uint32_t* pCode, size_t codeSize, VkShaderStageFlagBits stage)
+Shader::Shader(RenderContext& ctx, const uint32_t* pCode, size_t codeSize, VkShaderStageFlagBits stage)
     :
-    m_pCtx(ctx),
+    m_ctx(ctx),
     stage(stage)
 {
-    assert(m_pCtx != nullptr);
     assert(pCode != nullptr && codeSize > 0);
 
     VkShaderModuleCreateInfo createInfo = VkShaderModuleCreateInfo{ VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO };
     createInfo.flags = 0;
     createInfo.codeSize = static_cast<uint32_t>(codeSize);
     createInfo.pCode = pCode;
-    HRI_VK_CHECK(vkCreateShaderModule(ctx->device, &createInfo, nullptr, &module));
+    HRI_VK_CHECK(vkCreateShaderModule(m_ctx.device, &createInfo, nullptr, &module));
 }
 
 Shader::~Shader()
@@ -169,7 +168,7 @@ Shader::~Shader()
 
 Shader::Shader(Shader&& other) noexcept
     :
-    m_pCtx(other.m_pCtx),
+    m_ctx(other.m_ctx),
     stage(other.stage),
     module(other.module)
 {
@@ -184,7 +183,7 @@ Shader& Shader::operator=(Shader&& other) noexcept
     }
 
     release();
-    m_pCtx = other.m_pCtx;
+    m_ctx = std::move(other.m_ctx);
     stage = other.stage;
     module = other.module;
 
@@ -193,7 +192,7 @@ Shader& Shader::operator=(Shader&& other) noexcept
     return *this;
 }
 
-Shader Shader::loadFile(RenderContext* ctx, const std::string& path, VkShaderStageFlagBits stage)
+Shader Shader::loadFile(RenderContext& ctx, const std::string& path, VkShaderStageFlagBits stage)
 {
     // Open code file
     FILE* file = fopen(path.c_str(), "rb");
@@ -233,30 +232,28 @@ Shader Shader::loadFile(RenderContext* ctx, const std::string& path, VkShaderSta
 
 void Shader::release()
 {
-    vkDestroyShaderModule(m_pCtx->device, module, nullptr);
+    vkDestroyShaderModule(m_ctx.device, module, nullptr);
 }
 
-ShaderDatabase::ShaderDatabase(RenderContext* ctx)
+ShaderDatabase::ShaderDatabase(RenderContext& ctx)
     :
-    m_pCtx(ctx)
+    m_ctx(ctx)
 {
-    assert(m_pCtx != nullptr);
-
     VkPipelineCacheCreateInfo cacheCreateInfo = VkPipelineCacheCreateInfo{ VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO };
     cacheCreateInfo.flags = 0;
     cacheCreateInfo.initialDataSize = 0;
     cacheCreateInfo.pInitialData = nullptr;
-    HRI_VK_CHECK(vkCreatePipelineCache(m_pCtx->device, &cacheCreateInfo, nullptr, &m_pipelineCache));
+    HRI_VK_CHECK(vkCreatePipelineCache(m_ctx.device, &cacheCreateInfo, nullptr, &m_pipelineCache));
 }
 
 ShaderDatabase::~ShaderDatabase()
 {
     for (auto& [ name, pso ] : m_pipelineMap)
     {
-        vkDestroyPipeline(m_pCtx->device, pso.pipeline, nullptr);
+        vkDestroyPipeline(m_ctx.device, pso.pipeline, nullptr);
     }
 
-    vkDestroyPipelineCache(m_pCtx->device, m_pipelineCache, nullptr);
+    vkDestroyPipelineCache(m_ctx.device, m_pipelineCache, nullptr);
 }
 
 Shader* ShaderDatabase::registerShader(const std::string& name, Shader&& shader)
@@ -350,7 +347,7 @@ PipelineStateObject* ShaderDatabase::createPipeline(
     pipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
     pipelineCreateInfo.basePipelineIndex = 0;
     HRI_VK_CHECK(vkCreateGraphicsPipelines(
-        m_pCtx->device,
+        m_ctx.device,
         m_pipelineCache,
         1,
         &pipelineCreateInfo,

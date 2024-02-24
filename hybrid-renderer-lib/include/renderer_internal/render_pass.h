@@ -24,7 +24,7 @@ namespace hri
 	public:
 		/// @brief Create a new render pass builder.
 		/// @param ctx Render context to use.
-		RenderPassBuilder(RenderContext* ctx = nullptr);
+		RenderPassBuilder(RenderContext& ctx);
 
 		/// @brief Destroy this render pass builder.
 		virtual ~RenderPassBuilder() = default;
@@ -60,11 +60,6 @@ namespace hri
 		/// @return RenderPassBuilder reference.
 		RenderPassBuilder& setAttachmentReference(AttachmentType type, VkAttachmentReference ref);
 
-		/// @brief Update the used render context.
-		/// @param ctx New render context to use for render pass creation.
-		/// @return RenderPassBuilder reference.
-		RenderPassBuilder& setContext(RenderContext* ctx);
-
 		/// @brief Build the configured render pass.
 		/// @return RenderPassBuilder reference.
 		VkRenderPass build();
@@ -76,7 +71,7 @@ namespace hri
 			std::optional<VkAttachmentReference> depthStencilAttachment;
 		};
 
-		RenderContext* m_pCtx = nullptr;
+		RenderContext& m_ctx;
 		std::vector<VkAttachmentDescription> m_attachments;
 		std::vector<SubpassData> m_subpasses;
 	};
@@ -101,7 +96,7 @@ namespace hri
 		/// @param renderPass Render Pass for which to manage resources.
 		/// @param attachmentConfigs Attachment configurations.
 		IRenderPassResourceManagerBase(
-			RenderContext* ctx,
+			RenderContext& ctx,
 			VkRenderPass renderPass,
 			const std::vector<RenderAttachmentConfig>& attachmentConfigs
 		);
@@ -160,7 +155,7 @@ namespace hri
 		virtual VkExtent2D getRenderExtent() const;
 
 	protected:
-		RenderContext* m_pCtx = nullptr;
+		RenderContext& m_ctx;
 		VkRenderPass m_renderPass = VK_NULL_HANDLE;
 		VkExtent2D m_renderExtent = VkExtent2D{};
 		std::vector<VkClearValue> m_clearValues = {};
@@ -180,7 +175,7 @@ namespace hri
 		/// @param renderPass Render pass for which to manage resources.
 		/// @param attachmentConfigs Pass attachment configs.
 		SwapchainPassResourceManager(
-			RenderContext* ctx,
+			RenderContext& ctx,
 			VkRenderPass renderPass,
 			const std::vector<RenderAttachmentConfig>& attachmentConfigs = {}
 		);
@@ -216,7 +211,7 @@ namespace hri
 		/// @param renderPass Render pass to manage resources for.
 		/// @param attachmentConfigs Pass attachment configs.
 		RenderPassResourceManager(
-			RenderContext* ctx,
+			RenderContext& ctx,
 			VkRenderPass renderPass,
 			const std::vector<RenderAttachmentConfig>& attachmentConfigs = {}
 		);

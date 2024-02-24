@@ -18,7 +18,7 @@ namespace hri
     public:
         /// @brief Create a new render subsystem.
         /// @param ctx Render Context to use.
-        IRenderSubsystem(RenderContext* ctx);
+        IRenderSubsystem(RenderContext& ctx);
 
         /// @brief Destroy this subsystem.
         virtual ~IRenderSubsystem();
@@ -32,7 +32,7 @@ namespace hri
         virtual void record(ActiveFrame& frame) const = 0;
 
     protected:
-        RenderContext* m_pCtx = nullptr;
+        RenderContext& m_ctx;
         VkPipelineLayout m_layout = VK_NULL_HANDLE;
         PipelineStateObject* m_pPSO = nullptr;
     };
@@ -43,8 +43,7 @@ namespace hri
     {
     public:
         /// @brief Create a new subsystem manager.
-        /// @param ctx Render Context to use.
-        RenderSubsystemManager(RenderContext* ctx);
+        RenderSubsystemManager() = default;
 
         /// @brief Destroy this Subsystem Manager.
         virtual ~RenderSubsystemManager() = default;
@@ -60,7 +59,6 @@ namespace hri
         void registerSubsystem(const std::string& name, IRenderSubsystem* subsystem);
 
     private:
-        RenderContext* m_pCtx = nullptr;
         std::unordered_map<std::string, IRenderSubsystem*> m_subsystems = {};
     };
 }

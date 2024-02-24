@@ -35,8 +35,8 @@ public:
 	/// @param renderPass Render pass to use.
 	/// @param sceneDataSetLayout Descriptor set layout describing scene data provided by renderer.
 	GBufferLayoutSubsystem(
-		hri::RenderContext* ctx,
-		hri::ShaderDatabase* shaderDB,
+		hri::RenderContext& ctx,
+		hri::ShaderDatabase& shaderDB,
 		VkRenderPass renderPass,
 		VkDescriptorSetLayout sceneDataSetLayout
 	);
@@ -67,7 +67,7 @@ public:
 	/// @param renderPass Render pass to use. Preferably drawing straight to swapchain.
 	/// @param uiPool Descriptor pool to use for UI resources.
 	UISubsystem(
-		hri::RenderContext* ctx,
+		hri::RenderContext& ctx,
 		VkRenderPass renderPass,
 		VkDescriptorPool uiPool
 	);
@@ -92,8 +92,8 @@ public:
 	/// @param renderPass Render pass to use.
 	/// @param presentInputSetLayout Descriptor set layout describing input images for presentation.
 	PresentationSubsystem(
-		hri::RenderContext* ctx,
-		hri::ShaderDatabase* shaderDB,
+		hri::RenderContext& ctx,
+		hri::ShaderDatabase& shaderDB,
 		VkRenderPass renderPass,
 		VkDescriptorSetLayout presentInputSetLayout
 	);
