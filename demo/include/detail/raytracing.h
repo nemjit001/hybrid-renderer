@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "demo.h"
-#include "dispatch.h"
+#include "detail/dispatch.h"
 
 /// @brief A Ray Tracing Context uses a render context to initialize dispatch tables required for ray tracing.
 ///		These dispatch tables need to be used for all extension functions.

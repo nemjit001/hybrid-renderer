@@ -160,7 +160,7 @@ namespace hri
     template<typename _PFn>
     _PFn RenderContext::getInstanceFunction(const char* name) const
     {
-        void* pFunction = vkGetInstanceProcAddr(instance, name);
+        PFN_vkVoidFunction pFunction = vkGetInstanceProcAddr(instance, name);
         assert(pFunction != nullptr);
         
         return reinterpret_cast<_PFn>(pFunction);
@@ -169,7 +169,7 @@ namespace hri
     template<typename _PFn>
     _PFn RenderContext::getDeviceFunction(const char* name) const
     {
-        void* pFunction = vkGetDeviceProcAddr(device, name);
+        PFN_vkVoidFunction pFunction = vkGetDeviceProcAddr(device, name);
         assert(pFunction != nullptr);
         
         return reinterpret_cast<_PFn>(pFunction);
