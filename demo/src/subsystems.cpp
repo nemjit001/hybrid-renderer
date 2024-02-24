@@ -113,32 +113,25 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 
 	vkCmdBindPipeline(frame.commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
 
-	// Nothing to draw
-	if (m_currentFrameInfo.scene == nullptr)
-		return;
-
-	for (auto const& renderable : m_currentFrameInfo.scene->renderables)
+	for (auto const& renderable : m_currentFrameInfo.renderables)
 	{
-		TransformPushConstant transform = TransformPushConstant{
-			renderable.transform,
-			transpose(inverse(hri::Float3x3(renderable.transform))),	// FIXME: this doesn't seem to work for normal matrix calculation?
+		TransformPushConstant transformPushConstant = TransformPushConstant{
+			renderable.modelMatrix,
+			hri::Float3x3(1.0f),
 		};
 
 		vkCmdPushConstants(
 			frame.commandBuffer,
 			m_layout,
 			VK_SHADER_STAGE_VERTEX_BIT,
-			0,
-			sizeof(TransformPushConstant),
-			&transform
+			0, sizeof(TransformPushConstant),
+			&transformPushConstant
 		);
 
-		// TODO: bind material descriptor set
-
-		VkDeviceSize vertexBufferOffsets[] = { 0 };
-		vkCmdBindVertexBuffers(frame.commandBuffer, 0, 1, &renderable.mesh->vertexBuffer.buffer, vertexBufferOffsets);
-		vkCmdBindIndexBuffer(frame.commandBuffer, renderable.mesh->indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
-		vkCmdDrawIndexed(frame.commandBuffer, renderable.mesh->indexCount, 1, 0, 0, 0);
+		VkDeviceSize vertexOffsets[] = { 0 };
+		vkCmdBindVertexBuffers(frame.commandBuffer, 0, 1, &renderable.pMesh->vertexBuffer.buffer, vertexOffsets);
+		vkCmdBindIndexBuffer(frame.commandBuffer, renderable.pMesh->indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdDrawIndexed(frame.commandBuffer, renderable.pMesh->indexCount, 1, 0, 0, 0);
 	}
 }
 

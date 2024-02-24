@@ -4,9 +4,7 @@
 
 #include "camera.h"
 #include "hri_math.h"
-#include "material.h"
 #include "mesh.h"
-#include "scene.h"
 #include "texture.h"
 #include "renderer_internal/buffer.h"
 #include "renderer_internal/descriptor_management.h"

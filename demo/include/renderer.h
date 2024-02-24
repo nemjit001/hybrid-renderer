@@ -3,6 +3,7 @@
 #include <hybrid_renderer.h>
 #include <memory>
 
+#include "scene.h"
 #include "subsystems.h"
 
 /// @brief The Renderer Frame Data structure contains per frame data for rendering.
@@ -11,17 +12,17 @@ struct RendererFrameData
 	std::unique_ptr<hri::BufferResource> cameraUBO;
 	std::unique_ptr<hri::DescriptorSetManager> sceneDataSet;
 	std::unique_ptr<hri::DescriptorSetManager> presentInputSet;
-	hri::RenderableScene renderableScene;
+	std::vector<Renderable> renderables;
 };
 
 class Renderer
 {
 public:
-	Renderer(hri::RenderContext& ctx, hri::Camera& camera, hri::Scene& scene);
+	Renderer(hri::RenderContext& ctx, hri::Camera& camera, SceneGraph& activeScene);
 
 	virtual ~Renderer();
 
-	void setActiveScene(hri::Scene& scene);
+	void setVSyncMode(hri::VSyncMode vsyncMode);
 
 	void drawFrame();
 
@@ -51,7 +52,7 @@ private:
 
 	// Renderer state
 	hri::Camera& m_camera;
-	hri::Scene& m_activeScene;
+	SceneGraph& m_activeScene;
 
 	// Shared preinitialized samplers
 	std::unique_ptr<hri::ImageSampler> m_renderResultLinearSampler;

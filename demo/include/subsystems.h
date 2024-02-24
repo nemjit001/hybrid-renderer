@@ -1,7 +1,8 @@
 #pragma once
 
 #include <hybrid_renderer.h>
-#include <vector>
+
+#include <scene.h>
 
 /// @brief The Transform Push Constant is used to push transformation data for renderable objects to shaders.
 struct TransformPushConstant
@@ -13,7 +14,7 @@ struct TransformPushConstant
 struct GBufferLayoutFrameInfo
 {
 	VkDescriptorSet sceneDataSetHandle 	= VK_NULL_HANDLE;
-	hri::RenderableScene* scene			= nullptr;
+	std::vector<Renderable> renderables = {};
 };
 
 struct PresentFrameInfo
