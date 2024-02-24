@@ -290,9 +290,9 @@ int main()
 
 	ctxCreateInfo.deviceFeatures13.synchronization2 = true;
 	ctxCreateInfo.extensionFeatures = {
-		&rayQueryFeatures,
-		&accelerationStructureFeatures,
-		&rtPipelineFeatures,
+		rayQueryFeatures,
+		accelerationStructureFeatures,
+		rtPipelineFeatures,
 	};
 
 	hri::RenderContext renderContext = hri::RenderContext(ctxCreateInfo);

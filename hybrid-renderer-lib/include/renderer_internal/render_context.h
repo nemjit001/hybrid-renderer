@@ -38,6 +38,8 @@ namespace hri
     /// @brief The render context create info allows for specifying context settings & registering extensions for the created context.
     struct RenderContextCreateInfo
     {
+        typedef vkb::detail::GenericFeaturesPNextNode ExtensionFeature;
+
         const char* appName                                 = "NONAME";
         uint32_t appVersion                                 = 0;
         HRISurfaceCreateFunc surfaceCreateFunc              = nullptr; 
@@ -48,7 +50,7 @@ namespace hri
         VkPhysicalDeviceVulkan11Features deviceFeatures11   = {};
         VkPhysicalDeviceVulkan12Features deviceFeatures12   = {};
         VkPhysicalDeviceVulkan13Features deviceFeatures13   = {};
-        std::vector<void*> extensionFeatures                = {};
+        std::vector<ExtensionFeature> extensionFeatures     = {};
     };
 
     /// @brief The swapchain present setup dictates available swap images for rendering, as well as the present mode.
