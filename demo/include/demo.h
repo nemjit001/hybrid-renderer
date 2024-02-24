@@ -14,6 +14,9 @@
 #define SCR_HEIGHT			720
 #define CAMERA_SPEED        1.5f
 
+// Raytracing config
+#define DEMO_DEFAULT_RT_RECURSION_DEPTH		5;
+
 #ifndef NDEBUG
 #define DEMO_DEBUG			1
 #define DEMO_DEBUG_OUTPUT	1

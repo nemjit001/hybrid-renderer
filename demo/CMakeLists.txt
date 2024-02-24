@@ -1,8 +1,8 @@
 project("hybrid-renderer-demo" VERSION 1.0.0)
 set(TARGET_NAME hrdemo)
 
-file(GLOB PROJECT_HEADERS "include/*.h")
-file(GLOB PROJECT_SOURCES "src/*.cpp")
+file(GLOB PROJECT_HEADERS "include/*.h" "include/**/*.h")
+file(GLOB PROJECT_SOURCES "src/*.cpp" "src/**/*.cpp")
 file(GLOB PROJECT_SHADERS "shaders/*.vert" "shaders/*.frag")
 
 # Add dependencies
