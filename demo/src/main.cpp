@@ -32,7 +32,7 @@ void drawSceneGraphNodeMenu(std::vector<SceneNode>& nodes)
 		if (ImGui::TreeNode(node.name.c_str()))
 		{
 			ImGui::DragFloat3("Position", node.transform.position.xyz, 0.05f);
-			ImGui::DragFloat3("Rotation", node.transform.rotation.xyz, 0.05f);
+			ImGui::DragFloat3("Rotation", node.transform.rotation.xyz, 0.5f);
 			ImGui::DragFloat3("Scale", node.transform.scale.xyz, 0.05f);
 			ImGui::TreePop();
 		}

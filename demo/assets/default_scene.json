@@ -5,8 +5,8 @@
 			"mesh_file": "assets/susanne_lod.obj",
 			"transform": {
 				"position": [ 0.0, 1.0, 0.0 ],
-				"scale": [ 1.0, 1.0, 1.0 ],
-				"rotation": [ 0.0, 0.0, 0.0 ]
+				"rotation": [ 0.0, 0.0, 0.0 ],
+				"scale": [ 1.0, 1.0, 1.0 ]
 			},
 			"lod_levels": [
 				"Susanne_LOD0",
@@ -18,11 +18,39 @@
 			"mesh_file": "assets/plane_lod.obj",
 			"transform": {
 				"position": [ 0.0, 0.0, 0.0 ],
-				"scale": [ 5.0, 1.0, 5.0 ],
-				"rotation": [ 0.0, 0.0, 0.0 ]
+				"rotation": [ 0.0, 0.0, 0.0 ],
+				"scale": [ 5.0, 1.0, 5.0 ]
 			},
 			"lod_levels": [
 				"Plane_LOD0"
+			]
+		},
+		{
+			"name": "Icosphere",
+			"mesh_file": "assets/simple_objects_lod.obj",
+			"transform": {
+				"position": [ 3.0, 1.0, 3.0 ],
+				"rotation": [ 0.0, 0.0, 0.0 ],
+				"scale": [ 1.0, 1.0, 1.0 ]
+			},
+			"lod_levels": [
+				"Icosphere_LOD0",
+				"Icosphere_LOD1",
+				"Icosphere_LOD2"
+			]
+		},
+		{
+			"name": "Torus",
+			"mesh_file": "assets/simple_objects_lod.obj",
+			"transform": {
+				"position": [ -3.0, 2.0, 3.0 ],
+				"rotation": [ -45.0, -20.0, 0.0 ],
+				"scale": [ 1.0, 1.0, 1.0 ]
+			},
+			"lod_levels": [
+				"Torus_LOD0",
+				"Torus_LOD1",
+				"Torus_LOD2"
 			]
 		}
 	]

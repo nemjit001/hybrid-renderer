@@ -78,9 +78,9 @@ inline hri::Float4x4 SceneTransform::modelMatrix() const
 	out = glm::rotate(
 		glm::rotate(
 			glm::rotate(
-				out, hri::radians(rotation.x), static_cast<vec3>(HRI_WORLD_RIGHT)
-			), hri::radians(rotation.y), static_cast<vec3>(HRI_WORLD_UP)
-		), hri::radians(rotation.z), static_cast<vec3>(HRI_WORLD_FORWARD)
+				out, hri::radians(rotation.y), static_cast<vec3>(HRI_WORLD_UP)
+			), hri::radians(rotation.z), static_cast<vec3>(HRI_WORLD_FORWARD)
+		), hri::radians(rotation.x), static_cast<vec3>(HRI_WORLD_RIGHT)
 	);
 	out = glm::scale(out, static_cast<vec3>(scale));
 
