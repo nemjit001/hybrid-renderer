@@ -1,0 +1,29 @@
+{
+	"nodes": [
+		{
+			"name": "Susanne",
+			"mesh_file": "assets/susanne_lod.obj",
+			"transform": {
+				"position": [ 0.0, 1.0, 0.0 ],
+				"scale": [ 1.0, 1.0, 1.0 ],
+				"rotation": [ 0.0, 0.0, 0.0 ]
+			},
+			"lod_levels": [
+				"Susanne_LOD0",
+				"Susanne_LOD1"
+			]
+		},
+		{
+			"name": "Floor",
+			"mesh_file": "assets/plane_lod.obj",
+			"transform": {
+				"position": [ 0.0, 0.0, 0.0 ],
+				"scale": [ 5.0, 1.0, 5.0 ],
+				"rotation": [ 0.0, 0.0, 0.0 ]
+			},
+			"lod_levels": [
+				"Plane_LOD0"
+			]
+		}
+	]
+}

@@ -11,6 +11,7 @@
 struct SceneTransform
 {
 	hri::Float3 position	= hri::Float3(0.0f, 0.0f, 0.0f);
+	hri::Float3 rotation	= hri::Float3(0.0f, 0.0f, 0.0f);
 	hri::Float3 scale		= hri::Float3(1.0f, 1.0f, 1.0f);
 
 	inline hri::Float4x4 modelMatrix() const;
@@ -54,12 +55,34 @@ public:
 	std::vector<SceneNode> nodes;
 };
 
+class SceneLoader
+{
+public:
+	static SceneGraph load(hri::RenderContext& context, const std::string& path);
+
+private:
+	static bool loadOBJMesh(
+		const std::string& path,
+		const std::string& name,
+		Material& material,
+		std::vector<hri::Vertex>& vertices,
+		std::vector<uint32_t>& indices,
+		bool loadMaterial
+	);
+};
+
 inline hri::Float4x4 SceneTransform::modelMatrix() const
 {
 	hri::Float4x4 out = hri::Float4x4(1.0f);
 	out = glm::translate(out, static_cast<vec3>(position));
+	out = glm::rotate(
+		glm::rotate(
+			glm::rotate(
+				out, hri::radians(rotation.x), static_cast<vec3>(HRI_WORLD_RIGHT)
+			), hri::radians(rotation.y), static_cast<vec3>(HRI_WORLD_UP)
+		), hri::radians(rotation.z), static_cast<vec3>(HRI_WORLD_FORWARD)
+	);
 	out = glm::scale(out, static_cast<vec3>(scale));
-	// TODO: rotation
 
 	return out;
 }

@@ -17,3 +17,6 @@
 [submodule "hybrid-renderer-lib/deps/glm"]
 	path = hybrid-renderer-lib/deps/glm
 	url = https://github.com/g-truc/glm
+[submodule "demo/deps/json"]
+	path = demo/deps/json
+	url = https://github.com/nlohmann/json

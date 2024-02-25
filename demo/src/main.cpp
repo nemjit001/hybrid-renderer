@@ -25,135 +25,6 @@ static bool gWindowResized  = false;
 static int gDisplayWidth 	= SCR_WIDTH;
 static int gDisplayHeight 	= SCR_HEIGHT;
 
-SceneGraph loadScene(hri::RenderContext& renderContext, const char* path)
-{
-	printf("Loading scenefile [%s]\n", path);
-
-	// Only real configuration needed is the triangulation on load
-	tinyobj::ObjReaderConfig readerConfig = tinyobj::ObjReaderConfig{};
-	readerConfig.triangulate = true;
-	readerConfig.triangulation_method = "earcut";
-
-	// Parse file & handle errors / report warnings
-	tinyobj::ObjReader reader;
-	if (false == reader.ParseFromFile(path, readerConfig))
-	{
-		if (reader.Error().size() > 0)
-		{
-			fprintf(stderr, "Loader Error: %s", reader.Error().c_str());
-		}
-
-		FATAL_ERROR("Failed to parse scene file");
-	}
-
-	if (reader.Warning().size() > 0)
-	{
-		printf("Loader Warning: %s", reader.Warning().c_str());
-	}
-
-	// Obj scene file attributes
-	const tinyobj::attrib_t& objAttributes = reader.GetAttrib();
-	const std::vector<tinyobj::shape_t>& objShapes = reader.GetShapes();
-	const std::vector<tinyobj::material_t>& objMaterials = reader.GetMaterials();
-
-	std::vector<Material> materials = {}; materials.reserve(objMaterials.size());
-	std::vector<hri::Mesh> meshes = {}; meshes.reserve(objShapes.size());
-
-	// For now assume all meshes are unqiue nodes (i.e. no instancing or per node transform)
-	std::vector<SceneNode> nodes; nodes.reserve(objShapes.size());
-
-	// Load material data into compatible format
-	for (auto const& material : objMaterials)
-	{
-		bool hasAlbedoMap = !material.diffuse_texname.empty();
-		bool hasNormalMap = !material.diffuse_texname.empty();
-
-		MaterialParameters materialParams = MaterialParameters{
-			hri::Float3(material.diffuse[0], material.diffuse[1], material.diffuse[2]),
-			hri::Float3(material.specular[0], material.specular[1], material.specular[2]),
-			hri::Float3(material.transmittance[0], material.transmittance[1], material.transmittance[2]),
-			hri::Float3(material.emission[0], material.emission[1], material.emission[2]),
-			material.shininess,
-			material.ior,
-		};
-
-		Material newMaterial = Material{
-			materialParams,
-			hri::Texture(),
-			hri::Texture(),
-		};
-
-		materials.push_back(newMaterial);
-	}
-
-	// Load shapes into hri compatible format
-	for (auto const& shape : objShapes)
-	{
-		// Retrieve indexed vertices for Shape
-		std::vector<hri::Vertex> vertices; vertices.reserve(shape.mesh.indices.size());
-		std::vector<uint32_t> indices; indices.reserve(shape.mesh.indices.size());
-		for (auto const& index : shape.mesh.indices)
-		{
-			size_t vertexIndex = index.vertex_index * 3;
-			size_t normalIndex = index.normal_index * 3;
-			size_t texCoordIndex = index.texcoord_index * 2;
-
-			hri::Vertex newVertex = hri::Vertex{
-				hri::Float3(
-					objAttributes.vertices[vertexIndex + 0],
-					objAttributes.vertices[vertexIndex + 1],
-					objAttributes.vertices[vertexIndex + 2]
-				),
-				hri::Float3(
-					objAttributes.normals[normalIndex + 0],
-					objAttributes.normals[normalIndex + 1],
-					objAttributes.normals[normalIndex + 2]
-				),
-				hri::Float3(0.0f),	// The tangent vector is initialy (0, 0, 0), because it can only be calculated AFTER triangles are loaded
-				hri::Float2(
-					objAttributes.texcoords[texCoordIndex + 0],
-					objAttributes.texcoords[texCoordIndex + 1]
-				),
-			};
-
-			vertices.push_back(newVertex);
-			indices.push_back(static_cast<uint32_t>(indices.size()));	// Works because mesh is already triangulated on load
-		}
-
-		// Calculate tangent space vectors for Shape
-		for (size_t i = 0; i < indices.size(); i += 3)
-		{
-			hri::Vertex& v0 = vertices[indices[i + 0]];
-			hri::Vertex& v1 = vertices[indices[i + 1]];
-			hri::Vertex& v2 = vertices[indices[i + 2]];
-
-			const hri::Float3 e1 = v1.position - v0.position, e2 = v2.position - v0.position;
-			const hri::Float2 dUV1 = v1.textureCoord - v0.textureCoord, dUV2 = v2.textureCoord - v0.textureCoord;
-
-			const float f = 1.0f / (dUV1.x * dUV2.y - dUV2.x * dUV1.y);
-			const hri::Float3 tangent = normalize(f * (dUV2.y * e1 - dUV1.y * e2));
-
-			// Ensure tangent is 90 degrees w/ normal for each vertex
-			v0.tangent = normalize(tangent - dot(v0.normal, tangent) * v0.normal);
-			v1.tangent = normalize(tangent - dot(v1.normal, tangent) * v1.normal);
-			v2.tangent = normalize(tangent - dot(v2.normal, tangent) * v2.normal);
-		}
-
-		meshes.push_back(std::move(hri::Mesh(renderContext, vertices, indices)));
-
-		// TODO: set LOD levels instead of always primary
-		size_t meshIdx = meshes.size() - 1;
-		nodes.push_back(SceneNode{
-			shape.name,
-			SceneTransform{},	// No transform support
-			static_cast<SceneNode::SceneId>(shape.mesh.material_ids[0]),	// assume 1 material per mesh
-			{ meshIdx, INVALID_SCENE_ID, INVALID_SCENE_ID }
-		});
-	}
-
-	return SceneGraph(std::move(materials), std::move(meshes), std::move(nodes));
-}
-
 void drawSceneGraphNodeMenu(std::vector<SceneNode>& nodes)
 {
 	for (auto& node : nodes)
@@ -161,6 +32,7 @@ void drawSceneGraphNodeMenu(std::vector<SceneNode>& nodes)
 		if (ImGui::TreeNode(node.name.c_str()))
 		{
 			ImGui::DragFloat3("Position", node.transform.position.xyz, 0.05f);
+			ImGui::DragFloat3("Rotation", node.transform.rotation.xyz, 0.05f);
 			ImGui::DragFloat3("Scale", node.transform.scale.xyz, 0.05f);
 			ImGui::TreePop();
 		}
@@ -309,7 +181,7 @@ int main()
 	);
 
 	// Load scene file
-	SceneGraph scene = loadScene(renderContext, "assets/test_scene.obj");
+	SceneGraph scene = SceneLoader::load(renderContext, "./assets/default_scene.json");
 
 	// Create renderer
 	Renderer renderer = Renderer(renderContext, camera, scene);

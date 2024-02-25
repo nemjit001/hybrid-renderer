@@ -13,6 +13,8 @@ add_subdirectory("deps/glfw/")
 
 add_subdirectory("deps/tinyobjloader/")
 
+add_subdirectory("deps/json/")
+
 file(GLOB IMGUI_HEADERS "deps/imgui/*.h")
 file(GLOB IMGUI_SOURCES "deps/imgui/*.cpp")
 set(IMGUI_HEADERS ${IMGUI_HEADERS} "deps/imgui/backends/imgui_impl_glfw.h" "deps/imgui/backends/imgui_impl_vulkan.h")
@@ -39,7 +41,8 @@ target_include_directories(${TARGET_NAME} PRIVATE
 	"deps/glfw/include/"
 	"deps/tinyobjloader/"
 	"deps/imgui/"
-	"deps/imgui/backends"
+	"deps/imgui/backends/"
+	"deps/json/include/"
 	"../hybrid-renderer-lib/include/"
 )
 
