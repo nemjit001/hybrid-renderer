@@ -158,11 +158,13 @@ public:
 
 	/// @brief Add AABB geometry data to this acceleration structure geometry.
 	/// @param aabbStride Stride of the AABB.
+	/// @param aabbCount Number of AABBs in the AABB buffer.
 	/// @param aabbBuffer Buffer resource containing AABB data.
 	/// @param flags Geometry flags to set.
 	/// @return A reference to this class.
 	AccelerationStructureGeometryBuilder& addGeometry(
 		size_t aabbStride,
+		uint32_t aabbCount,
 		const hri::BufferResource& aabbBuffer,
 		VkGeometryFlagsKHR flags = 0
 	);
@@ -209,5 +211,6 @@ public:
 private:
 	RayTracingContext& m_ctx;
 	VkBuildAccelerationStructureFlagsKHR m_flags = 0;
+	std::vector<VkAccelerationStructureBuildRangeInfoKHR> m_buildRanges = {};
 	std::vector<VkAccelerationStructureGeometryKHR> m_geometries = {};
 };

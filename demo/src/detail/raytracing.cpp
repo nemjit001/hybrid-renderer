@@ -228,6 +228,7 @@ AccelerationStructureGeometryBuilder& AccelerationStructureGeometryBuilder::setB
 
 AccelerationStructureGeometryBuilder& AccelerationStructureGeometryBuilder::addGeometry(
 	size_t aabbStride,
+	uint32_t aabbCount,
 	const hri::BufferResource& aabbBuffer,
 	VkGeometryFlagsKHR flags
 )
@@ -239,11 +240,18 @@ AccelerationStructureGeometryBuilder& AccelerationStructureGeometryBuilder::addG
 	VkAccelerationStructureGeometryDataKHR geometryData = VkAccelerationStructureGeometryDataKHR{};
 	geometryData.aabbs = aabbs;
 
+	VkAccelerationStructureBuildRangeInfoKHR buildRange = VkAccelerationStructureBuildRangeInfoKHR{};
+	buildRange.firstVertex = 0;
+	buildRange.primitiveCount = aabbCount;
+	buildRange.primitiveOffset = 0;
+	buildRange.transformOffset = 0;
+
 	VkAccelerationStructureGeometryKHR geometry = VkAccelerationStructureGeometryKHR{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR };
 	geometry.flags = flags;
 	geometry.geometryType = VK_GEOMETRY_TYPE_AABBS_KHR;
 	geometry.geometry = geometryData;
 
+	m_buildRanges.push_back(buildRange);
 	m_geometries.push_back(geometry);
 	return *this;
 }
@@ -270,11 +278,18 @@ AccelerationStructureGeometryBuilder& AccelerationStructureGeometryBuilder::addG
 	VkAccelerationStructureGeometryDataKHR geometryData = VkAccelerationStructureGeometryDataKHR{};
 	geometryData.triangles = triangles;
 
+	VkAccelerationStructureBuildRangeInfoKHR buildRange = VkAccelerationStructureBuildRangeInfoKHR{};
+	buildRange.firstVertex = 0;
+	buildRange.primitiveCount = maxVertexIdx + 1;
+	buildRange.primitiveOffset = 0;
+	buildRange.transformOffset = 0;
+
 	VkAccelerationStructureGeometryKHR geometry = VkAccelerationStructureGeometryKHR{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR };
 	geometry.flags = flags;
 	geometry.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
 	geometry.geometry = geometryData;
 
+	m_buildRanges.push_back(buildRange);
 	m_geometries.push_back(geometry);
 	return *this;
 }
