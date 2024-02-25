@@ -6,7 +6,14 @@
 #include "material.h"
 
 #define INVALID_SCENE_ID	(size_t)(~0)
+#define DEFAULT_LOD_FAR		100.0f
 #define MAX_LOD_LEVELS		3
+
+struct SceneParameters
+{
+	float nearPoint = 0.0f;
+	float farPoint	= DEFAULT_LOD_FAR;
+};
 
 struct SceneTransform
 {
@@ -50,6 +57,7 @@ private:
 	SceneNode::SceneId calculateLODLevel(const hri::Camera& camera, const SceneNode& node);
 
 public:
+	SceneParameters parameters;
 	std::vector<Material> materials;
 	std::vector<hri::Mesh> meshes;
 	std::vector<SceneNode> nodes;

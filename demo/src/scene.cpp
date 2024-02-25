@@ -45,17 +45,17 @@ SceneNode::SceneId SceneGraph::calculateLODLevel(const hri::Camera& camera, cons
 {
 	hri::Float3 camToNode = node.transform.position - camera.position;
 	const float nodeDist = hri::magnitude(camToNode);
-	const float maxViewDist = camera.parameters.zFar - camera.parameters.zNear;
-	const float segmentSize = maxViewDist / static_cast<float>(MAX_LOD_LEVELS);
+	const float LODRange = parameters.farPoint - parameters.nearPoint;
+	const float LODSegmentSize = LODRange / static_cast<float>(MAX_LOD_LEVELS);
 
-	// FIXME: replace linear LOD levels w/ better algorithm?
+	// XXX: Check -> is Linear LOD sufficient, or should better algorithm be used?
 	SceneNode::SceneId LODIndex = 0;
 	for (size_t segmentIdx = 0; segmentIdx < MAX_LOD_LEVELS; segmentIdx++)
 	{
-		float minSegmentDist = segmentIdx * segmentSize;
-		float maxSegmentDist = (segmentIdx + 1) * segmentSize;
+		float fIdx = static_cast<float>(segmentIdx);
+		float minSegmentDist = fIdx * LODSegmentSize;
 
-		if (nodeDist >= minSegmentDist && nodeDist < maxSegmentDist && node.meshLODs[segmentIdx] != INVALID_SCENE_ID)
+		if (nodeDist >= minSegmentDist && node.meshLODs[segmentIdx] != INVALID_SCENE_ID)
 			LODIndex = segmentIdx;
 	}
 

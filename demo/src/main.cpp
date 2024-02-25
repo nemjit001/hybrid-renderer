@@ -57,6 +57,10 @@ void drawConfigWindow(float deltaTime, hri::Camera& camera, SceneGraph& scene)
 		ImGui::Text("Frame Time: %8.2f ms", AVG_FRAMETIME * 1'000.0f);
 		ImGui::Text("FPS:        %8.2f fps", 1.0f / AVG_FRAMETIME);
 
+		ImGui::SeparatorText("Scene");
+		ImGui::DragFloat("LOD Near", &scene.parameters.nearPoint, 0.5f);
+		ImGui::DragFloat("LOD Far", &scene.parameters.farPoint, 0.5f);
+
 		ImGui::SeparatorText("Camera");
 		ImGui::Text("Position: %.2f %.2f %.2f", camera.position.x, camera.position.y, camera.position.z);
 		ImGui::Text("Forward:  %.2f %.2f %.2f", camera.forward.x, camera.forward.y, camera.forward.z);
