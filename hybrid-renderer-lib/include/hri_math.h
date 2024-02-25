@@ -84,6 +84,15 @@ namespace hri
 
 	inline float radians(float degrees) { return degrees * HRI_PI * 0.00555555555555555555555555555556f; /* deg * (pi / 180) */ }
 
+	template<typename _Ty>
+	inline void swap(_Ty& a, _Ty& b) { _Ty t = a; a = b; b = t; }
+
+	template<typename _Ty>
+	inline _Ty max(const _Ty& a, const _Ty& b) { return a > b ? a : b; }
+
+	template<typename _Ty>
+	inline _Ty min(const _Ty& a, const _Ty& b) { return a > b ? a : b; }
+
 	// --- Standard math operations
 
 	inline Float2 operator+(const Float2& a, const Float2& b) { return Float2(a.x + b.x, a.y + b.y); }

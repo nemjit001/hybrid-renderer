@@ -136,7 +136,7 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 }
 
 SoftShadowsRTSubsystem::SoftShadowsRTSubsystem(
-	RayTracingContext& ctx,
+	raytracing::RayTracingContext& ctx,
 	hri::ShaderDatabase& shaderDB
 )
 	:
@@ -147,7 +147,7 @@ SoftShadowsRTSubsystem::SoftShadowsRTSubsystem(
 
 	// TODO: set up raytracing shaders for soft shadows
 
-	VkPipeline raytracingPipeline = RayTracingPipelineBuilder(ctx)
+	VkPipeline raytracingPipeline = raytracing::RayTracingPipelineBuilder(ctx)
 		.setMaxRecursionDepth()
 		.setLayout(m_layout)
 		.build();

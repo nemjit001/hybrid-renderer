@@ -63,7 +63,7 @@ class SoftShadowsRTSubsystem
 {
 public:
 	SoftShadowsRTSubsystem(
-		RayTracingContext& ctx,
+		raytracing::RayTracingContext& ctx,
 		hri::ShaderDatabase& shaderDB
 	);
 

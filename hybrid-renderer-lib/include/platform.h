@@ -17,3 +17,10 @@
 #else
 #define HRI_DEBUG 0
 #endif
+
+#if		HRI_PLATFORM_WINDOWS == 1
+
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+
+#endif

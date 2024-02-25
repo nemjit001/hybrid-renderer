@@ -6,6 +6,14 @@
 #include "demo.h"
 #include "detail/dispatch.h"
 
+using namespace raytracing;
+
+VkDeviceAddress raytracing::getDeviceAddress(const RayTracingContext& ctx, const hri::BufferResource& resource)
+{
+	VkBufferDeviceAddressInfo addressInfo = resource.deviceAddressInfo();
+	return vkGetBufferDeviceAddress(ctx.renderContext.device, &addressInfo);
+}
+
 RayTracingContext::RayTracingContext(RayTracingContext&& other) noexcept
 	:
 	renderContext(other.renderContext),
@@ -29,26 +37,6 @@ RayTracingContext& RayTracingContext::operator=(RayTracingContext&& other) noexc
 	rayTracingDispatch = other.rayTracingDispatch;
 
 	return *this;
-}
-
-VkDeviceOrHostAddressKHR RayTracingUtils::getDeviceAddress(const RayTracingContext& ctx, const hri::BufferResource& resource)
-{
-	VkBufferDeviceAddressInfo addressInfo = resource.deviceAddressInfo();
-	VkDeviceAddress deviceAddress = vkGetBufferDeviceAddress(ctx.renderContext.device, &addressInfo);
-	VkDeviceOrHostAddressKHR address = {};
-	address.deviceAddress = deviceAddress;
-
-	return address;
-}
-
-VkDeviceOrHostAddressConstKHR RayTracingUtils::getConstDeviceAddress(const RayTracingContext& ctx, const hri::BufferResource& resource)
-{
-	VkBufferDeviceAddressInfo addressInfo = resource.deviceAddressInfo();
-	VkDeviceAddress deviceAddress = vkGetBufferDeviceAddress(ctx.renderContext.device, &addressInfo);
-	VkDeviceOrHostAddressConstKHR address = {};
-	address.deviceAddress = deviceAddress;
-
-	return address;
 }
 
 RayTracingPipelineBuilder::RayTracingPipelineBuilder(RayTracingContext& ctx)
@@ -212,119 +200,185 @@ void AccelerationStructure::release()
 	m_ctx.accelStructDispatch.vkDestroyAccelerationStructure(m_ctx.renderContext.device, accelerationStructure, nullptr);
 }
 
-AccelerationStructureGeometryBuilder::AccelerationStructureGeometryBuilder(RayTracingContext& ctx)
+ASBuilder::ASBuilder(RayTracingContext& ctx)
 	:
 	m_ctx(ctx)
 {
 	//
 }
 
-AccelerationStructureGeometryBuilder& AccelerationStructureGeometryBuilder::setBuildFlags(VkBuildAccelerationStructureFlagsKHR flags)
+ASBuilder::ASInput ASBuilder::objectToGeometry(
+	const hri::Mesh& mesh,
+	VkBuildAccelerationStructureFlagsKHR buildFlags,
+	VkGeometryFlagsKHR geometryFlags
+) const
 {
-	m_flags = flags;
+	const VkDeviceAddress vertexAddress = raytracing::getDeviceAddress(m_ctx, mesh.vertexBuffer);
+	const VkDeviceAddress indexAddress = raytracing::getDeviceAddress(m_ctx, mesh.indexBuffer);
+	const uint32_t maxPrimitiveCount = mesh.indexCount / 3;
+	const uint32_t maxVertexIndex = mesh.vertexCount - 1;
 
-	return *this;
-}
-
-AccelerationStructureGeometryBuilder& AccelerationStructureGeometryBuilder::addGeometry(
-	size_t aabbStride,
-	uint32_t aabbCount,
-	const hri::BufferResource& aabbBuffer,
-	VkGeometryFlagsKHR flags
-)
-{
-	VkAccelerationStructureGeometryAabbsDataKHR aabbs = VkAccelerationStructureGeometryAabbsDataKHR{};
-	aabbs.data = RayTracingUtils::getConstDeviceAddress(m_ctx, aabbBuffer);
-	aabbs.stride = aabbStride;
-
-	VkAccelerationStructureGeometryDataKHR geometryData = VkAccelerationStructureGeometryDataKHR{};
-	geometryData.aabbs = aabbs;
-
-	VkAccelerationStructureBuildRangeInfoKHR buildRange = VkAccelerationStructureBuildRangeInfoKHR{};
-	buildRange.firstVertex = 0;
-	buildRange.primitiveCount = aabbCount;
-	buildRange.primitiveOffset = 0;
-	buildRange.transformOffset = 0;
-
-	VkAccelerationStructureGeometryKHR geometry = VkAccelerationStructureGeometryKHR{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR };
-	geometry.flags = flags;
-	geometry.geometryType = VK_GEOMETRY_TYPE_AABBS_KHR;
-	geometry.geometry = geometryData;
-
-	m_buildRanges.push_back(buildRange);
-	m_geometries.push_back(geometry);
-	return *this;
-}
-
-AccelerationStructureGeometryBuilder& AccelerationStructureGeometryBuilder::addGeometry(
-	VkFormat vertexFormat,
-	VkIndexType indexType,
-	size_t vertexStride,
-	uint32_t maxVertexIdx,
-	const hri::BufferResource& vertexBuffer,
-	const hri::BufferResource& indexBuffer,
-	VkGeometryFlagsKHR flags
-)
-{
 	VkAccelerationStructureGeometryTrianglesDataKHR triangles = VkAccelerationStructureGeometryTrianglesDataKHR{};
-	triangles.vertexFormat = vertexFormat;
-	triangles.vertexData = RayTracingUtils::getConstDeviceAddress(m_ctx, vertexBuffer);
-	triangles.vertexStride = vertexStride;
-	triangles.maxVertex = maxVertexIdx;
-	triangles.indexType = indexType;
-	triangles.indexData = RayTracingUtils::getConstDeviceAddress(m_ctx, indexBuffer);;
-	triangles.transformData = VkDeviceOrHostAddressConstKHR{};
-
-	VkAccelerationStructureGeometryDataKHR geometryData = VkAccelerationStructureGeometryDataKHR{};
-	geometryData.triangles = triangles;
-
-	VkAccelerationStructureBuildRangeInfoKHR buildRange = VkAccelerationStructureBuildRangeInfoKHR{};
-	buildRange.firstVertex = 0;
-	buildRange.primitiveCount = maxVertexIdx + 1;
-	buildRange.primitiveOffset = 0;
-	buildRange.transformOffset = 0;
+	triangles.vertexFormat = VK_FORMAT_R32G32B32_SFLOAT;
+	triangles.vertexData.deviceAddress = vertexAddress;
+	triangles.vertexStride = sizeof(hri::Vertex);
+	triangles.indexType = VK_INDEX_TYPE_UINT32;
+	triangles.indexData.deviceAddress = indexAddress;
+	triangles.transformData = VkDeviceOrHostAddressConstKHR{};	// Use identity transform
+	triangles.maxVertex = maxVertexIndex;
 
 	VkAccelerationStructureGeometryKHR geometry = VkAccelerationStructureGeometryKHR{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR };
-	geometry.flags = flags;
+	geometry.flags = geometryFlags;
 	geometry.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
-	geometry.geometry = geometryData;
+	geometry.geometry.triangles = triangles;
 
-	m_buildRanges.push_back(buildRange);
-	m_geometries.push_back(geometry);
-	return *this;
+	VkAccelerationStructureBuildRangeInfoKHR buildOffset = VkAccelerationStructureBuildRangeInfoKHR{};
+	buildOffset.firstVertex = 0;
+	buildOffset.primitiveCount = maxPrimitiveCount;
+	buildOffset.primitiveOffset = offsetof(hri::Vertex, position);
+	buildOffset.transformOffset = 0;
+
+	ASInput asInput = ASInput{};
+	asInput.buildFlags = buildFlags;
+	asInput.geometry.push_back(geometry);
+	asInput.buildOffsets.push_back(buildOffset);
+
+	return asInput;
 }
 
-VkAccelerationStructureBuildGeometryInfoKHR AccelerationStructureGeometryBuilder::getBuildGeometryInfo(
+ASBuilder::ASInput ASBuilder::instancesToGeometry(
+	const hri::BufferResource& instanceBuffer,
+	size_t instanceCount,
+	bool arrayOfPointers,
+	VkBuildAccelerationStructureFlagsKHR buildFlags,
+	VkGeometryFlagsKHR geometryFlags
+) const
+{
+	VkAccelerationStructureGeometryInstancesDataKHR instanceGeometry = VkAccelerationStructureGeometryInstancesDataKHR{};
+	instanceGeometry.arrayOfPointers = arrayOfPointers;
+	instanceGeometry.data.deviceAddress = raytracing::getDeviceAddress(m_ctx, instanceBuffer);
+
+	VkAccelerationStructureGeometryKHR geometry = VkAccelerationStructureGeometryKHR{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR };
+	geometry.flags = geometryFlags;
+	geometry.geometryType = VK_GEOMETRY_TYPE_INSTANCES_KHR;
+	geometry.geometry.instances = instanceGeometry;
+
+	VkAccelerationStructureBuildRangeInfoKHR buildOffset = VkAccelerationStructureBuildRangeInfoKHR{};
+	buildOffset.firstVertex = 0;
+	buildOffset.primitiveCount = static_cast<uint32_t>(instanceCount);
+	buildOffset.primitiveOffset = 0;
+	buildOffset.transformOffset = 0;
+
+	ASInput asInput = ASInput{};
+	asInput.buildFlags = buildFlags;
+	asInput.geometry.push_back(geometry);
+	asInput.buildOffsets.push_back(buildOffset);
+
+	return asInput;
+}
+
+std::vector<ASBuilder::ASBuildInfo> ASBuilder::generateASBuildInfo(
+	const std::vector<ASInput>& inputs,
+	ASSizeInfo& sizeInfo,
+	VkAccelerationStructureTypeKHR asType,
 	VkBuildAccelerationStructureModeKHR buildMode,
-	VkAccelerationStructureKHR accelerationStructure,
-	VkDeviceOrHostAddressKHR scratchData
+	VkBuildAccelerationStructureFlagsKHR flags
 ) const
 {
-	VkAccelerationStructureBuildGeometryInfoKHR buildInfo = VkAccelerationStructureBuildGeometryInfoKHR{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR };
-	buildInfo.flags = m_flags;
-	buildInfo.mode = buildMode;
-	buildInfo.srcAccelerationStructure = accelerationStructure;
-	buildInfo.dstAccelerationStructure = accelerationStructure;
-	buildInfo.geometryCount = static_cast<uint32_t>(m_geometries.size());
-	buildInfo.pGeometries = m_geometries.data();
-	buildInfo.scratchData = scratchData;
+	const uint32_t blasCount = static_cast<uint32_t>(inputs.size());
 
-	return buildInfo;
+	sizeInfo = ASSizeInfo{};
+	std::vector<ASBuildInfo> buildInfos = std::vector<ASBuildInfo>(blasCount);
+
+	for (uint32_t i = 0; i < blasCount; i++)
+	{
+		const ASInput& input = inputs[i];
+		ASBuildInfo& buildInfo = buildInfos[i];
+
+		// Geometry info
+		buildInfo.geometryInfo.flags = input.buildFlags | flags;
+		buildInfo.geometryInfo.type = asType;
+		buildInfo.geometryInfo.mode = buildMode;
+		buildInfo.geometryInfo.geometryCount = static_cast<uint32_t>(input.geometry.size());
+		buildInfo.geometryInfo.pGeometries = input.geometry.data();
+
+		// Offset info
+		buildInfo.buildRanges = input.buildOffsets.data();
+
+		// Max primitive info
+		std::vector<uint32_t> maxPrimitiveCounts = {}; maxPrimitiveCounts.reserve(input.buildOffsets.size());
+		for (auto const& offset : input.buildOffsets)
+			maxPrimitiveCounts.push_back(offset.primitiveCount);
+
+		// Retrieve build size infos
+		m_ctx.accelStructDispatch.vkGetAccelerationStructureBuildSizes(
+			m_ctx.renderContext.device,
+			VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR,
+			&buildInfo.geometryInfo,
+			maxPrimitiveCounts.data(),
+			&buildInfo.buildSizes
+		);
+
+		sizeInfo.totalAccelerationStructureSize += buildInfo.buildSizes.accelerationStructureSize;
+		sizeInfo.maxBuildScratchBufferSize = hri::max(buildInfo.buildSizes.buildScratchSize, sizeInfo.maxBuildScratchBufferSize);
+		sizeInfo.maxUpdateScratchBufferSize = hri::max(buildInfo.buildSizes.updateScratchSize, sizeInfo.maxUpdateScratchBufferSize);
+	}
+
+	return buildInfos;
 }
 
-VkAccelerationStructureBuildSizesInfoKHR AccelerationStructureGeometryBuilder::getAccelerationStructureBuildSizesInfo(
-	VkAccelerationStructureBuildTypeKHR buildType,
-	const VkAccelerationStructureBuildGeometryInfoKHR& geometry
+void ASBuilder::cmdBuildAccelerationStructure(
+	VkCommandBuffer commandBuffer,
+	const ASBuildInfo& buildInfo,
+	VkAccelerationStructureKHR structure,
+	VkDeviceAddress scratchDataAddress
 ) const
 {
-	VkAccelerationStructureBuildSizesInfoKHR sizeInfo = VkAccelerationStructureBuildSizesInfoKHR{};
-	m_ctx.accelStructDispatch.vkGetAccelerationStructureBuildSizes(
-		m_ctx.renderContext.device,
-		buildType,
-		&geometry,
-		nullptr,
-		&sizeInfo
-	);
+	// Extend build info
+	VkAccelerationStructureBuildGeometryInfoKHR buildGeometryInfo = buildInfo.geometryInfo;
+	buildGeometryInfo.srcAccelerationStructure = VK_NULL_HANDLE;
+	buildGeometryInfo.dstAccelerationStructure = structure;
+	buildGeometryInfo.scratchData.deviceAddress = scratchDataAddress;
 
-	return sizeInfo;
+	// Build acceleration structure
+	m_ctx.accelStructDispatch.vkCmdBuildAccelerationStructures(
+		commandBuffer,
+		1,
+		&buildGeometryInfo,
+		&buildInfo.buildRanges
+	);
+}
+
+void ASBuilder::cmdBuildAccelerationStructures(
+	VkCommandBuffer commandBuffer,
+	const std::vector<ASBuildInfo>& buildInfos,
+	std::vector<VkAccelerationStructureKHR>& structures,
+	VkDeviceAddress scratchDataAddress
+) const
+{
+	uint32_t blasCount = static_cast<uint32_t>(buildInfos.size());
+	assert(buildInfos.size() == structures.size());
+
+	// Simple unbatched command recording
+	for (uint32_t blasIdx = 0; blasIdx < blasCount; blasIdx++)
+	{
+		cmdBuildAccelerationStructure(
+			commandBuffer,
+			buildInfos[blasIdx],
+			structures[blasIdx],
+			scratchDataAddress
+		);
+
+		VkMemoryBarrier barrier = VkMemoryBarrier{ VK_STRUCTURE_TYPE_MEMORY_BARRIER };
+		barrier.srcAccessMask = VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
+		barrier.dstAccessMask = VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR;
+		vkCmdPipelineBarrier(commandBuffer,
+			VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
+			VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
+			0,
+			1, &barrier,
+			0, nullptr,
+			0, nullptr
+		);
+	}
 }
