@@ -85,6 +85,7 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 {
 	assert(m_pPSO != nullptr);
 	assert(m_currentFrameInfo.sceneDataSetHandle != VK_NULL_HANDLE);
+	m_debug.cmdBeginLabel(frame.commandBuffer, "GBuffer Layout Pass");
 
 	VkExtent2D swapExtent = m_ctx.swapchain.extent;
 
@@ -133,6 +134,8 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 		vkCmdBindIndexBuffer(frame.commandBuffer, instance.pMesh->indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
 		vkCmdDrawIndexed(frame.commandBuffer, instance.pMesh->indexCount, 1, 0, 0, 0);
 	}
+
+	m_debug.cmdEndLabel(frame.commandBuffer);
 }
 
 SoftShadowsRTSubsystem::SoftShadowsRTSubsystem(
@@ -169,6 +172,9 @@ SoftShadowsRTSubsystem::SoftShadowsRTSubsystem(
 
 void SoftShadowsRTSubsystem::record(hri::ActiveFrame& frame) const
 {
+	assert(m_pPSO != nullptr);
+	m_debug.cmdBeginLabel(frame.commandBuffer, "Soft Shadows Raytracing Pass");
+
 	VkExtent2D swapExtent = m_ctx.swapchain.extent;
 
 	vkCmdBindPipeline(frame.commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
@@ -186,6 +192,8 @@ void SoftShadowsRTSubsystem::record(hri::ActiveFrame& frame) const
 		swapExtent.height,
 		1
 	);
+
+	m_debug.cmdEndLabel(frame.commandBuffer);
 }
 
 void SoftShadowsRTSubsystem::initSBT(
@@ -271,7 +279,9 @@ UISubsystem::~UISubsystem()
 
 void UISubsystem::record(hri::ActiveFrame& frame) const
 {
+	m_debug.cmdBeginLabel(frame.commandBuffer, "UI Pass");
 	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), frame.commandBuffer);
+	m_debug.cmdEndLabel(frame.commandBuffer);
 }
 
 PresentationSubsystem::PresentationSubsystem(
@@ -325,6 +335,7 @@ void PresentationSubsystem::record(hri::ActiveFrame& frame) const
 {
 	assert(m_pPSO != nullptr);
 	assert(m_currentFrameInfo.presentInputSetHandle != VK_NULL_HANDLE);
+	m_debug.cmdBeginLabel(frame.commandBuffer, "Present Pass");
 
 	VkExtent2D swapExtent = m_ctx.swapchain.extent;
 
@@ -353,4 +364,6 @@ void PresentationSubsystem::record(hri::ActiveFrame& frame) const
 
 	vkCmdBindPipeline(frame.commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
 	vkCmdDraw(frame.commandBuffer, 3, 1, 0, 0);
+
+	m_debug.cmdEndLabel(frame.commandBuffer);
 }

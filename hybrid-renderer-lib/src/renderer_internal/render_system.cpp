@@ -11,7 +11,8 @@ using namespace hri;
 
 IRenderSubsystem::IRenderSubsystem(RenderContext& ctx)
     :
-    m_ctx(ctx)
+    m_ctx(ctx),
+    m_debug(ctx)
 {
     //
 }

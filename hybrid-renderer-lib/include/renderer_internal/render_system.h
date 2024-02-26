@@ -5,6 +5,7 @@
 #include <vulkan/vulkan.h>
 
 #include "renderer_internal/descriptor_management.h"
+#include "renderer_internal/debug.h"
 #include "renderer_internal/render_context.h"
 #include "renderer_internal/render_core.h"
 #include "renderer_internal/shader_database.h"
@@ -33,6 +34,7 @@ namespace hri
 
     protected:
         RenderContext& m_ctx;
+        hri_debug::DebugLabelHandler m_debug;
         VkPipelineLayout m_layout = VK_NULL_HANDLE;
         PipelineStateObject* m_pPSO = nullptr;
     };
