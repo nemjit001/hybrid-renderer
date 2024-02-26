@@ -114,17 +114,41 @@ void Renderer::drawFrame()
 		frame.pipelineBarrier({ gbufferAlbedoBarrier, gbufferWPosBarrier, gbufferNormalBarrier, gbufferDepthBarrier });
 	}
 	
-	// Transition Raytracing targets to storage layout
+	// Transition Raytracing targets to storage layouts
 	{
-		// TODO: actually transition resources
+		VkImageMemoryBarrier2 softShadowGeneralBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
+		softShadowGeneralBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+		softShadowGeneralBarrier.dstStageMask = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR;
+		softShadowGeneralBarrier.srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
+		softShadowGeneralBarrier.dstAccessMask = VK_ACCESS_2_SHADER_WRITE_BIT_KHR;
+		softShadowGeneralBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		softShadowGeneralBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+		softShadowGeneralBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		softShadowGeneralBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		softShadowGeneralBarrier.image = m_softShadowRTPassResult->image;
+		softShadowGeneralBarrier.subresourceRange = VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+
+		frame.pipelineBarrier({ softShadowGeneralBarrier });
 	}
 
 	// Execute raytracing passes
 	m_subsystemManager.recordSubsystem("SoftShadowsRTSystem", frame);
 
-	// Transition Raytracing targets to sample layout
+	// Transition Raytracing targets to sample layouts
 	{
-		// TODO: actually transition resources
+		VkImageMemoryBarrier2 softShadowSampleBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
+		softShadowSampleBarrier.srcStageMask = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR;
+		softShadowSampleBarrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
+		softShadowSampleBarrier.srcAccessMask = VK_ACCESS_2_SHADER_WRITE_BIT_KHR;
+		softShadowSampleBarrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
+		softShadowSampleBarrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+		softShadowSampleBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		softShadowSampleBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		softShadowSampleBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		softShadowSampleBarrier.image = m_softShadowRTPassResult->image;
+		softShadowSampleBarrier.subresourceRange = VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+
+		frame.pipelineBarrier({ softShadowSampleBarrier });
 	}
 
 	// Record swapchain output passes
