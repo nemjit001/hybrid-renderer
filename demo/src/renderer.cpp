@@ -340,16 +340,25 @@ void Renderer::initSharedResources()
 void Renderer::initGlobalDescriptorSets()
 {
 	hri::DescriptorSetLayoutBuilder sceneDataSetBuilder = hri::DescriptorSetLayoutBuilder(m_context)
-		.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT);	// Camera data
+		.addBinding(SceneDataBindings::Camera, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT);	// Camera data
 
-	hri::DescriptorSetLayoutBuilder raytracingTargetSetBuilder = hri::DescriptorSetLayoutBuilder(m_context)
-		.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR);	// Soft shadow result
+	hri::DescriptorSetLayoutBuilder rtGlobalDescriptorSetBuilder = hri::DescriptorSetLayoutBuilder(m_context)
+		.addBinding(
+			RayTracingBindings::Tlas,
+			VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR,
+			VK_SHADER_STAGE_RAYGEN_BIT_KHR
+		)
+		.addBinding(
+			RayTracingBindings::SoftShadowOutImage,
+			VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			VK_SHADER_STAGE_RAYGEN_BIT_KHR
+		);
 
 	hri::DescriptorSetLayoutBuilder presentInputSetBuilder = hri::DescriptorSetLayoutBuilder(m_context)
-		.addBinding(PresentationSubsystem::renderResultBinding, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
+		.addBinding(PresentInputBindings::RenderResult, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
 
 	m_sceneDataSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(sceneDataSetBuilder.build()));
-	m_raytracingTargetSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(raytracingTargetSetBuilder.build()));
+	m_rtGlobalDescriptorSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(rtGlobalDescriptorSetBuilder.build()));
 	m_presentInputSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(presentInputSetBuilder.build()));
 }
 
@@ -476,7 +485,7 @@ void Renderer::prepareFrameResources(uint32_t frameIdx)
 	cameraUBOInfo.range = rendererFrameData.cameraUBO->bufferSize;
 
 	(*rendererFrameData.sceneDataSet)
-		.writeBuffer(0, &cameraUBOInfo)
+		.writeBuffer(SceneDataBindings::Camera, &cameraUBOInfo)
 		.flush();
 
 	VkDescriptorImageInfo gbufferAlbedoResult = VkDescriptorImageInfo{};
@@ -485,6 +494,6 @@ void Renderer::prepareFrameResources(uint32_t frameIdx)
 	gbufferAlbedoResult.sampler = m_renderResultLinearSampler->sampler;
 
 	(*rendererFrameData.presentInputSet)
-		.writeImage(PresentationSubsystem::renderResultBinding, &gbufferAlbedoResult)
+		.writeImage(PresentInputBindings::RenderResult, &gbufferAlbedoResult)
 		.flush();
 }

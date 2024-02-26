@@ -16,6 +16,22 @@ struct RendererFrameData
 	std::vector<RenderInstance> instances;
 };
 
+enum SceneDataBindings
+{
+	Camera,
+};
+
+enum RayTracingBindings
+{
+	Tlas,
+	SoftShadowOutImage,
+};
+
+enum PresentInputBindings
+{
+	RenderResult,
+};
+
 class Renderer
 {
 public:
@@ -64,7 +80,7 @@ private:
 
 	// Global descriptor set layouts
 	std::unique_ptr<hri::DescriptorSetLayout> m_sceneDataSetLayout;
-	std::unique_ptr<hri::DescriptorSetLayout> m_raytracingTargetSetLayout;
+	std::unique_ptr<hri::DescriptorSetLayout> m_rtGlobalDescriptorSetLayout;
 	std::unique_ptr<hri::DescriptorSetLayout> m_presentInputSetLayout;
 
 	// Render pass managers
