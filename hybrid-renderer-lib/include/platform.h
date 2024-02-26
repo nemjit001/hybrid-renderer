@@ -12,7 +12,7 @@
 #define HRI_ALIGNAS(size)	__attribute__((aligned(size)))
 #endif
 
-#define HRI_ALIGNED_SIZE(size, align) (unsigned long long)(size + (align - 1)) & ~(align - 1))
+#define HRI_ALIGNED_SIZE(size, align) (unsigned long long)((size + (align - 1)) & ~(align - 1))
 
 #ifndef NDEBUG
 #define HRI_DEBUG 1

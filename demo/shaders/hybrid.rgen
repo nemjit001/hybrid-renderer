@@ -1,0 +1,6 @@
+#version 460
+
+void main()
+{
+	// TODO: ray generation based on GBuffer data
+}

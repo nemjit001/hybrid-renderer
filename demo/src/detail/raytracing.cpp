@@ -142,6 +142,122 @@ VkPipeline RayTracingPipelineBuilder::build(VkPipelineCache cache, VkDeferredOpe
 	return pipeline;
 }
 
+ShaderBindingTable::ShaderBindingTable(
+	RayTracingContext& ctx,
+	VkStridedDeviceAddressRegionKHR rayGenRegion,
+	VkStridedDeviceAddressRegionKHR rayMissRegion,
+	VkStridedDeviceAddressRegionKHR rayHitRegion,
+	VkStridedDeviceAddressRegionKHR rayCallRegion
+)
+	:
+	m_ctx(ctx),
+	m_handleInfo(ShaderBindingTable::getShaderGroupHandleInfo(ctx)),
+	m_SBTSize(rayGenRegion.size + rayMissRegion.size + rayHitRegion.size + rayCallRegion.size),
+	m_SBTBuffer(
+		m_ctx.renderContext,
+		m_SBTSize,
+		VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT_KHR
+		| VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR,
+		true
+	),
+	regions{ rayGenRegion, rayMissRegion, rayHitRegion, rayCallRegion }
+{
+	//
+}
+
+ShaderBindingTable::ShaderGroupHandleInfo ShaderBindingTable::getShaderGroupHandleInfo(RayTracingContext& ctx)
+{
+	VkPhysicalDeviceRayTracingPropertiesNV rtProperties = VkPhysicalDeviceRayTracingPropertiesNV{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PROPERTIES_NV };
+	VkPhysicalDeviceProperties2 properties = VkPhysicalDeviceProperties2{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2_KHR };
+	properties.pNext = &rtProperties;
+
+	vkGetPhysicalDeviceProperties2(ctx.renderContext.gpu, &properties);
+	size_t handleSize = rtProperties.shaderGroupHandleSize;
+	size_t baseAlignment = rtProperties.shaderGroupBaseAlignment;
+
+	return ShaderGroupHandleInfo{
+		handleSize,
+		baseAlignment,
+		HRI_ALIGNED_SIZE(handleSize, baseAlignment),
+	};
+}
+
+void ShaderBindingTable::populateSBT(
+	const std::vector<uint8_t>& shaderGroupHandles,
+	size_t missHandleCount,
+	size_t hitHandleCount,
+	size_t callHandleCount
+)
+{
+	VkDeviceAddress SBTAdress = raytracing::getDeviceAddress(m_ctx, m_SBTBuffer);
+
+	// Set region device addresses
+	regions[rayGenRegionIdx].deviceAddress = SBTAdress + getAddressRegionOffset(rayGenRegionIdx);
+	if (missHandleCount > 0) regions[rayMissRegionIdx].deviceAddress = SBTAdress + getAddressRegionOffset(rayMissRegionIdx);
+	if (hitHandleCount > 0)	regions[rayHitRegionIdx].deviceAddress = SBTAdress + getAddressRegionOffset(rayHitRegionIdx);
+	if (callHandleCount > 0) regions[rayCallRegionIdx].deviceAddress = SBTAdress + getAddressRegionOffset(rayCallRegionIdx);
+
+	// Retrieve buffer pointers
+	size_t handleIdx = 0;
+	const uint8_t* pHandles = shaderGroupHandles.data();
+	uint8_t* pSBTData = reinterpret_cast<uint8_t*>(m_SBTBuffer.map());
+	uint8_t* pTargetData = nullptr;
+
+	// Copy ray gen
+	pTargetData = pSBTData + getAddressRegionOffset(rayGenRegionIdx);
+	memcpy(pTargetData, getShaderGroupHandleOffset(pHandles, handleIdx), m_handleInfo.handleSize);
+	handleIdx++;
+
+	// Copy ray miss
+	pTargetData = pSBTData + getAddressRegionOffset(rayMissRegionIdx);
+	for (size_t i = 0; i < missHandleCount; i++, handleIdx++)
+	{
+		memcpy(pTargetData, getShaderGroupHandleOffset(pHandles, handleIdx), m_handleInfo.handleSize);
+		pTargetData += regions[1].stride;
+	}
+
+	// Copy ray hit
+	pTargetData = pSBTData + getAddressRegionOffset(rayHitRegionIdx);
+	for (size_t i = 0; i < hitHandleCount; i++, handleIdx++)
+	{
+		memcpy(pTargetData, getShaderGroupHandleOffset(pHandles, handleIdx), m_handleInfo.handleSize);
+		pTargetData += regions[2].stride;
+	}
+
+	// Copy ray call
+	pTargetData = pSBTData + getAddressRegionOffset(rayCallRegionIdx);
+	for (size_t i = 0; i < callHandleCount; i++, handleIdx++)
+	{
+		memcpy(pTargetData, getShaderGroupHandleOffset(pHandles, handleIdx), m_handleInfo.handleSize);
+		pTargetData += regions[3].stride;
+	}
+
+	m_SBTBuffer.unmap();
+}
+
+size_t ShaderBindingTable::getAddressRegionOffset(size_t regionIdx) const
+{
+	switch (regionIdx)
+	{
+	case rayGenRegionIdx:
+		return 0;
+	case rayMissRegionIdx:
+		return regions[0].size;
+	case rayHitRegionIdx:
+		return regions[0].size + regions[1].size;
+	case rayCallRegionIdx:
+		return regions[0].size + regions[1].size + regions[2].size;
+	default:
+		return 0;
+	}
+}
+
+void* ShaderBindingTable::getShaderGroupHandleOffset(const void* pHandles, size_t index) const
+{
+	assert(pHandles != nullptr);
+	return reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(pHandles) + index * m_handleInfo.handleSize);
+}
+
 AccelerationStructure::AccelerationStructure(RayTracingContext& ctx, VkAccelerationStructureTypeKHR type, size_t size)
 	:
 	m_ctx(ctx),

@@ -35,6 +35,12 @@ namespace hri
 		/// @param offset Offset into target buffer for data start.
 		void copyToBuffer(const void* pData, size_t size, size_t offset = 0);
 
+		void* map() const;
+
+		void unmap() const;
+
+		/// @brief Get Buffer Device Address info for this buffer.
+		/// @return A filled out VkBufferDeviceAddressInfo struct.
 		inline VkBufferDeviceAddressInfo deviceAddressInfo() const
 		{
 			VkBufferDeviceAddressInfo addressInfo = VkBufferDeviceAddressInfo{ VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO };

@@ -76,15 +76,26 @@ void BufferResource::copyToBuffer(const void* pData, size_t size, size_t offset)
 {
 	assert(pData != nullptr);
 	assert(offset + size <= bufferSize);
+
+	void* pBuffer = map();
+	void* pBufferLocation = reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(pBuffer) + offset);
+	memcpy(pBufferLocation, pData, size);
+	unmap();
+}
+
+void* BufferResource::map() const
+{
 	assert(hostVisible == true);
 
 	void* pBuffer = nullptr;
 	vmaMapMemory(m_ctx.allocator, m_allocation, &pBuffer);
 	assert(pBuffer != nullptr);
 
-	void* pBufferLocation = reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(pBuffer) + offset);
-	memcpy(pBufferLocation, pData, size);
+	return pBuffer;
+}
 
+void BufferResource::unmap() const
+{
 	vmaUnmapMemory(m_ctx.allocator, m_allocation);
 }
 

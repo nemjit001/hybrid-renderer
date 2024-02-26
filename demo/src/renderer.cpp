@@ -164,7 +164,10 @@ void Renderer::drawFrame()
 void Renderer::initShaderDB()
 {
 	// Raytracing Shaders
-	// TODO: load all raytracing shaders
+	m_shaderDatabase.registerShader("HybridRayGen", hri::Shader::loadFile(m_context, "./shaders/hybrid.rgen.spv", VK_SHADER_STAGE_RAYGEN_BIT_KHR));
+	m_shaderDatabase.registerShader("SoftShadowMiss", hri::Shader::loadFile(m_context, "./shaders/soft_shadow.rmiss.spv", VK_SHADER_STAGE_MISS_BIT_KHR));
+	m_shaderDatabase.registerShader("SoftShadowClosestHit", hri::Shader::loadFile(m_context, "./shaders/soft_shadow.rchit.spv", VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR));
+
 
 	// Vertex shaders
 	m_shaderDatabase.registerShader("PresentVert", hri::Shader::loadFile(m_context, "./shaders/present.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));

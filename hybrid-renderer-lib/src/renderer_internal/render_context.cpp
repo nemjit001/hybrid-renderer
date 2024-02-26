@@ -108,7 +108,7 @@ RenderContext::RenderContext(RenderContextCreateInfo& createInfo)
         .build().value();
 
     VmaAllocatorCreateInfo allocatorCreateInfo = VmaAllocatorCreateInfo{};
-    allocatorCreateInfo.flags = 0;
+    allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
     allocatorCreateInfo.instance = instance;
     allocatorCreateInfo.physicalDevice = gpu;
     allocatorCreateInfo.device = device;

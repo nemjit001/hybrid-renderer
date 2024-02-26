@@ -105,6 +105,55 @@ namespace raytracing
 		VkPipelineLayout m_layout = VK_NULL_HANDLE;
 	};
 
+	class ShaderBindingTable
+	{
+	public:
+		struct ShaderGroupHandleInfo
+		{
+			size_t handleSize			= 0;
+			size_t baseAlignment		= 0;
+			size_t alignedHandleSize	= 0;
+		};
+
+	public:
+		ShaderBindingTable(
+			RayTracingContext& ctx,
+			VkStridedDeviceAddressRegionKHR rayGenRegion,
+			VkStridedDeviceAddressRegionKHR rayMissRegion,
+			VkStridedDeviceAddressRegionKHR rayHitRegion,
+			VkStridedDeviceAddressRegionKHR rayCallRegion
+		);
+
+		virtual ~ShaderBindingTable() = default;
+
+		void populateSBT(
+			const std::vector<uint8_t>& shaderGroupHandles,
+			size_t missHandleCount,
+			size_t hitHandleCount,
+			size_t callHandleCount
+		);
+
+		static ShaderGroupHandleInfo getShaderGroupHandleInfo(RayTracingContext& ctx);
+
+	private:
+		size_t getAddressRegionOffset(size_t regionIdx) const;
+
+		void* getShaderGroupHandleOffset(const void* pHandles, size_t index) const;
+
+	public:
+		static const size_t rayGenRegionIdx			= 0;
+		static const size_t rayMissRegionIdx		= 1;
+		static const size_t rayHitRegionIdx			= 2;
+		static const size_t rayCallRegionIdx		= 3;
+		VkStridedDeviceAddressRegionKHR regions[4]	= {};
+
+	private:
+		RayTracingContext& m_ctx;
+		ShaderGroupHandleInfo m_handleInfo;
+		size_t m_SBTSize;
+		hri::BufferResource m_SBTBuffer;
+	};
+
 	/// @brief An acceleration structure is used for ray tracing to improve ray traversal performance.
 	class AccelerationStructure
 	{

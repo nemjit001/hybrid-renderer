@@ -146,14 +146,25 @@ SoftShadowsRTSubsystem::SoftShadowsRTSubsystem(
 	m_layout = hri::PipelineLayoutBuilder(ctx.renderContext)
 		.build();
 
-	// TODO: set up raytracing shaders for soft shadows
+	const hri::Shader* pRayGen = shaderDB.getShader("HybridRayGen");
+	const hri::Shader* pRayMiss = shaderDB.getShader("SoftShadowMiss");
+	const hri::Shader* pRayClosestHit = shaderDB.getShader("SoftShadowClosestHit");
 
 	VkPipeline raytracingPipeline = raytracing::RayTracingPipelineBuilder(ctx)
+		.addShaderStage(pRayGen->stage, pRayGen->module)
+		.addShaderStage(pRayMiss->stage, pRayMiss->module)
+		.addShaderStage(pRayClosestHit->stage, pRayClosestHit->module)
+		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR, 0)	// Ray Gen
+		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR,	1)	// Ray Miss
+		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR,	VK_SHADER_UNUSED_KHR, 2) // Ray Hit
 		.setMaxRecursionDepth()
 		.setLayout(m_layout)
-		.build();
+		.build(shaderDB.pipelineCache());
 
 	m_pPSO = shaderDB.registerPipeline("SoftShadowsRTPipeline", VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, raytracingPipeline);
+
+	// Init the SBT
+	initSBT(raytracingPipeline, 1, 1, 0);
 }
 
 void SoftShadowsRTSubsystem::record(hri::ActiveFrame& frame) const
@@ -165,17 +176,68 @@ void SoftShadowsRTSubsystem::record(hri::ActiveFrame& frame) const
 	// TODO: bind raytracing descriptor sets & push raytracing constants
 	//	- rt descriptor sets have a storage image, all scene materials & geometry, and acceleration structures bound
 
-	// TODO: set shader binding table pointers
-	//m_rtCtx.rayTracingDispatch.vkCmdTraceRays(
-	//	frame.commandBuffer,
-	//	nullptr,
-	//	nullptr,
-	//	nullptr,
-	//	nullptr,
-	//	swapExtent.width,
-	//	swapExtent.height,
-	//	1
-	//);
+	m_rtCtx.rayTracingDispatch.vkCmdTraceRays(
+		frame.commandBuffer,
+		&m_SBT->regions[raytracing::ShaderBindingTable::rayGenRegionIdx],
+		&m_SBT->regions[raytracing::ShaderBindingTable::rayMissRegionIdx],
+		&m_SBT->regions[raytracing::ShaderBindingTable::rayHitRegionIdx],
+		&m_SBT->regions[raytracing::ShaderBindingTable::rayCallRegionIdx],
+		swapExtent.width,
+		swapExtent.height,
+		1
+	);
+}
+
+void SoftShadowsRTSubsystem::initSBT(
+	VkPipeline pipeline,
+	size_t missGroupCount,
+	size_t hitGroupCount,
+	size_t callGroupCount
+)
+{
+	// Set up Shader group handle data
+	const size_t shaderGroupCount = 1 + missGroupCount + hitGroupCount + callGroupCount;
+	raytracing::ShaderBindingTable::ShaderGroupHandleInfo sgHandleInfo = raytracing::ShaderBindingTable::getShaderGroupHandleInfo(m_rtCtx);
+
+	size_t shaderGroupDataSize = shaderGroupCount * sgHandleInfo.handleSize;
+	std::vector<uint8_t> shaderGroupHandles = std::vector<uint8_t>(shaderGroupDataSize);
+	HRI_VK_CHECK(m_rtCtx.rayTracingDispatch.vkGetRayTracingShaderGroupHandles(
+		m_ctx.device,
+		pipeline,
+		0,
+		3,
+		shaderGroupDataSize,
+		shaderGroupHandles.data()
+	));
+
+	// Set up SBT regions
+	VkStridedDeviceAddressRegionKHR rayGenRegion = {};
+	VkStridedDeviceAddressRegionKHR rayMissRegion = {};
+	VkStridedDeviceAddressRegionKHR rayHitRegion = {};
+	VkStridedDeviceAddressRegionKHR rayCallRegion = {};
+
+	rayGenRegion.size = 1 * sgHandleInfo.alignedHandleSize;
+	rayGenRegion.stride = sgHandleInfo.alignedHandleSize;
+
+	rayMissRegion.size = HRI_ALIGNED_SIZE(missGroupCount * sgHandleInfo.alignedHandleSize, sgHandleInfo.baseAlignment);
+	rayMissRegion.stride = sgHandleInfo.alignedHandleSize;
+
+	rayHitRegion.size = HRI_ALIGNED_SIZE(hitGroupCount * sgHandleInfo.alignedHandleSize, sgHandleInfo.baseAlignment);
+	rayHitRegion.stride = sgHandleInfo.alignedHandleSize;
+
+	rayCallRegion.size = HRI_ALIGNED_SIZE(callGroupCount * sgHandleInfo.alignedHandleSize, sgHandleInfo.baseAlignment);
+	rayCallRegion.stride = sgHandleInfo.alignedHandleSize;
+
+	// Set up SBT & populate
+	m_SBT = std::unique_ptr<raytracing::ShaderBindingTable>(new raytracing::ShaderBindingTable(
+		m_rtCtx,
+		rayGenRegion,
+		rayHitRegion,
+		rayMissRegion,
+		rayCallRegion
+	));
+
+	m_SBT->populateSBT(shaderGroupHandles, missGroupCount, hitGroupCount, callGroupCount);
 }
 
 UISubsystem::UISubsystem(

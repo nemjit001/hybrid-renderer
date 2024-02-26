@@ -1,6 +1,7 @@
 #pragma once
 
 #include <hybrid_renderer.h>
+#include <memory>
 
 #include "detail/raytracing.h"
 #include "scene.h"
@@ -71,8 +72,17 @@ public:
 
 	virtual void record(hri::ActiveFrame& frame) const override;
 
-private:
+protected:
+	void initSBT(
+		VkPipeline pipeline,
+		size_t missGroupCount,
+		size_t hitGroupCount,
+		size_t callGroupCount = 0
+	);
+
+protected:
 	raytracing::RayTracingContext& m_rtCtx;
+	std::unique_ptr<raytracing::ShaderBindingTable> m_SBT;
 };
 
 /// @brief The UI Subsystem handles drawing an UI overlay to the swap render pass.
