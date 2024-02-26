@@ -7,6 +7,7 @@
 #include "mesh.h"
 #include "texture.h"
 #include "renderer_internal/buffer.h"
+#include "renderer_internal/command_submission.h"
 #include "renderer_internal/descriptor_management.h"
 #include "renderer_internal/image.h"
 #include "renderer_internal/render_context.h"

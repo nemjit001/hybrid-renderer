@@ -42,7 +42,7 @@ private:
 
 	void recreateSwapDependentResources();
 
-	void prepareFrameResources(const hri::ActiveFrame& frame);
+	void prepareFrameResources(uint32_t frameIdx);
 
 private:
 	hri::RenderContext& m_context;
@@ -51,6 +51,7 @@ private:
 	hri::ShaderDatabase m_shaderDatabase;
 	hri::RenderSubsystemManager m_subsystemManager;
 	hri::DescriptorSetAllocator m_descriptorSetAllocator;
+	hri::CommandPool m_stagingPool;
 
 	// Renderer state
 	hri::Camera& m_camera;

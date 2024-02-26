@@ -54,6 +54,7 @@ namespace hri
 	private:
 		RenderContext& m_ctx;
 		DeviceQueue m_queue			= DeviceQueue{};
+		VkFence m_submitFence		= VK_NULL_HANDLE;
 		VkCommandPool m_commandPool	= VK_NULL_HANDLE;
 	};
 }

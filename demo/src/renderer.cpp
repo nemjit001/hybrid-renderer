@@ -14,6 +14,7 @@ Renderer::Renderer(raytracing::RayTracingContext& ctx, hri::Camera& camera, Scen
 	m_shaderDatabase(m_context),
 	m_subsystemManager(),
 	m_descriptorSetAllocator(m_context),
+	m_stagingPool(m_context, m_context.queues.transferQueue, VK_COMMAND_POOL_CREATE_TRANSIENT_BIT),
 	m_camera(camera),
 	m_activeScene(activeScene)
 {
@@ -27,6 +28,9 @@ Renderer::Renderer(raytracing::RayTracingContext& ctx, hri::Camera& camera, Scen
 	m_renderCore.setOnSwapchainInvalidateCallback([this](const vkb::Swapchain& _swapchain) {
 		recreateSwapDependentResources();
 	});
+
+	// Prepare first frame resources
+	prepareFrameResources(0);
 }
 
 Renderer::~Renderer()
@@ -43,10 +47,13 @@ void Renderer::setVSyncMode(hri::VSyncMode vsyncMode)
 void Renderer::drawFrame()
 {
 	m_renderCore.startFrame();
-
 	hri::ActiveFrame frame = m_renderCore.getActiveFrame();
-	prepareFrameResources(frame);
 
+	// Prepare next frame's resources
+	uint32_t nextFrameIdx = (frame.currentFrameIndex + 1) % hri::RenderCore::framesInFlight();
+	prepareFrameResources(nextFrameIdx);
+
+	// Begin command recording for this frame
 	frame.beginCommands();
 
 	// Record GBufferLayout pass
@@ -339,15 +346,25 @@ void Renderer::recreateSwapDependentResources()
 	m_swapchainPassManager->recreateResources();
 }
 
-void Renderer::prepareFrameResources(const hri::ActiveFrame& frame)
+void Renderer::prepareFrameResources(uint32_t frameIdx)
 {
-	RendererFrameData& rendererFrameData = m_frames[frame.currentFrameIndex];
+	assert(frameIdx < hri::RenderCore::framesInFlight());
 
-	// Update UBOs & scene renderables
-	// TODO: upload Device Local data to GPU
+	RendererFrameData& rendererFrameData = m_frames[frameIdx];
+	rendererFrameData.renderables = m_activeScene.generateDrawData(m_camera);
+
+	// Update UBO staging buffers
 	hri::CameraShaderData cameraData = m_camera.getShaderData();
 	rendererFrameData.cameraUBO->copyToBuffer(&cameraData, sizeof(hri::CameraShaderData));
-	rendererFrameData.renderables = m_activeScene.generateDrawData(m_camera);
+
+	// Upload UBO staging data
+	{
+		VkCommandBuffer uploadCommandBuffer = m_stagingPool.createCommandBuffer(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+
+		//
+
+		m_stagingPool.submitAndWait(uploadCommandBuffer);
+	}
 
 	// Update subsystem frame info
 	m_gbufferLayoutSubsystem->updateFrameInfo(GBufferLayoutFrameInfo{

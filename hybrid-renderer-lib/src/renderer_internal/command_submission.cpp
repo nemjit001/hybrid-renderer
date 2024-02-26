@@ -11,10 +11,13 @@ CommandPool::CommandPool(RenderContext& ctx, DeviceQueue queue, VkCommandPoolCre
 	m_ctx(ctx),
 	m_queue(queue)
 {
+	VkFenceCreateInfo fenceCreateInfo = VkFenceCreateInfo{ VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
+	fenceCreateInfo.flags = 0;
+	HRI_VK_CHECK(vkCreateFence(m_ctx.device, &fenceCreateInfo, nullptr, &m_submitFence));
+
 	VkCommandPoolCreateInfo createInfo = VkCommandPoolCreateInfo{ VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO };
 	createInfo.flags = flags | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 	createInfo.queueFamilyIndex = queue.family;
-
 	HRI_VK_CHECK(vkCreateCommandPool(m_ctx.device, &createInfo, nullptr, &m_commandPool));
 }
 
@@ -62,6 +65,8 @@ void CommandPool::reset(VkCommandPoolResetFlags flags)
 
 void CommandPool::submitAndWait(VkCommandBuffer cmdBuffer, bool endRecording)
 {
+	HRI_VK_CHECK(vkResetFences(m_ctx.device, 1, &m_submitFence));
+
 	if (endRecording)
 		HRI_VK_CHECK(vkEndCommandBuffer(cmdBuffer));
 
@@ -69,12 +74,14 @@ void CommandPool::submitAndWait(VkCommandBuffer cmdBuffer, bool endRecording)
 	submitInfo.commandBufferCount = 1;
 	submitInfo.pCommandBuffers = &cmdBuffer;
 
-	vkQueueSubmit(m_queue.handle, 1, &submitInfo, VK_NULL_HANDLE);
-	vkDeviceWaitIdle(m_ctx.device);	// FIXME: use fence based sync
+	HRI_VK_CHECK(vkQueueSubmit(m_queue.handle, 1, &submitInfo, m_submitFence));
+	HRI_VK_CHECK(vkWaitForFences(m_ctx.device, 1, &m_submitFence, VK_TRUE, UINT64_MAX));
+	freeCommandBuffer(cmdBuffer);
 }
 
 void CommandPool::release()
 {
 	reset();
+	vkDestroyFence(m_ctx.device, m_submitFence, nullptr);
 	vkDestroyCommandPool(m_ctx.device, m_commandPool, nullptr);
 }
