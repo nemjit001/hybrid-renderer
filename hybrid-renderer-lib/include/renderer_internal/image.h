@@ -59,12 +59,27 @@ namespace hri
 		/// @brief Destroy the internal image view handle.
 		void destroyView();
 
+		/// @brief Get the default component mapping for images.
+		/// @return A VkComponentMapping structure.
+		inline static constexpr VkComponentMapping DefaultComponentMapping()
+		{
+			return VkComponentMapping{
+				VK_COMPONENT_SWIZZLE_IDENTITY,
+				VK_COMPONENT_SWIZZLE_IDENTITY,
+				VK_COMPONENT_SWIZZLE_IDENTITY,
+				VK_COMPONENT_SWIZZLE_IDENTITY,
+			};
+		}
+
 	private:
 		void release();
 
 	public:
         VkExtent3D extent               = VkExtent3D{};
+		VkImageType imageType			= VK_IMAGE_TYPE_MAX_ENUM;
 		VkFormat format				    = VK_FORMAT_UNDEFINED;
+		VkSampleCountFlagBits samples	= VK_SAMPLE_COUNT_FLAG_BITS_MAX_ENUM;
+		VkImageUsageFlags usage			= 0;
 		VkImage image				    = VK_NULL_HANDLE;
         VkImageView view                = VK_NULL_HANDLE;
 

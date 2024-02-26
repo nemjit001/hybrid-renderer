@@ -114,9 +114,21 @@ void Renderer::drawFrame()
 		frame.pipelineBarrier({ gbufferAlbedoBarrier, gbufferWPosBarrier, gbufferNormalBarrier, gbufferDepthBarrier });
 	}
 	
+	// Transition Raytracing targets to storage layout
+	{
+		// TODO: actually transition resources
+	}
+
+	// Execute raytracing passes
+	m_subsystemManager.recordSubsystem("SoftShadowsRTSystem", frame);
+
+	// Transition Raytracing targets to sample layout
+	{
+		// TODO: actually transition resources
+	}
+
 	// Record swapchain output passes
 	m_swapchainPassManager->beginRenderPass(frame);
-	m_subsystemManager.recordSubsystem("SoftShadowsRTSystem", frame);
 	m_subsystemManager.recordSubsystem("PresentationSystem", frame);
 	m_subsystemManager.recordSubsystem("UISystem", frame);	// Must be drawn after present as overlay
 	m_swapchainPassManager->endRenderPass(frame);
@@ -259,6 +271,8 @@ void Renderer::initRenderPasses()
 
 void Renderer::initSharedResources()
 {
+	VkExtent2D swapExtent = m_context.swapchain.extent;
+
 	// init shared samplers
 	m_renderResultLinearSampler = std::unique_ptr<hri::ImageSampler>(new hri::ImageSampler(
 		m_context,
@@ -266,6 +280,26 @@ void Renderer::initSharedResources()
 		VK_FILTER_LINEAR,
 		VK_SAMPLER_MIPMAP_MODE_LINEAR
 	));
+
+	// Init raytracing targets
+	m_softShadowRTPassResult = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
+		m_context,
+		VK_IMAGE_TYPE_2D,
+		VK_FORMAT_R8_UNORM,
+		VK_SAMPLE_COUNT_1_BIT,
+		{ swapExtent.width, swapExtent.height, 1 },
+		1,
+		1,
+		VK_IMAGE_USAGE_STORAGE_BIT
+		| VK_IMAGE_USAGE_SAMPLED_BIT
+	));
+
+	// Initialize raytracing target views
+	m_softShadowRTPassResult->createView(
+		VK_IMAGE_VIEW_TYPE_2D,
+		hri::ImageResource::DefaultComponentMapping(),
+		VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 }
+	);
 }
 
 void Renderer::initGlobalDescriptorSets()
@@ -342,8 +376,29 @@ void Renderer::initRendererFrameData()
 
 void Renderer::recreateSwapDependentResources()
 {
+	VkExtent2D swapExtent = m_context.swapchain.extent;
+
 	m_gbufferLayoutPassManager->recreateResources();
 	m_swapchainPassManager->recreateResources();
+
+	// Recreate raytracing targets
+	m_softShadowRTPassResult = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
+		m_context,
+		m_softShadowRTPassResult->imageType,
+		m_softShadowRTPassResult->format,	// Reuse format, that's fine
+		m_softShadowRTPassResult->samples,
+		{ swapExtent.width, swapExtent.height, 1 },
+		1,
+		1,
+		m_softShadowRTPassResult->usage
+	));
+
+	// Recreate raytracing target views
+	m_softShadowRTPassResult->createView(
+		VK_IMAGE_VIEW_TYPE_2D,
+		hri::ImageResource::DefaultComponentMapping(),
+		VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 }
+	);
 }
 
 void Renderer::prepareFrameResources(uint32_t frameIdx)

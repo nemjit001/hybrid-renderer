@@ -89,7 +89,7 @@ namespace hri
 
 		/// @brief Retrieve number of frames in flight for this render core.
 		/// @return The max number of frames in flight.
-		static constexpr uint32_t framesInFlight() { return HRI_VK_FRAMES_IN_FLIGHT; }
+		inline static constexpr uint32_t framesInFlight() { return HRI_VK_FRAMES_IN_FLIGHT; }
 
 	private:
 		/// @brief Validate a swap chain operation result, setting the recreate flag if necessary.

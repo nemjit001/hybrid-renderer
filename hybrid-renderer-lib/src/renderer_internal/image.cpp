@@ -23,7 +23,10 @@ ImageResource::ImageResource(
 	:
 	m_ctx(ctx),
 	extent(extent),
-	format(format)
+	imageType(type),
+	format(format),
+	samples(samples),
+	usage(usage)
 {
 	VkImageCreateInfo imageCreateInfo = VkImageCreateInfo{ VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
     imageCreateInfo.flags = flags;

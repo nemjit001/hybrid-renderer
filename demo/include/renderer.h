@@ -68,6 +68,9 @@ private:
 	std::unique_ptr<hri::RenderPassResourceManager> m_gbufferLayoutPassManager;
 	std::unique_ptr<hri::SwapchainPassResourceManager> m_swapchainPassManager;
 
+	// Ray Tracing Targets
+	std::unique_ptr<hri::ImageResource> m_softShadowRTPassResult;
+
 	// Render subsystems
 	std::unique_ptr<GBufferLayoutSubsystem> m_gbufferLayoutSubsystem;
 	std::unique_ptr<SoftShadowsRTSubsystem> m_softShadowsRTSubsystem;
