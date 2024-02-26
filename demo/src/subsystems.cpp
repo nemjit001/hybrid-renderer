@@ -113,10 +113,10 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 
 	vkCmdBindPipeline(frame.commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
 
-	for (auto const& renderable : m_currentFrameInfo.renderables)
+	for (auto const& instance : m_currentFrameInfo.instances)
 	{
 		TransformPushConstant transformPushConstant = TransformPushConstant{
-			renderable.modelMatrix,
+			instance.modelMatrix,
 			hri::Float3x3(1.0f),
 		};
 
@@ -129,9 +129,9 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 		);
 
 		VkDeviceSize vertexOffsets[] = { 0 };
-		vkCmdBindVertexBuffers(frame.commandBuffer, 0, 1, &renderable.pMesh->vertexBuffer.buffer, vertexOffsets);
-		vkCmdBindIndexBuffer(frame.commandBuffer, renderable.pMesh->indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
-		vkCmdDrawIndexed(frame.commandBuffer, renderable.pMesh->indexCount, 1, 0, 0, 0);
+		vkCmdBindVertexBuffers(frame.commandBuffer, 0, 1, &instance.pMesh->vertexBuffer.buffer, vertexOffsets);
+		vkCmdBindIndexBuffer(frame.commandBuffer, instance.pMesh->indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdDrawIndexed(frame.commandBuffer, instance.pMesh->indexCount, 1, 0, 0, 0);
 	}
 }
 

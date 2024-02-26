@@ -35,10 +35,12 @@ struct SceneNode
 	SceneId meshLODs[MAX_LOD_LEVELS]	= { INVALID_SCENE_ID, INVALID_SCENE_ID, INVALID_SCENE_ID };
 };
 
-struct Renderable
+struct RenderInstance
 {
 	hri::Float4x4 modelMatrix;
+	Material* pMaterial;
 	hri::Mesh* pMesh;
+	// AccelerationStructure* pAccelerationStructure
 };
 
 class SceneGraph
@@ -55,8 +57,9 @@ public:
 
 	void update(float deltaTime);
 
-	// FIXME: refactor for batching & acceleration structure building / updating
-	std::vector<Renderable> generateDrawData(const hri::Camera& camera);
+	const std::vector<RenderInstance>& getInstanceData() const;
+
+	const std::vector<RenderInstance>& generateInstanceData(const hri::Camera& camera);
 
 private:
 	SceneNode::SceneId calculateLODLevel(const hri::Camera& camera, const SceneNode& node);
@@ -70,6 +73,7 @@ public:
 private:
 	raytracing::RayTracingContext& m_ctx;
 	raytracing::ASBuilder m_asBuilder;
+	std::vector<RenderInstance> m_instances = {};
 };
 
 class SceneLoader

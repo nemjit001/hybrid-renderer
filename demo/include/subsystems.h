@@ -14,8 +14,8 @@ struct TransformPushConstant
 
 struct GBufferLayoutFrameInfo
 {
-	VkDescriptorSet sceneDataSetHandle 	= VK_NULL_HANDLE;
-	std::vector<Renderable> renderables = {};
+	VkDescriptorSet sceneDataSetHandle 		= VK_NULL_HANDLE;
+	std::vector<RenderInstance> instances	= {};
 };
 
 struct PresentFrameInfo

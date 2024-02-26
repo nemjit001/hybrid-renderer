@@ -351,7 +351,7 @@ void Renderer::prepareFrameResources(uint32_t frameIdx)
 	assert(frameIdx < hri::RenderCore::framesInFlight());
 
 	RendererFrameData& rendererFrameData = m_frames[frameIdx];
-	rendererFrameData.renderables = m_activeScene.generateDrawData(m_camera);
+	rendererFrameData.instances = m_activeScene.generateInstanceData(m_camera);
 
 	// Update UBO staging buffers
 	hri::CameraShaderData cameraData = m_camera.getShaderData();
@@ -369,7 +369,7 @@ void Renderer::prepareFrameResources(uint32_t frameIdx)
 	// Update subsystem frame info
 	m_gbufferLayoutSubsystem->updateFrameInfo(GBufferLayoutFrameInfo{
 		rendererFrameData.sceneDataSet->set,
-		rendererFrameData.renderables,
+		rendererFrameData.instances,
 	});
 
 	m_presentSubsystem->updateFrameInfo(PresentFrameInfo{

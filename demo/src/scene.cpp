@@ -26,27 +26,32 @@ SceneGraph::SceneGraph(
 
 void SceneGraph::update(float deltaTime)
 {
-	// TODO: update TLAS & BLASses
+	// TODO: rebuild TLAS & BLASses
 }
 
-std::vector<Renderable> SceneGraph::generateDrawData(const hri::Camera& camera)
+const std::vector<RenderInstance>& SceneGraph::getInstanceData() const
 {
-	// TODO: batch nodes by material, then by mesh
-	std::vector<Renderable> renderables = {};
+	return m_instances;
+}
+
+const std::vector<RenderInstance>& SceneGraph::generateInstanceData(const hri::Camera& camera)
+{
+	m_instances.clear();
 
 	for (auto const& node : nodes)
 	{
 		SceneNode::SceneId meshLOD = calculateLODLevel(camera, node);
 		assert(meshLOD != INVALID_SCENE_ID);
 
-		// TODO: upload mesh data into scene buffers, generate TLAS
-		renderables.push_back(Renderable{
+		// TODO: upload mesh data into scene buffers, build TLAS from instance BLASses
+		m_instances.push_back(RenderInstance{
 			node.transform.modelMatrix(),
+			&materials.at(node.material),
 			&meshes.at(meshLOD),
 		});
 	}
 
-	return renderables;
+	return m_instances;
 }
 
 SceneNode::SceneId SceneGraph::calculateLODLevel(const hri::Camera& camera, const SceneNode& node)

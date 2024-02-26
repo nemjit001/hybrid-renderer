@@ -13,7 +13,7 @@ struct RendererFrameData
 	std::unique_ptr<hri::BufferResource> cameraUBO;
 	std::unique_ptr<hri::DescriptorSetManager> sceneDataSet;
 	std::unique_ptr<hri::DescriptorSetManager> presentInputSet;
-	std::vector<Renderable> renderables;
+	std::vector<RenderInstance> instances;
 };
 
 class Renderer
