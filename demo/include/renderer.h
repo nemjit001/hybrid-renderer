@@ -24,7 +24,17 @@ enum SceneDataBindings
 enum RayTracingBindings
 {
 	Tlas,
+	GBufferAlbedo,
+	GBufferWorldPos,
+	GBufferNormal,
+	GBufferDepth,
 	SoftShadowOutImage,
+};
+
+enum ComposeInputBindings
+{
+	SoftShadowImage,
+	DirectIlluminationImage,
 };
 
 enum PresentInputBindings
