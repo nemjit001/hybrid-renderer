@@ -3,16 +3,17 @@
 #include <hybrid_renderer.h>
 #include <memory>
 
+#include "detail/raytracing.h"
 #include "subsystems.h"
 
-Renderer::Renderer(hri::RenderContext& ctx, hri::Camera& camera, SceneGraph& activeScene)
+Renderer::Renderer(raytracing::RayTracingContext& ctx, hri::Camera& camera, SceneGraph& activeScene)
 	:
-	m_context(ctx),
+	m_context(ctx.renderContext),
 	m_raytracingContext(ctx),
-	m_renderCore(ctx),
-	m_shaderDatabase(ctx),
+	m_renderCore(m_context),
+	m_shaderDatabase(m_context),
 	m_subsystemManager(),
-	m_descriptorSetAllocator(ctx),
+	m_descriptorSetAllocator(m_context),
 	m_camera(camera),
 	m_activeScene(activeScene)
 {

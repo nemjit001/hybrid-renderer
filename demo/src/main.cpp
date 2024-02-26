@@ -5,6 +5,7 @@
 #include <imgui.h>
 
 #include "demo.h"
+#include "detail/raytracing.h"
 #include "material.h"
 #include "renderer.h"
 #include "scene.h"
@@ -173,6 +174,7 @@ int main()
 	};
 
 	hri::RenderContext renderContext = hri::RenderContext(ctxCreateInfo);
+	raytracing::RayTracingContext rtContext = raytracing::RayTracingContext(renderContext);
 
 	// Set up world cam
 	hri::Camera camera = hri::Camera(
@@ -184,11 +186,9 @@ int main()
 		hri::Float3(0.0f, 1.0f, 0.0f)
 	);
 
-	// Load scene file
-	SceneGraph scene = SceneLoader::load(renderContext, "./assets/default_scene.json");
-
-	// Create renderer
-	Renderer renderer = Renderer(renderContext, camera, scene);
+	// Load scene file & Create renderer
+	SceneGraph scene = SceneLoader::load(rtContext, "./assets/default_scene.json");
+	Renderer renderer = Renderer(rtContext, camera, scene);
 
 	printf("Startup complete\n");
 
@@ -205,7 +205,8 @@ int main()
 		drawConfigWindow(gFrameTimer.deltaTime, camera, scene);
 		uiManager.endDraw();
 
-		// Draw renderer frame
+		// Update scene & draw renderer frame
+		scene.update(gFrameTimer.deltaTime);
 		renderer.drawFrame();
 
 		// Update camera state

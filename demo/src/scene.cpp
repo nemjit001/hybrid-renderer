@@ -9,16 +9,24 @@
 #include "demo.h"
 
 SceneGraph::SceneGraph(
+	raytracing::RayTracingContext& ctx,
 	std::vector<Material>&& materials,
 	std::vector<hri::Mesh>&& meshes,
 	std::vector<SceneNode>&& nodes
 )
 	:
+	m_ctx(ctx),
+	m_asBuilder(ctx),
 	materials(std::move(materials)),
 	meshes(std::move(meshes)),
 	nodes(std::move(nodes))
 {
-	//
+	// TODO: build BLASses & TLAS
+}
+
+void SceneGraph::update(float deltaTime)
+{
+	// TODO: update TLAS & BLASses
 }
 
 std::vector<Renderable> SceneGraph::generateDrawData(const hri::Camera& camera)
@@ -62,7 +70,7 @@ SceneNode::SceneId SceneGraph::calculateLODLevel(const hri::Camera& camera, cons
 	return node.meshLODs[LODIndex];
 }
 
-SceneGraph SceneLoader::load(hri::RenderContext& context, const std::string& path)
+SceneGraph SceneLoader::load(raytracing::RayTracingContext& context, const std::string& path)
 {
 	std::ifstream sceneFile = std::ifstream(path);
 	nlohmann::json sceneJSON = nlohmann::json::parse(sceneFile);
@@ -98,7 +106,7 @@ SceneGraph SceneLoader::load(hri::RenderContext& context, const std::string& pat
 			if (loadOBJMesh(meshFile, lodLevel, newMaterial, vertices, indices, loadMaterial))
 			{
 				newNode.meshLODs[lodIndex] = meshes.size();
-				meshes.push_back(std::move(hri::Mesh(context, vertices, indices)));
+				meshes.push_back(std::move(hri::Mesh(context.renderContext, vertices, indices)));
 			}
 
 			if (lodIndex >= MAX_LOD_LEVELS)
@@ -112,6 +120,7 @@ SceneGraph SceneLoader::load(hri::RenderContext& context, const std::string& pat
 	}
 
 	return SceneGraph(
+		context,
 		std::move(materials),
 		std::move(meshes),
 		std::move(nodes)

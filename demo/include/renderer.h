@@ -3,6 +3,7 @@
 #include <hybrid_renderer.h>
 #include <memory>
 
+#include "detail/raytracing.h"
 #include "scene.h"
 #include "subsystems.h"
 
@@ -18,7 +19,7 @@ struct RendererFrameData
 class Renderer
 {
 public:
-	Renderer(hri::RenderContext& ctx, hri::Camera& camera, SceneGraph& activeScene);
+	Renderer(raytracing::RayTracingContext& ctx, hri::Camera& camera, SceneGraph& activeScene);
 
 	virtual ~Renderer();
 
@@ -45,7 +46,7 @@ private:
 
 private:
 	hri::RenderContext& m_context;
-	raytracing::RayTracingContext m_raytracingContext;
+	raytracing::RayTracingContext& m_raytracingContext;
 	hri::RenderCore m_renderCore;
 	hri::ShaderDatabase m_shaderDatabase;
 	hri::RenderSubsystemManager m_subsystemManager;

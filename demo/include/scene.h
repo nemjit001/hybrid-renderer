@@ -3,6 +3,7 @@
 #include <hybrid_renderer.h>
 #include <string>
 
+#include "detail/raytracing.h"
 #include "material.h"
 
 #define INVALID_SCENE_ID	(size_t)(~0)
@@ -44,6 +45,7 @@ class SceneGraph
 {
 public:
 	SceneGraph(
+		raytracing::RayTracingContext& ctx,
 		std::vector<Material>&& materials,
 		std::vector<hri::Mesh>&& meshes,
 		std::vector<SceneNode>&& nodes
@@ -51,6 +53,9 @@ public:
 
 	virtual ~SceneGraph() = default;
 
+	void update(float deltaTime);
+
+	// FIXME: refactor for batching & acceleration structure building / updating
 	std::vector<Renderable> generateDrawData(const hri::Camera& camera);
 
 private:
@@ -61,12 +66,16 @@ public:
 	std::vector<Material> materials;
 	std::vector<hri::Mesh> meshes;
 	std::vector<SceneNode> nodes;
+
+private:
+	raytracing::RayTracingContext& m_ctx;
+	raytracing::ASBuilder m_asBuilder;
 };
 
 class SceneLoader
 {
 public:
-	static SceneGraph load(hri::RenderContext& context, const std::string& path);
+	static SceneGraph load(raytracing::RayTracingContext& context, const std::string& path);
 
 private:
 	static bool loadOBJMesh(
