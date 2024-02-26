@@ -189,6 +189,7 @@ void ShaderBindingTable::populateSBT(
 	size_t callHandleCount
 )
 {
+	// TODO: check SBT is not written to out of bounds
 	VkDeviceAddress SBTAdress = raytracing::getDeviceAddress(m_ctx, m_SBTBuffer);
 
 	// Set region device addresses
