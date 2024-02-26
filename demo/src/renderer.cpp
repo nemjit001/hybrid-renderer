@@ -274,6 +274,13 @@ void Renderer::initSharedResources()
 	VkExtent2D swapExtent = m_context.swapchain.extent;
 
 	// init shared samplers
+	m_renderResultNearestSampler = std::unique_ptr<hri::ImageSampler>(new hri::ImageSampler(
+		m_context,
+		VK_FILTER_NEAREST,
+		VK_FILTER_NEAREST,
+		VK_SAMPLER_MIPMAP_MODE_NEAREST
+	));
+
 	m_renderResultLinearSampler = std::unique_ptr<hri::ImageSampler>(new hri::ImageSampler(
 		m_context,
 		VK_FILTER_LINEAR,
@@ -305,13 +312,16 @@ void Renderer::initSharedResources()
 void Renderer::initGlobalDescriptorSets()
 {
 	hri::DescriptorSetLayoutBuilder sceneDataSetBuilder = hri::DescriptorSetLayoutBuilder(m_context)
-		.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT);
+		.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT);	// Camera data
 
-	m_sceneDataSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(sceneDataSetBuilder.build()));
+	hri::DescriptorSetLayoutBuilder raytracingTargetSetBuilder = hri::DescriptorSetLayoutBuilder(m_context)
+		.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR);	// Soft shadow result
 
 	hri::DescriptorSetLayoutBuilder presentInputSetBuilder = hri::DescriptorSetLayoutBuilder(m_context)
-		.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
+		.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);	// Presentable image
 
+	m_sceneDataSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(sceneDataSetBuilder.build()));
+	m_raytracingTargetSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(raytracingTargetSetBuilder.build()));
 	m_presentInputSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(presentInputSetBuilder.build()));
 }
 

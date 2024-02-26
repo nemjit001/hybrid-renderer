@@ -58,10 +58,12 @@ private:
 	SceneGraph& m_activeScene;
 
 	// Shared preinitialized samplers
+	std::unique_ptr<hri::ImageSampler> m_renderResultNearestSampler;
 	std::unique_ptr<hri::ImageSampler> m_renderResultLinearSampler;
 
 	// Global descriptor set layouts
 	std::unique_ptr<hri::DescriptorSetLayout> m_sceneDataSetLayout;
+	std::unique_ptr<hri::DescriptorSetLayout> m_raytracingTargetSetLayout;
 	std::unique_ptr<hri::DescriptorSetLayout> m_presentInputSetLayout;
 
 	// Render pass managers

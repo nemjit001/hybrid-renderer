@@ -140,6 +140,7 @@ SoftShadowsRTSubsystem::SoftShadowsRTSubsystem(
 	hri::ShaderDatabase& shaderDB
 )
 	:
+	m_rtCtx(ctx),
 	hri::IRenderSubsystem(ctx.renderContext)
 {
 	m_layout = hri::PipelineLayoutBuilder(ctx.renderContext)
@@ -152,12 +153,29 @@ SoftShadowsRTSubsystem::SoftShadowsRTSubsystem(
 		.setLayout(m_layout)
 		.build();
 
-	shaderDB.registerPipeline("SoftShadowsRTPipeline", VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, raytracingPipeline);
+	m_pPSO = shaderDB.registerPipeline("SoftShadowsRTPipeline", VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, raytracingPipeline);
 }
 
 void SoftShadowsRTSubsystem::record(hri::ActiveFrame& frame) const
 {
-	//
+	VkExtent2D swapExtent = m_ctx.swapchain.extent;
+
+	vkCmdBindPipeline(frame.commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
+
+	// TODO: bind raytracing descriptor sets & push raytracing constants
+	//	- rt descriptor sets have a storage image, all scene materials & geometry, and acceleration structures bound
+
+	// TODO: set shader binding table pointers
+	//m_rtCtx.rayTracingDispatch.vkCmdTraceRays(
+	//	frame.commandBuffer,
+	//	nullptr,
+	//	nullptr,
+	//	nullptr,
+	//	nullptr,
+	//	swapExtent.width,
+	//	swapExtent.height,
+	//	1
+	//);
 }
 
 UISubsystem::UISubsystem(

@@ -70,6 +70,9 @@ public:
 	virtual ~SoftShadowsRTSubsystem() = default;
 
 	virtual void record(hri::ActiveFrame& frame) const override;
+
+private:
+	raytracing::RayTracingContext& m_rtCtx;
 };
 
 /// @brief The UI Subsystem handles drawing an UI overlay to the swap render pass.
