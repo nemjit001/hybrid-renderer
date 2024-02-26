@@ -128,6 +128,9 @@ public:
 	/// @param frameInfo FrameInfo to pass to the subsystem.
 	inline void updateFrameInfo(const PresentFrameInfo& frameInfo) { m_currentFrameInfo = frameInfo; }
 
+public:
+	static const uint32_t renderResultBinding = 0;
+
 protected:
 	PresentFrameInfo m_currentFrameInfo = PresentFrameInfo{};
 };

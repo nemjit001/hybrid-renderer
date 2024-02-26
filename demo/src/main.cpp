@@ -51,7 +51,7 @@ void drawConfigWindow(float deltaTime, hri::Camera& camera, SceneGraph& scene)
 	if (ImGui::Begin("Config"))
 	{
 		ImGui::SetWindowPos(ImVec2(10.0f, 10.0f), ImGuiCond_FirstUseEver);
-		ImGui::SetWindowSize(ImVec2(300.0f, 0.0f), ImGuiCond_FirstUseEver);
+		ImGui::SetWindowSize(ImVec2(0.0f, 0.0f), ImGuiCond_Always);
 
 		ImGui::SeparatorText("Status");
 		ImGui::Text("Resolution: %d x %d", gDisplayWidth, gDisplayHeight);

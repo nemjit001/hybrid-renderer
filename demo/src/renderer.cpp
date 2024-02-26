@@ -342,7 +342,7 @@ void Renderer::initGlobalDescriptorSets()
 		.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR);	// Soft shadow result
 
 	hri::DescriptorSetLayoutBuilder presentInputSetBuilder = hri::DescriptorSetLayoutBuilder(m_context)
-		.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);	// Presentable image
+		.addBinding(PresentationSubsystem::renderResultBinding, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
 
 	m_sceneDataSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(sceneDataSetBuilder.build()));
 	m_raytracingTargetSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(raytracingTargetSetBuilder.build()));
@@ -481,6 +481,6 @@ void Renderer::prepareFrameResources(uint32_t frameIdx)
 	gbufferAlbedoResult.sampler = m_renderResultLinearSampler->sampler;
 
 	(*rendererFrameData.presentInputSet)
-		.writeImage(0, &gbufferAlbedoResult)
+		.writeImage(PresentationSubsystem::renderResultBinding, &gbufferAlbedoResult)
 		.flush();
 }

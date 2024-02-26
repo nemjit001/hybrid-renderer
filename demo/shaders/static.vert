@@ -30,7 +30,7 @@ void main()
     vec4 wPos = transform.model * vec4(VertexPosition, 1);
 
     vs_out.wPos = wPos;
-    vs_out.normal = normalize(transform.normal * VertexNormal);
+    vs_out.normal = normalize(transform.model * vec4(VertexNormal, 0)).xyz;
     vs_out.texCoord = VertexTexCoord;
 
     gl_Position = camera.project * camera.view * vs_out.wPos;
