@@ -26,7 +26,8 @@ namespace hri
 		/// @param ctx Render Context to use.
 		/// @param vertices A vector of vertices to draw, may not be empty.
 		/// @param indices A vector of indices into the vertex array, may not be empty.
-		Mesh(RenderContext& ctx, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
+		/// @param bufferFlags Additional create flags to specify for vertex & index buffers.
+		Mesh(RenderContext& ctx, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, VkBufferUsageFlags bufferFlags = 0);
 
 		/// @brief Destroy this Mesh object.
 		virtual ~Mesh() = default;

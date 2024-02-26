@@ -10,17 +10,17 @@
 
 using namespace hri;
 
-Mesh::Mesh(RenderContext& ctx, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
+Mesh::Mesh(RenderContext& ctx, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, VkBufferUsageFlags bufferFlags)
 	:
 	vertexCount(static_cast<uint32_t>(vertices.size())),
 	indexCount(static_cast<uint32_t>(indices.size())),
-	vertexBuffer(ctx, sizeof(Vertex) * vertices.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT),
-	indexBuffer(ctx, sizeof(uint32_t) * indices.size(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT)
+	vertexBuffer(ctx, sizeof(Vertex) * vertices.size(), bufferFlags | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT),
+	indexBuffer(ctx, sizeof(uint32_t) * indices.size(), bufferFlags | VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT)
 {
 	CommandPool pool = CommandPool(ctx, ctx.queues.transferQueue);
 
-	BufferResource& stagingVertex = BufferResource(ctx, vertexBuffer.bufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, true);
-	BufferResource& stagingIndex = BufferResource(ctx, indexBuffer.bufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, true);
+	BufferResource& stagingVertex = BufferResource(ctx, vertexBuffer.bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, true);
+	BufferResource& stagingIndex = BufferResource(ctx, indexBuffer.bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, true);
 
 	stagingVertex.copyToBuffer(vertices.data(), vertexBuffer.bufferSize);
 	stagingIndex.copyToBuffer(indices.data(), indexBuffer.bufferSize);
