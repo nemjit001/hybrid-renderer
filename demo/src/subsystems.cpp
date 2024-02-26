@@ -138,65 +138,15 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 	m_debug.cmdEndLabel(frame.commandBuffer);
 }
 
-SoftShadowsRTSubsystem::SoftShadowsRTSubsystem(
-	raytracing::RayTracingContext& ctx,
-	hri::ShaderDatabase& shaderDB
-)
+IRayTracingSubSystem::IRayTracingSubSystem(raytracing::RayTracingContext& ctx)
 	:
 	m_rtCtx(ctx),
 	hri::IRenderSubsystem(ctx.renderContext)
 {
-	m_layout = hri::PipelineLayoutBuilder(ctx.renderContext)
-		.build();
-
-	const hri::Shader* pRayGen = shaderDB.getShader("HybridRayGen");
-	const hri::Shader* pRayMiss = shaderDB.getShader("SoftShadowMiss");
-	const hri::Shader* pRayClosestHit = shaderDB.getShader("SoftShadowClosestHit");
-
-	VkPipeline raytracingPipeline = raytracing::RayTracingPipelineBuilder(ctx)
-		.addShaderStage(pRayGen->stage, pRayGen->module)
-		.addShaderStage(pRayMiss->stage, pRayMiss->module)
-		.addShaderStage(pRayClosestHit->stage, pRayClosestHit->module)
-		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR, 0)	// Ray Gen
-		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR,	1)	// Ray Miss
-		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR,	VK_SHADER_UNUSED_KHR, 2) // Ray Hit
-		.setMaxRecursionDepth()
-		.setLayout(m_layout)
-		.build(shaderDB.pipelineCache());
-
-	m_pPSO = shaderDB.registerPipeline("SoftShadowsRTPipeline", VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, raytracingPipeline);
-
-	// Init the SBT
-	initSBT(raytracingPipeline, 1, 1, 0);
+	//
 }
 
-void SoftShadowsRTSubsystem::record(hri::ActiveFrame& frame) const
-{
-	assert(m_pPSO != nullptr);
-	m_debug.cmdBeginLabel(frame.commandBuffer, "Soft Shadows Raytracing Pass");
-
-	VkExtent2D swapExtent = m_ctx.swapchain.extent;
-
-	vkCmdBindPipeline(frame.commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
-
-	// TODO: bind raytracing descriptor sets & push raytracing constants
-	//	- rt descriptor sets have a storage image, all scene materials & geometry, and acceleration structures bound
-
-	m_rtCtx.rayTracingDispatch.vkCmdTraceRays(
-		frame.commandBuffer,
-		&m_SBT->regions[raytracing::ShaderBindingTable::rayGenRegionIdx],
-		&m_SBT->regions[raytracing::ShaderBindingTable::rayMissRegionIdx],
-		&m_SBT->regions[raytracing::ShaderBindingTable::rayHitRegionIdx],
-		&m_SBT->regions[raytracing::ShaderBindingTable::rayCallRegionIdx],
-		swapExtent.width,
-		swapExtent.height,
-		1
-	);
-
-	m_debug.cmdEndLabel(frame.commandBuffer);
-}
-
-void SoftShadowsRTSubsystem::initSBT(
+void IRayTracingSubSystem::initSBT(
 	VkPipeline pipeline,
 	size_t missGroupCount,
 	size_t hitGroupCount,
@@ -246,6 +196,63 @@ void SoftShadowsRTSubsystem::initSBT(
 	));
 
 	m_SBT->populateSBT(shaderGroupHandles, missGroupCount, hitGroupCount, callGroupCount);
+}
+
+SoftShadowsRTSubsystem::SoftShadowsRTSubsystem(
+	raytracing::RayTracingContext& ctx,
+	hri::ShaderDatabase& shaderDB
+)
+	:
+	IRayTracingSubSystem(ctx)
+{
+	m_layout = hri::PipelineLayoutBuilder(ctx.renderContext)
+		.build();
+
+	const hri::Shader* pRayGen = shaderDB.getShader("HybridRayGen");
+	const hri::Shader* pRayMiss = shaderDB.getShader("SoftShadowMiss");
+	const hri::Shader* pRayClosestHit = shaderDB.getShader("SoftShadowClosestHit");
+
+	VkPipeline raytracingPipeline = raytracing::RayTracingPipelineBuilder(ctx)
+		.addShaderStage(pRayGen->stage, pRayGen->module)
+		.addShaderStage(pRayMiss->stage, pRayMiss->module)
+		.addShaderStage(pRayClosestHit->stage, pRayClosestHit->module)
+		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR, 0)	// Ray Gen
+		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR,	1)	// Ray Miss
+		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR,	VK_SHADER_UNUSED_KHR, 2) // Ray Hit
+		.setMaxRecursionDepth()
+		.setLayout(m_layout)
+		.build(shaderDB.pipelineCache());
+
+	m_pPSO = shaderDB.registerPipeline("SoftShadowsRTPipeline", VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, raytracingPipeline);
+
+	// Init the SBT
+	initSBT(raytracingPipeline, 1, 1, 0);
+}
+
+void SoftShadowsRTSubsystem::record(hri::ActiveFrame& frame) const
+{
+	assert(m_pPSO != nullptr);
+	m_debug.cmdBeginLabel(frame.commandBuffer, "Soft Shadows Raytracing Pass");
+
+	VkExtent2D swapExtent = m_ctx.swapchain.extent;
+
+	vkCmdBindPipeline(frame.commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
+
+	// TODO: bind raytracing descriptor sets & push raytracing constants
+	//	- rt descriptor sets have a storage image, all scene materials & geometry, and acceleration structures bound
+
+	m_rtCtx.rayTracingDispatch.vkCmdTraceRays(
+		frame.commandBuffer,
+		&m_SBT->regions[raytracing::ShaderBindingTable::rayGenRegionIdx],
+		&m_SBT->regions[raytracing::ShaderBindingTable::rayMissRegionIdx],
+		&m_SBT->regions[raytracing::ShaderBindingTable::rayHitRegionIdx],
+		&m_SBT->regions[raytracing::ShaderBindingTable::rayCallRegionIdx],
+		swapExtent.width,
+		swapExtent.height,
+		1
+	);
+
+	m_debug.cmdEndLabel(frame.commandBuffer);
 }
 
 UISubsystem::UISubsystem(

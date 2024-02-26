@@ -58,19 +58,14 @@ protected:
 	GBufferLayoutFrameInfo m_currentFrameInfo = GBufferLayoutFrameInfo{};
 };
 
-class SoftShadowsRTSubsystem
+class IRayTracingSubSystem
 	:
 	public hri::IRenderSubsystem
 {
 public:
-	SoftShadowsRTSubsystem(
-		raytracing::RayTracingContext& ctx,
-		hri::ShaderDatabase& shaderDB
-	);
+	IRayTracingSubSystem(raytracing::RayTracingContext& ctx);
 
-	virtual ~SoftShadowsRTSubsystem() = default;
-
-	virtual void record(hri::ActiveFrame& frame) const override;
+	virtual ~IRayTracingSubSystem() = default;
 
 protected:
 	void initSBT(
@@ -83,6 +78,21 @@ protected:
 protected:
 	raytracing::RayTracingContext& m_rtCtx;
 	std::unique_ptr<raytracing::ShaderBindingTable> m_SBT;
+};
+
+class SoftShadowsRTSubsystem
+	:
+	public IRayTracingSubSystem
+{
+public:
+	SoftShadowsRTSubsystem(
+		raytracing::RayTracingContext& ctx,
+		hri::ShaderDatabase& shaderDB
+	);
+
+	virtual ~SoftShadowsRTSubsystem() = default;
+
+	virtual void record(hri::ActiveFrame& frame) const override;
 };
 
 /// @brief The UI Subsystem handles drawing an UI overlay to the swap render pass.
