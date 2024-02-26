@@ -64,7 +64,6 @@ RenderCore::RenderCore(RenderContext& ctx)
 	VkCommandPoolCreateInfo submitPoolCreateInfo = VkCommandPoolCreateInfo{ VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO };
 	submitPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
 	submitPoolCreateInfo.queueFamilyIndex = m_ctx.queues.graphicsQueue.family;
-	HRI_VK_CHECK(vkCreateCommandPool(m_ctx.device, &submitPoolCreateInfo, nullptr, &m_submitPool));
 
 	// Set up per frame state
 	for (size_t i = 0; i < HRI_VK_FRAMES_IN_FLIGHT; i++)
@@ -75,9 +74,6 @@ RenderCore::RenderCore(RenderContext& ctx)
 
 RenderCore::~RenderCore()
 {
-	// Destroy vulkan resources
-	vkDestroyCommandPool(m_ctx.device, m_submitPool, nullptr);
-
 	// Destroy per frame state
 	for (size_t i = 0; i < HRI_VK_FRAMES_IN_FLIGHT; i++)
 	{
@@ -160,33 +156,6 @@ HRIOnSwapchainInvalidateFunc RenderCore::setOnSwapchainInvalidateCallback(HRIOnS
 	m_onSwapchainInvalidateFunc = onSwapchainInvalidate;
 
 	return old;
-}
-
-void RenderCore::immediateSubmit(HRIImmediateSubmitFunc submitFunc)
-{
-	VkCommandBuffer oneshotBuffer = VK_NULL_HANDLE;
-
-	VkCommandBufferAllocateInfo oneshotAllocateInfo = VkCommandBufferAllocateInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
-	oneshotAllocateInfo.commandPool = m_submitPool;
-	oneshotAllocateInfo.commandBufferCount = 1;
-	oneshotAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	HRI_VK_CHECK(vkAllocateCommandBuffers(m_ctx.device, &oneshotAllocateInfo, &oneshotBuffer));
-
-	VkCommandBufferBeginInfo beginOneshot = VkCommandBufferBeginInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
-	beginOneshot.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-	beginOneshot.pInheritanceInfo = nullptr;
-	vkBeginCommandBuffer(oneshotBuffer, &beginOneshot);
-	submitFunc(oneshotBuffer);
-	vkEndCommandBuffer(oneshotBuffer);
-
-	VkSubmitInfo oneshotSubmit = VkSubmitInfo{ VK_STRUCTURE_TYPE_SUBMIT_INFO };
-	oneshotSubmit.commandBufferCount = 1;
-	oneshotSubmit.pCommandBuffers = &oneshotBuffer;
-	// FIXME: Add fence based synchronization & use explicit queue for operation type!
-	HRI_VK_CHECK(vkQueueSubmit(m_ctx.queues.graphicsQueue.handle, 1, &oneshotSubmit, VK_NULL_HANDLE));
-	vkDeviceWaitIdle(m_ctx.device);
-
-	vkFreeCommandBuffers(m_ctx.device, m_submitPool, 1, &oneshotBuffer);
 }
 
 void RenderCore::validateSwapchainState(VkResult result)

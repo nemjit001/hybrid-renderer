@@ -80,6 +80,7 @@ namespace hri
 
     public:
         DeviceQueue graphicsQueue   = DeviceQueue{};
+        DeviceQueue transferQueue   = DeviceQueue{};
         DeviceQueue presentQueue    = DeviceQueue{};
     };
 

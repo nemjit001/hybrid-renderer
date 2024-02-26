@@ -31,9 +31,22 @@ static const std::vector<const char*> gDeviceExtensions = {
 
 RenderContextQueueState::RenderContextQueueState(vkb::Device device)
 {
+    vkb::Result<uint32_t> transferIndexResult = device.get_dedicated_queue_index(vkb::QueueType::transfer);
+    vkb::Result<VkQueue> transferQueueResult = device.get_dedicated_queue(vkb::QueueType::transfer);
+    if (!transferQueueResult.has_value() || !transferIndexResult.has_value())
+    {
+        transferIndexResult = device.get_queue_index(vkb::QueueType::transfer);
+        transferQueueResult = device.get_queue(vkb::QueueType::transfer);
+    }
+
     graphicsQueue = DeviceQueue{
         device.get_queue_index(vkb::QueueType::graphics).value(),
         device.get_queue(vkb::QueueType::graphics).value(),
+    };
+
+    transferQueue = DeviceQueue{
+        transferIndexResult.value(),
+        transferQueueResult.value(),
     };
 
     presentQueue = DeviceQueue{

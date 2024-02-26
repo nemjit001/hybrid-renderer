@@ -8,7 +8,6 @@
 
 namespace hri
 {
-	typedef std::function<void(VkCommandBuffer)> HRIImmediateSubmitFunc;
 	typedef std::function<void(const vkb::Swapchain&)> HRIOnSwapchainInvalidateFunc;
 
 	/// @brief The Frame State manages per frame data such as buffers & sync primitives
@@ -84,14 +83,12 @@ namespace hri
 		/// @return The previously registered callback, may be a nullptr.
 		HRIOnSwapchainInvalidateFunc setOnSwapchainInvalidateCallback(HRIOnSwapchainInvalidateFunc onSwapchainInvalidate);
 
-		/// @brief Immeditely record & submit Vulkan commands, e.g. for resource transfer operations.
-		/// @param submitFunc The submit function to use.
-		void immediateSubmit(HRIImmediateSubmitFunc submitFunc);
-
 		/// @brief Retrive the currently active frame's data.
 		/// @return ActiveFrame struct.
 		inline const ActiveFrame getActiveFrame() const { return ActiveFrame{ m_activeSwapImage, m_currentFrame, m_frames[m_currentFrame].graphicsCommandBuffer }; }
 
+		/// @brief Retrieve number of frames in flight for this render core.
+		/// @return The max number of frames in flight.
 		static constexpr uint32_t framesInFlight() { return HRI_VK_FRAMES_IN_FLIGHT; }
 
 	private:
@@ -105,7 +102,6 @@ namespace hri
 		uint32_t m_currentFrame			= 0;
 		uint32_t m_activeSwapImage		= 0;
 		bool m_recreateSwapchain		= false;
-		VkCommandPool m_submitPool		= VK_NULL_HANDLE;
 		HRIOnSwapchainInvalidateFunc m_onSwapchainInvalidateFunc = nullptr;
 		FrameState m_frames[HRI_VK_FRAMES_IN_FLIGHT] = {};
 	};
