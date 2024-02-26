@@ -10,6 +10,7 @@ Renderer::Renderer(raytracing::RayTracingContext& ctx, hri::Camera& camera, Scen
 	:
 	m_context(ctx.renderContext),
 	m_raytracingContext(ctx),
+	m_debug(m_context),
 	m_renderCore(m_context),
 	m_shaderDatabase(m_context),
 	m_subsystemManager(),

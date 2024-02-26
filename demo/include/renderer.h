@@ -47,6 +47,7 @@ private:
 private:
 	hri::RenderContext& m_context;
 	raytracing::RayTracingContext& m_raytracingContext;
+	hri_debug::DebugLabelHandler m_debug;
 	hri::RenderCore m_renderCore;
 	hri::ShaderDatabase m_shaderDatabase;
 	hri::RenderSubsystemManager m_subsystemManager;
