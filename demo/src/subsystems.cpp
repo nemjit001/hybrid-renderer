@@ -208,12 +208,16 @@ void IRayTracingSubSystem::initSBT(
 
 SoftShadowsRTSubsystem::SoftShadowsRTSubsystem(
 	raytracing::RayTracingContext& ctx,
-	hri::ShaderDatabase& shaderDB
+	hri::ShaderDatabase& shaderDB,
+	VkDescriptorSetLayout sceneDataSetLayout,
+	VkDescriptorSetLayout rtSetLayout
 )
 	:
 	IRayTracingSubSystem(ctx)
 {
 	m_layout = hri::PipelineLayoutBuilder(ctx.renderContext)
+		.addDescriptorSetLayout(sceneDataSetLayout)
+		.addDescriptorSetLayout(rtSetLayout)
 		.build();
 
 	const hri::Shader* pRayGen = shaderDB.getShader("HybridRayGen");
@@ -244,10 +248,20 @@ void SoftShadowsRTSubsystem::record(hri::ActiveFrame& frame) const
 
 	VkExtent2D swapExtent = m_ctx.swapchain.extent;
 
-	vkCmdBindPipeline(frame.commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
+	VkDescriptorSet descriptorSets[] = {
+		m_currentFrameInfo.sceneDataSetHandle,
+		m_currentFrameInfo.raytracingSetHandle,
+	};
 
-	// TODO: bind raytracing descriptor sets & push raytracing constants
-	//	- rt descriptor sets have a storage image, all scene materials & geometry, and acceleration structures bound
+	vkCmdBindDescriptorSets(
+		frame.commandBuffer,
+		m_pPSO->bindPoint,
+		m_layout,
+		0, 2, descriptorSets,
+		0, nullptr
+	);
+
+	vkCmdBindPipeline(frame.commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
 
 	m_rtCtx.rayTracingDispatch.vkCmdTraceRays(
 		frame.commandBuffer,

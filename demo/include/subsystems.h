@@ -20,6 +20,12 @@ struct GBufferLayoutFrameInfo
 	SceneGraph* pSceneGraph				= nullptr;
 };
 
+struct RayTracingFrameInfo
+{
+	VkDescriptorSet sceneDataSetHandle	= VK_NULL_HANDLE;
+	VkDescriptorSet raytracingSetHandle = VK_NULL_HANDLE;
+};
+
 struct PresentFrameInfo
 {
 	VkDescriptorSet presentInputSetHandle = VK_NULL_HANDLE;
@@ -68,6 +74,8 @@ public:
 
 	virtual ~IRayTracingSubSystem() = default;
 
+	inline void updateFrameInfo(const RayTracingFrameInfo& frameInfo) { m_currentFrameInfo = frameInfo; }
+
 protected:
 	void initSBT(
 		VkPipeline pipeline,
@@ -79,6 +87,7 @@ protected:
 protected:
 	raytracing::RayTracingContext& m_rtCtx;
 	std::unique_ptr<raytracing::ShaderBindingTable> m_SBT;
+	RayTracingFrameInfo m_currentFrameInfo = RayTracingFrameInfo{};
 };
 
 class SoftShadowsRTSubsystem
@@ -88,7 +97,9 @@ class SoftShadowsRTSubsystem
 public:
 	SoftShadowsRTSubsystem(
 		raytracing::RayTracingContext& ctx,
-		hri::ShaderDatabase& shaderDB
+		hri::ShaderDatabase& shaderDB,
+		VkDescriptorSetLayout sceneDataSetLayout,
+		VkDescriptorSetLayout rtSetLayout
 	);
 
 	virtual ~SoftShadowsRTSubsystem() = default;

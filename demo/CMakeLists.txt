@@ -73,6 +73,6 @@ foreach(SHADER_PATH IN LISTS PROJECT_SHADERS)
 	cmake_path(GET SHADER_PATH FILENAME SHADER_FILE)
 
 	add_custom_command(TARGET custom-commands-${TARGET_NAME}
-		COMMAND glslc ${SHADER_PATH} -o $<TARGET_FILE_DIR:${TARGET_NAME}>/shaders/${SHADER_FILE}.spv
+		COMMAND glslc --target-env=vulkan1.3 ${SHADER_PATH} -o $<TARGET_FILE_DIR:${TARGET_NAME}>/shaders/${SHADER_FILE}.spv
 	)
 endforeach()

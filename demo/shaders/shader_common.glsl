@@ -31,4 +31,12 @@ struct Vertex
 	vec2 textureCoord;
 };
 
+// Mirrors hri::CameraShaderData
+struct Camera
+{
+	vec3 position;
+    mat4 view;
+    mat4 project;
+};
+
 #endif // SHADER_COMMON_GLSL

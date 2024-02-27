@@ -341,15 +341,14 @@ void Renderer::initGlobalDescriptorSets()
 {
 	// Create set layouts
 	hri::DescriptorSetLayoutBuilder sceneDataSetBuilder = hri::DescriptorSetLayoutBuilder(m_context)
-		.addBinding(SceneDataBindings::Camera, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+		.addBinding(SceneDataBindings::Camera, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_RAYGEN_BIT_KHR)
 		.addBinding(SceneDataBindings::RenderInstanceData, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
 		.addBinding(SceneDataBindings::MaterialData, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
 
 	hri::DescriptorSetLayoutBuilder rtGlobalDescriptorSetBuilder = hri::DescriptorSetLayoutBuilder(m_context)
 		.addBinding(RayTracingBindings::Tlas, VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
-		.addBinding(RayTracingBindings::GBufferWorldPos, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
-		.addBinding(RayTracingBindings::GBufferNormal, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
-		.addBinding(RayTracingBindings::GBufferDepth, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
+		.addBinding(RayTracingBindings::GBufferWorldPos, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
+		.addBinding(RayTracingBindings::GBufferNormal, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
 		.addBinding(RayTracingBindings::SoftShadowOutImage, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR);
 
 	hri::DescriptorSetLayoutBuilder presentInputSetBuilder = hri::DescriptorSetLayoutBuilder(m_context)
@@ -372,7 +371,9 @@ void Renderer::initRenderSubsystems()
 
 	m_softShadowsRTSubsystem = std::unique_ptr<SoftShadowsRTSubsystem>(new SoftShadowsRTSubsystem(
 		m_raytracingContext,
-		m_shaderDatabase
+		m_shaderDatabase,
+		m_sceneDataSetLayout->setLayout,
+		m_rtDescriptorSetLayout->setLayout
 	));
 
 	m_uiSubsystem = std::unique_ptr<UISubsystem>(new UISubsystem(
@@ -406,48 +407,25 @@ void Renderer::initRendererFrameData()
 			true
 		));
 
-		frame.presentInputSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(
-			m_context,
-			m_descriptorSetAllocator,
-			*m_presentInputSetLayout
-		));
-
 		frame.sceneDataSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(
 			m_context,
 			m_descriptorSetAllocator,
 			*m_sceneDataSetLayout
 		));
 
-		// Write descriptor sets
-		VkDescriptorBufferInfo cameraUBOInfo = VkDescriptorBufferInfo{};
-		cameraUBOInfo.buffer = frame.cameraUBO->buffer;
-		cameraUBOInfo.offset = 0;
-		cameraUBOInfo.range = frame.cameraUBO->bufferSize;
+		frame.raytracingSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(
+			m_context,
+			m_descriptorSetAllocator,
+			*m_rtDescriptorSetLayout
+		));
 
-		VkDescriptorBufferInfo instanceSSBOInfo = VkDescriptorBufferInfo{};
-		instanceSSBOInfo.buffer = m_activeScene.buffers.instanceDataSSBO.buffer;
-		instanceSSBOInfo.offset = 0;
-		instanceSSBOInfo.range = m_activeScene.buffers.instanceDataSSBO.bufferSize;
+		frame.presentInputSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(
+			m_context,
+			m_descriptorSetAllocator,
+			*m_presentInputSetLayout
+		));
 
-		VkDescriptorBufferInfo materialSSBOInfo = VkDescriptorBufferInfo{};
-		materialSSBOInfo.buffer = m_activeScene.buffers.materialSSBO.buffer;
-		materialSSBOInfo.offset = 0;
-		materialSSBOInfo.range = m_activeScene.buffers.materialSSBO.bufferSize;
-
-		(*frame.sceneDataSet)
-			.writeBuffer(SceneDataBindings::Camera, &cameraUBOInfo)
-			.writeBuffer(SceneDataBindings::RenderInstanceData, &instanceSSBOInfo)
-			.writeBuffer(SceneDataBindings::MaterialData, &materialSSBOInfo)
-			.flush();
-
-		VkDescriptorImageInfo gbufferAlbedoResult = VkDescriptorImageInfo{};
-		gbufferAlbedoResult.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		gbufferAlbedoResult.imageView = m_gbufferLayoutPassManager->getAttachmentResource(0).view;
-		gbufferAlbedoResult.sampler = m_renderResultLinearSampler->sampler;
-
-		(*frame.presentInputSet)
-			.writeImage(PresentInputBindings::RenderResult, &gbufferAlbedoResult)
-			.flush();
+		updateFrameDescriptors(frame);
 	}
 }
 
@@ -480,16 +458,70 @@ void Renderer::recreateSwapDependentResources()
 	// Update descriptor sets
 	for (size_t frameIdx = 0; frameIdx < hri::RenderCore::framesInFlight(); frameIdx++)
 	{
-
 		RendererFrameData& rendererFrameData = m_frames[frameIdx];
+		updateFrameDescriptors(rendererFrameData);
+	}
+}
 
-		VkDescriptorImageInfo gbufferAlbedoResult = VkDescriptorImageInfo{};
-		gbufferAlbedoResult.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		gbufferAlbedoResult.imageView = m_gbufferLayoutPassManager->getAttachmentResource(0).view;
-		gbufferAlbedoResult.sampler = m_renderResultLinearSampler->sampler;
+void Renderer::updateFrameDescriptors(RendererFrameData& frame)
+{
+	// Scene data set
+	{
+		VkDescriptorBufferInfo cameraUBOInfo = VkDescriptorBufferInfo{};
+		cameraUBOInfo.buffer = frame.cameraUBO->buffer;
+		cameraUBOInfo.offset = 0;
+		cameraUBOInfo.range = frame.cameraUBO->bufferSize;
 
-		(*rendererFrameData.presentInputSet)
-			.writeImage(PresentInputBindings::RenderResult, &gbufferAlbedoResult)
+		VkDescriptorBufferInfo instanceSSBOInfo = VkDescriptorBufferInfo{};
+		instanceSSBOInfo.buffer = m_activeScene.buffers.instanceDataSSBO.buffer;
+		instanceSSBOInfo.offset = 0;
+		instanceSSBOInfo.range = m_activeScene.buffers.instanceDataSSBO.bufferSize;
+
+		VkDescriptorBufferInfo materialSSBOInfo = VkDescriptorBufferInfo{};
+		materialSSBOInfo.buffer = m_activeScene.buffers.materialSSBO.buffer;
+		materialSSBOInfo.offset = 0;
+		materialSSBOInfo.range = m_activeScene.buffers.materialSSBO.bufferSize;
+
+		(*frame.sceneDataSet)
+			.writeBuffer(SceneDataBindings::Camera, &cameraUBOInfo)
+			.writeBuffer(SceneDataBindings::RenderInstanceData, &instanceSSBOInfo)
+			.writeBuffer(SceneDataBindings::MaterialData, &materialSSBOInfo)
+			.flush();
+	}
+
+	// Ray tracing set
+	{
+		VkDescriptorImageInfo gbufferWorldPosResult = VkDescriptorImageInfo{};
+		gbufferWorldPosResult.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		gbufferWorldPosResult.imageView = m_gbufferLayoutPassManager->getAttachmentResource(1).view;
+		gbufferWorldPosResult.sampler = m_renderResultNearestSampler->sampler;
+
+		VkDescriptorImageInfo gbufferNormalResult = VkDescriptorImageInfo{};
+		gbufferNormalResult.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		gbufferNormalResult.imageView = m_gbufferLayoutPassManager->getAttachmentResource(2).view;
+		gbufferNormalResult.sampler = m_renderResultNearestSampler->sampler;
+
+		VkDescriptorImageInfo softShadowOutInfo = VkDescriptorImageInfo{};
+		softShadowOutInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+		softShadowOutInfo.imageView = m_softShadowRTPassResult->view;
+		softShadowOutInfo.sampler = VK_NULL_HANDLE;
+
+		(*frame.raytracingSet)
+			.writeImage(RayTracingBindings::GBufferWorldPos, &gbufferWorldPosResult)
+			.writeImage(RayTracingBindings::GBufferNormal, &gbufferNormalResult)
+			.writeImage(RayTracingBindings::SoftShadowOutImage, &softShadowOutInfo)
+			.flush();
+	}
+
+	// Present input set
+	{
+		VkDescriptorImageInfo renderResultInfo = VkDescriptorImageInfo{};
+		renderResultInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		renderResultInfo.imageView = m_softShadowRTPassResult->view;
+		renderResultInfo.sampler = m_renderResultLinearSampler->sampler;
+
+		(*frame.presentInputSet)
+			.writeImage(PresentInputBindings::RenderResult, &renderResultInfo)
 			.flush();
 	}
 }
@@ -511,6 +543,11 @@ void Renderer::prepareFrameResources(uint32_t frameIdx)
 	m_gbufferLayoutSubsystem->updateFrameInfo(GBufferLayoutFrameInfo{
 		rendererFrameData.sceneDataSet->set,
 		&m_activeScene,
+	});
+
+	m_softShadowsRTSubsystem->updateFrameInfo(RayTracingFrameInfo{
+		rendererFrameData.sceneDataSet->set,
+		rendererFrameData.raytracingSet->set,
 	});
 
 	m_presentSubsystem->updateFrameInfo(PresentFrameInfo{

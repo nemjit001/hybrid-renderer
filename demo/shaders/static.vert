@@ -1,5 +1,9 @@
 #version 450
 
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+
+#include "shader_common.glsl"
+
 layout(location = 0) in vec3 VertexPosition;
 layout(location = 1) in vec3 VertexNormal;
 layout(location = 2) in vec3 VertexTangent;
@@ -14,10 +18,8 @@ layout(location = 0) out VS_OUT
 
 layout(set = 0, binding = 0) uniform CAMERA
 {
-    vec3 position;
-    mat4 view;
-    mat4 project;
-} camera;
+    Camera camera;
+};
 
 layout(push_constant) uniform INSTANCE_PC
 {

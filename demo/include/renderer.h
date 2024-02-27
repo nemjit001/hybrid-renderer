@@ -12,6 +12,7 @@ struct RendererFrameData
 {
 	std::unique_ptr<hri::BufferResource> cameraUBO;
 	std::unique_ptr<hri::DescriptorSetManager> sceneDataSet;
+	std::unique_ptr<hri::DescriptorSetManager> raytracingSet;
 	std::unique_ptr<hri::DescriptorSetManager> presentInputSet;
 };
 
@@ -27,7 +28,6 @@ enum RayTracingBindings
 	Tlas,
 	GBufferWorldPos,
 	GBufferNormal,
-	GBufferDepth,
 	SoftShadowOutImage,
 };
 
@@ -67,6 +67,8 @@ private:
 	void initRendererFrameData();
 
 	void recreateSwapDependentResources();
+
+	void updateFrameDescriptors(RendererFrameData& frame);
 
 	void prepareFrameResources(uint32_t frameIdx);
 
