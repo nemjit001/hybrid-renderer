@@ -19,9 +19,64 @@ SceneGraph::SceneGraph(
 	m_asBuilder(ctx),
 	materials(std::move(materials)),
 	meshes(std::move(meshes)),
-	nodes(std::move(nodes))
+	nodes(std::move(nodes)),
+	buffers{
+		hri::BufferResource(
+			ctx.renderContext,
+			sizeof(RenderInstance)* this->meshes.size(),
+			VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
+			| VK_BUFFER_USAGE_TRANSFER_DST_BIT
+		),
+		hri::BufferResource(
+			ctx.renderContext,
+			sizeof(Material) * this->materials.size(),
+			VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
+			| VK_BUFFER_USAGE_TRANSFER_DST_BIT
+		),
+	}
 {
-	// TODO: build BLASses & TLAS
+	hri::CommandPool stagingPool = hri::CommandPool(
+		m_ctx.renderContext,
+		m_ctx.renderContext.queues.transferQueue,
+		VK_COMMAND_POOL_CREATE_TRANSIENT_BIT
+	);
+
+	// Set up render instance data for all meshes
+	m_instanceData.resize(this->meshes.size());
+	for (auto const& node : this->nodes)
+	{
+		for (size_t lodIdx = 0; lodIdx < MAX_LOD_LEVELS; lodIdx++)
+		{
+			size_t meshLOD = node.meshLODs[lodIdx];
+			if (meshLOD == INVALID_SCENE_ID)
+				continue;
+
+			const hri::Mesh& mesh = this->meshes[meshLOD];
+			RenderInstanceData& instanceData = m_instanceData[meshLOD];
+
+			instanceData.materialIdx = static_cast<uint32_t>(node.material);
+			instanceData.vertexBufferAddress = raytracing::getDeviceAddress(m_ctx, mesh.vertexBuffer);
+			instanceData.indexBufferAddress = raytracing::getDeviceAddress(m_ctx, mesh.indexBuffer);
+		}
+	}
+
+	// Fill staging buffers
+	hri::BufferResource instanceStaging = hri::BufferResource(ctx.renderContext, buffers.instanceDataSSBO.bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, true);
+	hri::BufferResource materialStaging = hri::BufferResource(ctx.renderContext, buffers.materialSSBO.bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, true);
+
+	instanceStaging.copyToBuffer(this->m_instanceData.data(), buffers.instanceDataSSBO.bufferSize);
+	materialStaging.copyToBuffer(this->materials.data(), buffers.materialSSBO.bufferSize);
+
+	// Transfer resources
+	VkCommandBuffer transferBuffer = stagingPool.createCommandBuffer(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+
+	VkBufferCopy instanceSSBOCopy = VkBufferCopy{ 0, 0, buffers.instanceDataSSBO.bufferSize };
+	VkBufferCopy matSSBOCopy = VkBufferCopy{ 0, 0, buffers.materialSSBO.bufferSize };
+
+	vkCmdCopyBuffer(transferBuffer, instanceStaging.buffer, buffers.instanceDataSSBO.buffer, 1, &instanceSSBOCopy);
+	vkCmdCopyBuffer(transferBuffer, materialStaging.buffer, buffers.materialSSBO.buffer, 1, &matSSBOCopy);
+
+	stagingPool.submitAndWait(transferBuffer);
 }
 
 void SceneGraph::update(float deltaTime)
@@ -29,12 +84,12 @@ void SceneGraph::update(float deltaTime)
 	// TODO: rebuild TLAS & BLASses
 }
 
-const std::vector<RenderInstance>& SceneGraph::getInstanceData() const
+const std::vector<RenderInstance>& SceneGraph::getRenderInstanceList() const
 {
 	return m_instances;
 }
 
-const std::vector<RenderInstance>& SceneGraph::generateInstanceData(const hri::Camera& camera)
+const std::vector<RenderInstance>& SceneGraph::generateRenderInstanceList(const hri::Camera& camera)
 {
 	m_instances.clear();
 
@@ -46,8 +101,7 @@ const std::vector<RenderInstance>& SceneGraph::generateInstanceData(const hri::C
 		// TODO: upload mesh data into scene buffers, build TLAS from instance BLASses
 		m_instances.push_back(RenderInstance{
 			node.transform.modelMatrix(),
-			&materials.at(node.material),
-			&meshes.at(meshLOD),
+			static_cast<uint32_t>(meshLOD),
 		});
 	}
 
@@ -111,7 +165,7 @@ SceneGraph SceneLoader::load(raytracing::RayTracingContext& context, const std::
 			if (loadOBJMesh(meshFile, lodLevel, newMaterial, vertices, indices, loadMaterial))
 			{
 				newNode.meshLODs[lodIndex] = meshes.size();
-				meshes.push_back(std::move(hri::Mesh(context.renderContext, vertices, indices)));
+				meshes.push_back(std::move(hri::Mesh(context.renderContext, vertices, indices, VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT)));
 			}
 
 			if (lodIndex >= MAX_LOD_LEVELS)
@@ -231,19 +285,14 @@ bool SceneLoader::loadOBJMesh(
 		{
 			// Set material params & load textures
 			tinyobj::material_t objMaterial = objMaterials[shape.mesh.material_ids[0]];
-			MaterialParameters materialParams = MaterialParameters{};
-			materialParams.diffuse = hri::Float3(objMaterial.diffuse[0], objMaterial.diffuse[1], objMaterial.diffuse[2]);
-			materialParams.specular = hri::Float3(objMaterial.specular[0], objMaterial.specular[1], objMaterial.specular[2]);
-			materialParams.transmittance = hri::Float3(objMaterial.transmittance[0], objMaterial.transmittance[1], objMaterial.transmittance[2]);
-			materialParams.emission = hri::Float3(objMaterial.emission[0], objMaterial.emission[1], objMaterial.emission[2]);
-			materialParams.shininess = objMaterial.shininess;
-			materialParams.ior = objMaterial.ior;
+			material = Material{};
 
-			material = Material{
-				materialParams,
-				hri::Texture(),
-				hri::Texture(),
-			};
+			material.diffuse = hri::Float3(objMaterial.diffuse[0], objMaterial.diffuse[1], objMaterial.diffuse[2]);
+			material.specular = hri::Float3(objMaterial.specular[0], objMaterial.specular[1], objMaterial.specular[2]);
+			material.transmittance = hri::Float3(objMaterial.transmittance[0], objMaterial.transmittance[1], objMaterial.transmittance[2]);
+			material.emission = hri::Float3(objMaterial.emission[0], objMaterial.emission[1], objMaterial.emission[2]);
+			material.shininess = objMaterial.shininess;
+			material.ior = objMaterial.ior;
 		}
 
 		break;

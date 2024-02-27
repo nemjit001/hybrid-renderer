@@ -13,18 +13,18 @@ struct RendererFrameData
 	std::unique_ptr<hri::BufferResource> cameraUBO;
 	std::unique_ptr<hri::DescriptorSetManager> sceneDataSet;
 	std::unique_ptr<hri::DescriptorSetManager> presentInputSet;
-	std::vector<RenderInstance> instances;
 };
 
 enum SceneDataBindings
 {
 	Camera,
+	RenderInstanceData,
+	MaterialData,
 };
 
 enum RayTracingBindings
 {
 	Tlas,
-	GBufferAlbedo,
 	GBufferWorldPos,
 	GBufferNormal,
 	GBufferDepth,
@@ -90,7 +90,7 @@ private:
 
 	// Global descriptor set layouts
 	std::unique_ptr<hri::DescriptorSetLayout> m_sceneDataSetLayout;
-	std::unique_ptr<hri::DescriptorSetLayout> m_rtGlobalDescriptorSetLayout;
+	std::unique_ptr<hri::DescriptorSetLayout> m_rtDescriptorSetLayout;
 	std::unique_ptr<hri::DescriptorSetLayout> m_presentInputSetLayout;
 
 	// Render pass managers

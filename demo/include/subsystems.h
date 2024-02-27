@@ -6,17 +6,18 @@
 #include "detail/raytracing.h"
 #include "scene.h"
 
-/// @brief The Transform Push Constant is used to push transformation data for renderable objects to shaders.
-struct TransformPushConstant
+/// @brief The Instance Push Constant is used to push instance & transformation data for renderable objects to shaders.
+struct InstancePushConstanct
 {
+	HRI_ALIGNAS(4)  uint32_t instanceId;
 	HRI_ALIGNAS(16) hri::Float4x4 model 	= hri::Float4x4(1.0f);
 	HRI_ALIGNAS(16) hri::Float3x3 normal 	= hri::Float3x3(1.0f);
 };
 
 struct GBufferLayoutFrameInfo
 {
-	VkDescriptorSet sceneDataSetHandle 		= VK_NULL_HANDLE;
-	std::vector<RenderInstance> instances	= {};
+	VkDescriptorSet sceneDataSetHandle	= VK_NULL_HANDLE;
+	SceneGraph* pSceneGraph				= nullptr;
 };
 
 struct PresentFrameInfo

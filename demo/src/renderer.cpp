@@ -339,8 +339,11 @@ void Renderer::initSharedResources()
 
 void Renderer::initGlobalDescriptorSets()
 {
+	// Create set layouts
 	hri::DescriptorSetLayoutBuilder sceneDataSetBuilder = hri::DescriptorSetLayoutBuilder(m_context)
-		.addBinding(SceneDataBindings::Camera, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT);	// Camera data
+		.addBinding(SceneDataBindings::Camera, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+		.addBinding(SceneDataBindings::RenderInstanceData, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
+		.addBinding(SceneDataBindings::MaterialData, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
 
 	hri::DescriptorSetLayoutBuilder rtGlobalDescriptorSetBuilder = hri::DescriptorSetLayoutBuilder(m_context)
 		.addBinding(RayTracingBindings::Tlas, VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
@@ -352,8 +355,9 @@ void Renderer::initGlobalDescriptorSets()
 	hri::DescriptorSetLayoutBuilder presentInputSetBuilder = hri::DescriptorSetLayoutBuilder(m_context)
 		.addBinding(PresentInputBindings::RenderResult, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
 
+	// Allocate descriptor set layouts
 	m_sceneDataSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(sceneDataSetBuilder.build()));
-	m_rtGlobalDescriptorSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(rtGlobalDescriptorSetBuilder.build()));
+	m_rtDescriptorSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(rtGlobalDescriptorSetBuilder.build()));
 	m_presentInputSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(presentInputSetBuilder.build()));
 }
 
@@ -413,6 +417,37 @@ void Renderer::initRendererFrameData()
 			m_descriptorSetAllocator,
 			*m_sceneDataSetLayout
 		));
+
+		// Write descriptor sets
+		VkDescriptorBufferInfo cameraUBOInfo = VkDescriptorBufferInfo{};
+		cameraUBOInfo.buffer = frame.cameraUBO->buffer;
+		cameraUBOInfo.offset = 0;
+		cameraUBOInfo.range = frame.cameraUBO->bufferSize;
+
+		VkDescriptorBufferInfo instanceSSBOInfo = VkDescriptorBufferInfo{};
+		instanceSSBOInfo.buffer = m_activeScene.buffers.instanceDataSSBO.buffer;
+		instanceSSBOInfo.offset = 0;
+		instanceSSBOInfo.range = m_activeScene.buffers.instanceDataSSBO.bufferSize;
+
+		VkDescriptorBufferInfo materialSSBOInfo = VkDescriptorBufferInfo{};
+		materialSSBOInfo.buffer = m_activeScene.buffers.materialSSBO.buffer;
+		materialSSBOInfo.offset = 0;
+		materialSSBOInfo.range = m_activeScene.buffers.materialSSBO.bufferSize;
+
+		(*frame.sceneDataSet)
+			.writeBuffer(SceneDataBindings::Camera, &cameraUBOInfo)
+			.writeBuffer(SceneDataBindings::RenderInstanceData, &instanceSSBOInfo)
+			.writeBuffer(SceneDataBindings::MaterialData, &materialSSBOInfo)
+			.flush();
+
+		VkDescriptorImageInfo gbufferAlbedoResult = VkDescriptorImageInfo{};
+		gbufferAlbedoResult.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		gbufferAlbedoResult.imageView = m_gbufferLayoutPassManager->getAttachmentResource(0).view;
+		gbufferAlbedoResult.sampler = m_renderResultLinearSampler->sampler;
+
+		(*frame.presentInputSet)
+			.writeImage(PresentInputBindings::RenderResult, &gbufferAlbedoResult)
+			.flush();
 	}
 }
 
@@ -441,54 +476,44 @@ void Renderer::recreateSwapDependentResources()
 		hri::ImageResource::DefaultComponentMapping(),
 		VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 }
 	);
+
+	// Update descriptor sets
+	for (size_t frameIdx = 0; frameIdx < hri::RenderCore::framesInFlight(); frameIdx++)
+	{
+
+		RendererFrameData& rendererFrameData = m_frames[frameIdx];
+
+		VkDescriptorImageInfo gbufferAlbedoResult = VkDescriptorImageInfo{};
+		gbufferAlbedoResult.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		gbufferAlbedoResult.imageView = m_gbufferLayoutPassManager->getAttachmentResource(0).view;
+		gbufferAlbedoResult.sampler = m_renderResultLinearSampler->sampler;
+
+		(*rendererFrameData.presentInputSet)
+			.writeImage(PresentInputBindings::RenderResult, &gbufferAlbedoResult)
+			.flush();
+	}
 }
 
 void Renderer::prepareFrameResources(uint32_t frameIdx)
 {
 	assert(frameIdx < hri::RenderCore::framesInFlight());
 
+	m_activeScene.generateRenderInstanceList(m_camera);
 	RendererFrameData& rendererFrameData = m_frames[frameIdx];
-	rendererFrameData.instances = m_activeScene.generateInstanceData(m_camera);
 
 	// Update UBO staging buffers
 	hri::CameraShaderData cameraData = m_camera.getShaderData();
 	rendererFrameData.cameraUBO->copyToBuffer(&cameraData, sizeof(hri::CameraShaderData));
 
-	// Upload UBO staging data
-	{
-		VkCommandBuffer uploadCommandBuffer = m_stagingPool.createCommandBuffer(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-
-		//
-
-		m_stagingPool.submitAndWait(uploadCommandBuffer);
-	}
+	// TODO: upload any staging data
 
 	// Update subsystem frame info
 	m_gbufferLayoutSubsystem->updateFrameInfo(GBufferLayoutFrameInfo{
 		rendererFrameData.sceneDataSet->set,
-		rendererFrameData.instances,
+		&m_activeScene,
 	});
 
 	m_presentSubsystem->updateFrameInfo(PresentFrameInfo{
 		rendererFrameData.presentInputSet->set,
 	});
-
-	// Update per frame descriptors
-	VkDescriptorBufferInfo cameraUBOInfo = VkDescriptorBufferInfo{};
-	cameraUBOInfo.buffer = rendererFrameData.cameraUBO->buffer;
-	cameraUBOInfo.offset = 0;
-	cameraUBOInfo.range = rendererFrameData.cameraUBO->bufferSize;
-
-	(*rendererFrameData.sceneDataSet)
-		.writeBuffer(SceneDataBindings::Camera, &cameraUBOInfo)
-		.flush();
-
-	VkDescriptorImageInfo gbufferAlbedoResult = VkDescriptorImageInfo{};
-	gbufferAlbedoResult.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-	gbufferAlbedoResult.imageView = m_gbufferLayoutPassManager->getAttachmentResource(0).view;
-	gbufferAlbedoResult.sampler = m_renderResultLinearSampler->sampler;
-
-	(*rendererFrameData.presentInputSet)
-		.writeImage(PresentInputBindings::RenderResult, &gbufferAlbedoResult)
-		.flush();
 }

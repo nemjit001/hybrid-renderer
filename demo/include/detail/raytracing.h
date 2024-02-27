@@ -14,7 +14,7 @@ namespace raytracing
 	/// @param ctx Ray Tracing Context to use.
 	/// @param resource Buffer Resource to query.
 	/// @return A Device Address.
-	static VkDeviceAddress getDeviceAddress(const RayTracingContext& ctx, const hri::BufferResource& resource);
+	VkDeviceAddress getDeviceAddress(const RayTracingContext& ctx, const hri::BufferResource& resource);
 
 	/// @brief A Ray Tracing Context uses a render context to initialize dispatch tables required for ray tracing.
 	///		These dispatch tables need to be used for all extension functions.

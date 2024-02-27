@@ -14,7 +14,11 @@ GBufferLayoutSubsystem::GBufferLayoutSubsystem(
 	hri::IRenderSubsystem(ctx)
 {
 	m_layout = hri::PipelineLayoutBuilder(ctx)
-		.addPushConstant(sizeof(TransformPushConstant), VK_SHADER_STAGE_VERTEX_BIT)
+		.addPushConstant(
+			sizeof(InstancePushConstanct),
+			VK_SHADER_STAGE_VERTEX_BIT
+			| VK_SHADER_STAGE_FRAGMENT_BIT
+		)
 		.addDescriptorSetLayout(sceneDataSetLayout)
 		.build();
 
@@ -114,9 +118,10 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 
 	vkCmdBindPipeline(frame.commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
 
-	for (auto const& instance : m_currentFrameInfo.instances)
+	for (auto const& instance : m_currentFrameInfo.pSceneGraph->getRenderInstanceList())
 	{
-		TransformPushConstant transformPushConstant = TransformPushConstant{
+		InstancePushConstanct instancePC = InstancePushConstanct{
+			instance.instanceId,
 			instance.modelMatrix,
 			hri::Float3x3(1.0f),
 		};
@@ -124,15 +129,18 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 		vkCmdPushConstants(
 			frame.commandBuffer,
 			m_layout,
-			VK_SHADER_STAGE_VERTEX_BIT,
-			0, sizeof(TransformPushConstant),
-			&transformPushConstant
+			VK_SHADER_STAGE_VERTEX_BIT
+			| VK_SHADER_STAGE_FRAGMENT_BIT,
+			0, sizeof(InstancePushConstanct),
+			&instancePC
 		);
 
+		const hri::Mesh& mesh = m_currentFrameInfo.pSceneGraph->meshes[instance.instanceId];
+
 		VkDeviceSize vertexOffsets[] = { 0 };
-		vkCmdBindVertexBuffers(frame.commandBuffer, 0, 1, &instance.pMesh->vertexBuffer.buffer, vertexOffsets);
-		vkCmdBindIndexBuffer(frame.commandBuffer, instance.pMesh->indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
-		vkCmdDrawIndexed(frame.commandBuffer, instance.pMesh->indexCount, 1, 0, 0, 0);
+		vkCmdBindVertexBuffers(frame.commandBuffer, 0, 1, &mesh.vertexBuffer.buffer, vertexOffsets);
+		vkCmdBindIndexBuffer(frame.commandBuffer, mesh.indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdDrawIndexed(frame.commandBuffer, mesh.indexCount, 1, 0, 0, 0);
 	}
 
 	m_debug.cmdEndLabel(frame.commandBuffer);

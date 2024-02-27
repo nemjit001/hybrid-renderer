@@ -19,18 +19,19 @@ layout(set = 0, binding = 0) uniform CAMERA
     mat4 project;
 } camera;
 
-layout(push_constant) uniform TRANSFORM
+layout(push_constant) uniform INSTANCE_PC
 {
+    uint instanceId;
     mat4 model;
     mat3 normal;
-} transform;
+} push;
 
 void main()
 {
-    vec4 wPos = transform.model * vec4(VertexPosition, 1);
+    vec4 wPos = push.model * vec4(VertexPosition, 1);
 
     vs_out.wPos = wPos;
-    vs_out.normal = normalize(transform.model * vec4(VertexNormal, 0)).xyz;
+    vs_out.normal = normalize(push.model * vec4(VertexNormal, 0)).xyz;
     vs_out.texCoord = VertexTexCoord;
 
     gl_Position = camera.project * camera.view * vs_out.wPos;
