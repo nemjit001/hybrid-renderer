@@ -274,7 +274,13 @@ namespace raytracing
 			VkGeometryFlagsKHR geometryFlags = 0
 		) const;
 
-		
+		/// @brief Generate build info from input.
+		/// @param input Input to generate build info for.
+		/// @param sizeInfo Size info to populate during generation, will not be cleared in this function call.
+		/// @param asType Acceleration Structure type to generate build infos for.
+		/// @param buildMode Build mode (Build or Update).
+		/// @param flags Global build flags to use along with input build flags.
+		/// @return A build info structure. MUST live shorter than the AS Inputs used to generate it.
 		ASBuilder::ASBuildInfo generateASBuildInfo(
 			const ASInput& input,
 			ASSizeInfo& sizeInfo,
