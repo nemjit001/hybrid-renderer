@@ -11,6 +11,7 @@
 struct RendererFrameData
 {
 	std::unique_ptr<hri::BufferResource> cameraUBO;
+	std::unique_ptr<raytracing::AccelerationStructure> tlas;
 	std::unique_ptr<hri::DescriptorSetManager> sceneDataSet;
 	std::unique_ptr<hri::DescriptorSetManager> raytracingSet;
 	std::unique_ptr<hri::DescriptorSetManager> presentInputSet;
@@ -80,6 +81,7 @@ private:
 	hri::ShaderDatabase m_shaderDatabase;
 	hri::RenderSubsystemManager m_subsystemManager;
 	hri::DescriptorSetAllocator m_descriptorSetAllocator;
+	hri::CommandPool m_computePool;
 	hri::CommandPool m_stagingPool;
 
 	// Renderer state

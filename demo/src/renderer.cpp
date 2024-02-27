@@ -15,6 +15,7 @@ Renderer::Renderer(raytracing::RayTracingContext& ctx, hri::Camera& camera, Scen
 	m_shaderDatabase(m_context),
 	m_subsystemManager(),
 	m_descriptorSetAllocator(m_context),
+	m_computePool(m_context, m_context.queues.computeQueue, VK_COMMAND_POOL_CREATE_TRANSIENT_BIT),
 	m_stagingPool(m_context, m_context.queues.transferQueue, VK_COMMAND_POOL_CREATE_TRANSIENT_BIT),
 	m_camera(camera),
 	m_activeScene(activeScene)
@@ -29,6 +30,11 @@ Renderer::Renderer(raytracing::RayTracingContext& ctx, hri::Camera& camera, Scen
 	m_renderCore.setOnSwapchainInvalidateCallback([this](const vkb::Swapchain& _swapchain) {
 		recreateSwapDependentResources();
 	});
+
+	// Prebuild BLAS list
+	VkCommandBuffer oneshot = m_computePool.createCommandBuffer(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+	m_activeScene.accelStructManager.cmdBuildBLASses(oneshot);
+	m_computePool.submitAndWait(oneshot);
 
 	// Prepare first frame resources
 	prepareFrameResources(0);
@@ -491,10 +497,6 @@ void Renderer::updateFrameDescriptors(RendererFrameData& frame)
 
 	// Ray tracing set
 	{
-		VkWriteDescriptorSetAccelerationStructureKHR tlasInfo = VkWriteDescriptorSetAccelerationStructureKHR{ VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR };
-		tlasInfo.accelerationStructureCount = 1;
-		tlasInfo.pAccelerationStructures = nullptr;
-
 		VkDescriptorImageInfo gbufferWorldPosResult = VkDescriptorImageInfo{};
 		gbufferWorldPosResult.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		gbufferWorldPosResult.imageView = m_gbufferLayoutPassManager->getAttachmentResource(1).view;
@@ -511,7 +513,6 @@ void Renderer::updateFrameDescriptors(RendererFrameData& frame)
 		softShadowOutInfo.sampler = VK_NULL_HANDLE;
 
 		(*frame.raytracingSet)
-			.writeEXT(RayTracingBindings::Tlas, &tlasInfo)
 			.writeImage(RayTracingBindings::GBufferWorldPos, &gbufferWorldPosResult)
 			.writeImage(RayTracingBindings::GBufferNormal, &gbufferNormalResult)
 			.writeImage(RayTracingBindings::SoftShadowOutImage, &softShadowOutInfo)
@@ -542,7 +543,33 @@ void Renderer::prepareFrameResources(uint32_t frameIdx)
 	hri::CameraShaderData cameraData = m_camera.getShaderData();
 	rendererFrameData.cameraUBO->copyToBuffer(&cameraData, sizeof(hri::CameraShaderData));
 
-	// TODO: upload any staging data
+	// Rebuild BLASses & TLAS
+	{
+		m_activeScene.accelStructManager.generateTLASBuildInfo(m_activeScene.getRenderInstanceList());
+		auto tlasSizeInfo = m_activeScene.accelStructManager.getTLASSizeInfo();
+
+		if (
+			rendererFrameData.tlas.get() == nullptr
+			|| tlasSizeInfo.totalAccelerationStructureSize > rendererFrameData.tlas->buffer.bufferSize
+		)
+		{
+			rendererFrameData.tlas = std::make_unique<raytracing::AccelerationStructure>(m_activeScene.accelStructManager.createTLAS());
+		}
+
+		VkCommandBuffer oneshot = m_computePool.createCommandBuffer(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+		m_activeScene.accelStructManager.cmdBuildBLASses(oneshot);
+		m_activeScene.accelStructManager.cmdBuildTLAS(oneshot, *rendererFrameData.tlas);
+		m_computePool.submitAndWait(oneshot);
+	}
+
+	// Always write TLAS descriptor in case of updated TLAS set
+	VkWriteDescriptorSetAccelerationStructureKHR tlasInfo = VkWriteDescriptorSetAccelerationStructureKHR{ VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR };
+	tlasInfo.accelerationStructureCount = 1;
+	tlasInfo.pAccelerationStructures = &rendererFrameData.tlas->accelerationStructure;
+
+	(*rendererFrameData.raytracingSet)
+		.writeEXT(RayTracingBindings::Tlas, &tlasInfo)
+		.flush();
 
 	// Update subsystem frame info
 	m_gbufferLayoutSubsystem->updateFrameInfo(GBufferLayoutFrameInfo{

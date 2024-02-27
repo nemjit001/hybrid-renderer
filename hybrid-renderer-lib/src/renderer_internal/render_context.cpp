@@ -39,6 +39,14 @@ RenderContextQueueState::RenderContextQueueState(vkb::Device device)
         transferQueueResult = device.get_queue(vkb::QueueType::transfer);
     }
 
+    vkb::Result<uint32_t> computeIndexResult = device.get_dedicated_queue_index(vkb::QueueType::compute);
+    vkb::Result<VkQueue> computeQueueResult = device.get_dedicated_queue(vkb::QueueType::compute);
+    if (!computeIndexResult.has_value() || !computeQueueResult.has_value())
+    {
+        computeIndexResult = device.get_queue_index(vkb::QueueType::compute);
+        computeQueueResult = device.get_queue(vkb::QueueType::compute);
+    }
+
     graphicsQueue = DeviceQueue{
         device.get_queue_index(vkb::QueueType::graphics).value(),
         device.get_queue(vkb::QueueType::graphics).value(),
@@ -47,6 +55,11 @@ RenderContextQueueState::RenderContextQueueState(vkb::Device device)
     transferQueue = DeviceQueue{
         transferIndexResult.value(),
         transferQueueResult.value(),
+    };
+
+    computeQueue = DeviceQueue{
+        computeIndexResult.value(),
+        computeQueueResult.value(),
     };
 
     presentQueue = DeviceQueue{
