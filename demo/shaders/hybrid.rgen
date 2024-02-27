@@ -13,13 +13,14 @@ layout(set = 0, binding = 0) uniform CAMERA { Camera camera; };
 layout(set = 1, binding = 0) uniform accelerationStructureEXT TLAS;
 layout(set = 1, binding = 1) uniform sampler2D GBufferWorldPos;
 layout(set = 1, binding = 2) uniform sampler2D GBufferNormal;
-layout(set = 1, binding = 3, rgba32f) uniform image2D softShadowOut;
+layout(set = 1, binding = 3, r32f) uniform image2D softShadowOut;
 
 void main()
 {
 	const uint rayFlags = gl_RayFlagsOpaqueEXT;
-	const uint sbtOffset = 0;
-	const uint sbtStride = 0;
+	const uint cullMask = 0xFF;
+	const uint sbtRecordOffset = 0;
+	const uint sbtRecordStride = 0;
 	const uint missIndex = 0;
 
 	const vec2 pixelLoc = gl_LaunchIDEXT.xy;
@@ -27,18 +28,19 @@ void main()
 
 	const vec3 wOrigin = vec3(texture(GBufferWorldPos, inUV));
 	const vec3 wNormal = vec3(texture(GBufferNormal, inUV));
+	const vec3 wOutDirection = randomWalk(wNormal);
 	// TODO: sample GBuffer Layout for material params & primary hit data to calculate new direction
 
 	traceRayEXT(
 		TLAS,
 		rayFlags,
-		0xFF,	// Cull Mask, TODO: set based on RNG value for stochastic LOD selection
-		sbtOffset,
-		sbtStride,
+		cullMask,
+		sbtRecordOffset,
+		sbtRecordStride,
 		missIndex,
 		wOrigin,
 		RAYTRACE_RANGE_TMIN,
-		wNormal,	// TODO: calculate direction based on GBuffer material params
+		wOutDirection,
 		RAYTRACE_RANGE_TMAX,
 		0
 	);

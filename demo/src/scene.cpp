@@ -61,8 +61,8 @@ void SceneASManager::generateTLASBuildInfo(const std::vector<RenderInstance>& in
 		);
 
 		VkAccelerationStructureInstanceKHR tlasInstance = VkAccelerationStructureInstanceKHR{};
-		tlasInstance.flags = 0;
-		tlasInstance.transform = {};
+		tlasInstance.flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
+		tlasInstance.transform = raytracing::toTransformMatrix(renderInstance.modelMatrix);
 		tlasInstance.instanceCustomIndex = renderInstance.instanceId;
 		tlasInstance.accelerationStructureReference = blasAddress;
 		tlasInstance.mask = 0xFF;
@@ -80,7 +80,7 @@ void SceneASManager::generateTLASBuildInfo(const std::vector<RenderInstance>& in
 		VK_GEOMETRY_OPAQUE_BIT_KHR
 	);
 
-	m_tlasSizeInfo = raytracing::ASBuilder::ASSizeInfo{};	// XXX: reset size, otherwise bigger size is allocated each call
+	m_tlasSizeInfo = raytracing::ASBuilder::ASSizeInfo{};	// XXX: reset size, otherwise size is incremented each call
 	m_tlasBuildInfo = m_asBuilder.generateASBuildInfo(
 		m_tlasInput,
 		m_tlasSizeInfo,

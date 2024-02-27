@@ -21,5 +21,5 @@ layout(set = 1, binding = 0) uniform accelerationStructureEXT TLAS;
 
 void main()
 {
-	// TODO: random bounce or random sample of lights in scene
+	prd.hitValue = vec3(1.0);
 }

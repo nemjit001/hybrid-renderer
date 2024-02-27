@@ -16,6 +16,11 @@ namespace raytracing
 	/// @return A Device Address.
 	VkDeviceAddress getDeviceAddress(const RayTracingContext& ctx, const hri::BufferResource& resource);
 
+	/// @brief Convert a 4x4 matrix to a 3x4 matrix.
+	/// @param mat Matrix to convert.
+	/// @return A vulkan 3x4 transform matrix.
+	VkTransformMatrixKHR toTransformMatrix(const hri::Float4x4& mat);
+
 	/// @brief A Ray Tracing Context uses a render context to initialize dispatch tables required for ray tracing.
 	///		These dispatch tables need to be used for all extension functions.
 	struct RayTracingContext

@@ -11,5 +11,5 @@ layout(location = 0) rayPayloadInEXT RayHitPayload prd;
 
 void main()
 {
-	prd.hitValue = vec3(1.0);
+	prd.hitValue = vec3(0.0);	// TODO: sample sky color?
 }
