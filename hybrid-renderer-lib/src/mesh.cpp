@@ -19,8 +19,8 @@ Mesh::Mesh(RenderContext& ctx, const std::vector<Vertex>& vertices, const std::v
 {
 	CommandPool pool = CommandPool(ctx, ctx.queues.transferQueue);
 
-	BufferResource& stagingVertex = BufferResource(ctx, vertexBuffer.bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, true);
-	BufferResource& stagingIndex = BufferResource(ctx, indexBuffer.bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, true);
+	BufferResource stagingVertex = BufferResource(ctx, vertexBuffer.bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, true);
+	BufferResource stagingIndex = BufferResource(ctx, indexBuffer.bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, true);
 
 	stagingVertex.copyToBuffer(vertices.data(), vertexBuffer.bufferSize);
 	stagingIndex.copyToBuffer(indices.data(), indexBuffer.bufferSize);
