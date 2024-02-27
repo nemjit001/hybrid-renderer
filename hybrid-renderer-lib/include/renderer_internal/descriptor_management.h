@@ -179,6 +179,12 @@ namespace hri
         /// @return An instance of this class.
         DescriptorSetManager& writeImage(uint32_t binding, VkDescriptorImageInfo* imageInfo);
 
+        /// @brief Queue an extension descriptor write to the descriptor set.
+        /// @param binding Binding to write into.
+        /// @param pEXTInfo Extension info pointer, must live until the writes are flushed.
+        /// @return An instance of this class.
+        DescriptorSetManager& writeEXT(uint32_t binding, void* pEXTInfo);
+
         /// @brief Flush queued writes, updating the descriptor set.
         /// @return Am instance of this class.
         DescriptorSetManager& flush();

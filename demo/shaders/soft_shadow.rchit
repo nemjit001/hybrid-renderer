@@ -17,9 +17,9 @@ layout(buffer_reference, scalar) buffer INDEX_DATA { uint indices[]; };
 layout(set = 0, binding = 1, scalar) buffer RENDER_INSTANCE_DATA { RenderInstanceData instances[]; };
 layout(set = 0, binding = 2) buffer MATERIAL_DATA { Material materials[]; };
 
-layout(set = 1, binding = 0) uniform accelerationStructureEXT topLevelAS;
+layout(set = 1, binding = 0) uniform accelerationStructureEXT TLAS;
 
 void main()
 {
-	// TODO: randomly sample lights in scene, or just random bounce?
+	// TODO: random bounce or random sample of lights in scene
 }

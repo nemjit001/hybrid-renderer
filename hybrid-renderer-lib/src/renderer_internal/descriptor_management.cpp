@@ -250,6 +250,24 @@ DescriptorSetManager& DescriptorSetManager::writeImage(uint32_t binding, VkDescr
     return *this;
 }
 
+DescriptorSetManager& DescriptorSetManager::writeEXT(uint32_t binding, void* pEXTInfo)
+{
+    assert(pEXTInfo != nullptr);
+
+    const VkDescriptorSetLayoutBinding& layoutBinding = getLayoutBinding(binding);
+    assert(layoutBinding.descriptorCount == 1);
+
+    VkWriteDescriptorSet writeSet = VkWriteDescriptorSet{ VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
+    writeSet.dstSet = set;
+    writeSet.dstBinding = binding;
+    writeSet.descriptorCount = layoutBinding.descriptorCount;
+    writeSet.descriptorType = layoutBinding.descriptorType;
+    writeSet.pNext = pEXTInfo;
+
+    m_writeSets.push_back(writeSet);
+    return *this;
+}
+
 DescriptorSetManager& DescriptorSetManager::flush()
 {
     vkUpdateDescriptorSets(

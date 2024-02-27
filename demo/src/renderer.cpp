@@ -491,6 +491,10 @@ void Renderer::updateFrameDescriptors(RendererFrameData& frame)
 
 	// Ray tracing set
 	{
+		VkWriteDescriptorSetAccelerationStructureKHR tlasInfo = VkWriteDescriptorSetAccelerationStructureKHR{ VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR };
+		tlasInfo.accelerationStructureCount = 1;
+		tlasInfo.pAccelerationStructures = nullptr;
+
 		VkDescriptorImageInfo gbufferWorldPosResult = VkDescriptorImageInfo{};
 		gbufferWorldPosResult.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		gbufferWorldPosResult.imageView = m_gbufferLayoutPassManager->getAttachmentResource(1).view;
@@ -507,6 +511,7 @@ void Renderer::updateFrameDescriptors(RendererFrameData& frame)
 		softShadowOutInfo.sampler = VK_NULL_HANDLE;
 
 		(*frame.raytracingSet)
+			.writeEXT(RayTracingBindings::Tlas, &tlasInfo)
 			.writeImage(RayTracingBindings::GBufferWorldPos, &gbufferWorldPosResult)
 			.writeImage(RayTracingBindings::GBufferNormal, &gbufferNormalResult)
 			.writeImage(RayTracingBindings::SoftShadowOutImage, &softShadowOutInfo)
