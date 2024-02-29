@@ -51,16 +51,20 @@ void main()
 	vec3 wPos = vec3(texture(GBufferWorldPos, inUV));
 	vec3 wNormal = vec3(texture(GBufferNormal, inUV));
 	float initialHitDepth = float(texture(GBufferDepth, inUV));
+	wNormal = normalize(wNormal);
 
-	// Get material data from GBuffer
+	// Get material params from GBuffer
 	vec3 diffuseColor = vec3(texture(GBufferAlbedo, inUV));
+	vec3 specular = vec3(0.5);		// TODO: add GBuffer attachment
+	vec3 transmittance = vec3(0);	// TODO: add GBuffer attachment
 	vec3 emissionColor = vec3(texture(GBufferEmission, inUV));
+	float shininess = 0.0;			// TODO: add GBuffer attachment
+	float ior = 1.45;				// TODO: add GBuffer attachment
 
 	// Evaluate initial material hit
-	vec4 iRayDirection = normalize(invProj * vec4(dir2D.x, dir2D.y, 1, 1));
+	vec4 iRayDirection = invProj * vec4(dir2D.x, dir2D.y, 1, 1);
 	vec3 wRayOrigin = vec3(invView * vec4(0, 0, 0, 1));
-	vec3 wInDir = vec3(invView * iRayDirection);
-	vec3 wOutDir = randomWalk(prd.seed, wInDir, wNormal);
+	vec3 wInDir = vec3(invView * vec4(normalize(iRayDirection.xyz), 0));
 	
 	if (initialHitDepth == 1.0)
 	{
@@ -74,13 +78,17 @@ void main()
 		prd.energy += prd.transmission * emissionColor;
 	}
 
-	const float pdf = evaluatePDF(wOutDir, wNormal);
-	const vec3 brdf = evaluateBRDF(wInDir, wOutDir, wNormal, diffuseColor);
-	prd.transmission *= pdf * brdf;
+	if (dot(wNormal, wInDir) > 0.0)
+		wNormal *= -1.0;
 
+	vec3 wOutDir = randomWalk(prd.seed, wInDir, wNormal);
+	float pdf = evaluatePDF(wOutDir, wNormal);
+	vec3 brdf = evaluateBRDF(wInDir, wOutDir, wNormal, diffuseColor);
+	prd.transmission *= pdf * brdf;
 #else
+	vec4 iRayDirection = invProj * vec4(dir2D.x, dir2D.y, 1, 1);
 	vec3 wPos = vec3(invView * vec4(0, 0, 0, 1));
-	vec3 wOutDir = vec3(invView * normalize(invProj * vec4(dir2D.x, dir2D.y, 1, 1)));
+	vec3 wOutDir = vec3(invView * vec4(normalize(iRayDirection.xyz), 0));
 #endif
 
 	prd.origin = wPos;

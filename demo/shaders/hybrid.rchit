@@ -46,7 +46,6 @@ void main()
 	vec3 wPos = vec3(gl_ObjectToWorldEXT * vec4(hitPos, 1));
 	vec3 wNormal = normalize(vec3(gl_ObjectToWorldEXT * vec4(hitNormal, 0)));
 	vec3 wInDir = gl_WorldRayDirectionEXT;
-	vec3 wOutDir = randomWalk(prd.seed, wInDir, wNormal);
 
 	// Evaluate hit material
 	if (isEmissive(material.emission))
@@ -56,8 +55,13 @@ void main()
 		return;
 	}
 
-	const float pdf = evaluatePDF(wOutDir, wNormal);
-	const vec3 brdf = evaluateBRDF(wInDir, wOutDir, wNormal, material.diffuse);
+	// Flip normal to account for backface hits
+	if (dot(wNormal, wInDir) > 0.0)
+		wNormal *= -1.0;
+
+	vec3 wOutDir = randomWalk(prd.seed, wInDir, wNormal);
+	float pdf = evaluatePDF(wOutDir, wNormal);
+	vec3 brdf = evaluateBRDF(wInDir, wOutDir, wNormal, material.diffuse);
 	prd.transmission *= pdf * brdf;
 
 	prd.origin = wPos;
