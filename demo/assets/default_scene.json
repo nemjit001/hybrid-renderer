@@ -39,6 +39,18 @@
 			]
 		},
 		{
+			"name": "AreaLight",
+			"mesh_file": "assets/simple_objects_lod.obj",
+			"transform": {
+				"position": [ 0.0, 5.0, 0.0 ],
+				"rotation": [ 0.0, 0.0, 0.0 ],
+				"scale": [ 1.0, 1.0, 1.0 ]
+			},
+			"lod_levels": [
+				"Plane_LOD0"
+			]
+		},
+		{
 			"name": "Icosphere",
 			"mesh_file": "assets/simple_objects_lod.obj",
 			"transform": {

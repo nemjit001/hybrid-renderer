@@ -167,6 +167,7 @@ int main()
 	ctxCreateInfo.deviceFeatures.shaderInt64 = true;
 	ctxCreateInfo.deviceFeatures12.bufferDeviceAddress = true;
 	ctxCreateInfo.deviceFeatures12.descriptorIndexing = true;
+	ctxCreateInfo.deviceFeatures12.scalarBlockLayout = true;
 	ctxCreateInfo.deviceFeatures13.synchronization2 = true;
 	ctxCreateInfo.extensionFeatures = {
 		rayQueryFeatures,

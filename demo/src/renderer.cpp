@@ -80,7 +80,7 @@ void Renderer::drawFrame()
 		gbufferAlbedoBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		gbufferAlbedoBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		gbufferAlbedoBarrier.image = m_gbufferLayoutPassManager->getAttachmentResource(0).image;
-		gbufferAlbedoBarrier.subresourceRange = VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+		gbufferAlbedoBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
 
 		VkImageMemoryBarrier2 gbufferWPosBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
 		gbufferWPosBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -92,7 +92,7 @@ void Renderer::drawFrame()
 		gbufferWPosBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		gbufferWPosBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		gbufferWPosBarrier.image = m_gbufferLayoutPassManager->getAttachmentResource(1).image;
-		gbufferWPosBarrier.subresourceRange = VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+		gbufferWPosBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
 
 		VkImageMemoryBarrier2 gbufferNormalBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
 		gbufferNormalBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -104,7 +104,7 @@ void Renderer::drawFrame()
 		gbufferNormalBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		gbufferNormalBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		gbufferNormalBarrier.image = m_gbufferLayoutPassManager->getAttachmentResource(2).image;
-		gbufferNormalBarrier.subresourceRange = VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+		gbufferNormalBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
 
 		VkImageMemoryBarrier2 gbufferDepthBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
 		gbufferDepthBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -116,7 +116,7 @@ void Renderer::drawFrame()
 		gbufferDepthBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		gbufferDepthBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		gbufferDepthBarrier.image = m_gbufferLayoutPassManager->getAttachmentResource(3).image;
-		gbufferDepthBarrier.subresourceRange = VkImageSubresourceRange{ VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT, 0, 1, 0, 1 };
+		gbufferDepthBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT, 0, 1, 0, 1);
 
 		frame.pipelineBarrier({ gbufferAlbedoBarrier, gbufferWPosBarrier, gbufferNormalBarrier, gbufferDepthBarrier });
 	}
@@ -133,9 +133,21 @@ void Renderer::drawFrame()
 		softShadowGeneralBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		softShadowGeneralBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		softShadowGeneralBarrier.image = m_softShadowRTPassResult->image;
-		softShadowGeneralBarrier.subresourceRange = VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+		softShadowGeneralBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
 
-		frame.pipelineBarrier({ softShadowGeneralBarrier });
+		VkImageMemoryBarrier2 DIGeneralBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
+		DIGeneralBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+		DIGeneralBarrier.dstStageMask = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR;
+		DIGeneralBarrier.srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
+		DIGeneralBarrier.dstAccessMask = VK_ACCESS_2_SHADER_WRITE_BIT_KHR;
+		DIGeneralBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		DIGeneralBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+		DIGeneralBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		DIGeneralBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		DIGeneralBarrier.image = m_directIlluminationRTPassResult->image;
+		DIGeneralBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
+
+		frame.pipelineBarrier({ softShadowGeneralBarrier, DIGeneralBarrier });
 	}
 
 	// Execute raytracing passes
@@ -153,9 +165,21 @@ void Renderer::drawFrame()
 		softShadowSampleBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		softShadowSampleBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		softShadowSampleBarrier.image = m_softShadowRTPassResult->image;
-		softShadowSampleBarrier.subresourceRange = VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+		softShadowSampleBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
 
-		frame.pipelineBarrier({ softShadowSampleBarrier });
+		VkImageMemoryBarrier2 DISampleBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
+		DISampleBarrier.srcStageMask = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR;
+		DISampleBarrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
+		DISampleBarrier.srcAccessMask = VK_ACCESS_2_SHADER_WRITE_BIT_KHR;
+		DISampleBarrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
+		DISampleBarrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+		DISampleBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		DISampleBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		DISampleBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		DISampleBarrier.image = m_directIlluminationRTPassResult->image;
+		DISampleBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
+
+		frame.pipelineBarrier({ softShadowSampleBarrier, DISampleBarrier });
 	}
 
 	// Record swapchain output passes
@@ -335,11 +359,29 @@ void Renderer::initSharedResources()
 		| VK_IMAGE_USAGE_SAMPLED_BIT
 	));
 
+	m_directIlluminationRTPassResult = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
+		m_context,
+		VK_IMAGE_TYPE_2D,
+		VK_FORMAT_R8G8B8A8_UNORM,
+		VK_SAMPLE_COUNT_1_BIT,
+		{ swapExtent.width, swapExtent.height, 1 },
+		1,
+		1,
+		VK_IMAGE_USAGE_STORAGE_BIT
+		| VK_IMAGE_USAGE_SAMPLED_BIT
+	));
+
 	// Initialize raytracing target views
 	m_softShadowRTPassResult->createView(
 		VK_IMAGE_VIEW_TYPE_2D,
 		hri::ImageResource::DefaultComponentMapping(),
-		VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 }
+		hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1)
+	);
+
+	m_directIlluminationRTPassResult->createView(
+		VK_IMAGE_VIEW_TYPE_2D,
+		hri::ImageResource::DefaultComponentMapping(),
+		hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1)
 	);
 }
 
@@ -348,14 +390,16 @@ void Renderer::initGlobalDescriptorSets()
 	// Create set layouts
 	hri::DescriptorSetLayoutBuilder sceneDataSetBuilder = hri::DescriptorSetLayoutBuilder(m_context)
 		.addBinding(SceneDataBindings::Camera, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_RAYGEN_BIT_KHR)
-		.addBinding(SceneDataBindings::RenderInstanceData, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
-		.addBinding(SceneDataBindings::MaterialData, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
+		.addBinding(SceneDataBindings::RenderInstanceData, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR)
+		.addBinding(SceneDataBindings::MaterialData, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
 
 	hri::DescriptorSetLayoutBuilder rtGlobalDescriptorSetBuilder = hri::DescriptorSetLayoutBuilder(m_context)
-		.addBinding(RayTracingBindings::Tlas, VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
+		.addBinding(RayTracingBindings::Tlas, VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR)
+		.addBinding(RayTracingBindings::GBufferAlbedo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
 		.addBinding(RayTracingBindings::GBufferWorldPos, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
 		.addBinding(RayTracingBindings::GBufferNormal, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
-		.addBinding(RayTracingBindings::SoftShadowOutImage, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR);
+		.addBinding(RayTracingBindings::SoftShadowOutImage, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
+		.addBinding(RayTracingBindings::DIOutImage, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR);
 
 	hri::DescriptorSetLayoutBuilder presentInputSetBuilder = hri::DescriptorSetLayoutBuilder(m_context)
 		.addBinding(PresentInputBindings::RenderResult, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
@@ -454,11 +498,28 @@ void Renderer::recreateSwapDependentResources()
 		m_softShadowRTPassResult->usage
 	));
 
+	m_directIlluminationRTPassResult = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
+		m_context,
+		m_directIlluminationRTPassResult->imageType,
+		m_directIlluminationRTPassResult->format,
+		m_directIlluminationRTPassResult->samples,
+		{ swapExtent.width, swapExtent.height, 1 },
+		1,
+		1,
+		m_directIlluminationRTPassResult->usage
+	));
+
 	// Recreate raytracing target views
 	m_softShadowRTPassResult->createView(
 		VK_IMAGE_VIEW_TYPE_2D,
 		hri::ImageResource::DefaultComponentMapping(),
-		VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 }
+		hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1)
+	);
+
+	m_directIlluminationRTPassResult->createView(
+		VK_IMAGE_VIEW_TYPE_2D,
+		hri::ImageResource::DefaultComponentMapping(),
+		hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1)
 	);
 
 	// Update descriptor sets
@@ -497,6 +558,11 @@ void Renderer::updateFrameDescriptors(RendererFrameData& frame)
 
 	// Ray tracing set
 	{
+		VkDescriptorImageInfo gbufferAlbedoResult = VkDescriptorImageInfo{};
+		gbufferAlbedoResult.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		gbufferAlbedoResult.imageView = m_gbufferLayoutPassManager->getAttachmentResource(0).view;
+		gbufferAlbedoResult.sampler = m_renderResultNearestSampler->sampler;
+
 		VkDescriptorImageInfo gbufferWorldPosResult = VkDescriptorImageInfo{};
 		gbufferWorldPosResult.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		gbufferWorldPosResult.imageView = m_gbufferLayoutPassManager->getAttachmentResource(1).view;
@@ -512,10 +578,17 @@ void Renderer::updateFrameDescriptors(RendererFrameData& frame)
 		softShadowOutInfo.imageView = m_softShadowRTPassResult->view;
 		softShadowOutInfo.sampler = VK_NULL_HANDLE;
 
+		VkDescriptorImageInfo DIOutInfo = VkDescriptorImageInfo{};
+		DIOutInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+		DIOutInfo.imageView = m_directIlluminationRTPassResult->view;
+		DIOutInfo.sampler = VK_NULL_HANDLE;
+
 		(*frame.raytracingSet)
+			.writeImage(RayTracingBindings::GBufferAlbedo, &gbufferAlbedoResult)
 			.writeImage(RayTracingBindings::GBufferWorldPos, &gbufferWorldPosResult)
 			.writeImage(RayTracingBindings::GBufferNormal, &gbufferNormalResult)
 			.writeImage(RayTracingBindings::SoftShadowOutImage, &softShadowOutInfo)
+			.writeImage(RayTracingBindings::DIOutImage, &DIOutInfo)
 			.flush();
 	}
 
@@ -523,7 +596,7 @@ void Renderer::updateFrameDescriptors(RendererFrameData& frame)
 	{
 		VkDescriptorImageInfo renderResultInfo = VkDescriptorImageInfo{};
 		renderResultInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		renderResultInfo.imageView = m_softShadowRTPassResult->view;
+		renderResultInfo.imageView = m_directIlluminationRTPassResult->view;
 		renderResultInfo.sampler = m_renderResultLinearSampler->sampler;
 
 		(*frame.presentInputSet)

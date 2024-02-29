@@ -27,9 +27,11 @@ enum SceneDataBindings
 enum RayTracingBindings
 {
 	Tlas,
+	GBufferAlbedo,
 	GBufferWorldPos,
 	GBufferNormal,
 	SoftShadowOutImage,
+	DIOutImage,
 };
 
 enum ComposeInputBindings
@@ -103,6 +105,7 @@ private:
 
 	// Ray Tracing Targets
 	std::unique_ptr<hri::ImageResource> m_softShadowRTPassResult;
+	std::unique_ptr<hri::ImageResource> m_directIlluminationRTPassResult;
 
 	// Render subsystems
 	std::unique_ptr<GBufferLayoutSubsystem> m_gbufferLayoutSubsystem;

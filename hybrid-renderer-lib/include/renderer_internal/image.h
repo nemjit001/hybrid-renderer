@@ -71,6 +71,28 @@ namespace hri
 			};
 		}
 
+		/// @brief Create an image subresource range.
+		/// @param aspect Image aspect flags to use.
+		/// @param baseMipLevel 
+		/// @param levelCount 
+		/// @param baseArrayLayer 
+		/// @param layerCount 
+		/// @return A new image subresource range.
+		inline static constexpr VkImageSubresourceRange SubresourceRange(
+			VkImageAspectFlags aspect,
+			uint32_t baseMipLevel,
+			uint32_t levelCount,
+			uint32_t baseArrayLayer,
+			uint32_t layerCount
+		)
+		{
+			return VkImageSubresourceRange{
+				aspect,
+				baseMipLevel, levelCount,
+				baseArrayLayer, layerCount
+			};
+		}
+
 	private:
 		void release();
 
