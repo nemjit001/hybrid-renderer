@@ -14,14 +14,16 @@ layout(set = 1, binding = 0) uniform accelerationStructureEXT TLAS;
 layout(set = 1, binding = 1) uniform sampler2D GBufferAlbedo;
 layout(set = 1, binding = 2) uniform sampler2D GBufferWorldPos;
 layout(set = 1, binding = 3) uniform sampler2D GBufferNormal;
-layout(set = 1, binding = 4, r32f) uniform image2D softShadowOut;
-layout(set = 1, binding = 5, rgba32f) uniform image2D DirectIlluminationOut;
+layout(set = 1, binding = 4) uniform sampler2D GBufferDepth;
+layout(set = 1, binding = 5, r32f) uniform image2D softShadowOut;
+layout(set = 1, binding = 6, rgba32f) uniform image2D DirectIlluminationOut;
 
 void main()
 {
 	const uint rayFlags = gl_RayFlagsOpaqueEXT;
 	const uint cullMask = 0xFF;
 
+	// Calculate launch & pixel info
 	const uint launchIndex = gl_LaunchIDEXT.x + gl_LaunchIDEXT.y * gl_LaunchSizeEXT.x;
 	const vec2 pixelLocation = gl_LaunchIDEXT.xy;
 	const vec2 pixelCenter = pixelLocation + vec2(0.5);
@@ -34,39 +36,46 @@ void main()
 
 	// TODO: sample GBuffer Layout for material params & primary hit data to calculate new direction
 	const vec3	diffuseColor = vec3(texture(GBufferAlbedo, inUV));
+	const float initialHitDepth = texture(GBufferDepth, inUV).r;
 
 	const vec3 wPos = vec3(texture(GBufferWorldPos, inUV));
 	const vec3 wNormal = vec3(normalize(texture(GBufferNormal, inUV)));
 	const vec3 wInDir = vec3(invView * normalize(invProj * vec4(d.x, d.y, 1, 1)));
-	const vec3 wOutDir = randomWalk(prd.seed, wNormal);
+	const vec3 wOutDir = randomWalk(prd.seed, wInDir, wNormal);
 
 	// Initialize ray payload
 	prd.seed = initSeed(launchIndex);
-	prd.shadow = 0.0;
-	prd.energy = vec3(0);
+	prd.energy = vec3(0.0);
 	prd.transmission = vec3(1);
+	
+	if (initialHitDepth == 1.0)	// miss
+	{
+		prd.energy += prd.transmission * sampleSkyColor(wInDir);	// Sample based on primary ray direction
+	}
+	else
+	{
+		// Apply material params from GBuffer data
+		const float pdf = evaluatePDF(wOutDir, wNormal);
+		const vec3 brdf = evaluateBRDF(wInDir, wOutDir, wNormal, diffuseColor);
+		prd.transmission *= pdf * brdf;
+		// TODO: trace shadow rays for direct illumination
 
-	// Apply material params from GBuffer data
-	prd.transmission = wPos;
-	// prd.transmission *= evaluatePDF(wOutDir, wNormal) * evaluateBRDF(wInDir, wOutDir, wNormal, diffuseColor);
-
-	// TODO: trace shadow rays for direct illumination
-
-//	traceRayEXT(
-//		TLAS,
-//		rayFlags,
-//		cullMask,
-//		0,	// SBT record offset
-//		0,	// SBT record stride
-//		0,	// Miss shader index
-//		wPos,
-//		RAYTRACE_RANGE_TMIN,
-//		wOutDir,
-//		RAYTRACE_RANGE_TMAX,
-//		0	// Payload location
-//	);
+		// Trace further into the scene
+		traceRayEXT(
+			TLAS,
+			rayFlags,
+			cullMask,
+			0,	// SBT record offset
+			0,	// SBT record stride
+			0,	// Miss shader index
+			wPos,
+			RAYTRACE_RANGE_TMIN,
+			wOutDir,
+			RAYTRACE_RANGE_TMAX,
+			0	// Payload location
+		);
+	}
 
 	const ivec2 pixel = ivec2(pixelLocation);
-	imageStore(softShadowOut, pixel, vec4(vec3(prd.shadow), 1));
-	imageStore(DirectIlluminationOut, pixel, vec4(prd.transmission, 1));
+	imageStore(DirectIlluminationOut, pixel, vec4(prd.energy, 1));
 }

@@ -34,6 +34,7 @@ enum RayTracingBindings
 	GBufferAlbedo,
 	GBufferWorldPos,
 	GBufferNormal,
+	GBufferDepth,
 	SoftShadowOutImage,
 	DIOutImage,
 };

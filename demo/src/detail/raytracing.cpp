@@ -166,8 +166,9 @@ ShaderBindingTable::ShaderBindingTable(
 		m_ctx.renderContext,
 		m_SBTSize,
 		VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT_KHR
-		| VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR,
-		true
+		| VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR
+		| VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+		false
 	),
 	regions{ rayGenRegion, rayMissRegion, rayHitRegion, rayCallRegion }
 {
@@ -200,6 +201,7 @@ void ShaderBindingTable::populateSBT(
 {
 	// TODO: check SBT is not written to out of bounds
 	VkDeviceAddress SBTAdress = raytracing::getDeviceAddress(m_ctx, m_SBTBuffer);
+	hri::BufferResource SBTStaging = hri::BufferResource(m_ctx.renderContext, m_SBTSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, true);
 
 	// Set region device addresses
 	regions[SBTRegion::SBTRayGen].deviceAddress = SBTAdress + getAddressRegionOffset(SBTRegion::SBTRayGen);
@@ -210,7 +212,7 @@ void ShaderBindingTable::populateSBT(
 	// Retrieve buffer pointers
 	size_t shaderHandleIdx = 0;
 	const uint8_t* pHandles = shaderGroupHandles.data();
-	uint8_t* pSBTData = reinterpret_cast<uint8_t*>(m_SBTBuffer.map());
+	uint8_t* pSBTData = reinterpret_cast<uint8_t*>(SBTStaging.map());
 	uint8_t* pTargetData = nullptr;
 
 	// Copy ray gen
@@ -242,7 +244,14 @@ void ShaderBindingTable::populateSBT(
 		pTargetData += regions[SBTRegion::SBTCall].stride;
 	}
 
-	m_SBTBuffer.unmap();
+	SBTStaging.unmap();
+	hri::CommandPool stagingPool = hri::CommandPool(m_ctx.renderContext, m_ctx.renderContext.queues.transferQueue);
+	VkCommandBuffer oneshot = stagingPool.createCommandBuffer();
+	
+	VkBufferCopy SBTCopy = VkBufferCopy{ 0, 0, m_SBTSize };
+	vkCmdCopyBuffer(oneshot, SBTStaging.buffer, m_SBTBuffer.buffer, 1, &SBTCopy);
+
+	stagingPool.submitAndWait(oneshot);
 }
 
 size_t ShaderBindingTable::getAddressRegionOffset(SBTRegion region) const

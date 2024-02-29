@@ -15,7 +15,6 @@
 struct RayHitPayload
 {
 	uint seed;
-	float shadow;
 	vec3 energy;
 	vec3 transmission;
 };
@@ -63,31 +62,34 @@ uint randomRangeU32(inout uint seed, uint minRange, uint maxRange)
 
 /// --- Random walk functions
 
-vec3 diffuseReflect(inout uint seed, vec3 N)
+vec3 randomWalk(inout uint seed, vec3 wI, vec3 N)
 {
-	vec3 direction = vec3(0);
-
+	vec3 outDir = vec3(0);
 	do
 	{
-		direction = vec3(
+		outDir = vec3(
 			randomRange(seed, -1.0, 1.0),
 			randomRange(seed, -1.0, 1.0),
 			randomRange(seed, -1.0, 1.0)
 		);
-	} while (dot(direction, direction) > 1.0);
+	} while(dot(outDir, outDir) > 1.0);
 
-	if (dot(direction, N) < 0.0)
-		direction *= -1.0;
+	if (dot(outDir, N) < 0.0)
+		outDir *= -1.0;
 
-	return normalize(direction);
-}
-
-vec3 randomWalk(inout uint seed, vec3 N)
-{
-	return diffuseReflect(seed, N);
+	return normalize(outDir);
 }
 
 /// --- Material evaluation functions
+
+vec3 sampleSkyColor(vec3 rayDirection)
+{
+	vec3 colorA = vec3(0.8, 0.8, 0.8);
+	vec3 colorB = vec3(0.1, 0.4, 0.6);
+	float alpha = rayDirection.y;
+
+	return alpha * colorB + (1.0 - alpha) * colorA;
+}
 
 bool isEmissive(vec3 emission)
 {

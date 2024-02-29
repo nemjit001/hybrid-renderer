@@ -41,38 +41,35 @@ void main()
 	const vec3 barycentric = vec3(1.0 - triangleHitCoords.x - triangleHitCoords.y, triangleHitCoords.x, triangleHitCoords.y);
 	vec3 hitPos = barycentric.x * v0.position + barycentric.y * v1.position + barycentric.z * v2.position;
 	vec3 hitNormal = barycentric.x * v0.normal + barycentric.y * v1.normal + barycentric.z * v2.normal;
-	hitNormal = normalize(hitNormal);
 
 	// Calculate world positions
 	vec3 wPos = vec3(gl_ObjectToWorldEXT * vec4(hitPos, 1));
 	vec3 wNormal = normalize(vec3(gl_ObjectToWorldEXT * vec4(hitNormal, 0)));
 	vec3 wInDir = gl_WorldRayDirectionEXT;
-	vec3 wOutDir = randomWalk(prd.seed, wNormal);
+	vec3 wOutDir = randomWalk(prd.seed, wInDir, wNormal);
 
 	// Evaluate hit material
 	if (isEmissive(material.emission))
 	{
 		prd.energy += prd.transmission * material.emission;
+		return;
 	}
-	else
-	{
-		const float pdf = evaluatePDF(wOutDir, wNormal);
-		const vec3 brdf = evaluateBRDF(wInDir, wOutDir, wNormal, material.diffuse);
 
-		prd.shadow = 0.0;	// TODO: trace shadow rays
-		prd.transmission *= pdf * brdf;
-//		traceRayEXT(
-//			TLAS,
-//			rayFlags,
-//			cullMask,
-//			0,	// SBT record offset
-//			0,	// SBT record stride
-//			0,	// Miss shader index
-//			wPos,
-//			RAYTRACE_RANGE_TMIN,
-//			wOutDir,
-//			RAYTRACE_RANGE_TMAX,
-//			0	// Payload location
-//		);
-	}
+	const float pdf = evaluatePDF(wOutDir, wNormal);
+	const vec3 brdf = evaluateBRDF(wInDir, wOutDir, wNormal, material.diffuse);
+	prd.transmission *= pdf * brdf;
+
+	traceRayEXT(
+		TLAS,
+		rayFlags,
+		cullMask,
+		0,	// SBT record offset
+		0,	// SBT record stride
+		0,	// Miss shader index
+		wPos,
+		RAYTRACE_RANGE_TMIN,
+		wOutDir,
+		RAYTRACE_RANGE_TMAX,
+		0	// Payload location
+	);
 }

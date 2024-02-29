@@ -111,7 +111,7 @@ void Renderer::drawFrame()
 		gbufferDepthBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		gbufferDepthBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		gbufferDepthBarrier.image = m_gbufferLayoutPassManager->getAttachmentResource(3).image;
-		gbufferDepthBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT, 0, 1, 0, 1);
+		gbufferDepthBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1);
 
 		frame.pipelineBarrier({ gbufferAlbedoBarrier, gbufferWPosBarrier, gbufferNormalBarrier, gbufferDepthBarrier });
 	}
@@ -231,7 +231,7 @@ void Renderer::initRenderPasses()
 				VK_ATTACHMENT_STORE_OP_STORE
 			)
 			.addAttachment(
-				VK_FORMAT_D24_UNORM_S8_UINT,
+				VK_FORMAT_D32_SFLOAT,
 				VK_SAMPLE_COUNT_1_BIT,
 				VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
 				VK_ATTACHMENT_LOAD_OP_CLEAR,
@@ -277,12 +277,11 @@ void Renderer::initRenderPasses()
 				VK_IMAGE_ASPECT_COLOR_BIT
 			},
 			hri::RenderAttachmentConfig{ // Depth Stencil target
-				VK_FORMAT_D24_UNORM_S8_UINT,
+				VK_FORMAT_D32_SFLOAT,
 				VK_SAMPLE_COUNT_1_BIT,
 				VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT
 				| VK_IMAGE_USAGE_SAMPLED_BIT,
 				VK_IMAGE_ASPECT_DEPTH_BIT
-				| VK_IMAGE_ASPECT_STENCIL_BIT
 			},
 		};
 
@@ -393,6 +392,7 @@ void Renderer::initGlobalDescriptorSets()
 		.addBinding(RayTracingBindings::GBufferAlbedo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
 		.addBinding(RayTracingBindings::GBufferWorldPos, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
 		.addBinding(RayTracingBindings::GBufferNormal, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
+		.addBinding(RayTracingBindings::GBufferDepth, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
 		.addBinding(RayTracingBindings::SoftShadowOutImage, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
 		.addBinding(RayTracingBindings::DIOutImage, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR);
 
@@ -570,6 +570,11 @@ void Renderer::updateFrameDescriptors(RendererFrameData& frame)
 		gbufferNormalResult.imageView = m_gbufferLayoutPassManager->getAttachmentResource(2).view;
 		gbufferNormalResult.sampler = m_renderResultNearestSampler->sampler;
 
+		VkDescriptorImageInfo gbufferDepthResult = VkDescriptorImageInfo{};
+		gbufferDepthResult.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		gbufferDepthResult.imageView = m_gbufferLayoutPassManager->getAttachmentResource(3).view;
+		gbufferDepthResult.sampler = m_renderResultNearestSampler->sampler;
+
 		VkDescriptorImageInfo softShadowOutInfo = VkDescriptorImageInfo{};
 		softShadowOutInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 		softShadowOutInfo.imageView = m_softShadowRTPassResult->view;
@@ -584,6 +589,7 @@ void Renderer::updateFrameDescriptors(RendererFrameData& frame)
 			.writeImage(RayTracingBindings::GBufferAlbedo, &gbufferAlbedoResult)
 			.writeImage(RayTracingBindings::GBufferWorldPos, &gbufferWorldPosResult)
 			.writeImage(RayTracingBindings::GBufferNormal, &gbufferNormalResult)
+			.writeImage(RayTracingBindings::GBufferDepth, &gbufferDepthResult)
 			.writeImage(RayTracingBindings::SoftShadowOutImage, &softShadowOutInfo)
 			.writeImage(RayTracingBindings::DIOutImage, &DIOutInfo)
 			.flush();
