@@ -156,13 +156,13 @@ IRayTracingSubSystem::IRayTracingSubSystem(raytracing::RayTracingContext& ctx)
 
 void IRayTracingSubSystem::initSBT(
 	VkPipeline pipeline,
-	size_t missGroupCount,
-	size_t hitGroupCount,
-	size_t callGroupCount
+	uint32_t missGroupCount,
+	uint32_t hitGroupCount,
+	uint32_t callGroupCount
 )
 {
 	// Set up Shader group handle data
-	const size_t shaderGroupCount = 1 + missGroupCount + hitGroupCount + callGroupCount;
+	const uint32_t shaderGroupCount = 1 + missGroupCount + hitGroupCount + callGroupCount;
 	raytracing::ShaderBindingTable::ShaderGroupHandleInfo sgHandleInfo = raytracing::ShaderBindingTable::getShaderGroupHandleInfo(m_rtCtx);
 
 	size_t shaderGroupDataSize = shaderGroupCount * sgHandleInfo.handleSize;
@@ -171,26 +171,25 @@ void IRayTracingSubSystem::initSBT(
 		m_ctx.device,
 		pipeline,
 		0,
-		3,
+		shaderGroupCount,
 		shaderGroupDataSize,
 		shaderGroupHandles.data()
 	));
 
 	// Set up SBT regions
 	VkStridedDeviceAddressRegionKHR rayGenRegion = {};
-	VkStridedDeviceAddressRegionKHR rayMissRegion = {};
-	VkStridedDeviceAddressRegionKHR rayHitRegion = {};
-	VkStridedDeviceAddressRegionKHR rayCallRegion = {};
-
-	rayGenRegion.size = 1 * sgHandleInfo.alignedHandleSize;
+	rayGenRegion.size = sgHandleInfo.alignedHandleSize;
 	rayGenRegion.stride = sgHandleInfo.alignedHandleSize;
 
+	VkStridedDeviceAddressRegionKHR rayMissRegion = {};
 	rayMissRegion.size = HRI_ALIGNED_SIZE(missGroupCount * sgHandleInfo.alignedHandleSize, sgHandleInfo.baseAlignment);
 	rayMissRegion.stride = sgHandleInfo.alignedHandleSize;
 
+	VkStridedDeviceAddressRegionKHR rayHitRegion = {};
 	rayHitRegion.size = HRI_ALIGNED_SIZE(hitGroupCount * sgHandleInfo.alignedHandleSize, sgHandleInfo.baseAlignment);
 	rayHitRegion.stride = sgHandleInfo.alignedHandleSize;
 
+	VkStridedDeviceAddressRegionKHR rayCallRegion = {};
 	rayCallRegion.size = HRI_ALIGNED_SIZE(callGroupCount * sgHandleInfo.alignedHandleSize, sgHandleInfo.baseAlignment);
 	rayCallRegion.stride = sgHandleInfo.alignedHandleSize;
 
@@ -265,10 +264,10 @@ void HybridRayTracingSubsystem::record(hri::ActiveFrame& frame) const
 
 	m_rtCtx.rayTracingDispatch.vkCmdTraceRays(
 		frame.commandBuffer,
-		&m_SBT->regions[raytracing::ShaderBindingTable::rayGenRegionIdx],
-		&m_SBT->regions[raytracing::ShaderBindingTable::rayMissRegionIdx],
-		&m_SBT->regions[raytracing::ShaderBindingTable::rayHitRegionIdx],
-		&m_SBT->regions[raytracing::ShaderBindingTable::rayCallRegionIdx],
+		&m_SBT->regions[raytracing::SBTRegion::SBTRayGen],
+		&m_SBT->regions[raytracing::SBTRegion::SBTMiss],
+		&m_SBT->regions[raytracing::SBTRegion::SBTHit],
+		&m_SBT->regions[raytracing::SBTRegion::SBTCall],
 		swapExtent.width,
 		swapExtent.height,
 		1

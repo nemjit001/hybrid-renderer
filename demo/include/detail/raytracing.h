@@ -110,6 +110,14 @@ namespace raytracing
 		VkPipelineLayout m_layout = VK_NULL_HANDLE;
 	};
 
+	enum SBTRegion
+	{
+		SBTRayGen,
+		SBTMiss,
+		SBTHit,
+		SBTCall
+	};
+
 	/// @brief The Shader Binding Table is used by a raytracing pipeline to reference its bounds shaders.
 	class ShaderBindingTable
 	{
@@ -160,21 +168,17 @@ namespace raytracing
 
 	private:
 		/// @brief Get the internal address region offset.
-		/// @param regionIdx Region Index to use.
+		/// @param region SBT region to use.
 		/// @return The address offset.
-		size_t getAddressRegionOffset(size_t regionIdx) const;
+		size_t getAddressRegionOffset(SBTRegion region) const;
 
 		/// @brief Get a shader group handle offset from a handle array by index.
 		/// @param pHandles Shader group handle list.
 		/// @param index Index to retrieve.
 		/// @return A shader group handle pointer offset.
-		void* getShaderGroupHandleOffset(const void* pHandles, size_t index) const;
+		const uint8_t* getShaderGroupHandleOffset(const uint8_t* pHandles, size_t index) const;
 
 	public:
-		static const size_t rayGenRegionIdx			= 0;
-		static const size_t rayMissRegionIdx		= 1;
-		static const size_t rayHitRegionIdx			= 2;
-		static const size_t rayCallRegionIdx		= 3;
 		VkStridedDeviceAddressRegionKHR regions[4]	= {};
 
 	private:

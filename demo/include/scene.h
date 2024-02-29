@@ -94,8 +94,9 @@ public:
 
 	void cmdBuildBLASses(
 		VkCommandBuffer commandBuffer,
+		const std::vector<RenderInstance>& instances,
 		const std::vector<hri::Mesh>& meshes,
-		std::vector<raytracing::AccelerationStructure>& blasList
+		const std::vector<raytracing::AccelerationStructure>& blasList
 	) const;
 
 private:

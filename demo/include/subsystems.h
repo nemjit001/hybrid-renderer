@@ -79,9 +79,9 @@ public:
 protected:
 	void initSBT(
 		VkPipeline pipeline,
-		size_t missGroupCount,
-		size_t hitGroupCount,
-		size_t callGroupCount = 0
+		uint32_t missGroupCount,
+		uint32_t hitGroupCount,
+		uint32_t callGroupCount = 0
 	);
 
 protected:

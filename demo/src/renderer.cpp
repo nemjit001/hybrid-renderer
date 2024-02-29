@@ -217,14 +217,14 @@ void Renderer::initRenderPasses()
 				VK_ATTACHMENT_STORE_OP_STORE
 			)
 			.addAttachment(
-				VK_FORMAT_R8G8B8A8_SNORM,
+				VK_FORMAT_R16G16B16A16_SNORM,
 				VK_SAMPLE_COUNT_1_BIT,
 				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 				VK_ATTACHMENT_LOAD_OP_CLEAR,
 				VK_ATTACHMENT_STORE_OP_STORE
 			)
 			.addAttachment(
-				VK_FORMAT_R8G8B8A8_SNORM,
+				VK_FORMAT_R16G16B16A16_SNORM,
 				VK_SAMPLE_COUNT_1_BIT,
 				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 				VK_ATTACHMENT_LOAD_OP_CLEAR,
@@ -263,14 +263,14 @@ void Renderer::initRenderPasses()
 				VK_IMAGE_ASPECT_COLOR_BIT
 			},
 			hri::RenderAttachmentConfig{ // wPos target
-				VK_FORMAT_R8G8B8A8_SNORM,
+				VK_FORMAT_R16G16B16A16_SNORM,
 				VK_SAMPLE_COUNT_1_BIT,
 				VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
 				| VK_IMAGE_USAGE_SAMPLED_BIT,
 				VK_IMAGE_ASPECT_COLOR_BIT
 			},
 			hri::RenderAttachmentConfig{ // Normal target
-				VK_FORMAT_R8G8B8A8_SNORM,
+				VK_FORMAT_R16G16B16A16_SNORM,
 				VK_SAMPLE_COUNT_1_BIT,
 				VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
 				| VK_IMAGE_USAGE_SAMPLED_BIT,
@@ -614,7 +614,7 @@ void Renderer::prepareFrameResources(uint32_t frameIdx)
 	hri::CameraShaderData cameraData = m_camera.getShaderData();
 	rendererFrameData.cameraUBO->copyToBuffer(&cameraData, sizeof(hri::CameraShaderData));
 
-	// Rebuild BLASses & TLAS
+	// Create or reallocate TLAS
 	if (rendererFrameData.tlas.get() == nullptr
 		|| m_activeScene.accelStructManager.shouldReallocTLAS(*rendererFrameData.tlas, renderInstanceList, rendererFrameData.blasList)
 	)
@@ -624,13 +624,14 @@ void Renderer::prepareFrameResources(uint32_t frameIdx)
 		);
 	}
 
+	// Build BLAS list & TLAS
 	VkCommandBuffer oneshot = m_computePool.createCommandBuffer();
-	m_activeScene.accelStructManager.cmdBuildBLASses(oneshot, m_activeScene.meshes, rendererFrameData.blasList);
+	m_activeScene.accelStructManager.cmdBuildBLASses(oneshot, renderInstanceList, m_activeScene.meshes, rendererFrameData.blasList);
 	m_activeScene.accelStructManager.cmdBuildTLAS(oneshot, renderInstanceList, rendererFrameData.blasList, *rendererFrameData.tlas);
 	m_computePool.submitAndWait(oneshot);
 	m_computePool.freeCommandBuffer(oneshot);
 
-	// Always write TLAS descriptor in case of updated TLAS set
+	// Always write TLAS descriptor in case of updated TLAS structure
 	VkWriteDescriptorSetAccelerationStructureKHR tlasInfo = VkWriteDescriptorSetAccelerationStructureKHR{ VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR };
 	tlasInfo.accelerationStructureCount = 1;
 	tlasInfo.pAccelerationStructures = &rendererFrameData.tlas->accelerationStructure;

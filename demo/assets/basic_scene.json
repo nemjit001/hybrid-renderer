@@ -1,0 +1,40 @@
+{
+  "nodes": [
+    {
+      "name": "Cube",
+      "mesh_file": "assets/simple_objects_lod.obj",
+      "transform": {
+        "position": [ 0.0, 1.0, 0.0 ],
+        "rotation": [ 0.0, 0.0, 0.0 ],
+        "scale": [ 1.0, 1.0, 1.0 ]
+      },
+      "lod_levels": [
+        "Cube_LOD0"
+      ]
+    },
+    {
+      "name": "AreaLight",
+      "mesh_file": "assets/simple_objects_lod.obj",
+      "transform": {
+        "position": [ 0.0, 5.0, 0.0 ],
+        "rotation": [ 0.0, 0.0, 0.0 ],
+        "scale": [ 1.0, 1.0, 1.0 ]
+      },
+      "lod_levels": [
+        "Plane_LOD0"
+      ]
+    },
+    {
+      "name": "Floor",
+      "mesh_file": "assets/plane_lod.obj",
+      "transform": {
+        "position": [ 0.0, 0.0, 0.0 ],
+        "rotation": [ 0.0, 0.0, 0.0 ],
+        "scale": [ 10.0, 1.0, 10.0 ]
+      },
+      "lod_levels": [
+        "Plane_LOD0"
+      ]
+    }
+  ]
+}

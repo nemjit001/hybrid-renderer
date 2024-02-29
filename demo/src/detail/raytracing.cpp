@@ -202,70 +202,70 @@ void ShaderBindingTable::populateSBT(
 	VkDeviceAddress SBTAdress = raytracing::getDeviceAddress(m_ctx, m_SBTBuffer);
 
 	// Set region device addresses
-	regions[rayGenRegionIdx].deviceAddress = SBTAdress + getAddressRegionOffset(rayGenRegionIdx);
-	if (missHandleCount > 0) regions[rayMissRegionIdx].deviceAddress = SBTAdress + getAddressRegionOffset(rayMissRegionIdx);
-	if (hitHandleCount > 0)	regions[rayHitRegionIdx].deviceAddress = SBTAdress + getAddressRegionOffset(rayHitRegionIdx);
-	if (callHandleCount > 0) regions[rayCallRegionIdx].deviceAddress = SBTAdress + getAddressRegionOffset(rayCallRegionIdx);
+	regions[SBTRegion::SBTRayGen].deviceAddress = SBTAdress + getAddressRegionOffset(SBTRegion::SBTRayGen);
+	regions[SBTRegion::SBTMiss].deviceAddress = SBTAdress + getAddressRegionOffset(SBTRegion::SBTMiss);
+	regions[SBTRegion::SBTHit].deviceAddress = SBTAdress + getAddressRegionOffset(SBTRegion::SBTHit);
+	if (callHandleCount > 0) regions[SBTRegion::SBTCall].deviceAddress = SBTAdress + getAddressRegionOffset(SBTRegion::SBTCall);
 
 	// Retrieve buffer pointers
-	size_t handleIdx = 0;
+	size_t shaderHandleIdx = 0;
 	const uint8_t* pHandles = shaderGroupHandles.data();
 	uint8_t* pSBTData = reinterpret_cast<uint8_t*>(m_SBTBuffer.map());
 	uint8_t* pTargetData = nullptr;
 
 	// Copy ray gen
-	pTargetData = pSBTData + getAddressRegionOffset(rayGenRegionIdx);
-	memcpy(pTargetData, getShaderGroupHandleOffset(pHandles, handleIdx), m_handleInfo.handleSize);
-	handleIdx++;
+	pTargetData = pSBTData + getAddressRegionOffset(SBTRegion::SBTRayGen);
+	memcpy(pTargetData, getShaderGroupHandleOffset(pHandles, shaderHandleIdx), m_handleInfo.handleSize);
+	shaderHandleIdx++;
 
 	// Copy ray miss
-	pTargetData = pSBTData + getAddressRegionOffset(rayMissRegionIdx);
-	for (size_t i = 0; i < missHandleCount; i++, handleIdx++)
+	pTargetData = pSBTData + getAddressRegionOffset(SBTRegion::SBTMiss);
+	for (size_t i = 0; i < missHandleCount; i++, shaderHandleIdx++)
 	{
-		memcpy(pTargetData, getShaderGroupHandleOffset(pHandles, handleIdx), m_handleInfo.handleSize);
-		pTargetData += regions[1].stride;
+		memcpy(pTargetData, getShaderGroupHandleOffset(pHandles, shaderHandleIdx), m_handleInfo.handleSize);
+		pTargetData += regions[SBTRegion::SBTMiss].stride;
 	}
 
 	// Copy ray hit
-	pTargetData = pSBTData + getAddressRegionOffset(rayHitRegionIdx);
-	for (size_t i = 0; i < hitHandleCount; i++, handleIdx++)
+	pTargetData = pSBTData + getAddressRegionOffset(SBTRegion::SBTHit);
+	for (size_t i = 0; i < hitHandleCount; i++, shaderHandleIdx++)
 	{
-		memcpy(pTargetData, getShaderGroupHandleOffset(pHandles, handleIdx), m_handleInfo.handleSize);
-		pTargetData += regions[2].stride;
+		memcpy(pTargetData, getShaderGroupHandleOffset(pHandles, shaderHandleIdx), m_handleInfo.handleSize);
+		pTargetData += regions[SBTRegion::SBTHit].stride;
 	}
 
 	// Copy ray call
-	pTargetData = pSBTData + getAddressRegionOffset(rayCallRegionIdx);
-	for (size_t i = 0; i < callHandleCount; i++, handleIdx++)
+	pTargetData = pSBTData + getAddressRegionOffset(SBTRegion::SBTCall);
+	for (size_t i = 0; i < callHandleCount; i++, shaderHandleIdx++)
 	{
-		memcpy(pTargetData, getShaderGroupHandleOffset(pHandles, handleIdx), m_handleInfo.handleSize);
-		pTargetData += regions[3].stride;
+		memcpy(pTargetData, getShaderGroupHandleOffset(pHandles, shaderHandleIdx), m_handleInfo.handleSize);
+		pTargetData += regions[SBTRegion::SBTCall].stride;
 	}
 
 	m_SBTBuffer.unmap();
 }
 
-size_t ShaderBindingTable::getAddressRegionOffset(size_t regionIdx) const
+size_t ShaderBindingTable::getAddressRegionOffset(SBTRegion region) const
 {
-	switch (regionIdx)
+	switch (region)
 	{
-	case rayGenRegionIdx:
+	case SBTRegion::SBTRayGen:
 		return 0;
-	case rayMissRegionIdx:
-		return regions[0].size;
-	case rayHitRegionIdx:
-		return regions[0].size + regions[1].size;
-	case rayCallRegionIdx:
-		return regions[0].size + regions[1].size + regions[2].size;
+	case SBTRegion::SBTMiss:
+		return regions[SBTRayGen].size;
+	case SBTRegion::SBTHit:
+		return regions[SBTRayGen].size + regions[SBTMiss].size;
+	case SBTRegion::SBTCall:
+		return regions[SBTRayGen].size + regions[SBTMiss].size + regions[SBTHit].size;
 	default:
 		return 0;
 	}
 }
 
-void* ShaderBindingTable::getShaderGroupHandleOffset(const void* pHandles, size_t index) const
+ const uint8_t* ShaderBindingTable::getShaderGroupHandleOffset(const uint8_t* pHandles, size_t index) const
 {
 	assert(pHandles != nullptr);
-	return reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(pHandles) + index * m_handleInfo.handleSize);
+	return pHandles + index * m_handleInfo.handleSize;
 }
 
 AccelerationStructure::AccelerationStructure(RayTracingContext& ctx, VkAccelerationStructureTypeKHR type, size_t size)
@@ -361,7 +361,7 @@ ASBuilder::ASInput ASBuilder::objectToGeometry(
 	buildOffset.firstVertex = 0;
 	buildOffset.primitiveCount = maxPrimitiveCount;
 	buildOffset.primitiveOffset = offsetof(hri::Vertex, position);
-	buildOffset.transformOffset = 0;
+	buildOffset.transformOffset = 0;	// unused
 
 	ASInput asInput = ASInput{};
 	asInput.buildFlags = buildFlags;

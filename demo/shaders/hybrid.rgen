@@ -27,19 +27,18 @@ void main()
 	const vec2 pixelCenter = pixelLocation + vec2(0.5);
 	const vec2 inUV = pixelCenter / vec2(gl_LaunchSizeEXT.xy);
 
-	// Temp raygen stuff
+	// Initial ray hit stuff
 	const mat4 invProj = inverse(camera.project);
 	const mat4 invView = inverse(camera.view);
 	const vec2 d = inUV * 2.0 - 1.0;
 
 	// TODO: sample GBuffer Layout for material params & primary hit data to calculate new direction
-	const vec3	gbufferDiffuse = vec3(texture(GBufferAlbedo, inUV));
+	const vec3	diffuseColor = vec3(texture(GBufferAlbedo, inUV));
 
-	const vec3 wPos = vec3(invView * vec4(0, 0, 0, 1));
-	const vec3 wOutDir = vec3(invView * normalize(invProj * vec4(d.x, d.y, 1, 1)));
-//	const vec3 wPos = vec3(texture(GBufferWorldPos, inUV));
-//	const vec3 wNormal = vec3(normalize(texture(GBufferNormal, inUV)));
-//	const vec3 wOutDir = randomWalk(prd.seed, wNormal);
+	const vec3 wPos = vec3(texture(GBufferWorldPos, inUV));
+	const vec3 wNormal = vec3(normalize(texture(GBufferNormal, inUV)));
+	const vec3 wInDir = vec3(invView * normalize(invProj * vec4(d.x, d.y, 1, 1)));
+	const vec3 wOutDir = randomWalk(prd.seed, wNormal);
 
 	// Initialize ray payload
 	prd.seed = initSeed(launchIndex);
@@ -48,25 +47,26 @@ void main()
 	prd.transmission = vec3(1);
 
 	// Apply material params from GBuffer data
-	// prd.transmission *= applyBRDF(wOutDir, wNormal, diffuse);
+	prd.transmission = wPos;
+	// prd.transmission *= evaluatePDF(wOutDir, wNormal) * evaluateBRDF(wInDir, wOutDir, wNormal, diffuseColor);
 
-	// TODO: trace shadow rays for di
+	// TODO: trace shadow rays for direct illumination
 
-	traceRayEXT(
-		TLAS,
-		rayFlags,
-		cullMask,
-		0,	// SBT record offset
-		0,	// SBT record stride
-		0,	// Miss shader index
-		wPos,
-		RAYTRACE_RANGE_TMIN,
-		wOutDir,
-		RAYTRACE_RANGE_TMAX,
-		0	// Payload location
-	);
+//	traceRayEXT(
+//		TLAS,
+//		rayFlags,
+//		cullMask,
+//		0,	// SBT record offset
+//		0,	// SBT record stride
+//		0,	// Miss shader index
+//		wPos,
+//		RAYTRACE_RANGE_TMIN,
+//		wOutDir,
+//		RAYTRACE_RANGE_TMAX,
+//		0	// Payload location
+//	);
 
 	const ivec2 pixel = ivec2(pixelLocation);
 	imageStore(softShadowOut, pixel, vec4(vec3(prd.shadow), 1));
-	imageStore(DirectIlluminationOut, pixel, vec4(prd.energy, 1));
+	imageStore(DirectIlluminationOut, pixel, vec4(prd.transmission, 1));
 }

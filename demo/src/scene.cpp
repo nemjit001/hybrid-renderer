@@ -152,8 +152,9 @@ void SceneASManager::cmdBuildTLAS(
 
 void SceneASManager::cmdBuildBLASses(
 	VkCommandBuffer commandBuffer,
+	const std::vector<RenderInstance>& instances,
 	const std::vector<hri::Mesh>& meshes,
-	std::vector<raytracing::AccelerationStructure>& blasList
+	const std::vector<raytracing::AccelerationStructure>& blasList
 ) const
 {
 	assert(meshes.size() == blasList.size());
@@ -175,13 +176,19 @@ void SceneASManager::cmdBuildBLASses(
 		| VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT
 	);
 
-	std::vector<VkAccelerationStructureKHR> asHandles = {}; asHandles.reserve(blasList.size());
-	for (auto const& blas : blasList) asHandles.push_back(blas.accelerationStructure);
+	// Gather build batch
+	std::vector<raytracing::ASBuilder::ASBuildInfo> batchInfo = {};
+	std::vector<VkAccelerationStructureKHR> batchHandles = {};
+	for (auto const& instance : instances)
+	{
+		batchInfo.push_back(blasBuildInfos[instance.instanceId]);
+		batchHandles.push_back(blasList[instance.instanceId].accelerationStructure);
+	}
 
 	m_asBuilder.cmdBuildAccelerationStructures(
 		commandBuffer,
-		blasBuildInfos,
-		asHandles,
+		batchInfo,
+		batchHandles,
 		raytracing::getDeviceAddress(m_ctx, scratchBuffer)
 	);
 }
