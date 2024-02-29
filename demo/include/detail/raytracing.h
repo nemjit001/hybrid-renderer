@@ -1,6 +1,7 @@
 #pragma once
 
 #include <hybrid_renderer.h>
+#include <array>
 #include <vector>
 
 #include "demo.h"
@@ -100,6 +101,10 @@ namespace raytracing
 		/// @return A new vk pipeline handle.
 		VkPipeline build(VkPipelineCache cache = VK_NULL_HANDLE, VkDeferredOperationKHR deferredOperation = VK_NULL_HANDLE);
 
+		inline const std::vector<VkPipelineShaderStageCreateInfo>& shaderStages() const { return m_shaderStages; }
+
+		inline const std::vector<VkRayTracingShaderGroupCreateInfoKHR>& shaderGroups() const { return m_shaderGroups; }
+
 	private:
 		RayTracingContext& m_ctx;
 		VkPipelineCreateFlags m_flags = 0;
@@ -110,82 +115,65 @@ namespace raytracing
 		VkPipelineLayout m_layout = VK_NULL_HANDLE;
 	};
 
-	enum SBTRegion
-	{
-		SBTRayGen,
-		SBTMiss,
-		SBTHit,
-		SBTCall
-	};
-
 	/// @brief The Shader Binding Table is used by a raytracing pipeline to reference its bounds shaders.
 	class ShaderBindingTable
 	{
 	public:
+		/// @brief SBT regions contain shader module handles that are called during ray tracing.
+		enum SBTShaderGroup
+		{
+			SGRayGen,
+			SGMiss,
+			SGHit,
+			SGCall
+		};
+
 		/// @brief Shader Group Handle Info contains sizes needed to calculate shader region offsets.
 		struct ShaderGroupHandleInfo
 		{
-			size_t handleSize			= 0;
-			size_t baseAlignment		= 0;
-			size_t alignedHandleSize	= 0;
+			uint32_t handleSize			= 0;
+			uint32_t baseAlignment		= 0;
+			uint32_t alignedHandleSize	= 0;
 		};
 
 	public:
-		/// @brief Create a new Shader Binding Table.
-		/// @param ctx Ray Tracing Context to use.
-		/// @param rayGenRegion Ray Gen region, 1 shader, MUST be set.
-		/// @param rayMissRegion Ray Miss region, optional shaders.
-		/// @param rayHitRegion Ray Hit region, optional shaders.
-		/// @param rayCallRegion Callable shader region, optional shaders.
 		ShaderBindingTable(
 			RayTracingContext& ctx,
-			VkStridedDeviceAddressRegionKHR rayGenRegion,
-			VkStridedDeviceAddressRegionKHR rayMissRegion = VkStridedDeviceAddressRegionKHR{},
-			VkStridedDeviceAddressRegionKHR rayHitRegion = VkStridedDeviceAddressRegionKHR{},
-			VkStridedDeviceAddressRegionKHR rayCallRegion = VkStridedDeviceAddressRegionKHR{}
+			VkPipeline pipeline,
+			const RayTracingPipelineBuilder& pipelineBuilder
 		);
 
-		/// @brief Destroy this SBT.
-		virtual ~ShaderBindingTable() = default;
-
-		/// @brief Populate this SBT.
-		/// @param shaderGroupHandles Shader Group Handles fetched from pipeline, shaders groups MUST be in order Ray Gen,
-		///		Ray Miss, Ray Hit, Ray Call.
-		/// @param missHandleCount Number of miss shaders.
-		/// @param hitHandleCount Number of hit shaders.
-		/// @param callHandleCount Number of callable shaders.
-		void populateSBT(
-			const std::vector<uint8_t>& shaderGroupHandles,
-			size_t missHandleCount = 0,
-			size_t hitHandleCount = 0,
-			size_t callHandleCount = 0
-		);
-
-		/// @brief Get shader group handle info from a ray tracing context.
-		/// @param ctx Context to use.
-		/// @return This context's Shader Group Handle Info.
 		static ShaderGroupHandleInfo getShaderGroupHandleInfo(RayTracingContext& ctx);
 
+		const VkStridedDeviceAddressRegionKHR getRegion(SBTShaderGroup group) const;
+
+		inline uint32_t size(SBTShaderGroup group) const {
+			return group == SBTShaderGroup::SGRayGen ?
+				m_shaderGroupStrides[group] : m_shaderGroupStrides[group] * indexCount(SBTShaderGroup::SGRayGen);
+		}
+	
+		inline uint32_t stride(SBTShaderGroup group) const { return m_shaderGroupStrides[group]; }
+
+		inline uint32_t indexCount(SBTShaderGroup group) const { return static_cast<uint32_t>(m_shaderGroupIndices[group].size()); }
+
 	private:
-		/// @brief Get the internal address region offset.
-		/// @param region SBT region to use.
-		/// @return The address offset.
-		size_t getAddressRegionOffset(SBTRegion region) const;
+		VkDeviceAddress getGroupDeviceAddress(SBTShaderGroup group) const;
 
-		/// @brief Get a shader group handle offset from a handle array by index.
-		/// @param pHandles Shader group handle list.
-		/// @param index Index to retrieve.
-		/// @return A shader group handle pointer offset.
-		const uint8_t* getShaderGroupHandleOffset(const uint8_t* pHandles, size_t index) const;
+		uint8_t* getShaderHandleOffset(uint8_t* pHandles, size_t idx) const;
 
-	public:
-		VkStridedDeviceAddressRegionKHR regions[4]	= {};
+		void getShaderGroupIndices(const RayTracingPipelineBuilder& pipelineBuilder);
+
+		void getShaderGroupStrides();
 
 	private:
 		RayTracingContext& m_ctx;
-		ShaderGroupHandleInfo m_handleInfo;
-		size_t m_SBTSize;
-		hri::BufferResource m_SBTBuffer;
+		ShaderGroupHandleInfo m_handleInfo = ShaderGroupHandleInfo{};
+		std::array<std::vector<uint32_t>, 4> m_shaderGroupIndices;
+		std::array<uint32_t, 4> m_shaderGroupStrides;
+		std::array<uint32_t, 4> m_shaderGroupSizes;
+		std::array<std::vector<uint8_t>, 4> m_sbtData;
+		
+		std::unordered_map<SBTShaderGroup, hri::BufferResource> m_buffers;
 	};
 
 	/// @brief An acceleration structure is used for ray tracing to improve ray traversal performance.

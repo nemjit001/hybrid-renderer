@@ -153,128 +153,153 @@ VkPipeline RayTracingPipelineBuilder::build(VkPipelineCache cache, VkDeferredOpe
 
 ShaderBindingTable::ShaderBindingTable(
 	RayTracingContext& ctx,
-	VkStridedDeviceAddressRegionKHR rayGenRegion,
-	VkStridedDeviceAddressRegionKHR rayMissRegion,
-	VkStridedDeviceAddressRegionKHR rayHitRegion,
-	VkStridedDeviceAddressRegionKHR rayCallRegion
+	VkPipeline pipeline,
+	const RayTracingPipelineBuilder& pipelineBuilder
 )
 	:
 	m_ctx(ctx),
-	m_handleInfo(ShaderBindingTable::getShaderGroupHandleInfo(ctx)),
-	m_SBTSize(rayGenRegion.size + rayMissRegion.size + rayHitRegion.size + rayCallRegion.size),
-	m_SBTBuffer(
-		m_ctx.renderContext,
-		m_SBTSize,
-		VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT_KHR
-		| VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR
-		| VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-		false
-	),
-	regions{ rayGenRegion, rayMissRegion, rayHitRegion, rayCallRegion }
+	m_handleInfo(getShaderGroupHandleInfo(ctx))
 {
-	//
+	// Populate shader group count, indices & stride
+	const uint32_t groupCount = static_cast<uint32_t>(pipelineBuilder.shaderGroups().size());
+	getShaderGroupIndices(pipelineBuilder);
+	getShaderGroupStrides();
+
+	// Get shader group handles
+	const uint32_t handleDataSize = groupCount * m_handleInfo.handleSize;
+	std::vector<uint8_t> shaderHandles = std::vector<uint8_t>(handleDataSize);
+	HRI_VK_CHECK(m_ctx.rayTracingDispatch.vkGetRayTracingShaderGroupHandles(
+		m_ctx.renderContext.device,
+		pipeline,
+		0,
+		groupCount,
+		handleDataSize,
+		shaderHandles.data()
+	));
+
+	// Calculate SBT sizes
+	m_shaderGroupSizes[SBTShaderGroup::SGRayGen] = m_shaderGroupStrides[SBTShaderGroup::SGRayGen] * indexCount(SBTShaderGroup::SGRayGen);
+	m_shaderGroupSizes[SBTShaderGroup::SGMiss] = m_shaderGroupStrides[SBTShaderGroup::SGMiss] * indexCount(SBTShaderGroup::SGMiss);
+	m_shaderGroupSizes[SBTShaderGroup::SGHit] = m_shaderGroupStrides[SBTShaderGroup::SGHit] * indexCount(SBTShaderGroup::SGHit);
+	m_shaderGroupSizes[SBTShaderGroup::SGCall] = m_shaderGroupStrides[SBTShaderGroup::SGCall] * indexCount(SBTShaderGroup::SGCall);
+
+	// Allocate SBT datas & populate with shader group handles
+	m_sbtData = {};
+	size_t groupIdx = 0;
+	for (uint32_t group = 0; group < m_shaderGroupIndices.size(); group++)
+	{
+		m_sbtData[groupIdx] = std::vector<uint8_t>(m_shaderGroupSizes[groupIdx]);
+		uint8_t* pBufferData = m_sbtData[groupIdx].data();
+		for (auto const& handleIdx : m_shaderGroupIndices[group])
+		{
+			memcpy(pBufferData, getShaderHandleOffset(shaderHandles.data(), handleIdx), m_handleInfo.handleSize);
+			pBufferData += m_shaderGroupStrides[groupIdx];
+		}
+
+		groupIdx++;
+	}
+
+	// Copy shader group handle data to buffers
+	VkBufferUsageFlags sbtBufferUsage = VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR
+		| VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+	for (uint32_t group = 0; group < m_shaderGroupIndices.size(); group++)
+	{
+		if (m_shaderGroupIndices[group].size() > 0)
+		{
+			SBTShaderGroup shaderGroup = static_cast<SBTShaderGroup>(group);
+			hri::BufferResource groupBuffer = hri::BufferResource(m_ctx.renderContext, m_shaderGroupSizes[group], sbtBufferUsage, true);
+
+			auto& it = m_buffers.insert(std::make_pair(shaderGroup, std::move(groupBuffer)));
+			assert(it.second == true);
+
+			m_buffers.at(shaderGroup).copyToBuffer(m_sbtData[group].data(), m_shaderGroupSizes[group]);
+		}
+	}
+}
+
+VkDeviceAddress ShaderBindingTable::getGroupDeviceAddress(SBTShaderGroup group) const
+{
+	if (indexCount(group) == 0)
+		return 0;
+
+	return getDeviceAddress(m_ctx, m_buffers.at(group));
+}
+
+uint8_t* ShaderBindingTable::getShaderHandleOffset(uint8_t* pHandles, size_t idx) const
+{
+	return pHandles + idx * m_handleInfo.handleSize;
 }
 
 ShaderBindingTable::ShaderGroupHandleInfo ShaderBindingTable::getShaderGroupHandleInfo(RayTracingContext& ctx)
 {
-	VkPhysicalDeviceRayTracingPropertiesNV rtProperties = VkPhysicalDeviceRayTracingPropertiesNV{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PROPERTIES_NV };
-	VkPhysicalDeviceProperties2 properties = VkPhysicalDeviceProperties2{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2_KHR };
-	properties.pNext = &rtProperties;
-
-	vkGetPhysicalDeviceProperties2(ctx.renderContext.gpu, &properties);
-	size_t handleSize = rtProperties.shaderGroupHandleSize;
-	size_t baseAlignment = rtProperties.shaderGroupBaseAlignment;
+	VkPhysicalDeviceRayTracingPropertiesNV rtProps = VkPhysicalDeviceRayTracingPropertiesNV{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PROPERTIES_NV };
+	VkPhysicalDeviceProperties2 props = VkPhysicalDeviceProperties2{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2 };
+	props.pNext = &rtProps;
+	vkGetPhysicalDeviceProperties2(ctx.renderContext.gpu, &props);
 
 	return ShaderGroupHandleInfo{
-		handleSize,
-		baseAlignment,
-		HRI_ALIGNED_SIZE(handleSize, baseAlignment),
+		rtProps.shaderGroupHandleSize,
+		rtProps.shaderGroupBaseAlignment,
+		HRI_ALIGNED_SIZE(rtProps.shaderGroupHandleSize, rtProps.shaderGroupBaseAlignment)
 	};
 }
 
-void ShaderBindingTable::populateSBT(
-	const std::vector<uint8_t>& shaderGroupHandles,
-	size_t missHandleCount,
-	size_t hitHandleCount,
-	size_t callHandleCount
-)
+const VkStridedDeviceAddressRegionKHR ShaderBindingTable::getRegion(SBTShaderGroup group) const
 {
-	// TODO: check SBT is not written to out of bounds
-	VkDeviceAddress SBTAdress = raytracing::getDeviceAddress(m_ctx, m_SBTBuffer);
-	hri::BufferResource SBTStaging = hri::BufferResource(m_ctx.renderContext, m_SBTSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, true);
-
-	// Set region device addresses
-	regions[SBTRegion::SBTRayGen].deviceAddress = SBTAdress + getAddressRegionOffset(SBTRegion::SBTRayGen);
-	regions[SBTRegion::SBTMiss].deviceAddress = SBTAdress + getAddressRegionOffset(SBTRegion::SBTMiss);
-	regions[SBTRegion::SBTHit].deviceAddress = SBTAdress + getAddressRegionOffset(SBTRegion::SBTHit);
-	if (callHandleCount > 0) regions[SBTRegion::SBTCall].deviceAddress = SBTAdress + getAddressRegionOffset(SBTRegion::SBTCall);
-
-	// Retrieve buffer pointers
-	size_t shaderHandleIdx = 0;
-	const uint8_t* pHandles = shaderGroupHandles.data();
-	uint8_t* pSBTData = reinterpret_cast<uint8_t*>(SBTStaging.map());
-	uint8_t* pTargetData = nullptr;
-
-	// Copy ray gen
-	pTargetData = pSBTData + getAddressRegionOffset(SBTRegion::SBTRayGen);
-	memcpy(pTargetData, getShaderGroupHandleOffset(pHandles, shaderHandleIdx), m_handleInfo.handleSize);
-	shaderHandleIdx++;
-
-	// Copy ray miss
-	pTargetData = pSBTData + getAddressRegionOffset(SBTRegion::SBTMiss);
-	for (size_t i = 0; i < missHandleCount; i++, shaderHandleIdx++)
-	{
-		memcpy(pTargetData, getShaderGroupHandleOffset(pHandles, shaderHandleIdx), m_handleInfo.handleSize);
-		pTargetData += regions[SBTRegion::SBTMiss].stride;
-	}
-
-	// Copy ray hit
-	pTargetData = pSBTData + getAddressRegionOffset(SBTRegion::SBTHit);
-	for (size_t i = 0; i < hitHandleCount; i++, shaderHandleIdx++)
-	{
-		memcpy(pTargetData, getShaderGroupHandleOffset(pHandles, shaderHandleIdx), m_handleInfo.handleSize);
-		pTargetData += regions[SBTRegion::SBTHit].stride;
-	}
-
-	// Copy ray call
-	pTargetData = pSBTData + getAddressRegionOffset(SBTRegion::SBTCall);
-	for (size_t i = 0; i < callHandleCount; i++, shaderHandleIdx++)
-	{
-		memcpy(pTargetData, getShaderGroupHandleOffset(pHandles, shaderHandleIdx), m_handleInfo.handleSize);
-		pTargetData += regions[SBTRegion::SBTCall].stride;
-	}
-
-	SBTStaging.unmap();
-	hri::CommandPool stagingPool = hri::CommandPool(m_ctx.renderContext, m_ctx.renderContext.queues.transferQueue);
-	VkCommandBuffer oneshot = stagingPool.createCommandBuffer();
-	
-	VkBufferCopy SBTCopy = VkBufferCopy{ 0, 0, m_SBTSize };
-	vkCmdCopyBuffer(oneshot, SBTStaging.buffer, m_SBTBuffer.buffer, 1, &SBTCopy);
-
-	stagingPool.submitAndWait(oneshot);
+	return VkStridedDeviceAddressRegionKHR{ getGroupDeviceAddress(group), stride(group), size(group)};
 }
 
-size_t ShaderBindingTable::getAddressRegionOffset(SBTRegion region) const
+void ShaderBindingTable::getShaderGroupIndices(const RayTracingPipelineBuilder& pipelineBuilder)
 {
-	switch (region)
+	auto const& shaderStages = pipelineBuilder.shaderStages();
+	auto const& shaderGroups = pipelineBuilder.shaderGroups();
+
+	for (auto& indices : m_shaderGroupIndices)
+		indices = {};
+
+	for (uint32_t groupIdx = 0; groupIdx < shaderGroups.size(); groupIdx++)
 	{
-	case SBTRegion::SBTRayGen:
-		return 0;
-	case SBTRegion::SBTMiss:
-		return regions[SBTRayGen].size;
-	case SBTRegion::SBTHit:
-		return regions[SBTRayGen].size + regions[SBTMiss].size;
-	case SBTRegion::SBTCall:
-		return regions[SBTRayGen].size + regions[SBTMiss].size + regions[SBTHit].size;
-	default:
-		return 0;
+		auto const& rtShaderGroup = shaderGroups[groupIdx];
+
+		if (rtShaderGroup.type == VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR)
+		{
+			assert(rtShaderGroup.generalShader < shaderStages.size());
+			auto const& generalShader = shaderStages[rtShaderGroup.generalShader];
+			switch (generalShader.stage)
+			{
+			case VK_SHADER_STAGE_RAYGEN_BIT_KHR:
+				m_shaderGroupIndices[SBTShaderGroup::SGRayGen].push_back(groupIdx);
+				break;
+			case VK_SHADER_STAGE_MISS_BIT_KHR:
+				m_shaderGroupIndices[SBTShaderGroup::SGMiss].push_back(groupIdx);
+				break;
+			case VK_SHADER_STAGE_CALLABLE_BIT_KHR:
+				m_shaderGroupIndices[SBTShaderGroup::SGHit].push_back(groupIdx);
+				break;
+			default:
+				break;
+			}
+		}
+		else // If type is not general, we are dealing with a hit group
+		{
+			m_shaderGroupIndices[SBTShaderGroup::SGHit].push_back(groupIdx);
+		}
 	}
 }
 
- const uint8_t* ShaderBindingTable::getShaderGroupHandleOffset(const uint8_t* pHandles, size_t index) const
+void ShaderBindingTable::getShaderGroupStrides()
 {
-	assert(pHandles != nullptr);
-	return pHandles + index * m_handleInfo.handleSize;
+	for (size_t groupIdx = 0; groupIdx < m_shaderGroupIndices.size(); groupIdx++)
+	{
+		uint32_t stride = HRI_ALIGNED_SIZE(m_handleInfo.alignedHandleSize, m_handleInfo.baseAlignment);
+		m_shaderGroupStrides[groupIdx] = stride;
+	}
+
+	// ensure sg raygen is aligned on group base alignment
+	m_shaderGroupStrides[SBTShaderGroup::SGRayGen] = HRI_ALIGNED_SIZE(
+		m_shaderGroupStrides[SBTShaderGroup::SGRayGen],
+		m_handleInfo.baseAlignment
+	);
 }
 
 AccelerationStructure::AccelerationStructure(RayTracingContext& ctx, VkAccelerationStructureTypeKHR type, size_t size)

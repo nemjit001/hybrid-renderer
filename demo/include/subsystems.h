@@ -77,14 +77,6 @@ public:
 	inline void updateFrameInfo(const RayTracingFrameInfo& frameInfo) { m_currentFrameInfo = frameInfo; }
 
 protected:
-	void initSBT(
-		VkPipeline pipeline,
-		uint32_t missGroupCount,
-		uint32_t hitGroupCount,
-		uint32_t callGroupCount = 0
-	);
-
-protected:
 	raytracing::RayTracingContext& m_rtCtx;
 	std::unique_ptr<raytracing::ShaderBindingTable> m_SBT;
 	RayTracingFrameInfo m_currentFrameInfo = RayTracingFrameInfo{};

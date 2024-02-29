@@ -154,57 +154,6 @@ IRayTracingSubSystem::IRayTracingSubSystem(raytracing::RayTracingContext& ctx)
 	//
 }
 
-void IRayTracingSubSystem::initSBT(
-	VkPipeline pipeline,
-	uint32_t missGroupCount,
-	uint32_t hitGroupCount,
-	uint32_t callGroupCount
-)
-{
-	// Set up Shader group handle data
-	const uint32_t shaderGroupCount = 1 + missGroupCount + hitGroupCount + callGroupCount;
-	raytracing::ShaderBindingTable::ShaderGroupHandleInfo sgHandleInfo = raytracing::ShaderBindingTable::getShaderGroupHandleInfo(m_rtCtx);
-
-	size_t shaderGroupDataSize = shaderGroupCount * sgHandleInfo.handleSize;
-	std::vector<uint8_t> shaderGroupHandles = std::vector<uint8_t>(shaderGroupDataSize);
-	HRI_VK_CHECK(m_rtCtx.rayTracingDispatch.vkGetRayTracingShaderGroupHandles(
-		m_ctx.device,
-		pipeline,
-		0,
-		shaderGroupCount,
-		shaderGroupDataSize,
-		shaderGroupHandles.data()
-	));
-
-	// Set up SBT regions
-	VkStridedDeviceAddressRegionKHR rayGenRegion = {};
-	rayGenRegion.size = sgHandleInfo.alignedHandleSize;
-	rayGenRegion.stride = sgHandleInfo.alignedHandleSize;
-
-	VkStridedDeviceAddressRegionKHR rayMissRegion = {};
-	rayMissRegion.size = HRI_ALIGNED_SIZE(missGroupCount * sgHandleInfo.alignedHandleSize, sgHandleInfo.baseAlignment);
-	rayMissRegion.stride = sgHandleInfo.alignedHandleSize;
-
-	VkStridedDeviceAddressRegionKHR rayHitRegion = {};
-	rayHitRegion.size = HRI_ALIGNED_SIZE(hitGroupCount * sgHandleInfo.alignedHandleSize, sgHandleInfo.baseAlignment);
-	rayHitRegion.stride = sgHandleInfo.alignedHandleSize;
-
-	VkStridedDeviceAddressRegionKHR rayCallRegion = {};
-	rayCallRegion.size = HRI_ALIGNED_SIZE(callGroupCount * sgHandleInfo.alignedHandleSize, sgHandleInfo.baseAlignment);
-	rayCallRegion.stride = sgHandleInfo.alignedHandleSize;
-
-	// Set up SBT & populate
-	m_SBT = std::unique_ptr<raytracing::ShaderBindingTable>(new raytracing::ShaderBindingTable(
-		m_rtCtx,
-		rayGenRegion,
-		rayHitRegion,
-		rayMissRegion,
-		rayCallRegion
-	));
-
-	m_SBT->populateSBT(shaderGroupHandles, missGroupCount, hitGroupCount, callGroupCount);
-}
-
 HybridRayTracingSubsystem::HybridRayTracingSubsystem(
 	raytracing::RayTracingContext& ctx,
 	hri::ShaderDatabase& shaderDB,
@@ -223,21 +172,28 @@ HybridRayTracingSubsystem::HybridRayTracingSubsystem(
 	const hri::Shader* pRayMiss = shaderDB.getShader("HybridMiss");
 	const hri::Shader* pRayClosestHit = shaderDB.getShader("HybridClosestHit");
 
-	VkPipeline raytracingPipeline = raytracing::RayTracingPipelineBuilder(ctx)
+	raytracing::RayTracingPipelineBuilder rtPipelineBuilder = raytracing::RayTracingPipelineBuilder(ctx)
 		.addShaderStage(pRayGen->stage, pRayGen->module)
 		.addShaderStage(pRayMiss->stage, pRayMiss->module)
 		.addShaderStage(pRayClosestHit->stage, pRayClosestHit->module)
 		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR, 0)	// Ray Gen
-		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR,	1)	// Ray Miss
-		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR,	VK_SHADER_UNUSED_KHR, 2) // Ray Hit
+		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR, 1)	// Ray Miss
+		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR, VK_SHADER_UNUSED_KHR, 2) // Ray Hit
 		.setMaxRecursionDepth()
-		.setLayout(m_layout)
-		.build(shaderDB.pipelineCache());
+		.setLayout(m_layout);
 
-	m_pPSO = shaderDB.registerPipeline("SoftShadowsRTPipeline", VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, raytracingPipeline);
+	VkPipeline raytracingPipeline = rtPipelineBuilder.build(shaderDB.pipelineCache());
+	m_pPSO = shaderDB.registerPipeline(
+		"HybridRenderingRTPipeline",
+		VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR,
+		raytracingPipeline);
 
 	// Init the SBT
-	initSBT(raytracingPipeline, 1, 1, 0);
+	m_SBT = std::unique_ptr<raytracing::ShaderBindingTable>(new raytracing::ShaderBindingTable(
+		m_rtCtx,
+		raytracingPipeline,
+		rtPipelineBuilder
+	));
 }
 
 void HybridRayTracingSubsystem::record(hri::ActiveFrame& frame) const
@@ -262,12 +218,16 @@ void HybridRayTracingSubsystem::record(hri::ActiveFrame& frame) const
 
 	vkCmdBindPipeline(frame.commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
 
+	VkStridedDeviceAddressRegionKHR raygenRegion = m_SBT->getRegion(raytracing::ShaderBindingTable::SBTShaderGroup::SGRayGen);
+	VkStridedDeviceAddressRegionKHR missRegion = m_SBT->getRegion(raytracing::ShaderBindingTable::SBTShaderGroup::SGMiss);
+	VkStridedDeviceAddressRegionKHR hitRegion = m_SBT->getRegion(raytracing::ShaderBindingTable::SBTShaderGroup::SGHit);
+	VkStridedDeviceAddressRegionKHR callRegion = m_SBT->getRegion(raytracing::ShaderBindingTable::SBTShaderGroup::SGCall);
 	m_rtCtx.rayTracingDispatch.vkCmdTraceRays(
 		frame.commandBuffer,
-		&m_SBT->regions[raytracing::SBTRegion::SBTRayGen],
-		&m_SBT->regions[raytracing::SBTRegion::SBTMiss],
-		&m_SBT->regions[raytracing::SBTRegion::SBTHit],
-		&m_SBT->regions[raytracing::SBTRegion::SBTCall],
+		&raygenRegion,
+		&missRegion,
+		&hitRegion,
+		&callRegion,
 		swapExtent.width,
 		swapExtent.height,
 		1
