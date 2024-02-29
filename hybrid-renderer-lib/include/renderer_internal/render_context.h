@@ -19,7 +19,7 @@
 
 #define HRI_DEFAULT_SWAP_IMAGE_COUNT 3
 
-#define HRI_VK_CHECK(result)    (void)((result == VK_SUCCESS) || (abort(), 0))
+#define HRI_VK_CHECK(result)    (void)((result == VK_SUCCESS) || (fprintf(stderr, "VkResult(%d)\n", result), abort(), 0))
 #define HRI_SIZEOF_ARRAY(a)     (sizeof(a) / sizeof(a[0]))
 
 namespace hri

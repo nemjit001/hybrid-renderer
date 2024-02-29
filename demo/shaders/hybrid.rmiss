@@ -15,8 +15,7 @@ vec3 sampleSkyColor(vec3 rayDirection)
 	vec3 colorB = vec3(0.1, 0.4, 0.6);
 	float alpha = rayDirection.y;
 
-	//return alpha * colorB + (1.0 - alpha) * colorA;
-	return vec3(0);
+	return alpha * colorB + (1.0 - alpha) * colorA;
 }
 
 void main()

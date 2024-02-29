@@ -244,7 +244,7 @@ HybridRayTracingSubsystem::HybridRayTracingSubsystem(
 void HybridRayTracingSubsystem::record(hri::ActiveFrame& frame) const
 {
 	assert(m_pPSO != nullptr);
-	m_debug.cmdBeginLabel(frame.commandBuffer, "Soft Shadows Raytracing Pass");
+	m_debug.cmdBeginLabel(frame.commandBuffer, "Hybrid Rendering Raytracing Pass");
 
 	VkExtent2D swapExtent = m_ctx.swapchain.extent;
 

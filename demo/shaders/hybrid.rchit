@@ -9,7 +9,7 @@
 #include "shader_common.glsl"
 #include "raytracing_common.glsl"
 
-hitAttributeEXT vec2 hitAttrs;
+hitAttributeEXT vec2 triangleHitCoords;
 layout(location = 0) rayPayloadInEXT RayHitPayload prd;
 
 layout(buffer_reference, scalar) buffer VertexBuffer  { Vertex v[]; };
@@ -24,9 +24,6 @@ void main()
 {
 	const uint rayFlags = gl_RayFlagsOpaqueEXT;
 	const uint cullMask = 0xFF;
-	const uint sbtRecordOffset = 0;
-	const uint sbtRecordStride = 0;
-	const uint missIndex = 0;
 
 	// Set up instance & buffer data
 	RenderInstanceData hitInstance = instances[gl_InstanceCustomIndexEXT];
@@ -41,7 +38,7 @@ void main()
 	const Vertex v2 = vertices.v[triangle.z];
 
 	// Calculate hit position & normal
-	const vec3 barycentric = vec3(1.0 - hitAttrs.x - hitAttrs.y, hitAttrs.x, hitAttrs.y);
+	const vec3 barycentric = vec3(1.0 - triangleHitCoords.x - triangleHitCoords.y, triangleHitCoords.x, triangleHitCoords.y);
 	vec3 hitPos = barycentric.x * v0.position + barycentric.y * v1.position + barycentric.z * v2.position;
 	vec3 hitNormal = barycentric.x * v0.normal + barycentric.y * v1.normal + barycentric.z * v2.normal;
 	hitNormal = normalize(hitNormal);
@@ -68,14 +65,14 @@ void main()
 			TLAS,
 			rayFlags,
 			cullMask,
-			sbtRecordOffset,
-			sbtRecordStride,
-			missIndex,
+			0,	// SBT record offset
+			0,	// SBT record stride
+			0,	// Miss shader index
 			wPos,
 			RAYTRACE_RANGE_TMIN,
 			wOutDir,
 			RAYTRACE_RANGE_TMAX,
-			0
+			0	// Payload location
 		);
 	}
 }

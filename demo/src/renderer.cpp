@@ -31,11 +31,6 @@ Renderer::Renderer(raytracing::RayTracingContext& ctx, hri::Camera& camera, Scen
 		recreateSwapDependentResources();
 	});
 
-	// Prebuild BLAS list
-	VkCommandBuffer oneshot = m_computePool.createCommandBuffer(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-	m_activeScene.accelStructManager.cmdBuildBLASses(oneshot, m_activeScene.meshes);
-	m_computePool.submitAndWait(oneshot);
-
 	// Prepare first frame resources
 	prepareFrameResources(0);
 }
@@ -457,6 +452,8 @@ void Renderer::initRendererFrameData()
 			true
 		));
 
+		frame.blasList = m_activeScene.accelStructManager.createBLASList(m_activeScene.meshes);
+
 		frame.sceneDataSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(
 			m_context,
 			m_descriptorSetAllocator,
@@ -609,7 +606,7 @@ void Renderer::prepareFrameResources(uint32_t frameIdx)
 {
 	assert(frameIdx < hri::RenderCore::framesInFlight());
 
-	m_activeScene.generateRenderInstanceList(m_camera);
+	const std::vector<RenderInstance>& renderInstanceList = m_activeScene.generateRenderInstanceList(m_camera);
 	RendererFrameData& rendererFrameData = m_frames[frameIdx];
 
 	// Update UBO staging buffers
@@ -618,20 +615,25 @@ void Renderer::prepareFrameResources(uint32_t frameIdx)
 
 	// Rebuild BLASses & TLAS
 	{
-		if (
-			rendererFrameData.tlas.get() == nullptr
-			|| m_activeScene.accelStructManager.shouldReallocTLAS(*rendererFrameData.tlas, m_activeScene.getRenderInstanceList())
-		)
+		if (rendererFrameData.tlas.get() == nullptr)
 		{
 			rendererFrameData.tlas = std::make_unique<raytracing::AccelerationStructure>(
-				m_activeScene.accelStructManager.createTLAS(m_activeScene.getRenderInstanceList())
+				m_activeScene.accelStructManager.createTLAS(renderInstanceList, rendererFrameData.blasList)
 			);
 		}
 
-		VkCommandBuffer oneshot = m_computePool.createCommandBuffer(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-		m_activeScene.accelStructManager.cmdBuildBLASses(oneshot, m_activeScene.meshes);
-		m_activeScene.accelStructManager.cmdBuildTLAS(oneshot, m_activeScene.getRenderInstanceList(), *rendererFrameData.tlas);
+		if (m_activeScene.accelStructManager.shouldReallocTLAS(*rendererFrameData.tlas, renderInstanceList, rendererFrameData.blasList))
+		{
+			rendererFrameData.tlas = std::make_unique<raytracing::AccelerationStructure>(
+				m_activeScene.accelStructManager.createTLAS(renderInstanceList, rendererFrameData.blasList)
+			);
+		}
+
+		VkCommandBuffer oneshot = m_computePool.createCommandBuffer();
+		m_activeScene.accelStructManager.cmdBuildBLASses(oneshot, m_activeScene.meshes, rendererFrameData.blasList);
+		m_activeScene.accelStructManager.cmdBuildTLAS(oneshot, renderInstanceList, rendererFrameData.blasList, *rendererFrameData.tlas);
 		m_computePool.submitAndWait(oneshot);
+		m_computePool.freeCommandBuffer(oneshot);
 	}
 
 	// Always write TLAS descriptor in case of updated TLAS set

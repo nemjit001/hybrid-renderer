@@ -76,7 +76,6 @@ void CommandPool::submitAndWait(VkCommandBuffer cmdBuffer, bool endRecording)
 
 	HRI_VK_CHECK(vkQueueSubmit(m_queue.handle, 1, &submitInfo, m_submitFence));
 	HRI_VK_CHECK(vkWaitForFences(m_ctx.device, 1, &m_submitFence, VK_TRUE, UINT64_MAX));
-	freeCommandBuffer(cmdBuffer);
 }
 
 void CommandPool::release()

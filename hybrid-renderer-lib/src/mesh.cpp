@@ -41,4 +41,5 @@ Mesh::Mesh(RenderContext& ctx, const std::vector<Vertex>& vertices, const std::v
 	vkCmdCopyBuffer(commandBuffer, stagingIndex.buffer, indexBuffer.buffer, 1, &indexCopy);
 
 	pool.submitAndWait(commandBuffer);
+	pool.freeCommandBuffer(commandBuffer);
 }

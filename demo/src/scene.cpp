@@ -16,13 +16,17 @@ SceneASManager::SceneASManager(
 	m_ctx(ctx),
 	m_asBuilder(ctx)
 {
-	createBLASList(meshes);
+	//
 }
 
-bool SceneASManager::shouldReallocTLAS(const raytracing::AccelerationStructure& tlas, const std::vector<RenderInstance>& instances) const
+bool SceneASManager::shouldReallocTLAS(
+	const raytracing::AccelerationStructure& tlas,
+	const std::vector<RenderInstance>& instances,
+	const std::vector<raytracing::AccelerationStructure>& blasList
+) const
 {
 	size_t instanceCount = instances.size();
-	hri::BufferResource tlasInstanceBuffer = generateTLASInstances(instances);
+	hri::BufferResource tlasInstanceBuffer = generateTLASInstances(instances, blasList);
 
 	raytracing::ASBuilder::ASInput tlasInput = m_asBuilder.instancesToGeometry(
 		tlasInstanceBuffer,
@@ -44,10 +48,13 @@ bool SceneASManager::shouldReallocTLAS(const raytracing::AccelerationStructure& 
 	return tlas.buffer.bufferSize < tlasSizeInfo.totalAccelerationStructureSize;
 }
 
-raytracing::AccelerationStructure SceneASManager::createTLAS(const std::vector<RenderInstance>& instances)
+raytracing::AccelerationStructure SceneASManager::createTLAS(
+	const std::vector<RenderInstance>& instances,
+	const std::vector<raytracing::AccelerationStructure>& blasList
+)
 {
 	size_t instanceCount = instances.size();
-	hri::BufferResource tlasInstanceBuffer = generateTLASInstances(instances);
+	hri::BufferResource tlasInstanceBuffer = generateTLASInstances(instances, blasList);
 
 	raytracing::ASBuilder::ASInput tlasInput = m_asBuilder.instancesToGeometry(
 		tlasInstanceBuffer,
@@ -73,14 +80,42 @@ raytracing::AccelerationStructure SceneASManager::createTLAS(const std::vector<R
 	);
 }
 
+std::vector<raytracing::AccelerationStructure> SceneASManager::createBLASList(const std::vector<hri::Mesh>& meshes)
+{
+	raytracing::ASBuilder::ASSizeInfo blasSizeInfo = raytracing::ASBuilder::ASSizeInfo{};
+	std::vector<raytracing::ASBuilder::ASInput> blasInputs = generateBLASInputs(meshes);
+	std::vector<raytracing::ASBuilder::ASBuildInfo> blasBuildInfos = m_asBuilder.generateASBuildInfo(
+		blasInputs,
+		blasSizeInfo,
+		VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR,
+		VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR,
+		VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR
+	);
+
+	std::vector<raytracing::AccelerationStructure> blasList; blasList.reserve(blasBuildInfos.size());
+	for (auto const& buildInfo : blasBuildInfos)
+	{
+		raytracing::AccelerationStructure blas = raytracing::AccelerationStructure(
+			m_ctx,
+			VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR,
+			buildInfo.buildSizes.accelerationStructureSize
+		);
+
+		blasList.push_back(std::move(blas));
+	}
+
+	return blasList;
+}
+
 void SceneASManager::cmdBuildTLAS(
 	VkCommandBuffer commandBuffer,
 	const std::vector<RenderInstance>& instances,
+	const std::vector<raytracing::AccelerationStructure>& blasList,
 	raytracing::AccelerationStructure& tlas
 ) const
 {
 	size_t instanceCount = instances.size();
-	hri::BufferResource tlasInstanceBuffer = generateTLASInstances(instances);
+	hri::BufferResource tlasInstanceBuffer = generateTLASInstances(instances, blasList);
 
 	raytracing::ASBuilder::ASInput tlasInput = m_asBuilder.instancesToGeometry(
 		tlasInstanceBuffer,
@@ -115,9 +150,13 @@ void SceneASManager::cmdBuildTLAS(
 	);
 }
 
-void SceneASManager::cmdBuildBLASses(VkCommandBuffer commandBuffer, const std::vector<hri::Mesh>& meshes) const
+void SceneASManager::cmdBuildBLASses(
+	VkCommandBuffer commandBuffer,
+	const std::vector<hri::Mesh>& meshes,
+	std::vector<raytracing::AccelerationStructure>& blasList
+) const
 {
-	assert(meshes.size() == m_blasList.size());
+	assert(meshes.size() == blasList.size());
 
 	raytracing::ASBuilder::ASSizeInfo blasSizeInfo = raytracing::ASBuilder::ASSizeInfo{};
 	std::vector<raytracing::ASBuilder::ASInput> blasInputs = generateBLASInputs(meshes);
@@ -136,8 +175,8 @@ void SceneASManager::cmdBuildBLASses(VkCommandBuffer commandBuffer, const std::v
 		| VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT
 	);
 
-	std::vector<VkAccelerationStructureKHR> asHandles = {}; asHandles.reserve(m_blasList.size());
-	for (auto const& blas : m_blasList) asHandles.push_back(blas.accelerationStructure);
+	std::vector<VkAccelerationStructureKHR> asHandles = {}; asHandles.reserve(blasList.size());
+	for (auto const& blas : blasList) asHandles.push_back(blas.accelerationStructure);
 
 	m_asBuilder.cmdBuildAccelerationStructures(
 		commandBuffer,
@@ -147,7 +186,10 @@ void SceneASManager::cmdBuildBLASses(VkCommandBuffer commandBuffer, const std::v
 	);
 }
 
-hri::BufferResource SceneASManager::generateTLASInstances(const std::vector<RenderInstance>& instances) const
+hri::BufferResource SceneASManager::generateTLASInstances(
+	const std::vector<RenderInstance>& instances,
+	const std::vector<raytracing::AccelerationStructure>& blasList
+) const
 {
 	size_t instanceCount = instances.size();
 	hri::BufferResource tlasInstanceBuffer = hri::BufferResource(
@@ -162,7 +204,7 @@ hri::BufferResource SceneASManager::generateTLASInstances(const std::vector<Rend
 	std::vector<VkAccelerationStructureInstanceKHR> tlasInstances = {}; tlasInstances.reserve(instances.size());
 	for (auto const& renderInstance : instances)
 	{
-		auto const& blas = m_blasList[renderInstance.instanceId];
+		auto const& blas = blasList[renderInstance.instanceId];
 		VkAccelerationStructureDeviceAddressInfoKHR addrInfo = VkAccelerationStructureDeviceAddressInfoKHR{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR };
 		addrInfo.accelerationStructure = blas.accelerationStructure;
 
@@ -204,32 +246,6 @@ std::vector<raytracing::ASBuilder::ASInput> SceneASManager::generateBLASInputs(c
 	return blasInputs;
 }
 
-void SceneASManager::createBLASList(const std::vector<hri::Mesh>& meshes)
-{
-	raytracing::ASBuilder::ASSizeInfo blasSizeInfo = raytracing::ASBuilder::ASSizeInfo{};
-	std::vector<raytracing::ASBuilder::ASInput> blasInputs = generateBLASInputs(meshes);
-	std::vector<raytracing::ASBuilder::ASBuildInfo> blasBuildInfos = m_asBuilder.generateASBuildInfo(
-		blasInputs,
-		blasSizeInfo,
-		VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR,
-		VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR,
-		VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR
-	);
-
-	m_blasList.clear();
-	m_blasList.reserve(blasBuildInfos.size());
-	for (auto const& buildInfo : blasBuildInfos)
-	{
-		raytracing::AccelerationStructure blas = raytracing::AccelerationStructure(
-			m_ctx,
-			VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR,
-			buildInfo.buildSizes.accelerationStructureSize
-		);
-
-		m_blasList.push_back(std::move(blas));
-	}
-}
-
 SceneGraph::SceneGraph(
 	raytracing::RayTracingContext& ctx,
 	std::vector<Material>&& materials,
@@ -246,7 +262,7 @@ SceneGraph::SceneGraph(
 	buffers{
 		hri::BufferResource(
 			ctx.renderContext,
-			sizeof(RenderInstance)* this->meshes.size(),
+			sizeof(RenderInstance) * this->meshes.size(),
 			VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
 			| VK_BUFFER_USAGE_TRANSFER_DST_BIT
 		),
@@ -304,7 +320,7 @@ SceneGraph::SceneGraph(
 
 void SceneGraph::update(float deltaTime)
 {
-	// TODO: rebuild TLAS & BLASses
+	// TODO: update scene animation data
 }
 
 const std::vector<RenderInstance>& SceneGraph::getRenderInstanceList() const

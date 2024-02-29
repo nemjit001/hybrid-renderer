@@ -12,10 +12,10 @@ namespace hri
 	/// @brief A Vertex is a datapoint containing information needed for rendering.
 	struct Vertex
 	{
-		HRI_ALIGNAS(16) Float3 position;
-		HRI_ALIGNAS(16) Float3 normal;
-		HRI_ALIGNAS(16) Float3 tangent;
-		HRI_ALIGNAS(16) Float2 textureCoord;
+		Float3 position;
+		Float3 normal;
+		Float3 tangent;
+		Float2 textureCoord;
 	};
 
 	/// @brief A Mesh represents a renderable object. It uses indexed drawing to reduce vertex array size.

@@ -21,9 +21,6 @@ void main()
 {
 	const uint rayFlags = gl_RayFlagsOpaqueEXT;
 	const uint cullMask = 0xFF;
-	const uint sbtRecordOffset = 0;
-	const uint sbtRecordStride = 0;
-	const uint missIndex = 0;
 
 	const uint launchIndex = gl_LaunchIDEXT.x + gl_LaunchIDEXT.y * gl_LaunchSizeEXT.x;
 	const vec2 pixelLocation = gl_LaunchIDEXT.xy;
@@ -59,14 +56,14 @@ void main()
 		TLAS,
 		rayFlags,
 		cullMask,
-		sbtRecordOffset,
-		sbtRecordStride,
-		missIndex,
+		0,	// SBT record offset
+		0,	// SBT record stride
+		0,	// Miss shader index
 		wPos,
 		RAYTRACE_RANGE_TMIN,
 		wOutDir,
 		RAYTRACE_RANGE_TMAX,
-		0
+		0	// Payload location
 	);
 
 	const ivec2 pixel = ivec2(pixelLocation);

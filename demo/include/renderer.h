@@ -10,8 +10,12 @@
 /// @brief The Renderer Frame Data structure contains per frame data for rendering.
 struct RendererFrameData
 {
+	// Per frame resources
 	std::unique_ptr<hri::BufferResource> cameraUBO;
 	std::unique_ptr<raytracing::AccelerationStructure> tlas;
+	std::vector<raytracing::AccelerationStructure> blasList;
+
+	// Descriptor sets
 	std::unique_ptr<hri::DescriptorSetManager> sceneDataSet;
 	std::unique_ptr<hri::DescriptorSetManager> raytracingSet;
 	std::unique_ptr<hri::DescriptorSetManager> presentInputSet;

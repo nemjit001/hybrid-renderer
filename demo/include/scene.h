@@ -72,29 +72,45 @@ public:
 
 	virtual ~SceneASManager() = default;
 
-	bool shouldReallocTLAS(const raytracing::AccelerationStructure& tlas, const std::vector<RenderInstance>& instances) const;
+	bool shouldReallocTLAS(
+		const raytracing::AccelerationStructure& tlas,
+		const std::vector<RenderInstance>& instances,
+		const std::vector<raytracing::AccelerationStructure>& blasList
+	) const;
 
-	raytracing::AccelerationStructure createTLAS(const std::vector<RenderInstance>& instances);
+	raytracing::AccelerationStructure createTLAS(
+		const std::vector<RenderInstance>& instances,
+		const std::vector<raytracing::AccelerationStructure>& blasList
+	);
+
+	std::vector<raytracing::AccelerationStructure> createBLASList(const std::vector<hri::Mesh>& meshes);
 
 	void cmdBuildTLAS(
 		VkCommandBuffer commandBuffer,
 		const std::vector<RenderInstance>& instances,
+		const std::vector<raytracing::AccelerationStructure>& blasList,
 		raytracing::AccelerationStructure& tlas
 	) const;
 
-	void cmdBuildBLASses(VkCommandBuffer commandBuffer, const std::vector<hri::Mesh>& meshes) const;
+	void cmdBuildBLASses(
+		VkCommandBuffer commandBuffer,
+		const std::vector<hri::Mesh>& meshes,
+		std::vector<raytracing::AccelerationStructure>& blasList
+	) const;
 
 private:
-	hri::BufferResource generateTLASInstances(const std::vector<RenderInstance>& instances) const;
+	hri::BufferResource generateTLASInstances(
+		const std::vector<RenderInstance>& instances,
+		const std::vector<raytracing::AccelerationStructure>& blasList
+	) const;
 
 	std::vector<raytracing::ASBuilder::ASInput> generateBLASInputs(const std::vector<hri::Mesh>& meshes) const;
 
-	void createBLASList(const std::vector<hri::Mesh>& meshes);
+	
 
 private:
 	raytracing::RayTracingContext& m_ctx;
 	raytracing::ASBuilder m_asBuilder;
-	std::vector<raytracing::AccelerationStructure> m_blasList			= {};
 };
 
 class SceneGraph
