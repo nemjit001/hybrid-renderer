@@ -15,6 +15,9 @@
 struct RayHitPayload
 {
 	uint seed;
+	bool terminated;
+	vec3 origin;
+	vec3 direction;
 	vec3 energy;
 	vec3 transmission;
 };

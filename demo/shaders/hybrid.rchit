@@ -51,25 +51,14 @@ void main()
 	// Evaluate hit material
 	if (isEmissive(material.emission))
 	{
+		prd.terminated = true;
 		prd.energy += prd.transmission * material.emission;
 		return;
 	}
 
 	const float pdf = evaluatePDF(wOutDir, wNormal);
 	const vec3 brdf = evaluateBRDF(wInDir, wOutDir, wNormal, material.diffuse);
+	prd.origin = wPos;
+	prd.direction = wOutDir;
 	prd.transmission *= pdf * brdf;
-
-	traceRayEXT(
-		TLAS,
-		rayFlags,
-		cullMask,
-		0,	// SBT record offset
-		0,	// SBT record stride
-		0,	// Miss shader index
-		wPos,
-		RAYTRACE_RANGE_TMIN,
-		wOutDir,
-		RAYTRACE_RANGE_TMAX,
-		0	// Payload location
-	);
 }

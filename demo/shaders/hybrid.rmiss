@@ -11,5 +11,6 @@ layout(location = 0) rayPayloadInEXT RayHitPayload prd;
 
 void main()
 {
+	prd.terminated = true;
 	prd.energy += prd.transmission * sampleSkyColor(gl_WorldRayDirectionEXT);
 }

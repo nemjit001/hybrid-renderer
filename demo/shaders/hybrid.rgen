@@ -6,6 +6,8 @@
 #include "shader_common.glsl"
 #include "raytracing_common.glsl"
 
+#define RT_MAX_BOUNCE_COUNT	5
+
 layout(location = 0) rayPayloadEXT RayHitPayload prd;
 
 layout(set = 0, binding = 0) uniform CAMERA { Camera camera; };
@@ -29,38 +31,24 @@ void main()
 	const vec2 pixelCenter = pixelLocation + vec2(0.5);
 	const vec2 inUV = pixelCenter / vec2(gl_LaunchSizeEXT.xy);
 
-	// Initial ray hit stuff
+	// Calculate initial ray data
 	const mat4 invProj = inverse(camera.project);
 	const mat4 invView = inverse(camera.view);
-	const vec2 d = inUV * 2.0 - 1.0;
+	const vec2 dir2D = inUV * 2.0 - 1.0;
 
-	// TODO: sample GBuffer Layout for material params & primary hit data to calculate new direction
-	const vec3	diffuseColor = vec3(texture(GBufferAlbedo, inUV));
-	const float initialHitDepth = texture(GBufferDepth, inUV).r;
-
-	const vec3 wPos = vec3(texture(GBufferWorldPos, inUV));
-	const vec3 wNormal = vec3(normalize(texture(GBufferNormal, inUV)));
-	const vec3 wInDir = vec3(invView * normalize(invProj * vec4(d.x, d.y, 1, 1)));
-	const vec3 wOutDir = randomWalk(prd.seed, wInDir, wNormal);
+	const vec3 wPos = vec3(invView * vec4(0, 0, 0, 1));
+	const vec3 wOutDir = vec3(invView * normalize(invProj * vec4(dir2D.x, dir2D.y, 1, 1)));
 
 	// Initialize ray payload
 	prd.seed = initSeed(launchIndex);
+	prd.terminated = false;
+	prd.origin = wPos;
+	prd.direction = wOutDir;
 	prd.energy = vec3(0.0);
 	prd.transmission = vec3(1);
-	
-	if (initialHitDepth == 1.0)	// miss
-	{
-		prd.energy += prd.transmission * sampleSkyColor(wInDir);	// Sample based on primary ray direction
-	}
-	else
-	{
-		// Apply material params from GBuffer data
-		const float pdf = evaluatePDF(wOutDir, wNormal);
-		const vec3 brdf = evaluateBRDF(wInDir, wOutDir, wNormal, diffuseColor);
-		prd.transmission *= pdf * brdf;
-		// TODO: trace shadow rays for direct illumination
 
-		// Trace further into the scene
+	for (uint i = 0; i < RT_MAX_BOUNCE_COUNT; i++)
+	{
 		traceRayEXT(
 			TLAS,
 			rayFlags,
@@ -68,12 +56,15 @@ void main()
 			0,	// SBT record offset
 			0,	// SBT record stride
 			0,	// Miss shader index
-			wPos,
+			prd.origin,
 			RAYTRACE_RANGE_TMIN,
-			wOutDir,
+			prd.direction,
 			RAYTRACE_RANGE_TMAX,
 			0	// Payload location
 		);
+
+		if (prd.terminated)
+			break;
 	}
 
 	const ivec2 pixel = ivec2(pixelLocation);
