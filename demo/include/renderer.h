@@ -32,6 +32,7 @@ enum RayTracingBindings
 {
 	Tlas,
 	GBufferAlbedo,
+	GBufferEmission,
 	GBufferWorldPos,
 	GBufferNormal,
 	GBufferDepth,

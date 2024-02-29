@@ -58,7 +58,8 @@ void main()
 
 	const float pdf = evaluatePDF(wOutDir, wNormal);
 	const vec3 brdf = evaluateBRDF(wInDir, wOutDir, wNormal, material.diffuse);
+	prd.transmission *= pdf * brdf;
+
 	prd.origin = wPos;
 	prd.direction = wOutDir;
-	prd.transmission *= pdf * brdf;
 }

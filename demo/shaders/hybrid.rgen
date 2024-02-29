@@ -7,6 +7,7 @@
 #include "raytracing_common.glsl"
 
 #define RT_MAX_BOUNCE_COUNT	5
+#define HYBRID_RENDERING	1
 
 layout(location = 0) rayPayloadEXT RayHitPayload prd;
 
@@ -14,11 +15,12 @@ layout(set = 0, binding = 0) uniform CAMERA { Camera camera; };
 
 layout(set = 1, binding = 0) uniform accelerationStructureEXT TLAS;
 layout(set = 1, binding = 1) uniform sampler2D GBufferAlbedo;
-layout(set = 1, binding = 2) uniform sampler2D GBufferWorldPos;
-layout(set = 1, binding = 3) uniform sampler2D GBufferNormal;
-layout(set = 1, binding = 4) uniform sampler2D GBufferDepth;
-layout(set = 1, binding = 5, r32f) uniform image2D softShadowOut;
-layout(set = 1, binding = 6, rgba32f) uniform image2D DirectIlluminationOut;
+layout(set = 1, binding = 2) uniform sampler2D GBufferEmission;
+layout(set = 1, binding = 3) uniform sampler2D GBufferWorldPos;
+layout(set = 1, binding = 4) uniform sampler2D GBufferNormal;
+layout(set = 1, binding = 5) uniform sampler2D GBufferDepth;
+layout(set = 1, binding = 6, r32f) uniform image2D softShadowOut;
+layout(set = 1, binding = 7, rgba32f) uniform image2D DirectIlluminationOut;
 
 void main()
 {
@@ -36,18 +38,55 @@ void main()
 	const mat4 invView = inverse(camera.view);
 	const vec2 dir2D = inUV * 2.0 - 1.0;
 
-	const vec3 wPos = vec3(invView * vec4(0, 0, 0, 1));
-	const vec3 wOutDir = vec3(invView * normalize(invProj * vec4(dir2D.x, dir2D.y, 1, 1)));
-
 	// Initialize ray payload
 	prd.seed = initSeed(launchIndex);
 	prd.terminated = false;
-	prd.origin = wPos;
-	prd.direction = wOutDir;
+	prd.origin = vec3(0);
+	prd.direction = vec3(0);
 	prd.energy = vec3(0.0);
 	prd.transmission = vec3(1);
 
-	for (uint i = 0; i < RT_MAX_BOUNCE_COUNT; i++)
+#if HYBRID_RENDERING == 1
+	// Get initial hit data from GBuffer
+	vec3 wPos = vec3(texture(GBufferWorldPos, inUV));
+	vec3 wNormal = vec3(texture(GBufferNormal, inUV));
+	float initialHitDepth = float(texture(GBufferDepth, inUV));
+
+	// Get material data from GBuffer
+	vec3 diffuseColor = vec3(texture(GBufferAlbedo, inUV));
+	vec3 emissionColor = vec3(texture(GBufferEmission, inUV));
+
+	// Evaluate initial material hit
+	vec4 iRayDirection = normalize(invProj * vec4(dir2D.x, dir2D.y, 1, 1));
+	vec3 wRayOrigin = vec3(invView * vec4(0, 0, 0, 1));
+	vec3 wInDir = vec3(invView * iRayDirection);
+	vec3 wOutDir = randomWalk(prd.seed, wInDir, wNormal);
+	
+	if (initialHitDepth == 1.0)
+	{
+		prd.terminated = true;
+		prd.energy += prd.transmission * sampleSkyColor(wInDir);
+	}
+
+	if (isEmissive(emissionColor))
+	{
+		prd.terminated = true;
+		prd.energy += prd.transmission * emissionColor;
+	}
+
+	const float pdf = evaluatePDF(wOutDir, wNormal);
+	const vec3 brdf = evaluateBRDF(wInDir, wOutDir, wNormal, diffuseColor);
+	prd.transmission *= pdf * brdf;
+
+#else
+	vec3 wPos = vec3(invView * vec4(0, 0, 0, 1));
+	vec3 wOutDir = vec3(invView * normalize(invProj * vec4(dir2D.x, dir2D.y, 1, 1)));
+#endif
+
+	prd.origin = wPos;
+	prd.direction = wOutDir;
+
+	for (uint i = 0; i < RT_MAX_BOUNCE_COUNT && !prd.terminated; i++)
 	{
 		traceRayEXT(
 			TLAS,
@@ -62,9 +101,6 @@ void main()
 			RAYTRACE_RANGE_TMAX,
 			0	// Payload location
 		);
-
-		if (prd.terminated)
-			break;
 	}
 
 	const ivec2 pixel = ivec2(pixelLocation);
