@@ -77,6 +77,10 @@ namespace hri
 		/// @brief Await the finish of the currently active frame.
 		void awaitFrameFinished() const;
 
+		/// @brief Await the finish of a frame.
+		/// @param idx Set this to a frame idx to await the finish of a specific frame.
+		void awaitFrameFinished(size_t idx) const;
+
 		/// @brief Register a callback for when the Swap Chain is invalidated. This callback can be used to
 		///		recreate frame resources for example.
 		/// @param onSwapchainInvalidate Callback to execute on swapchain invalidation.

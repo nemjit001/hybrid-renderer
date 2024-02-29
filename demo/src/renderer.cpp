@@ -605,6 +605,7 @@ void Renderer::updateFrameDescriptors(RendererFrameData& frame)
 void Renderer::prepareFrameResources(uint32_t frameIdx)
 {
 	assert(frameIdx < hri::RenderCore::framesInFlight());
+	m_renderCore.awaitFrameFinished(frameIdx);	// Ensure this frame's execution has finished
 
 	const std::vector<RenderInstance>& renderInstanceList = m_activeScene.generateRenderInstanceList(m_camera);
 	RendererFrameData& rendererFrameData = m_frames[frameIdx];
@@ -614,27 +615,20 @@ void Renderer::prepareFrameResources(uint32_t frameIdx)
 	rendererFrameData.cameraUBO->copyToBuffer(&cameraData, sizeof(hri::CameraShaderData));
 
 	// Rebuild BLASses & TLAS
+	if (rendererFrameData.tlas.get() == nullptr
+		|| m_activeScene.accelStructManager.shouldReallocTLAS(*rendererFrameData.tlas, renderInstanceList, rendererFrameData.blasList)
+	)
 	{
-		if (rendererFrameData.tlas.get() == nullptr)
-		{
-			rendererFrameData.tlas = std::make_unique<raytracing::AccelerationStructure>(
-				m_activeScene.accelStructManager.createTLAS(renderInstanceList, rendererFrameData.blasList)
-			);
-		}
-
-		if (m_activeScene.accelStructManager.shouldReallocTLAS(*rendererFrameData.tlas, renderInstanceList, rendererFrameData.blasList))
-		{
-			rendererFrameData.tlas = std::make_unique<raytracing::AccelerationStructure>(
-				m_activeScene.accelStructManager.createTLAS(renderInstanceList, rendererFrameData.blasList)
-			);
-		}
-
-		VkCommandBuffer oneshot = m_computePool.createCommandBuffer();
-		m_activeScene.accelStructManager.cmdBuildBLASses(oneshot, m_activeScene.meshes, rendererFrameData.blasList);
-		m_activeScene.accelStructManager.cmdBuildTLAS(oneshot, renderInstanceList, rendererFrameData.blasList, *rendererFrameData.tlas);
-		m_computePool.submitAndWait(oneshot);
-		m_computePool.freeCommandBuffer(oneshot);
+		rendererFrameData.tlas = std::make_unique<raytracing::AccelerationStructure>(
+			m_activeScene.accelStructManager.createTLAS(renderInstanceList, rendererFrameData.blasList)
+		);
 	}
+
+	VkCommandBuffer oneshot = m_computePool.createCommandBuffer();
+	m_activeScene.accelStructManager.cmdBuildBLASses(oneshot, m_activeScene.meshes, rendererFrameData.blasList);
+	m_activeScene.accelStructManager.cmdBuildTLAS(oneshot, renderInstanceList, rendererFrameData.blasList, *rendererFrameData.tlas);
+	m_computePool.submitAndWait(oneshot);
+	m_computePool.freeCommandBuffer(oneshot);
 
 	// Always write TLAS descriptor in case of updated TLAS set
 	VkWriteDescriptorSetAccelerationStructureKHR tlasInfo = VkWriteDescriptorSetAccelerationStructureKHR{ VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR };

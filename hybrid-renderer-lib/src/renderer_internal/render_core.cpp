@@ -150,6 +150,15 @@ void RenderCore::awaitFrameFinished() const
 	HRI_VK_CHECK(vkWaitForFences(m_ctx.device, HRI_SIZEOF_ARRAY(frameFences), frameFences, VK_TRUE, UINT64_MAX));
 }
 
+void RenderCore::awaitFrameFinished(size_t idx) const
+{
+	assert(idx < HRI_VK_FRAMES_IN_FLIGHT);
+
+	const FrameState& activeFrame = m_frames[idx];
+	VkFence frameFences[] = { activeFrame.frameReady };
+	HRI_VK_CHECK(vkWaitForFences(m_ctx.device, HRI_SIZEOF_ARRAY(frameFences), frameFences, VK_TRUE, UINT64_MAX));
+}
+
 HRIOnSwapchainInvalidateFunc RenderCore::setOnSwapchainInvalidateCallback(HRIOnSwapchainInvalidateFunc onSwapchainInvalidate)
 {
 	HRIOnSwapchainInvalidateFunc old = m_onSwapchainInvalidateFunc;

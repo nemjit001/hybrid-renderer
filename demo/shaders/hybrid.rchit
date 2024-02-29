@@ -61,18 +61,18 @@ void main()
 
 		prd.shadow = 0.0;	// TODO: trace shadow rays
 		prd.transmission *= pdf * brdf;
-		traceRayEXT(
-			TLAS,
-			rayFlags,
-			cullMask,
-			0,	// SBT record offset
-			0,	// SBT record stride
-			0,	// Miss shader index
-			wPos,
-			RAYTRACE_RANGE_TMIN,
-			wOutDir,
-			RAYTRACE_RANGE_TMAX,
-			0	// Payload location
-		);
+//		traceRayEXT(
+//			TLAS,
+//			rayFlags,
+//			cullMask,
+//			0,	// SBT record offset
+//			0,	// SBT record stride
+//			0,	// Miss shader index
+//			wPos,
+//			RAYTRACE_RANGE_TMIN,
+//			wOutDir,
+//			RAYTRACE_RANGE_TMAX,
+//			0	// Payload location
+//		);
 	}
 }
