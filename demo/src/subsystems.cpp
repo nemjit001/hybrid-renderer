@@ -206,7 +206,7 @@ void IRayTracingSubSystem::initSBT(
 	m_SBT->populateSBT(shaderGroupHandles, missGroupCount, hitGroupCount, callGroupCount);
 }
 
-SoftShadowsRTSubsystem::SoftShadowsRTSubsystem(
+HybridRayTracingSubsystem::HybridRayTracingSubsystem(
 	raytracing::RayTracingContext& ctx,
 	hri::ShaderDatabase& shaderDB,
 	VkDescriptorSetLayout sceneDataSetLayout,
@@ -221,8 +221,8 @@ SoftShadowsRTSubsystem::SoftShadowsRTSubsystem(
 		.build();
 
 	const hri::Shader* pRayGen = shaderDB.getShader("HybridRayGen");
-	const hri::Shader* pRayMiss = shaderDB.getShader("SoftShadowMiss");
-	const hri::Shader* pRayClosestHit = shaderDB.getShader("SoftShadowClosestHit");
+	const hri::Shader* pRayMiss = shaderDB.getShader("HybridMiss");
+	const hri::Shader* pRayClosestHit = shaderDB.getShader("HybridClosestHit");
 
 	VkPipeline raytracingPipeline = raytracing::RayTracingPipelineBuilder(ctx)
 		.addShaderStage(pRayGen->stage, pRayGen->module)
@@ -241,7 +241,7 @@ SoftShadowsRTSubsystem::SoftShadowsRTSubsystem(
 	initSBT(raytracingPipeline, 1, 1, 0);
 }
 
-void SoftShadowsRTSubsystem::record(hri::ActiveFrame& frame) const
+void HybridRayTracingSubsystem::record(hri::ActiveFrame& frame) const
 {
 	assert(m_pPSO != nullptr);
 	m_debug.cmdBeginLabel(frame.commandBuffer, "Soft Shadows Raytracing Pass");

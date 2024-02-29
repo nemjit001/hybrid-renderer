@@ -33,7 +33,7 @@ Renderer::Renderer(raytracing::RayTracingContext& ctx, hri::Camera& camera, Scen
 
 	// Prebuild BLAS list
 	VkCommandBuffer oneshot = m_computePool.createCommandBuffer(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-	m_activeScene.accelStructManager.cmdBuildBLASses(oneshot);
+	m_activeScene.accelStructManager.cmdBuildBLASses(oneshot, m_activeScene.meshes);
 	m_computePool.submitAndWait(oneshot);
 
 	// Prepare first frame resources
@@ -139,7 +139,7 @@ void Renderer::drawFrame()
 	}
 
 	// Execute raytracing passes
-	m_subsystemManager.recordSubsystem("SoftShadowsRTSystem", frame);
+	m_subsystemManager.recordSubsystem("HybridRTSystem", frame);
 
 	// Transition Raytracing targets to sample layouts
 	{
@@ -172,8 +172,8 @@ void Renderer::initShaderDB()
 {
 	// Raytracing Shaders
 	m_shaderDatabase.registerShader("HybridRayGen", hri::Shader::loadFile(m_context, "./shaders/hybrid.rgen.spv", VK_SHADER_STAGE_RAYGEN_BIT_KHR));
-	m_shaderDatabase.registerShader("SoftShadowMiss", hri::Shader::loadFile(m_context, "./shaders/soft_shadow.rmiss.spv", VK_SHADER_STAGE_MISS_BIT_KHR));
-	m_shaderDatabase.registerShader("SoftShadowClosestHit", hri::Shader::loadFile(m_context, "./shaders/soft_shadow.rchit.spv", VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR));
+	m_shaderDatabase.registerShader("HybridMiss", hri::Shader::loadFile(m_context, "./shaders/hybrid.rmiss.spv", VK_SHADER_STAGE_MISS_BIT_KHR));
+	m_shaderDatabase.registerShader("HybridClosestHit", hri::Shader::loadFile(m_context, "./shaders/hybrid.rchit.spv", VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR));
 
 
 	// Vertex shaders
@@ -375,7 +375,7 @@ void Renderer::initRenderSubsystems()
 		m_sceneDataSetLayout->setLayout
 	));
 
-	m_softShadowsRTSubsystem = std::unique_ptr<SoftShadowsRTSubsystem>(new SoftShadowsRTSubsystem(
+	m_hybridRTSubsystem = std::unique_ptr<HybridRayTracingSubsystem>(new HybridRayTracingSubsystem(
 		m_raytracingContext,
 		m_shaderDatabase,
 		m_sceneDataSetLayout->setLayout,
@@ -396,7 +396,7 @@ void Renderer::initRenderSubsystems()
 	));
 
 	m_subsystemManager.registerSubsystem("GBufferLayoutSystem", m_gbufferLayoutSubsystem.get());
-	m_subsystemManager.registerSubsystem("SoftShadowsRTSystem", m_softShadowsRTSubsystem.get());
+	m_subsystemManager.registerSubsystem("HybridRTSystem", m_hybridRTSubsystem.get());
 	m_subsystemManager.registerSubsystem("UISystem", m_uiSubsystem.get());
 	m_subsystemManager.registerSubsystem("PresentationSystem", m_presentSubsystem.get());
 }
@@ -545,20 +545,19 @@ void Renderer::prepareFrameResources(uint32_t frameIdx)
 
 	// Rebuild BLASses & TLAS
 	{
-		m_activeScene.accelStructManager.generateTLASBuildInfo(m_activeScene.getRenderInstanceList());
-		auto tlasSizeInfo = m_activeScene.accelStructManager.getTLASSizeInfo();
-
 		if (
 			rendererFrameData.tlas.get() == nullptr
-			|| tlasSizeInfo.totalAccelerationStructureSize > rendererFrameData.tlas->buffer.bufferSize
+			|| m_activeScene.accelStructManager.shouldReallocTLAS(*rendererFrameData.tlas, m_activeScene.getRenderInstanceList())
 		)
 		{
-			rendererFrameData.tlas = std::make_unique<raytracing::AccelerationStructure>(m_activeScene.accelStructManager.createTLAS());
+			rendererFrameData.tlas = std::make_unique<raytracing::AccelerationStructure>(
+				m_activeScene.accelStructManager.createTLAS(m_activeScene.getRenderInstanceList())
+			);
 		}
 
 		VkCommandBuffer oneshot = m_computePool.createCommandBuffer(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-		m_activeScene.accelStructManager.cmdBuildBLASses(oneshot);
-		m_activeScene.accelStructManager.cmdBuildTLAS(oneshot, *rendererFrameData.tlas);
+		m_activeScene.accelStructManager.cmdBuildBLASses(oneshot, m_activeScene.meshes);
+		m_activeScene.accelStructManager.cmdBuildTLAS(oneshot, m_activeScene.getRenderInstanceList(), *rendererFrameData.tlas);
 		m_computePool.submitAndWait(oneshot);
 	}
 
@@ -577,7 +576,7 @@ void Renderer::prepareFrameResources(uint32_t frameIdx)
 		&m_activeScene,
 	});
 
-	m_softShadowsRTSubsystem->updateFrameInfo(RayTracingFrameInfo{
+	m_hybridRTSubsystem->updateFrameInfo(RayTracingFrameInfo{
 		rendererFrameData.sceneDataSet->set,
 		rendererFrameData.raytracingSet->set,
 	});

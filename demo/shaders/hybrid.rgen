@@ -23,13 +23,16 @@ void main()
 	const uint sbtRecordStride = 0;
 	const uint missIndex = 0;
 
-	const vec2 pixelLoc = gl_LaunchIDEXT.xy;
-	const vec2 inUV = pixelLoc / vec2(gl_LaunchIDEXT.xy);
+	const vec2 pixelLocation = gl_LaunchIDEXT.xy;
+	const vec2 pixelCenter = pixelLocation + vec2(0.5);
+	const vec2 inUV = pixelCenter / vec2(gl_LaunchSizeEXT.xy);
 
-	const vec3 wOrigin = vec3(texture(GBufferWorldPos, inUV));
-	const vec3 wNormal = vec3(texture(GBufferNormal, inUV));
-	const vec3 wOutDirection = randomWalk(wNormal);
 	// TODO: sample GBuffer Layout for material params & primary hit data to calculate new direction
+	const vec3 wOrigin = vec3(normalize(texture(GBufferWorldPos, inUV)));
+	const vec3 wNormal = vec3(normalize(texture(GBufferNormal, inUV)));
+	const vec3 wOutDirection = randomWalk(wNormal);
+
+	// TODO: trace shadow rays
 
 	traceRayEXT(
 		TLAS,
@@ -45,5 +48,5 @@ void main()
 		0
 	);
 
-	imageStore(softShadowOut, ivec2(pixelLoc), vec4(prd.hitValue, 1));
+	imageStore(softShadowOut, ivec2(pixelLocation), vec4(vec3(prd.shadow), 1));
 }

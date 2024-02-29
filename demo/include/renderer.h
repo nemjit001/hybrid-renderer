@@ -106,7 +106,7 @@ private:
 
 	// Render subsystems
 	std::unique_ptr<GBufferLayoutSubsystem> m_gbufferLayoutSubsystem;
-	std::unique_ptr<SoftShadowsRTSubsystem> m_softShadowsRTSubsystem;
+	std::unique_ptr<HybridRayTracingSubsystem> m_hybridRTSubsystem;
 	std::unique_ptr<UISubsystem> m_uiSubsystem;
 	std::unique_ptr<PresentationSubsystem> m_presentSubsystem;
 

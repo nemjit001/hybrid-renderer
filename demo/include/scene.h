@@ -72,34 +72,28 @@ public:
 
 	virtual ~SceneASManager() = default;
 
-	raytracing::AccelerationStructure createTLAS();
+	bool shouldReallocTLAS(const raytracing::AccelerationStructure& tlas, const std::vector<RenderInstance>& instances) const;
 
-	void generateTLASBuildInfo(const std::vector<RenderInstance>& instances);
+	raytracing::AccelerationStructure createTLAS(const std::vector<RenderInstance>& instances);
 
-	void cmdBuildTLAS(VkCommandBuffer commandBuffer, raytracing::AccelerationStructure& tlas);
+	void cmdBuildTLAS(
+		VkCommandBuffer commandBuffer,
+		const std::vector<RenderInstance>& instances,
+		raytracing::AccelerationStructure& tlas
+	) const;
 
-	void cmdBuildBLASses(VkCommandBuffer commandBuffer);
-
-	inline raytracing::ASBuilder::ASSizeInfo getTLASSizeInfo() const { return m_tlasSizeInfo; }
+	void cmdBuildBLASses(VkCommandBuffer commandBuffer, const std::vector<hri::Mesh>& meshes) const;
 
 private:
+	hri::BufferResource generateTLASInstances(const std::vector<RenderInstance>& instances) const;
+
 	std::vector<raytracing::ASBuilder::ASInput> generateBLASInputs(const std::vector<hri::Mesh>& meshes) const;
 
-	void createBLASList();
+	void createBLASList(const std::vector<hri::Mesh>& meshes);
 
 private:
 	raytracing::RayTracingContext& m_ctx;
 	raytracing::ASBuilder m_asBuilder;
-
-	raytracing::ASBuilder::ASSizeInfo m_tlasSizeInfo					= raytracing::ASBuilder::ASSizeInfo{};
-	raytracing::ASBuilder::ASSizeInfo m_blasSizeInfo					= raytracing::ASBuilder::ASSizeInfo{};
-
-	raytracing::ASBuilder::ASInput m_tlasInput							= raytracing::ASBuilder::ASInput{};
-	raytracing::ASBuilder::ASBuildInfo m_tlasBuildInfo					= raytracing::ASBuilder::ASBuildInfo{};
-
-	std::vector<raytracing::ASBuilder::ASInput> m_blasInputs			= {};
-	std::vector<raytracing::ASBuilder::ASBuildInfo> m_blasBuildInfos	= {};
-
 	std::vector<raytracing::AccelerationStructure> m_blasList			= {};
 };
 

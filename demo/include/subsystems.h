@@ -90,19 +90,19 @@ protected:
 	RayTracingFrameInfo m_currentFrameInfo = RayTracingFrameInfo{};
 };
 
-class SoftShadowsRTSubsystem
+class HybridRayTracingSubsystem
 	:
 	public IRayTracingSubSystem
 {
 public:
-	SoftShadowsRTSubsystem(
+	HybridRayTracingSubsystem(
 		raytracing::RayTracingContext& ctx,
 		hri::ShaderDatabase& shaderDB,
 		VkDescriptorSetLayout sceneDataSetLayout,
 		VkDescriptorSetLayout rtSetLayout
 	);
 
-	virtual ~SoftShadowsRTSubsystem() = default;
+	virtual ~HybridRayTracingSubsystem() = default;
 
 	virtual void record(hri::ActiveFrame& frame) const override;
 };
