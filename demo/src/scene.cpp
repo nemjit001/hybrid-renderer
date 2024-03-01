@@ -26,8 +26,10 @@ bool SceneASManager::shouldReallocTLAS(
 ) const
 {
 	size_t instanceCount = instances.size();
-	hri::BufferResource tlasInstanceBuffer = generateTLASInstances(instances, blasList);
+	if (instanceCount == 0)
+		return false;
 
+	hri::BufferResource tlasInstanceBuffer = generateTLASInstances(instances, blasList);
 	raytracing::ASBuilder::ASInput tlasInput = m_asBuilder.instancesToGeometry(
 		tlasInstanceBuffer,
 		instanceCount,
@@ -55,7 +57,6 @@ raytracing::AccelerationStructure SceneASManager::createTLAS(
 {
 	size_t instanceCount = instances.size();
 	hri::BufferResource tlasInstanceBuffer = generateTLASInstances(instances, blasList);
-
 	raytracing::ASBuilder::ASInput tlasInput = m_asBuilder.instancesToGeometry(
 		tlasInstanceBuffer,
 		instanceCount,
@@ -115,6 +116,9 @@ void SceneASManager::cmdBuildTLAS(
 ) const
 {
 	size_t instanceCount = instances.size();
+	if (instanceCount == 0)	// Nothing to do
+		return;
+
 	hri::BufferResource tlasInstanceBuffer = generateTLASInstances(instances, blasList);
 
 	raytracing::ASBuilder::ASInput tlasInput = m_asBuilder.instancesToGeometry(
@@ -343,7 +347,8 @@ const std::vector<RenderInstance>& SceneGraph::generateRenderInstanceList(const 
 	for (auto const& node : nodes)
 	{
 		SceneNode::SceneId meshLOD = calculateLODLevel(camera, node);
-		assert(meshLOD != INVALID_SCENE_ID);
+		if (meshLOD == INVALID_SCENE_ID)	// Don't show out of bounds meshes
+			continue;
 
 		// TODO: upload mesh data into scene buffers, build TLAS from instance BLASses
 		m_instances.push_back(RenderInstance{
@@ -362,14 +367,18 @@ SceneNode::SceneId SceneGraph::calculateLODLevel(const hri::Camera& camera, cons
 	const float LODRange = parameters.farPoint - parameters.nearPoint;
 	const float LODSegmentSize = LODRange / static_cast<float>(MAX_LOD_LEVELS);
 
+	if (nodeDist > parameters.farPoint)
+		return INVALID_SCENE_ID;
+
 	// XXX: Check -> is Linear LOD sufficient, or should better algorithm be used?
 	SceneNode::SceneId LODIndex = 0;
 	for (size_t segmentIdx = 0; segmentIdx < MAX_LOD_LEVELS; segmentIdx++)
 	{
 		float fIdx = static_cast<float>(segmentIdx);
+		float nearPointAdjustedDist = nodeDist - parameters.nearPoint;
 		float minSegmentDist = fIdx * LODSegmentSize;
 
-		if (nodeDist >= minSegmentDist && node.meshLODs[segmentIdx] != INVALID_SCENE_ID)
+		if (nearPointAdjustedDist >= minSegmentDist && node.meshLODs[segmentIdx] != INVALID_SCENE_ID)
 			LODIndex = segmentIdx;
 	}
 

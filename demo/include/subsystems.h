@@ -7,7 +7,7 @@
 #include "scene.h"
 
 /// @brief The Instance Push Constant is used to push instance & transformation data for renderable objects to shaders.
-struct InstancePushConstanct
+struct InstancePushConstant
 {
 	HRI_ALIGNAS(4)  uint32_t instanceId;
 	HRI_ALIGNAS(16) hri::Float4x4 model 	= hri::Float4x4(1.0f);

@@ -7,7 +7,7 @@
 #include "raytracing_common.glsl"
 
 #define RT_MAX_BOUNCE_COUNT	5
-#define HYBRID_RENDERING	1
+#define HYBRID_RENDERING	0
 
 layout(location = 0) rayPayloadEXT RayHitPayload prd;
 

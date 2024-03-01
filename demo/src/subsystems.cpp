@@ -15,7 +15,7 @@ GBufferLayoutSubsystem::GBufferLayoutSubsystem(
 {
 	m_layout = hri::PipelineLayoutBuilder(ctx)
 		.addPushConstant(
-			sizeof(InstancePushConstanct),
+			sizeof(InstancePushConstant),
 			VK_SHADER_STAGE_VERTEX_BIT
 			| VK_SHADER_STAGE_FRAGMENT_BIT
 		)
@@ -129,7 +129,7 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 
 	for (auto const& instance : m_currentFrameInfo.pSceneGraph->getRenderInstanceList())
 	{
-		InstancePushConstanct instancePC = InstancePushConstanct{
+		InstancePushConstant instancePC = InstancePushConstant{
 			instance.instanceId,
 			instance.modelMatrix,
 			hri::Float3x3(1.0f),
@@ -140,7 +140,7 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 			m_layout,
 			VK_SHADER_STAGE_VERTEX_BIT
 			| VK_SHADER_STAGE_FRAGMENT_BIT,
-			0, sizeof(InstancePushConstanct),
+			0, sizeof(InstancePushConstant),
 			&instancePC
 		);
 

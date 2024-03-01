@@ -65,7 +65,7 @@ uint randomRangeU32(inout uint seed, uint minRange, uint maxRange)
 
 /// --- Random walk functions
 
-vec3 randomWalk(inout uint seed, vec3 wI, vec3 N)
+vec3 diffuseReflect(inout uint seed, vec3 wI, vec3 N)
 {
 	vec3 outDir = vec3(0);
 	do
@@ -81,6 +81,11 @@ vec3 randomWalk(inout uint seed, vec3 wI, vec3 N)
 		outDir *= -1.0;
 
 	return normalize(outDir);
+}
+
+vec3 randomWalk(inout uint seed, vec3 wI, vec3 N)
+{
+	return diffuseReflect(seed, wI, N);
 }
 
 /// --- Material evaluation functions
