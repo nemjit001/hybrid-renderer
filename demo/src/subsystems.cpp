@@ -186,17 +186,23 @@ HybridRayTracingSubsystem::HybridRayTracingSubsystem(
 		.addDescriptorSetLayout(rtSetLayout)
 		.build();
 
-	const hri::Shader* pRayGen = shaderDB.getShader("HybridRayGen");
-	const hri::Shader* pRayMiss = shaderDB.getShader("HybridMiss");
-	const hri::Shader* pRayClosestHit = shaderDB.getShader("HybridClosestHit");
+	// Soft shadows
+	hri::Shader* pSSRayGen = shaderDB.getShader("SSRayGen");
+	hri::Shader* pSSMiss = shaderDB.getShader("SSMiss");
+
+	// Direct Illumination
+	hri::Shader* pDIRayGen = shaderDB.getShader("DIRayGen");
+	hri::Shader* pDIMiss = shaderDB.getShader("DIMiss");
 
 	raytracing::RayTracingPipelineBuilder rtPipelineBuilder = raytracing::RayTracingPipelineBuilder(ctx)
-		.addShaderStage(pRayGen->stage, pRayGen->module)
-		.addShaderStage(pRayMiss->stage, pRayMiss->module)
-		.addShaderStage(pRayClosestHit->stage, pRayClosestHit->module)
-		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR, 0)	// Ray Gen
-		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR, 1)	// Ray Miss
-		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR, VK_SHADER_UNUSED_KHR, 2) // Ray Hit
+		.addShaderStage(pSSRayGen->stage, pSSRayGen->module)
+		.addShaderStage(pSSMiss->stage, pSSMiss->module)
+		.addShaderStage(pDIRayGen->stage, pDIRayGen->module)
+		.addShaderStage(pDIMiss->stage, pDIMiss->module)
+		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR, 0)
+		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR, 1)
+		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR, 2)
+		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR, 3)
 		.setMaxRecursionDepth()
 		.setLayout(m_layout);
 
@@ -236,13 +242,28 @@ void HybridRayTracingSubsystem::record(hri::ActiveFrame& frame) const
 
 	vkCmdBindPipeline(frame.commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
 
-	VkStridedDeviceAddressRegionKHR raygenRegion = m_SBT->getRegion(raytracing::ShaderBindingTable::SBTShaderGroup::SGRayGen);
+	VkStridedDeviceAddressRegionKHR SSRayGenRegion = m_SBT->getRegion(raytracing::ShaderBindingTable::SBTShaderGroup::SGRayGen, 0);
+	VkStridedDeviceAddressRegionKHR DIRayGenRegion = m_SBT->getRegion(raytracing::ShaderBindingTable::SBTShaderGroup::SGRayGen, 1);
 	VkStridedDeviceAddressRegionKHR missRegion = m_SBT->getRegion(raytracing::ShaderBindingTable::SBTShaderGroup::SGMiss);
 	VkStridedDeviceAddressRegionKHR hitRegion = m_SBT->getRegion(raytracing::ShaderBindingTable::SBTShaderGroup::SGHit);
 	VkStridedDeviceAddressRegionKHR callRegion = m_SBT->getRegion(raytracing::ShaderBindingTable::SBTShaderGroup::SGCall);
+
+	// Soft Shadow subpass
 	m_rtCtx.rayTracingDispatch.vkCmdTraceRays(
 		frame.commandBuffer,
-		&raygenRegion,
+		&SSRayGenRegion,
+		&missRegion,
+		&hitRegion,
+		&callRegion,
+		swapExtent.width,
+		swapExtent.height,
+		1
+	);
+
+	// Direct Illumination subpass
+	m_rtCtx.rayTracingDispatch.vkCmdTraceRays(
+		frame.commandBuffer,
+		&DIRayGenRegion,
 		&missRegion,
 		&hitRegion,
 		&callRegion,

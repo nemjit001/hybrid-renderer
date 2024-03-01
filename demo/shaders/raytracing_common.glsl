@@ -10,19 +10,33 @@
 #define RT_INV_PI	0.31830988618379067153777
 #define RT_INV_2PI	0.15915494309189533576888
 
+#define LIGHT_POS	vec3(0, 4, 0)
+#define LIGHT_COLOR vec3(1)
+
 /// Shared include file for raytracing shader definitions
 
-// RayHitPayload contains ray payload data.
-struct RayHitPayload
+struct SSRayPayload
 {
-	uint seed;
-	uint traceDepth;
-	bool terminated;
-	vec3 origin;
-	vec3 direction;
-	vec3 energy;
-	vec3 transmission;
+	bool miss;
 };
+
+struct DIRayPayload
+{
+	vec3 transmission;
+	vec3 energy;
+};
+
+/// --- Common functions
+
+uint calculateLaunchIndex(uvec3 launchID, uvec3 launchSize)
+{
+	return launchID.x + launchID.y * launchSize.x + launchID.z * launchSize.x * launchSize.y;
+}
+
+bool gbufferRayHit(float depth)
+{
+	return depth < 1.0;
+}
 
 /// --- Random noise functions
 
@@ -88,23 +102,13 @@ vec3 diffuseReflect(inout uint seed, vec3 wI, vec3 N)
 vec3 randomWalk(inout uint seed, vec3 wI, vec3 N)
 {
 	return diffuseReflect(seed, wI, N);
-	// return reflect(wI, N);
 }
 
 /// --- Material evaluation functions
 
-vec3 sampleSkyColor(vec3 rayDirection)
+float luminance(vec3 color)
 {
-	vec3 colorA = vec3(0.8, 0.8, 0.8);
-	vec3 colorB = vec3(0.1, 0.4, 0.6);
-	float alpha = rayDirection.y;
-
-	return alpha * colorB + (1.0 - alpha) * colorA;
-}
-
-bool isEmissive(vec3 emission)
-{
-	return emission.x > 0.0 || emission.y > 0.0 || emission.z > 0;
+	return color.r + color.g + color.b;
 }
 
 float evaluatePDF(vec3 wO, vec3 N)

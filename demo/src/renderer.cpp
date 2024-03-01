@@ -221,10 +221,12 @@ void Renderer::drawFrame()
 void Renderer::initShaderDB()
 {
 	// Raytracing Shaders
-	m_shaderDatabase.registerShader("HybridRayGen", hri::Shader::loadFile(m_context, "./shaders/hybrid.rgen.spv", VK_SHADER_STAGE_RAYGEN_BIT_KHR));
-	m_shaderDatabase.registerShader("HybridMiss", hri::Shader::loadFile(m_context, "./shaders/hybrid.rmiss.spv", VK_SHADER_STAGE_MISS_BIT_KHR));
-	m_shaderDatabase.registerShader("HybridClosestHit", hri::Shader::loadFile(m_context, "./shaders/hybrid.rchit.spv", VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR));
-
+	//	Soft shadows
+	m_shaderDatabase.registerShader("SSRayGen", hri::Shader::loadFile(m_context, "./shaders/ss_hybrid.rgen.spv", VK_SHADER_STAGE_RAYGEN_BIT_KHR));
+	m_shaderDatabase.registerShader("SSMiss", hri::Shader::loadFile(m_context, "./shaders/ss_hybrid.rmiss.spv", VK_SHADER_STAGE_MISS_BIT_KHR));
+	//	Direct Illumination
+	m_shaderDatabase.registerShader("DIRayGen", hri::Shader::loadFile(m_context, "./shaders/di_hybrid.rgen.spv", VK_SHADER_STAGE_RAYGEN_BIT_KHR));
+	m_shaderDatabase.registerShader("DIMiss", hri::Shader::loadFile(m_context, "./shaders/di_hybrid.rmiss.spv", VK_SHADER_STAGE_MISS_BIT_KHR));
 
 	// Vertex shaders
 	m_shaderDatabase.registerShader("PresentVert", hri::Shader::loadFile(m_context, "./shaders/present.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));

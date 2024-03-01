@@ -185,34 +185,29 @@ ShaderBindingTable::ShaderBindingTable(
 
 	// Allocate SBT datas & populate with shader group handles
 	m_sbtData = {};
-	size_t groupIdx = 0;
 	for (uint32_t group = 0; group < m_shaderGroupIndices.size(); group++)
 	{
-		m_sbtData[groupIdx] = std::vector<uint8_t>(m_shaderGroupSizes[groupIdx]);
-		uint8_t* pBufferData = m_sbtData[groupIdx].data();
+		m_sbtData[group] = std::vector<uint8_t>(m_shaderGroupSizes[group]);
+		uint8_t* pBufferData = m_sbtData[group].data();
 		for (auto const& handleIdx : m_shaderGroupIndices[group])
 		{
 			memcpy(pBufferData, getShaderHandleOffset(shaderHandles.data(), handleIdx), m_handleInfo.handleSize);
-			pBufferData += m_shaderGroupStrides[groupIdx];
+			pBufferData += m_shaderGroupStrides[group];
 		}
-
-		groupIdx++;
 	}
 
 	// Copy shader group handle data to buffers
-	VkBufferUsageFlags sbtBufferUsage = VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR
-		| VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+	VkBufferUsageFlags sbtBufferUsage = VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
 	for (uint32_t group = 0; group < m_shaderGroupIndices.size(); group++)
 	{
 		if (m_shaderGroupIndices[group].size() > 0)
 		{
 			SBTShaderGroup shaderGroup = static_cast<SBTShaderGroup>(group);
 			hri::BufferResource groupBuffer = hri::BufferResource(m_ctx.renderContext, m_shaderGroupSizes[group], sbtBufferUsage, true);
+			groupBuffer.copyToBuffer(m_sbtData[group].data(), m_shaderGroupSizes[group]);
 
 			auto& it = m_buffers.insert(std::make_pair(shaderGroup, std::move(groupBuffer)));
 			assert(it.second == true);
-
-			m_buffers.at(shaderGroup).copyToBuffer(m_sbtData[group].data(), m_shaderGroupSizes[group]);
 		}
 	}
 }
@@ -244,9 +239,9 @@ ShaderBindingTable::ShaderGroupHandleInfo ShaderBindingTable::getShaderGroupHand
 	};
 }
 
-const VkStridedDeviceAddressRegionKHR ShaderBindingTable::getRegion(SBTShaderGroup group) const
+const VkStridedDeviceAddressRegionKHR ShaderBindingTable::getRegion(SBTShaderGroup group, uint32_t offset) const
 {
-	return VkStridedDeviceAddressRegionKHR{ getGroupDeviceAddress(group), stride(group), size(group)};
+	return VkStridedDeviceAddressRegionKHR{ getGroupDeviceAddress(group) + offset * stride(group), stride(group), size(group)};
 }
 
 void ShaderBindingTable::getShaderGroupIndices(const RayTracingPipelineBuilder& pipelineBuilder)

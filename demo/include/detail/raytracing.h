@@ -154,15 +154,16 @@ namespace raytracing
 
 		/// @brief Get an SBT region.
 		/// @param group SBT Shader Group for which to fetch the region.
+		/// @param offset Offset into the SBT group start.
 		/// @return A strided device address region.
-		const VkStridedDeviceAddressRegionKHR getRegion(SBTShaderGroup group) const;
+		const VkStridedDeviceAddressRegionKHR getRegion(SBTShaderGroup group, uint32_t offset = 0) const;
 
 		/// @brief Get the size of an SBT Shader Group.
 		/// @param group Group to fetch the size for.
 		/// @return The group size.
 		inline uint32_t size(SBTShaderGroup group) const {
 			return group == SBTShaderGroup::SGRayGen ?
-				m_shaderGroupStrides[group] : m_shaderGroupStrides[group] * indexCount(SBTShaderGroup::SGRayGen);
+				m_shaderGroupStrides[group] : m_shaderGroupStrides[group] * indexCount(group);
 		}
 		
 		/// @brief Get the stride of an SBT Shader Group.
