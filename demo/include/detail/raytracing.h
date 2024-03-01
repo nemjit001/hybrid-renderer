@@ -137,32 +137,58 @@ namespace raytracing
 		};
 
 	public:
+		/// @brief Create a new SBT.
+		/// @param ctx Ray Tracing Context to use.
+		/// @param pipeline Ray Tracing Pipeline for which to generate an SBT.
+		/// @param pipelineBuilder Pipeline Builder used to create the RT Pipeline.
 		ShaderBindingTable(
 			RayTracingContext& ctx,
 			VkPipeline pipeline,
 			const RayTracingPipelineBuilder& pipelineBuilder
 		);
 
+		/// @brief Get Shader Group Handle info such as size, stride, and aligned size.
+		/// @param ctx Ray Tracing Context to use.
+		/// @return A ShaderGroupHandleInfo struct.
 		static ShaderGroupHandleInfo getShaderGroupHandleInfo(RayTracingContext& ctx);
 
+		/// @brief Get an SBT region.
+		/// @param group SBT Shader Group for which to fetch the region.
+		/// @return A strided device address region.
 		const VkStridedDeviceAddressRegionKHR getRegion(SBTShaderGroup group) const;
 
+		/// @brief Get the size of an SBT Shader Group.
+		/// @param group Group to fetch the size for.
+		/// @return The group size.
 		inline uint32_t size(SBTShaderGroup group) const {
 			return group == SBTShaderGroup::SGRayGen ?
 				m_shaderGroupStrides[group] : m_shaderGroupStrides[group] * indexCount(SBTShaderGroup::SGRayGen);
 		}
-	
+		
+		/// @brief Get the stride of an SBT Shader Group.
+		/// @param group Group to fetch the stride for.
+		/// @return The group stride.
 		inline uint32_t stride(SBTShaderGroup group) const { return m_shaderGroupStrides[group]; }
 
+		/// @brief Get the number of shader stage indices in a shader group.
+		/// @param group Group to fetch the number of indices for.
+		/// @return The index count of a group.
 		inline uint32_t indexCount(SBTShaderGroup group) const { return static_cast<uint32_t>(m_shaderGroupIndices[group].size()); }
 
 	private:
+		/// @brief Tet a device address for a shader group.
+		/// @param group 
+		/// @return A device address or 0 if no buffer was allocated for this group.
 		VkDeviceAddress getGroupDeviceAddress(SBTShaderGroup group) const;
 
+		/// @brief Get a shader handle's byte offset from a handle array.
 		uint8_t* getShaderHandleOffset(uint8_t* pHandles, size_t idx) const;
 
+		/// @brief Fill out the shader group indices array using the pipeline builder provided.
+		/// @param pipelineBuilder The pipeline builder containing shader groups.
 		void getShaderGroupIndices(const RayTracingPipelineBuilder& pipelineBuilder);
 
+		/// @brief Fill out the shader group strides array using the group indices.
 		void getShaderGroupStrides();
 
 	private:
