@@ -15,7 +15,7 @@
 #define CAMERA_SPEED        1.5f
 
 // Raytracing config
-#define DEMO_DEFAULT_RT_RECURSION_DEPTH		1
+#define DEMO_DEFAULT_RT_RECURSION_DEPTH		5
 
 #ifndef NDEBUG
 #define DEMO_DEBUG			1

@@ -240,7 +240,7 @@ ShaderBindingTable::ShaderGroupHandleInfo ShaderBindingTable::getShaderGroupHand
 	return ShaderGroupHandleInfo{
 		rtProps.shaderGroupHandleSize,
 		rtProps.shaderGroupBaseAlignment,
-		HRI_ALIGNED_SIZE(rtProps.shaderGroupHandleSize, rtProps.shaderGroupBaseAlignment)
+		static_cast<uint32_t>(HRI_ALIGNED_SIZE(rtProps.shaderGroupHandleSize, rtProps.shaderGroupBaseAlignment))
 	};
 }
 

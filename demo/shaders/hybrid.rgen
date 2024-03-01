@@ -6,7 +6,6 @@
 #include "shader_common.glsl"
 #include "raytracing_common.glsl"
 
-#define RT_MAX_BOUNCE_COUNT	5
 #define HYBRID_RENDERING	0
 
 layout(location = 0) rayPayloadEXT RayHitPayload prd;
@@ -40,6 +39,7 @@ void main()
 
 	// Initialize ray payload
 	prd.seed = initSeed(launchIndex);
+	prd.traceDepth = 0;
 	prd.terminated = false;
 	prd.origin = vec3(0);
 	prd.direction = vec3(0);
@@ -94,8 +94,9 @@ void main()
 	prd.origin = wPos;
 	prd.direction = wOutDir;
 
-	for (uint i = 0; i < RT_MAX_BOUNCE_COUNT && !prd.terminated; i++)
+	if (!prd.terminated)
 	{
+		prd.traceDepth++;
 		traceRayEXT(
 			TLAS,
 			rayFlags,

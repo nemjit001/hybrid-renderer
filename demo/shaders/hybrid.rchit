@@ -47,6 +47,13 @@ void main()
 	vec3 wNormal = normalize(vec3(gl_ObjectToWorldEXT * vec4(hitNormal, 0)));
 	vec3 wInDir = gl_WorldRayDirectionEXT;
 
+	// Terminate ray if deeper than max bounces
+	if (prd.traceDepth > RAYTRACE_MAX_BOUNCE_COUNT)
+	{
+		prd.terminated = true;
+		return;
+	}
+
 	// Evaluate hit material
 	if (isEmissive(material.emission))
 	{
@@ -66,4 +73,19 @@ void main()
 
 	prd.origin = wPos;
 	prd.direction = wOutDir;
+
+	prd.traceDepth++;
+	traceRayEXT(
+		TLAS,
+		rayFlags,
+		cullMask,
+		0,	// SBT record offset
+		0,	// SBT record stride
+		0,	// Miss shader index
+		prd.origin,
+		RAYTRACE_RANGE_TMIN,
+		prd.direction,
+		RAYTRACE_RANGE_TMAX,
+		0	// Payload location
+	);
 }

@@ -1,8 +1,9 @@
 #ifndef RT_COMMON_GLSL
 #define RT_COMMON_GLSL
 
-#define RAYTRACE_RANGE_TMIN 1e-5
-#define RAYTRACE_RANGE_TMAX 1e30
+#define RAYTRACE_MAX_BOUNCE_COUNT	5
+#define RAYTRACE_RANGE_TMIN			1e-5
+#define RAYTRACE_RANGE_TMAX			1e30
 
 #define RT_PI		3.14159265358979323846264
 #define RT_2PI		6.28318530717958647692528
@@ -15,6 +16,7 @@
 struct RayHitPayload
 {
 	uint seed;
+	uint traceDepth;
 	bool terminated;
 	vec3 origin;
 	vec3 direction;
