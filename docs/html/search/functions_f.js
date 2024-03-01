@@ -1,6 +1,28 @@
 var searchData=
 [
-  ['texture_0',['Texture',['../classhri_1_1_texture.html#a23e26863cddb0dbfb1a04206a377205b',1,'hri::Texture::Texture(TextureExtent extent)'],['../classhri_1_1_texture.html#aa4d81d9237e042792094a65b69ff98d6',1,'hri::Texture::Texture(TextureExtent extent, void *data)']]],
-  ['tick_1',['tick',['../struct_timer.html#a6f4dc6b9e9f333fa4c60ddf2ff33c801',1,'Timer']]],
-  ['timer_2',['Timer',['../struct_timer.html#a5f16e8da27d2a5a5242dead46de05d97',1,'Timer']]]
+  ['sceneasmanager_0',['SceneASManager',['../class_scene_a_s_manager.html#a50f285656f31ade4195aadddc74c2cf9',1,'SceneASManager']]],
+  ['scenegraph_1',['SceneGraph',['../class_scene_graph.html#acb456eb3ad39870d6eaba7e50f76f283',1,'SceneGraph']]],
+  ['setattachmentreference_2',['setAttachmentReference',['../classhri_1_1_render_pass_builder.html#ab5fa6e7f2769f5dadc819c076b3cbda6',1,'hri::RenderPassBuilder']]],
+  ['setclearvalue_3',['setClearValue',['../classhri_1_1_i_render_pass_resource_manager_base.html#a9a3592d076463280424393288cb1304f',1,'hri::IRenderPassResourceManagerBase']]],
+  ['setcreateflags_4',['setCreateFlags',['../classraytracing_1_1_ray_tracing_pipeline_builder.html#ac8d35c4b2f52394609576056538e01dc',1,'raytracing::RayTracingPipelineBuilder']]],
+  ['setdescriptorsetflags_5',['setDescriptorSetFlags',['../classhri_1_1_descriptor_set_layout_builder.html#aa8e003f8aa5185f733117a6e41519e38',1,'hri::DescriptorSetLayoutBuilder']]],
+  ['setlayout_6',['setLayout',['../classraytracing_1_1_ray_tracing_pipeline_builder.html#a50e2ce96de901ee51708989817a0c8ce',1,'raytracing::RayTracingPipelineBuilder']]],
+  ['setmaxrecursiondepth_7',['setMaxRecursionDepth',['../classraytracing_1_1_ray_tracing_pipeline_builder.html#ab6d70d84b23cdb870a3d41c987a6c4d3',1,'raytracing::RayTracingPipelineBuilder']]],
+  ['setonswapchaininvalidatecallback_8',['setOnSwapchainInvalidateCallback',['../classhri_1_1_render_core.html#a9baea667f47f366ce6acceaae113dac8',1,'hri::RenderCore']]],
+  ['setvsyncmode_9',['setVSyncMode',['../class_renderer.html#af0ee1887b75179c4babd9be06f8954b5',1,'Renderer::setVSyncMode()'],['../classhri_1_1_render_context.html#ac97443dd7688d762d9a865c3b106ae3d',1,'hri::RenderContext::setVSyncMode()']]],
+  ['shader_10',['Shader',['../classhri_1_1_shader.html#ab571108da2caffa85d368423b0ee9fa4',1,'hri::Shader::Shader(RenderContext &amp;ctx, const uint32_t *pCode, size_t codeSize, VkShaderStageFlagBits stage)'],['../classhri_1_1_shader.html#abfd3b1529d8c703ff0dee60425135b93',1,'hri::Shader::Shader(const Shader &amp;)=delete'],['../classhri_1_1_shader.html#aa2d393c5ab924b3ae5dbcf0e11d82c4b',1,'hri::Shader::Shader(Shader &amp;&amp;other) noexcept']]],
+  ['shaderbindingtable_11',['ShaderBindingTable',['../classraytracing_1_1_shader_binding_table.html#ae8f9c78889c59caa2403276f3b3d5ed4',1,'raytracing::ShaderBindingTable']]],
+  ['shaderdatabase_12',['ShaderDatabase',['../classhri_1_1_shader_database.html#ad9c2f380573810de2378f548f1c8f360',1,'hri::ShaderDatabase::ShaderDatabase(RenderContext &amp;ctx)'],['../classhri_1_1_shader_database.html#ae85fff88f932eba3719b34f2e8f1d218',1,'hri::ShaderDatabase::ShaderDatabase(const ShaderDatabase &amp;)=delete']]],
+  ['shadergroups_13',['shaderGroups',['../classraytracing_1_1_ray_tracing_pipeline_builder.html#a5bbf81c4de729a14d2f24f3d05f5fb50',1,'raytracing::RayTracingPipelineBuilder']]],
+  ['shaderstages_14',['shaderStages',['../classraytracing_1_1_ray_tracing_pipeline_builder.html#abecbcf46d1931a59f5cd75421f65c880',1,'raytracing::RayTracingPipelineBuilder']]],
+  ['shouldrealloctlas_15',['shouldReallocTLAS',['../class_scene_a_s_manager.html#a0b76beddf292469cd273d91ca2cbcf99',1,'SceneASManager']]],
+  ['size_16',['size',['../classraytracing_1_1_shader_binding_table.html#a42673cf488a9ab6247be79889d7f6e81',1,'raytracing::ShaderBindingTable']]],
+  ['startdraw_17',['startDraw',['../class_u_i_manager.html#af186903ad448358a2aa274c027baddcd',1,'UIManager']]],
+  ['startframe_18',['startFrame',['../classhri_1_1_render_core.html#a0effa6efd78811071c92ffb467678145',1,'hri::RenderCore']]],
+  ['stride_19',['stride',['../classraytracing_1_1_shader_binding_table.html#a1c4b17db94527dbaf329dfb5ea2e83a2',1,'raytracing::ShaderBindingTable']]],
+  ['submitandwait_20',['submitAndWait',['../classhri_1_1_command_pool.html#aae260ea86e353e899434382a930ee211',1,'hri::CommandPool']]],
+  ['subresourcerange_21',['SubresourceRange',['../classhri_1_1_image_resource.html#acb45dad4bfb49d9e739ed8d5d5a25cf0',1,'hri::ImageResource']]],
+  ['swap_22',['swap',['../namespacehri.html#adbd92a686825b069ddd3c6eac8bdc70d',1,'hri']]],
+  ['swapchainpassresourcemanager_23',['SwapchainPassResourceManager',['../classhri_1_1_swapchain_pass_resource_manager.html#a37fb0d79f8ee46085616dd9b85156284',1,'hri::SwapchainPassResourceManager']]],
+  ['swapformat_24',['swapFormat',['../classhri_1_1_render_context.html#a15da2b72297ebb8cbddd247842d5640d',1,'hri::RenderContext']]]
 ];

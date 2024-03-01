@@ -1,0 +1,11 @@
+<map id="SceneASManager::shouldReallocTLAS" name="SceneASManager::shouldReallocTLAS">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,47,253,73"/>
+<area shape="rect" id="Node000002" href="$classraytracing_1_1_a_s_builder.html#a735324c0da6b17aa548c590af9b29208" title="Generate build info from input." alt="" coords="306,5,452,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="234,43,290,36,291,41,234,49"/>
+<area shape="rect" id="Node000004" href="$classraytracing_1_1_a_s_builder.html#a42350a22f3a56d2e6fa9ad06a032c723" title="Convert an instance buffer to AS Input." alt="" coords="301,72,457,115"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="234,71,286,78,285,84,234,77"/>
+<area shape="rect" id="Node000003" href="$namespacehri.html#ad174e49d89763692b01496e2615c7d49" title=" " alt="" coords="566,13,634,40"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="452,24,551,24,551,29,452,29"/>
+<area shape="rect" id="Node000005" href="$namespaceraytracing.html#a88f8e296ad709ea3326ae37c0be49ff5" title="Get the device address from a buffer resource." alt="" coords="505,80,695,107"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="457,91,489,91,489,96,457,96"/>
+</map>

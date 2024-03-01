@@ -1,11 +1,18 @@
 <map id="hri::Camera::Camera" name="hri::Camera::Camera">
-<area shape="rect" id="Node000001" title="Instantiate a camera." alt="" coords="5,31,147,57"/>
-<area shape="rect" id="Node000002" href="$namespacehri.html#ab81e99a2bbe92d4d1002b786d897d624" title=" " alt="" coords="207,5,282,32"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="147,31,191,24,192,29,148,36"/>
-<area shape="rect" id="Node000003" href="$namespacehri.html#ac37aa10e96e3d4f0775c3a659f16d490" title=" " alt="" coords="195,56,294,83"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="148,52,180,57,179,62,147,57"/>
-<area shape="rect" id="Node000004" href="$namespacehri.html#a3f539220562b091be4c7e5409dd4c80e" title=" " alt="" coords="348,31,409,57"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="294,57,332,50,333,55,295,63"/>
-<area shape="rect" id="Node000005" href="$namespacehri.html#a80da0ea8cafbed379ba92a21796fe33c" title="Simple inverse square root function." alt="" coords="342,81,414,108"/>
-<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="295,76,327,82,326,88,294,81"/>
+<area shape="rect" id="Node000001" title="Instantiate a camera." alt="" coords="5,56,147,83"/>
+<area shape="rect" id="Node000002" href="$namespacehri.html#ab81e99a2bbe92d4d1002b786d897d624" title=" " alt="" coords="250,5,325,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="134,53,234,28,236,34,136,58"/>
+<area shape="rect" id="Node000003" href="$namespacehri.html#ac37aa10e96e3d4f0775c3a659f16d490" title=" " alt="" coords="238,56,337,83"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="147,67,222,67,222,72,147,72"/>
+<area shape="rect" id="Node000006" href="$classhri_1_1_camera.html#aeb6260cec685087b762690c86519d980" title="Update view &amp; project matrices using basis vectors." alt="" coords="195,107,380,133"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="136,81,214,100,213,105,134,86"/>
+<area shape="rect" id="Node000004" href="$namespacehri.html#a3f539220562b091be4c7e5409dd4c80e" title=" " alt="" coords="440,5,501,32"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="337,53,379,41,424,29,426,34,381,47,338,58"/>
+<area shape="rect" id="Node000005" href="$namespacehri.html#a80da0ea8cafbed379ba92a21796fe33c" title="Simple inverse square root function." alt="" coords="435,56,507,83"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="338,67,419,67,419,72,338,72"/>
+<area shape="rect" id="Node000007" href="$namespacehri.html#acd3a7c0c786cee7eb37afe8bfb309464" title=" " alt="" coords="428,107,513,133"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="381,117,412,117,412,123,381,123"/>
+<area shape="rect" id="Node000008" href="$namespacehri.html#a778909c1320f31774fdf25dc126fcb9d" title=" " alt="" coords="561,107,651,133"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="514,126,545,126,545,132,514,131"/>
+<area shape="poly" id="edge8_Node000008_Node000007" title=" " alt="" coords="561,114,529,114,529,108,561,109"/>
 </map>

@@ -92,34 +92,219 @@ $(function(){initNavTree('structhri_1_1_render_context_create_info.html',''); in
 
 <div class="header">
   <div class="summary">
+<a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="structhri_1_1_render_context_create_info-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">hri::RenderContextCreateInfo Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
-<p>The render context create info allows for specifying context settings.  
+<p>The render context create info allows for specifying context settings &amp; registering extensions for the created context.  
  <a href="#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="render__context_8h_source.html">render_context.h</a>&gt;</code></p>
 <div class="dynheader">
 Collaboration diagram for hri::RenderContextCreateInfo:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="structhri_1_1_render_context_create_info__coll__graph.svg" width="190" height="118"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="structhri_1_1_render_context_create_info__coll__graph.svg" width="208" height="422"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
+Public Types</h2></td></tr>
+<tr class="memitem:ae690b3140a7c067a50c5bc5d8817c551" id="r_ae690b3140a7c067a50c5bc5d8817c551"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">typedef</a> vkb::detail::GenericFeaturesPNextNode&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae690b3140a7c067a50c5bc5d8817c551">ExtensionFeature</a></td></tr>
+<tr class="separator:ae690b3140a7c067a50c5bc5d8817c551"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
+<tr class="memitem:ac13213a4484eee14bdc7d2df5f9c6c31" id="r_ac13213a4484eee14bdc7d2df5f9c6c31"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">char</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac13213a4484eee14bdc7d2df5f9c6c31">appName</a> = &quot;NONAME&quot;</td></tr>
+<tr class="separator:ac13213a4484eee14bdc7d2df5f9c6c31"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe6143642141fbe77d3e4e069da90e10" id="r_afe6143642141fbe77d3e4e069da90e10"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">uint32_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afe6143642141fbe77d3e4e069da90e10">appVersion</a> = 0</td></tr>
+<tr class="separator:afe6143642141fbe77d3e4e069da90e10"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a37273622a644efe75096f728177eee39" id="r_a37273622a644efe75096f728177eee39"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacehri.html#a506c1e315d13fefd91116d08c3615637">HRISurfaceCreateFunc</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a37273622a644efe75096f728177eee39">surfaceCreateFunc</a> = <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">nullptr</a></td></tr>
 <tr class="separator:a37273622a644efe75096f728177eee39"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0c4a1431c837819c2ca73825fe96993c" id="r_a0c4a1431c837819c2ca73825fe96993c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacehri.html#a721d6a9d311acee543c48d9f6d7739dc">VSyncMode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0c4a1431c837819c2ca73825fe96993c">vsyncMode</a> = <a class="el" href="namespacehri.html#a721d6a9d311acee543c48d9f6d7739dcab9f5c797ebbf55adccdd8539a65a0241">VSyncMode::Disabled</a></td></tr>
 <tr class="separator:a0c4a1431c837819c2ca73825fe96993c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac385a51342ccfb96589cd038e09e62d4" id="r_ac385a51342ccfb96589cd038e09e62d4"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">char</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac385a51342ccfb96589cd038e09e62d4">instanceExtensions</a> = {}</td></tr>
+<tr class="separator:ac385a51342ccfb96589cd038e09e62d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abf7046c25fa9222c2e03f5d8e8e43f4f" id="r_abf7046c25fa9222c2e03f5d8e8e43f4f"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">char</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abf7046c25fa9222c2e03f5d8e8e43f4f">deviceExtensions</a> = {}</td></tr>
+<tr class="separator:abf7046c25fa9222c2e03f5d8e8e43f4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0a996269a3e31c7696efb46d9d67aaab" id="r_a0a996269a3e31c7696efb46d9d67aaab"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkPhysicalDeviceFeatures</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0a996269a3e31c7696efb46d9d67aaab">deviceFeatures</a> = {}</td></tr>
+<tr class="separator:a0a996269a3e31c7696efb46d9d67aaab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64c47121d2b4f28620f4c291548f4bff" id="r_a64c47121d2b4f28620f4c291548f4bff"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkPhysicalDeviceVulkan11Features</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a64c47121d2b4f28620f4c291548f4bff">deviceFeatures11</a> = {}</td></tr>
+<tr class="separator:a64c47121d2b4f28620f4c291548f4bff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a60388888b43388ca20358f1117169cf4" id="r_a60388888b43388ca20358f1117169cf4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkPhysicalDeviceVulkan12Features</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a60388888b43388ca20358f1117169cf4">deviceFeatures12</a> = {}</td></tr>
+<tr class="separator:a60388888b43388ca20358f1117169cf4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd1d442c1b03332917b57ff344d50e1e" id="r_abd1d442c1b03332917b57ff344d50e1e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkPhysicalDeviceVulkan13Features</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abd1d442c1b03332917b57ff344d50e1e">deviceFeatures13</a> = {}</td></tr>
+<tr class="separator:abd1d442c1b03332917b57ff344d50e1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b30652634871bf15d36bcf14e533604" id="r_a2b30652634871bf15d36bcf14e533604"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="#ae690b3140a7c067a50c5bc5d8817c551">ExtensionFeature</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2b30652634871bf15d36bcf14e533604">extensionFeatures</a> = {}</td></tr>
+<tr class="separator:a2b30652634871bf15d36bcf14e533604"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>The render context create info allows for specifying context settings. </p>
+<div class="textblock"><p>The render context create info allows for specifying context settings &amp; registering extensions for the created context. </p>
 
 <p class="definition">Definition at line <a class="el" href="render__context_8h_source.html#l00039">39</a> of file <a class="el" href="render__context_8h_source.html">render_context.h</a>.</p>
-</div><h2 class="groupheader">Member Data Documentation</h2>
+</div><h2 class="groupheader">Member Typedef Documentation</h2>
+<a id="ae690b3140a7c067a50c5bc5d8817c551" name="ae690b3140a7c067a50c5bc5d8817c551"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae690b3140a7c067a50c5bc5d8817c551">&#9670;&#160;</a></span>ExtensionFeature</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">typedef</a> vkb::detail::GenericFeaturesPNextNode <a class="el" href="#ae690b3140a7c067a50c5bc5d8817c551">hri::RenderContextCreateInfo::ExtensionFeature</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="render__context_8h_source.html#l00041">41</a> of file <a class="el" href="render__context_8h_source.html">render_context.h</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="ac13213a4484eee14bdc7d2df5f9c6c31" name="ac13213a4484eee14bdc7d2df5f9c6c31"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac13213a4484eee14bdc7d2df5f9c6c31">&#9670;&#160;</a></span>appName</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">char</a>* hri::RenderContextCreateInfo::appName = &quot;NONAME&quot;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="render__context_8h_source.html#l00043">43</a> of file <a class="el" href="render__context_8h_source.html">render_context.h</a>.</p>
+
+</div>
+</div>
+<a id="afe6143642141fbe77d3e4e069da90e10" name="afe6143642141fbe77d3e4e069da90e10"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afe6143642141fbe77d3e4e069da90e10">&#9670;&#160;</a></span>appVersion</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">uint32_t</a> hri::RenderContextCreateInfo::appVersion = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="render__context_8h_source.html#l00044">44</a> of file <a class="el" href="render__context_8h_source.html">render_context.h</a>.</p>
+
+</div>
+</div>
+<a id="abf7046c25fa9222c2e03f5d8e8e43f4f" name="abf7046c25fa9222c2e03f5d8e8e43f4f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abf7046c25fa9222c2e03f5d8e8e43f4f">&#9670;&#160;</a></span>deviceExtensions</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">char</a>*&gt; hri::RenderContextCreateInfo::deviceExtensions = {}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="render__context_8h_source.html#l00048">48</a> of file <a class="el" href="render__context_8h_source.html">render_context.h</a>.</p>
+
+</div>
+</div>
+<a id="a0a996269a3e31c7696efb46d9d67aaab" name="a0a996269a3e31c7696efb46d9d67aaab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0a996269a3e31c7696efb46d9d67aaab">&#9670;&#160;</a></span>deviceFeatures</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkPhysicalDeviceFeatures</a> hri::RenderContextCreateInfo::deviceFeatures = {}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="render__context_8h_source.html#l00049">49</a> of file <a class="el" href="render__context_8h_source.html">render_context.h</a>.</p>
+
+</div>
+</div>
+<a id="a64c47121d2b4f28620f4c291548f4bff" name="a64c47121d2b4f28620f4c291548f4bff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a64c47121d2b4f28620f4c291548f4bff">&#9670;&#160;</a></span>deviceFeatures11</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkPhysicalDeviceVulkan11Features</a> hri::RenderContextCreateInfo::deviceFeatures11 = {}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="render__context_8h_source.html#l00050">50</a> of file <a class="el" href="render__context_8h_source.html">render_context.h</a>.</p>
+
+</div>
+</div>
+<a id="a60388888b43388ca20358f1117169cf4" name="a60388888b43388ca20358f1117169cf4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a60388888b43388ca20358f1117169cf4">&#9670;&#160;</a></span>deviceFeatures12</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkPhysicalDeviceVulkan12Features</a> hri::RenderContextCreateInfo::deviceFeatures12 = {}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="render__context_8h_source.html#l00051">51</a> of file <a class="el" href="render__context_8h_source.html">render_context.h</a>.</p>
+
+</div>
+</div>
+<a id="abd1d442c1b03332917b57ff344d50e1e" name="abd1d442c1b03332917b57ff344d50e1e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abd1d442c1b03332917b57ff344d50e1e">&#9670;&#160;</a></span>deviceFeatures13</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkPhysicalDeviceVulkan13Features</a> hri::RenderContextCreateInfo::deviceFeatures13 = {}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="render__context_8h_source.html#l00052">52</a> of file <a class="el" href="render__context_8h_source.html">render_context.h</a>.</p>
+
+</div>
+</div>
+<a id="a2b30652634871bf15d36bcf14e533604" name="a2b30652634871bf15d36bcf14e533604"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b30652634871bf15d36bcf14e533604">&#9670;&#160;</a></span>extensionFeatures</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;<a class="el" href="#ae690b3140a7c067a50c5bc5d8817c551">ExtensionFeature</a>&gt; hri::RenderContextCreateInfo::extensionFeatures = {}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="render__context_8h_source.html#l00053">53</a> of file <a class="el" href="render__context_8h_source.html">render_context.h</a>.</p>
+
+</div>
+</div>
+<a id="ac385a51342ccfb96589cd038e09e62d4" name="ac385a51342ccfb96589cd038e09e62d4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac385a51342ccfb96589cd038e09e62d4">&#9670;&#160;</a></span>instanceExtensions</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">char</a>*&gt; hri::RenderContextCreateInfo::instanceExtensions = {}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="render__context_8h_source.html#l00047">47</a> of file <a class="el" href="render__context_8h_source.html">render_context.h</a>.</p>
+
+</div>
+</div>
 <a id="a37273622a644efe75096f728177eee39" name="a37273622a644efe75096f728177eee39"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a37273622a644efe75096f728177eee39">&#9670;&#160;</a></span>surfaceCreateFunc</h2>
 
@@ -132,7 +317,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="render__context_8h_source.html#l00041">41</a> of file <a class="el" href="render__context_8h_source.html">render_context.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="render__context_8h_source.html#l00045">45</a> of file <a class="el" href="render__context_8h_source.html">render_context.h</a>.</p>
 
 </div>
 </div>
@@ -148,7 +333,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="render__context_8h_source.html#l00042">42</a> of file <a class="el" href="render__context_8h_source.html">render_context.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="render__context_8h_source.html#l00046">46</a> of file <a class="el" href="render__context_8h_source.html">render_context.h</a>.</p>
 
 </div>
 </div>

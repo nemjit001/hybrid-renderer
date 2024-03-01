@@ -1,5 +1,5 @@
 <map id="UISubsystem" name="UISubsystem">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,432,241,640"/>
-<area shape="rect" id="Node000002" href="$classhri_1_1_i_render_subsystem.html" title="A Render Subsystem manages a render pipeline, layout, and subsystem descriptors. A Render Subsystem b..." alt="" coords="7,5,240,384"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="126,399,126,432,121,432,121,399"/>
+<area shape="rect" id="Node000001" title="The UI Subsystem handles drawing an UI overlay to the swap render pass." alt="" coords="20,416,223,608"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_i_render_subsystem.html" title="A Render Subsystem manages a render pipeline, layout, and subsystem descriptors. A Render Subsystem b..." alt="" coords="5,5,237,368"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="124,383,124,416,119,416,119,383"/>
 </map>

@@ -1,0 +1,9 @@
+<map id="raytracing::ASBuilder::instancesToGeometry" name="raytracing::ASBuilder::instancesToGeometry">
+<area shape="rect" id="Node000001" title="Convert an instance buffer to AS Input." alt="" coords="301,48,457,91"/>
+<area shape="rect" id="Node000002" href="$class_scene_a_s_manager.html#a3a6567c53fd1bbc025b547db857575aa" title=" " alt="" coords="19,5,239,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="285,53,198,35,199,30,286,48"/>
+<area shape="rect" id="Node000003" href="$class_scene_a_s_manager.html#a5d945af1c6136a2dedcba6caba66b74b" title=" " alt="" coords="28,56,230,83"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="285,72,231,72,231,67,285,67"/>
+<area shape="rect" id="Node000004" href="$class_scene_a_s_manager.html#a0b76beddf292469cd273d91ca2cbcf99" title=" " alt="" coords="5,107,253,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="286,91,199,109,198,103,285,86"/>
+</map>

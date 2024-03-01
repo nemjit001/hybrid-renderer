@@ -42,8 +42,11 @@ var NAVTREE =
       [ "Class Hierarchy", "hierarchy.html", "hierarchy" ],
       [ "Class Members", "functions.html", [
         [ "All", "functions.html", "functions_dup" ],
-        [ "Functions", "functions_func.html", null ],
-        [ "Variables", "functions_vars.html", null ]
+        [ "Functions", "functions_func.html", "functions_func" ],
+        [ "Variables", "functions_vars.html", null ],
+        [ "Typedefs", "functions_type.html", null ],
+        [ "Enumerations", "functions_enum.html", null ],
+        [ "Enumerator", "functions_eval.html", null ]
       ] ]
     ] ],
     [ "Files", "files.html", [
@@ -53,6 +56,8 @@ var NAVTREE =
         [ "Functions", "globals_func.html", null ],
         [ "Variables", "globals_vars.html", null ],
         [ "Typedefs", "globals_type.html", null ],
+        [ "Enumerations", "globals_enum.html", null ],
+        [ "Enumerator", "globals_eval.html", null ],
         [ "Macros", "globals_defs.html", null ]
       ] ]
     ] ]
@@ -61,10 +66,12 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"_c_make_c_compiler_id_8c.html",
-"classhri_1_1_render_context.html#a026bc86c2b20d9d4c1675d79af540d0e",
-"hri__math_8h.html#a816e332c4406462aaf78bfc03fcdf63d",
-"structhri_1_1_descriptor_set_layout.html"
+"annotated.html",
+"classhri_1_1_i_render_pass_resource_manager_base.html#ac5c678c77b51549de492410ad945c782",
+"classhri_1_1_shader_database.html#ae85fff88f932eba3719b34f2e8f1d218",
+"hri__math_8h.html#a1f956ec3a8e0bc7137496adba95c3ff4",
+"sampler_8h.html",
+"structhri_1_1_swapchain_present_setup.html#a076201b38652997775b307d3ba236c97"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

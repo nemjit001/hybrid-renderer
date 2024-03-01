@@ -1,0 +1,9 @@
+<map id="hri::PipelineLayoutBuilder::addDescriptorSetLayout" name="hri::PipelineLayoutBuilder::addDescriptorSetLayout">
+<area shape="rect" id="Node000001" title="Add a new Descriptor Set Layout to the pipeline layout." alt="" coords="251,72,419,115"/>
+<area shape="rect" id="Node000002" href="$class_g_buffer_layout_subsystem.html#a26867401ba6679f838b890edbb4ebceb" title="Create a new GBuffer Layout subsystem." alt="" coords="15,5,193,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="244,70,180,51,181,46,245,65"/>
+<area shape="rect" id="Node000003" href="$class_hybrid_ray_tracing_subsystem.html#af80a13c38e942cd5ecd6b1c44d0b38f5" title=" " alt="" coords="5,72,203,115"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="235,96,203,96,203,91,235,91"/>
+<area shape="rect" id="Node000004" href="$class_presentation_subsystem.html#a83e2ec653ef486e434b1636a1c7a3261" title="Create a new Presentation Subsystem." alt="" coords="20,139,188,181"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="245,122,181,141,180,135,244,117"/>
+</map>

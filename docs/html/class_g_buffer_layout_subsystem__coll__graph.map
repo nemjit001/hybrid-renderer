@@ -1,17 +1,27 @@
 <map id="GBufferLayoutSubsystem" name="GBufferLayoutSubsystem">
-<area shape="rect" id="Node000001" title=" " alt="" coords="333,1472,621,1744"/>
-<area shape="rect" id="Node000002" href="$classhri_1_1_i_render_subsystem.html" title="A Render Subsystem manages a render pipeline, layout, and subsystem descriptors. A Render Subsystem b..." alt="" coords="234,976,467,1259"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="393,1273,445,1472,440,1473,388,1274"/>
-<area shape="rect" id="Node000003" href="$classhri_1_1_render_context.html" title="THe RenderContext manages the Vulkan instance, device, and swapchain state." alt="" coords="5,363,219,763"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="200,761,286,959,281,962,195,764"/>
-<area shape="rect" id="Node000004" href="$classhri_1_1_render_context_queue_state.html" title="The context queue state creates and maintains the device queue setup." alt="" coords="17,176,207,299"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="115,299,115,346,109,346,109,299"/>
-<area shape="rect" id="Node000005" href="$structhri_1_1_device_queue.html" title="A Device Queue is a queue on the logical device to which operations can be submitted." alt="" coords="52,5,172,96"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="115,96,115,159,109,159,109,96"/>
-<area shape="rect" id="Node000006" href="$classhri_1_1_descriptor_set_allocator.html" title="The Descriptor Set Allocator handles allocation of Descriptor Sets from descriptor pools." alt="" coords="243,373,459,752"/>
-<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="353,752,353,959,348,959,348,752"/>
-<area shape="rect" id="Node000007" href="$structhri_1_1_pipeline_state_object.html" title="A pipeline state object (PSO) stores a pipeline and its bind point." alt="" coords="483,509,632,616"/>
-<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="565,616,565,659,559,708,547,758,523,804,513,814,502,818,491,821,481,829,456,859,435,892,400,962,396,959,430,889,452,855,477,825,489,816,500,813,510,809,519,801,542,756,554,707,559,659,559,616"/>
-<area shape="rect" id="Node000008" href="$classhri_1_1_descriptor_set_manager.html" title="A Descriptor Set Manager manages a single descriptor set and its updates." alt="" coords="491,827,719,1408"/>
-<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="532,1409,520,1456,514,1455,527,1407"/>
+<area shape="rect" id="Node000001" title="The GBuffer Layout Subsystem handles drawing a scene and storing the resulting geometry data (depth,..." alt="" coords="415,2299,683,2576"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_i_render_subsystem.html" title="A Render Subsystem manages a render pipeline, layout, and subsystem descriptors. A Render Subsystem b..." alt="" coords="319,1968,551,2235"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="487,2248,505,2298,500,2300,482,2249"/>
+<area shape="rect" id="Node000003" href="$classhri_1_1_render_context.html" title="THe RenderContext manages the Vulkan instance, device, and swapchain state." alt="" coords="5,1339,219,1904"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="221,1884,233,1902,269,1948,309,1991,305,1995,265,1952,228,1906,216,1887"/>
+<area shape="rect" id="Node000004" href="$classhri_1_1_render_context_queue_state.html" title="The context queue state creates and maintains the device queue setup." alt="" coords="17,875,207,997"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="115,997,115,1322,109,1322,109,997"/>
+<area shape="rect" id="Node000005" href="$structhri_1_1_device_queue.html" title="A Device Queue is a queue on the logical device to which operations can be submitted." alt="" coords="52,200,172,291"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="115,290,115,858,109,858,109,290"/>
+<area shape="rect" id="Node000006" href="$classhri__debug_1_1_debug_label_handler.html" title="The debug label handler allows setting debug labels for Vulkan objects." alt="" coords="243,1488,487,1755"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="387,1754,416,1951,410,1952,382,1755"/>
+<area shape="rect" id="Node000007" href="$structhri_1_1_pipeline_state_object.html" title="A pipeline state object (PSO) stores a pipeline and its bind point." alt="" coords="512,1568,661,1675"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="573,1675,501,1905,486,1953,481,1951,496,1903,568,1674"/>
+<area shape="rect" id="Node000008" href="$struct_g_buffer_layout_frame_info.html" title=" " alt="" coords="609,2059,793,2144"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="685,2145,621,2284,617,2282,680,2143"/>
+<area shape="rect" id="Node000009" href="$class_scene_graph.html" title=" " alt="" coords="686,1403,903,1840"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="755,1840,715,2043,710,2042,750,1839"/>
+<area shape="rect" id="Node000010" href="$struct_scene_parameters.html" title="Scene parameters allow modifying LOD selection." alt="" coords="507,891,624,981"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="573,981,594,1114,613,1195,638,1274,656,1306,676,1337,699,1386,695,1389,671,1340,651,1309,634,1276,608,1196,589,1115,567,982"/>
+<area shape="rect" id="Node000011" href="$class_scene_a_s_manager.html" title=" " alt="" coords="649,597,941,1275"/>
+<area shape="poly" id="edge10_Node000009_Node000011" title=" " alt="" coords="797,1274,797,1386,792,1386,792,1274"/>
+<area shape="rect" id="Node000012" href="$struct_scene_buffers.html" title="Scene buffers store device local resources for a scene." alt="" coords="965,901,1054,971"/>
+<area shape="poly" id="edge11_Node000009_Node000012" title=" " alt="" coords="1009,971,992,1105,976,1191,955,1275,913,1389,908,1387,949,1274,971,1189,987,1104,1004,970"/>
+<area shape="rect" id="Node000013" href="$classhri_1_1_buffer_resource.html" title="A Buffer Resource is a collection of a vk buffer and its allocation." alt="" coords="893,5,1126,485"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="1012,485,1012,884,1007,884,1007,485"/>
 </map>

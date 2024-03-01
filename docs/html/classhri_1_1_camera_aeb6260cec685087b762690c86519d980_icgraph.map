@@ -1,0 +1,7 @@
+<map id="hri::Camera::updateMatrices" name="hri::Camera::updateMatrices">
+<area shape="rect" id="Node000001" title="Update view &amp; project matrices using basis vectors." alt="" coords="195,31,380,57"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_camera.html#a1d5d52436f4eb15ae2d4a2b0feb44fbd" title="Instantiate a camera at the world origin, looking forward, with custom parameters." alt="" coords="5,5,147,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="179,34,147,30,147,24,180,28"/>
+<area shape="rect" id="Node000003" href="$classhri_1_1_camera.html#af28880b5e06eb181cf5f4afd82f5c7ae" title="Instantiate a camera." alt="" coords="5,56,147,83"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="180,60,147,64,147,58,179,54"/>
+</map>

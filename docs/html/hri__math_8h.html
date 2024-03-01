@@ -94,16 +94,19 @@ $(function(){initNavTree('hri__math_8h.html',''); initResizable(); });
   <div class="summary">
 <a href="#namespaces">Namespaces</a> &#124;
 <a href="#define-members">Macros</a> &#124;
+<a href="#typedef-members">Typedefs</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">hri_math.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &lt;cmath&gt;</code><br />
+<code>#include &lt;glm/glm.hpp&gt;</code><br />
+<code>#include &lt;glm/gtc/matrix_transform.hpp&gt;</code><br />
 <code>#include &quot;<a class="el" href="platform_8h_source.html">platform.h</a>&quot;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for hri_math.h:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="hri__math_8h__incl.svg" width="171" height="128"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="hri__math_8h__incl.svg" width="502" height="128"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 </div><div class="textblock"><div class="dynheader">
 This graph shows which files directly or indirectly include this file:</div>
@@ -120,6 +123,10 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
+<tr class="memitem:ad39ff9bc8a4676f8e1e28d695e637360" id="r_ad39ff9bc8a4676f8e1e28d695e637360"><td class="memItemLeft" align="right" valign="top">#<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">define</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad39ff9bc8a4676f8e1e28d695e637360">GLM_FORCE_LEFT_HANDED</a></td></tr>
+<tr class="separator:ad39ff9bc8a4676f8e1e28d695e637360"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa53e0967978ad7a8792f6961156ec968" id="r_aa53e0967978ad7a8792f6961156ec968"><td class="memItemLeft" align="right" valign="top">#<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">define</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa53e0967978ad7a8792f6961156ec968">GLM_FORCE_DEPTH_ZERO_TO_ONE</a></td></tr>
+<tr class="separator:aa53e0967978ad7a8792f6961156ec968"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a63080f6e1fba92c00666e627de4a0cfe" id="r_a63080f6e1fba92c00666e627de4a0cfe"><td class="memItemLeft" align="right" valign="top">#<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">define</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a63080f6e1fba92c00666e627de4a0cfe">HRI_PI</a>&#160;&#160;&#160;3.14159265358979323846264<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">f</a></td></tr>
 <tr class="separator:a63080f6e1fba92c00666e627de4a0cfe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa82c03e0acbdcfccd1a94a7a59776cb7" id="r_aa82c03e0acbdcfccd1a94a7a59776cb7"><td class="memItemLeft" align="right" valign="top">#<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">define</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa82c03e0acbdcfccd1a94a7a59776cb7">HRI_INV_PI</a>&#160;&#160;&#160;0.31830988618379067153777<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">f</a></td></tr>
@@ -129,10 +136,17 @@ Macros</h2></td></tr>
 <tr class="memitem:a96fef187fb10d77b19c23e0515ab719c" id="r_a96fef187fb10d77b19c23e0515ab719c"><td class="memItemLeft" align="right" valign="top">#<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">define</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a96fef187fb10d77b19c23e0515ab719c">HRI_INV_2PI</a>&#160;&#160;&#160;0.15915494309189533576888<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">f</a></td></tr>
 <tr class="separator:a96fef187fb10d77b19c23e0515ab719c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+Typedefs</h2></td></tr>
+<tr class="memitem:a7e7fcd88732476a117ee2d54dd7ed574" id="r_a7e7fcd88732476a117ee2d54dd7ed574"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">typedef</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">mat3</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacehri.html#a7e7fcd88732476a117ee2d54dd7ed574">hri::Float3x3</a></td></tr>
+<tr class="separator:a7e7fcd88732476a117ee2d54dd7ed574"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad04972f2c4c6c9dfd1ce7e1d6d7fd576" id="r_ad04972f2c4c6c9dfd1ce7e1d6d7fd576"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">typedef</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">mat4</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacehri.html#ad04972f2c4c6c9dfd1ce7e1d6d7fd576">hri::Float4x4</a></td></tr>
+<tr class="separator:ad04972f2c4c6c9dfd1ce7e1d6d7fd576"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a20d510ca45e7195be7c151a1f9f16850" id="r_a20d510ca45e7195be7c151a1f9f16850"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">struct</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacehri.html#a20d510ca45e7195be7c151a1f9f16850">hri::ALIGNAS</a> (4) <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">Float2</a></td></tr>
-<tr class="separator:a20d510ca45e7195be7c151a1f9f16850"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65f2c9d698bce725e8bc4a1b00cb4d22" id="r_a65f2c9d698bce725e8bc4a1b00cb4d22"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">struct</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacehri.html#a65f2c9d698bce725e8bc4a1b00cb4d22">hri::HRI_ALIGNAS</a> (4) <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">Float2</a></td></tr>
+<tr class="separator:a65f2c9d698bce725e8bc4a1b00cb4d22"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a80da0ea8cafbed379ba92a21796fe33c" id="r_a80da0ea8cafbed379ba92a21796fe33c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">float</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacehri.html#a80da0ea8cafbed379ba92a21796fe33c">hri::rsqrtf</a> (<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">float</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">val</a>)</td></tr>
 <tr class="memdesc:a80da0ea8cafbed379ba92a21796fe33c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Simple inverse square root function.  <br /></td></tr>
 <tr class="separator:a80da0ea8cafbed379ba92a21796fe33c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -140,6 +154,15 @@ Functions</h2></td></tr>
 <tr class="separator:a778909c1320f31774fdf25dc126fcb9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acd3a7c0c786cee7eb37afe8bfb309464" id="r_acd3a7c0c786cee7eb37afe8bfb309464"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">float</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacehri.html#acd3a7c0c786cee7eb37afe8bfb309464">hri::radians</a> (<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">float</a> <a class="el" href="namespacehri.html#a778909c1320f31774fdf25dc126fcb9d">degrees</a>)</td></tr>
 <tr class="separator:acd3a7c0c786cee7eb37afe8bfb309464"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adbd92a686825b069ddd3c6eac8bdc70d" id="r_adbd92a686825b069ddd3c6eac8bdc70d"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">typename</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a> &gt; </td></tr>
+<tr class="memitem:adbd92a686825b069ddd3c6eac8bdc70d"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacehri.html#adbd92a686825b069ddd3c6eac8bdc70d">hri::swap</a> (<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a> &amp;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">a</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a> &amp;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">b</a>)</td></tr>
+<tr class="separator:adbd92a686825b069ddd3c6eac8bdc70d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad174e49d89763692b01496e2615c7d49" id="r_ad174e49d89763692b01496e2615c7d49"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">typename</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a> &gt; </td></tr>
+<tr class="memitem:ad174e49d89763692b01496e2615c7d49"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacehri.html#ad174e49d89763692b01496e2615c7d49">hri::max</a> (<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a> &amp;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">a</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a> &amp;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">b</a>)</td></tr>
+<tr class="separator:ad174e49d89763692b01496e2615c7d49"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa370e8f80e4c7511e90f1ecfc4f7402f" id="r_aa370e8f80e4c7511e90f1ecfc4f7402f"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">typename</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a> &gt; </td></tr>
+<tr class="memitem:aa370e8f80e4c7511e90f1ecfc4f7402f"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacehri.html#aa370e8f80e4c7511e90f1ecfc4f7402f">hri::min</a> (<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a> &amp;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">a</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a> &amp;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">b</a>)</td></tr>
+<tr class="separator:aa370e8f80e4c7511e90f1ecfc4f7402f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac3756396c04e1a991938cc6fb5f9e163" id="r_ac3756396c04e1a991938cc6fb5f9e163"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">Float2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacehri.html#ac3756396c04e1a991938cc6fb5f9e163">hri::operator+</a> (<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">Float2</a> &amp;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">a</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">Float2</a> &amp;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">b</a>)</td></tr>
 <tr class="separator:ac3756396c04e1a991938cc6fb5f9e163"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a69c3129882980b649a72aa2e4c9e861a" id="r_a69c3129882980b649a72aa2e4c9e861a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">Float3</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacehri.html#a69c3129882980b649a72aa2e4c9e861a">hri::operator+</a> (<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">Float3</a> &amp;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">a</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">Float3</a> &amp;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">b</a>)</td></tr>
@@ -264,6 +287,38 @@ Functions</h2></td></tr>
 <tr class="separator:a1f956ec3a8e0bc7137496adba95c3ff4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
+<a id="aa53e0967978ad7a8792f6961156ec968" name="aa53e0967978ad7a8792f6961156ec968"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa53e0967978ad7a8792f6961156ec968">&#9670;&#160;</a></span>GLM_FORCE_DEPTH_ZERO_TO_ONE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">define</a> GLM_FORCE_DEPTH_ZERO_TO_ONE</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00004">4</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+
+</div>
+</div>
+<a id="ad39ff9bc8a4676f8e1e28d695e637360" name="ad39ff9bc8a4676f8e1e28d695e637360"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad39ff9bc8a4676f8e1e28d695e637360">&#9670;&#160;</a></span>GLM_FORCE_LEFT_HANDED</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">define</a> GLM_FORCE_LEFT_HANDED</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00003">3</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+
+</div>
+</div>
 <a id="ac492fa13f837cbeec381bc93019e6d7b" name="ac492fa13f837cbeec381bc93019e6d7b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac492fa13f837cbeec381bc93019e6d7b">&#9670;&#160;</a></span>HRI_2PI</h2>
 
@@ -276,7 +331,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00009">9</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00014">14</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -292,7 +347,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00010">10</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00015">15</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -308,7 +363,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00008">8</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00013">13</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -324,7 +379,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00007">7</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00012">12</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>

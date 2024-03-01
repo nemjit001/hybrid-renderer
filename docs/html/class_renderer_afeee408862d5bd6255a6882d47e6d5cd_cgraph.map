@@ -1,7 +1,5 @@
 <map id="Renderer::~Renderer" name="Renderer::~Renderer">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,47,147,73"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,13,147,40"/>
 <area shape="rect" id="Node000002" href="$classhri_1_1_render_core.html#a41c0ca170e62df347e4c7d623b9fef57" title="Await the finish of the currently active frame." alt="" coords="195,5,381,48"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="147,46,179,41,180,46,147,52"/>
-<area shape="rect" id="Node000003" href="$structhri_1_1_buffer_resource.html#a99665502a8e8f3561285b09487ecf632" title="Destroy a Buffer Resource." alt="" coords="222,72,354,115"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="147,68,207,78,207,83,147,74"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="147,24,179,24,179,29,147,29"/>
 </map>

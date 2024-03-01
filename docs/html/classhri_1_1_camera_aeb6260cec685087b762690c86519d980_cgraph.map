@@ -1,0 +1,8 @@
+<map id="hri::Camera::updateMatrices" name="hri::Camera::updateMatrices">
+<area shape="rect" id="Node000001" title="Update view &amp; project matrices using basis vectors." alt="" coords="5,5,191,32"/>
+<area shape="rect" id="Node000002" href="$namespacehri.html#acd3a7c0c786cee7eb37afe8bfb309464" title=" " alt="" coords="239,5,324,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="191,16,223,16,223,21,191,21"/>
+<area shape="rect" id="Node000003" href="$namespacehri.html#a778909c1320f31774fdf25dc126fcb9d" title=" " alt="" coords="372,5,461,32"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="325,24,356,25,356,30,325,30"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="371,13,340,12,340,7,371,7"/>
+</map>

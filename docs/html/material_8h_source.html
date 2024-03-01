@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.10.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Hybrid Renderer: hybrid-renderer-lib/include/material.h Source File</title>
+<title>Hybrid Renderer: demo/include/material.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -101,35 +101,28 @@ $(function(){initNavTree('material_8h_source.html',''); initResizable(); });
 <div class="contents">
 <a href="material_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &quot;<a class="code" href="platform_8h.html">platform.h</a>&quot;</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &quot;<a class="code" href="hri__math_8h.html">hri_math.h</a>&quot;</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacehri.html">hri</a></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span>{</div>
-<div class="foldopen" id="foldopen00009" data-start="{" data-end="};">
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno"><a class="line" href="structhri_1_1_material.html">    9</a></span>    <span class="keyword">struct </span><a class="code hl_struct" href="structhri_1_1_material.html">Material</a></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>    {</div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno"><a class="line" href="structhri_1_1_material.html#a9ac417bdaba83c08514bbaada406ccb7">   11</a></span>        <a class="code hl_function" href="structhri_1_1_material.html#a9ac417bdaba83c08514bbaada406ccb7">ALIGNAS</a>(16) <a class="code hl_typedef" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">Float3</a> <a class="code hl_typedef" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">diffuse</a>          = <a class="code hl_typedef" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">Float3</a>(0.8<a class="code hl_typedef" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">f</a>);</div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno"><a class="line" href="structhri_1_1_material.html#a754924e37254949c9ac851c343440d76">   12</a></span>        <a class="code hl_function" href="structhri_1_1_material.html#a9ac417bdaba83c08514bbaada406ccb7">ALIGNAS</a>(16) <a class="code hl_typedef" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">Float3</a> <a class="code hl_typedef" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">specular</a>         = <a class="code hl_typedef" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">Float3</a>(0.5<a class="code hl_typedef" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">f</a>);</div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno"><a class="line" href="structhri_1_1_material.html#a1f127b53421cb41ad0ff5e3d3b1f4328">   13</a></span>        <a class="code hl_function" href="structhri_1_1_material.html#a9ac417bdaba83c08514bbaada406ccb7">ALIGNAS</a>(16) <a class="code hl_typedef" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">Float3</a> <a class="code hl_typedef" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">transmittance</a>    = <a class="code hl_typedef" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">Float3</a>(0.0<a class="code hl_typedef" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">f</a>);</div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno"><a class="line" href="structhri_1_1_material.html#a18dac20b7634b3c191251c47f4edd266">   14</a></span>        <a class="code hl_function" href="structhri_1_1_material.html#a9ac417bdaba83c08514bbaada406ccb7">ALIGNAS</a>(16) <a class="code hl_typedef" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">Float3</a> <a class="code hl_typedef" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">emission</a>         = <a class="code hl_typedef" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">Float3</a>(0.0<a class="code hl_typedef" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">f</a>);</div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="structhri_1_1_material.html#a59a0d29d778f397bce357fd71d388673">   15</a></span>        <a class="code hl_function" href="structhri_1_1_material.html#a9ac417bdaba83c08514bbaada406ccb7">ALIGNAS</a>(4)  <span class="keywordtype">float</span> <a class="code hl_typedef" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">shininess</a>         = 1.0<a class="code hl_typedef" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">f</a>;</div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno"><a class="line" href="structhri_1_1_material.html#a9a20f077264fafb382c89b8667cb57d2">   16</a></span>        <a class="code hl_function" href="structhri_1_1_material.html#a9ac417bdaba83c08514bbaada406ccb7">ALIGNAS</a>(4)  <span class="keywordtype">float</span> <a class="code hl_typedef" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">ior</a>               = 1.45<a class="code hl_typedef" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">f</a>;</div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    };</div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &lt;<a class="code" href="hybrid__renderer_8h.html">hybrid_renderer.h</a>&gt;</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
+<div class="foldopen" id="foldopen00005" data-start="{" data-end="};">
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno"><a class="line" href="struct_material.html">    5</a></span><span class="keyword">struct </span><a class="code hl_struct" href="struct_material.html">Material</a></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span>{</div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span>    <a class="code hl_function" href="struct_material.html#aba1a7fe723ab4ce3224a6d3950be81c2">HRI_ALIGNAS</a>(16) hri::Float3 diffuse         = hri::Float3(0.8f);</div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span>    <a class="code hl_function" href="struct_material.html#aba1a7fe723ab4ce3224a6d3950be81c2">HRI_ALIGNAS</a>(16) hri::Float3 specular        = hri::Float3(0.5f);</div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span>    <a class="code hl_function" href="struct_material.html#aba1a7fe723ab4ce3224a6d3950be81c2">HRI_ALIGNAS</a>(16) hri::Float3 transmittance   = hri::Float3(0.0f);</div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>    <a class="code hl_function" href="struct_material.html#aba1a7fe723ab4ce3224a6d3950be81c2">HRI_ALIGNAS</a>(16) hri::Float3 emission        = hri::Float3(0.0f);</div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno"><a class="line" href="struct_material.html#aba1a7fe723ab4ce3224a6d3950be81c2">   11</a></span>    <a class="code hl_function" href="struct_material.html#aba1a7fe723ab4ce3224a6d3950be81c2">HRI_ALIGNAS</a>(4) float shininess              = 1.0f;</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno"><a class="line" href="struct_material.html#a96f7220337cb75d2c051f80af26fc913">   12</a></span>    <a class="code hl_function" href="struct_material.html#aba1a7fe723ab4ce3224a6d3950be81c2">HRI_ALIGNAS</a>(4) <span class="keywordtype">float</span> ior                    = 1.45f;</div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>};</div>
 </div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>}</div>
-<div class="ttc" id="ahri__math_8h_html"><div class="ttname"><a href="hri__math_8h.html">hri_math.h</a></div></div>
-<div class="ttc" id="anamespacehri_html"><div class="ttname"><a href="namespacehri.html">hri</a></div><div class="ttdef"><b>Definition</b> <a href="camera_8h_source.html#l00009">camera.h:10</a></div></div>
-<div class="ttc" id="aplatform_8h_html"><div class="ttname"><a href="platform_8h.html">platform.h</a></div></div>
-<div class="ttc" id="astructhri_1_1_material_html"><div class="ttname"><a href="structhri_1_1_material.html">hri::Material</a></div><div class="ttdoc">The Material struct describes drawing parameters for renderable objects.</div><div class="ttdef"><b>Definition</b> <a href="#l00009">material.h:10</a></div></div>
-<div class="ttc" id="astructhri_1_1_material_html_a9ac417bdaba83c08514bbaada406ccb7"><div class="ttname"><a href="structhri_1_1_material.html#a9ac417bdaba83c08514bbaada406ccb7">hri::Material::ALIGNAS</a></div><div class="ttdeci">ALIGNAS(16) Float3 diffuse</div></div>
-<div class="ttc" id="atimer_8h_html_aa9b015ef49e0ade762df7b5b36bdbdb0"><div class="ttname"><a href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">time_point</a></div><div class="ttdeci">std::chrono::time_point&lt; std::chrono::steady_clock &gt; time_point</div><div class="ttdef"><b>Definition</b> <a href="timer_8h_source.html#l00005">timer.h:5</a></div></div>
+<div class="ttc" id="ahybrid__renderer_8h_html"><div class="ttname"><a href="hybrid__renderer_8h.html">hybrid_renderer.h</a></div></div>
+<div class="ttc" id="astruct_material_html"><div class="ttname"><a href="struct_material.html">Material</a></div><div class="ttdef"><b>Definition</b> <a href="#l00005">material.h:6</a></div></div>
+<div class="ttc" id="astruct_material_html_aba1a7fe723ab4ce3224a6d3950be81c2"><div class="ttname"><a href="struct_material.html#aba1a7fe723ab4ce3224a6d3950be81c2">Material::HRI_ALIGNAS</a></div><div class="ttdeci">HRI_ALIGNAS(16) hri HRI_ALIGNAS(16) hri HRI_ALIGNAS(16) hri HRI_ALIGNAS(16) hri HRI_ALIGNAS(4) float shininess</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_c3dc3d948fed51b5091fc60f82f6810f.html">hybrid-renderer-lib</a></li><li class="navelem"><a class="el" href="dir_dcda78488e7a3fd7756cc82c710a3898.html">include</a></li><li class="navelem"><a class="el" href="material_8h.html">material.h</a></li>
+    <li class="navelem"><a class="el" href="dir_b6c2a257bfab6380ca9b3cb94b12cb25.html">demo</a></li><li class="navelem"><a class="el" href="dir_c417fe8970694d961378a77eb346355e.html">include</a></li><li class="navelem"><a class="el" href="material_8h.html">material.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.10.0 </li>
   </ul>
 </div>

@@ -1,17 +1,21 @@
 <map id="hri::dot" name="hri::dot">
-<area shape="rect" id="Node000001" title=" " alt="" coords="346,132,407,159"/>
-<area shape="rect" id="Node000002" href="$namespacehri.html#a973384293c0e408c65e034c68d3f29b4" title=" " alt="" coords="195,5,298,32"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="358,120,331,83,296,46,279,35,282,30,300,42,335,79,362,117"/>
-<area shape="rect" id="Node000003" href="$namespacehri.html#ac16296eb9f9ac2b2fa74fa1d67692fe5" title=" " alt="" coords="195,56,298,83"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="341,125,297,97,275,86,278,81,299,92,344,121"/>
-<area shape="rect" id="Node000004" href="$namespacehri.html#a1f956ec3a8e0bc7137496adba95c3ff4" title=" " alt="" coords="195,107,298,133"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="330,139,298,133,299,127,331,134"/>
-<area shape="rect" id="Node000005" href="$namespacehri.html#ac37aa10e96e3d4f0775c3a659f16d490" title=" " alt="" coords="197,157,296,184"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="331,157,297,164,296,158,330,152"/>
-<area shape="rect" id="Node000007" href="$namespacehri.html#a049be5f298c13d3a19e3b014fd1b8a60" title=" " alt="" coords="197,208,296,235"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="344,170,299,198,278,210,275,205,297,194,341,166"/>
-<area shape="rect" id="Node000008" href="$namespacehri.html#ae5e9d70d8e442397de8a40bb1af251ac" title=" " alt="" coords="197,259,296,285"/>
-<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="362,174,335,211,300,249,282,260,279,256,296,245,331,208,358,171"/>
-<area shape="rect" id="Node000006" href="$classhri_1_1_camera.html#af28880b5e06eb181cf5f4afd82f5c7ae" title="Instantiate a camera." alt="" coords="5,157,147,184"/>
-<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="181,173,147,173,147,168,181,168"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="443,132,505,159"/>
+<area shape="rect" id="Node000002" href="$namespacehri.html#a973384293c0e408c65e034c68d3f29b4" title=" " alt="" coords="292,5,395,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="455,120,428,83,394,46,376,35,379,30,397,42,433,79,459,117"/>
+<area shape="rect" id="Node000003" href="$namespacehri.html#ac16296eb9f9ac2b2fa74fa1d67692fe5" title=" " alt="" coords="292,56,395,83"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="439,125,394,97,373,86,375,81,397,92,441,121"/>
+<area shape="rect" id="Node000004" href="$namespacehri.html#a1f956ec3a8e0bc7137496adba95c3ff4" title=" " alt="" coords="292,107,395,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="428,139,395,133,396,127,429,134"/>
+<area shape="rect" id="Node000005" href="$namespacehri.html#ac37aa10e96e3d4f0775c3a659f16d490" title=" " alt="" coords="294,157,393,184"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="429,157,394,164,393,158,428,152"/>
+<area shape="rect" id="Node000009" href="$namespacehri.html#a049be5f298c13d3a19e3b014fd1b8a60" title=" " alt="" coords="294,208,393,235"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="441,170,397,198,375,210,373,205,394,194,439,166"/>
+<area shape="rect" id="Node000010" href="$namespacehri.html#ae5e9d70d8e442397de8a40bb1af251ac" title=" " alt="" coords="294,259,393,285"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="459,174,433,211,397,249,379,260,376,256,394,245,428,208,455,171"/>
+<area shape="rect" id="Node000006" href="$classhri_1_1_camera.html#af28880b5e06eb181cf5f4afd82f5c7ae" title="Instantiate a camera." alt="" coords="103,132,244,159"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="278,164,244,159,245,153,279,158"/>
+<area shape="rect" id="Node000007" href="$main_8cpp.html#a35afe9a22644f1030e0558cfe105d18b" title=" " alt="" coords="107,183,240,209"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="279,183,240,189,239,184,278,178"/>
+<area shape="rect" id="Node000008" href="$main_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4" title=" " alt="" coords="5,183,55,209"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="92,199,55,199,55,193,92,193"/>
 </map>

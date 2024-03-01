@@ -92,12 +92,15 @@ $(function(){initNavTree('renderer_8h.html',''); initResizable(); });
 
 <div class="header">
   <div class="summary">
-<a href="#nested-classes">Classes</a>  </div>
+<a href="#nested-classes">Classes</a> &#124;
+<a href="#enum-members">Enumerations</a>  </div>
   <div class="headertitle"><div class="title">renderer.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &lt;<a class="el" href="hybrid__renderer_8h_source.html">hybrid_renderer.h</a>&gt;</code><br />
 <code>#include &lt;memory&gt;</code><br />
+<code>#include &quot;<a class="el" href="raytracing_8h_source.html">detail/raytracing.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="scene_8h_source.html">scene.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="subsystems_8h_source.html">subsystems.h</a>&quot;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for renderer.h:</div>
@@ -114,9 +117,127 @@ This graph shows which files directly or indirectly include this file:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_renderer_frame_data.html">RendererFrameData</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="class_renderer.html">Renderer</a> Frame Data structure contains per frame data for rendering.  <a href="struct_renderer_frame_data.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_renderer.html">Renderer</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:a0adaef779b05a9fec6fdd53e4e038095" id="r_a0adaef779b05a9fec6fdd53e4e038095"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0adaef779b05a9fec6fdd53e4e038095">SceneDataBindings</a> { <a class="el" href="#a0adaef779b05a9fec6fdd53e4e038095a72159b99f162eb7444ea0810dcce4442">Camera</a>
+, <a class="el" href="#a0adaef779b05a9fec6fdd53e4e038095a30be439c8e7aa9c90bfc9c3b83733a4a">RenderInstanceData</a>
+, <a class="el" href="#a0adaef779b05a9fec6fdd53e4e038095a9b390fa7bebae21fcab29f88101e7e32">MaterialData</a>
+ }</td></tr>
+<tr class="separator:a0adaef779b05a9fec6fdd53e4e038095"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae0e568aa401d4dabcf7208d8a547446" id="r_aae0e568aa401d4dabcf7208d8a547446"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aae0e568aa401d4dabcf7208d8a547446">RayTracingBindings</a> { <br />
+&#160;&#160;<a class="el" href="#aae0e568aa401d4dabcf7208d8a547446a8367bd23038a488d0a841678592ebacd">Tlas</a>
+, <a class="el" href="#aae0e568aa401d4dabcf7208d8a547446a10954a9f62e0313657184fc15a7ea679">GBufferAlbedo</a>
+, <a class="el" href="#aae0e568aa401d4dabcf7208d8a547446a9b8428f89d55f68f6e4d03be226f2710">GBufferEmission</a>
+, <a class="el" href="#aae0e568aa401d4dabcf7208d8a547446a9d2de82d188f0cbf0e6d96b7ad26f768">GBufferWorldPos</a>
+, <br />
+&#160;&#160;<a class="el" href="#aae0e568aa401d4dabcf7208d8a547446a9412be89de5116491ce6dba5ae5b96dc">GBufferNormal</a>
+, <a class="el" href="#aae0e568aa401d4dabcf7208d8a547446ab5f272ccc179cd3b91e057119b8256f4">GBufferDepth</a>
+, <a class="el" href="#aae0e568aa401d4dabcf7208d8a547446a1bb6c69575392eae83c4b03fda2a0b99">SoftShadowOutImage</a>
+, <a class="el" href="#aae0e568aa401d4dabcf7208d8a547446a919b22991b8f0c04856a8b784a04c130">DIOutImage</a>
+<br />
+ }</td></tr>
+<tr class="separator:aae0e568aa401d4dabcf7208d8a547446"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af5bcbf1657ec07150d78bc61ce7e4dcc" id="r_af5bcbf1657ec07150d78bc61ce7e4dcc"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af5bcbf1657ec07150d78bc61ce7e4dcc">ComposeInputBindings</a> { <a class="el" href="#af5bcbf1657ec07150d78bc61ce7e4dcca1bce3c6fff3d1602b5df62edce8813bb">SoftShadowImage</a>
+, <a class="el" href="#af5bcbf1657ec07150d78bc61ce7e4dcca88fd3ec1f4ce4b751538b450118b3988">DirectIlluminationImage</a>
+ }</td></tr>
+<tr class="separator:af5bcbf1657ec07150d78bc61ce7e4dcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad2ddeeea374e3d6c9eef1a417832facb" id="r_ad2ddeeea374e3d6c9eef1a417832facb"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad2ddeeea374e3d6c9eef1a417832facb">PresentInputBindings</a> { <a class="el" href="#ad2ddeeea374e3d6c9eef1a417832facba5137e51c722d26f6201c427ae238a07b">RenderResult</a>
+ }</td></tr>
+<tr class="separator:ad2ddeeea374e3d6c9eef1a417832facb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Enumeration Type Documentation</h2>
+<a id="af5bcbf1657ec07150d78bc61ce7e4dcc" name="af5bcbf1657ec07150d78bc61ce7e4dcc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af5bcbf1657ec07150d78bc61ce7e4dcc">&#9670;&#160;</a></span>ComposeInputBindings</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">enum</a> <a class="el" href="#af5bcbf1657ec07150d78bc61ce7e4dcc">ComposeInputBindings</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="af5bcbf1657ec07150d78bc61ce7e4dcca1bce3c6fff3d1602b5df62edce8813bb" name="af5bcbf1657ec07150d78bc61ce7e4dcca1bce3c6fff3d1602b5df62edce8813bb"></a>SoftShadowImage&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="af5bcbf1657ec07150d78bc61ce7e4dcca88fd3ec1f4ce4b751538b450118b3988" name="af5bcbf1657ec07150d78bc61ce7e4dcca88fd3ec1f4ce4b751538b450118b3988"></a>DirectIlluminationImage&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="renderer_8h_source.html#l00043">43</a> of file <a class="el" href="renderer_8h_source.html">renderer.h</a>.</p>
+
+</div>
+</div>
+<a id="ad2ddeeea374e3d6c9eef1a417832facb" name="ad2ddeeea374e3d6c9eef1a417832facb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad2ddeeea374e3d6c9eef1a417832facb">&#9670;&#160;</a></span>PresentInputBindings</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">enum</a> <a class="el" href="#ad2ddeeea374e3d6c9eef1a417832facb">PresentInputBindings</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ad2ddeeea374e3d6c9eef1a417832facba5137e51c722d26f6201c427ae238a07b" name="ad2ddeeea374e3d6c9eef1a417832facba5137e51c722d26f6201c427ae238a07b"></a>RenderResult&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="renderer_8h_source.html#l00049">49</a> of file <a class="el" href="renderer_8h_source.html">renderer.h</a>.</p>
+
+</div>
+</div>
+<a id="aae0e568aa401d4dabcf7208d8a547446" name="aae0e568aa401d4dabcf7208d8a547446"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae0e568aa401d4dabcf7208d8a547446">&#9670;&#160;</a></span>RayTracingBindings</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">enum</a> <a class="el" href="#aae0e568aa401d4dabcf7208d8a547446">RayTracingBindings</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="aae0e568aa401d4dabcf7208d8a547446a8367bd23038a488d0a841678592ebacd" name="aae0e568aa401d4dabcf7208d8a547446a8367bd23038a488d0a841678592ebacd"></a>Tlas&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="aae0e568aa401d4dabcf7208d8a547446a10954a9f62e0313657184fc15a7ea679" name="aae0e568aa401d4dabcf7208d8a547446a10954a9f62e0313657184fc15a7ea679"></a>GBufferAlbedo&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="aae0e568aa401d4dabcf7208d8a547446a9b8428f89d55f68f6e4d03be226f2710" name="aae0e568aa401d4dabcf7208d8a547446a9b8428f89d55f68f6e4d03be226f2710"></a>GBufferEmission&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="aae0e568aa401d4dabcf7208d8a547446a9d2de82d188f0cbf0e6d96b7ad26f768" name="aae0e568aa401d4dabcf7208d8a547446a9d2de82d188f0cbf0e6d96b7ad26f768"></a>GBufferWorldPos&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="aae0e568aa401d4dabcf7208d8a547446a9412be89de5116491ce6dba5ae5b96dc" name="aae0e568aa401d4dabcf7208d8a547446a9412be89de5116491ce6dba5ae5b96dc"></a>GBufferNormal&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="aae0e568aa401d4dabcf7208d8a547446ab5f272ccc179cd3b91e057119b8256f4" name="aae0e568aa401d4dabcf7208d8a547446ab5f272ccc179cd3b91e057119b8256f4"></a>GBufferDepth&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="aae0e568aa401d4dabcf7208d8a547446a1bb6c69575392eae83c4b03fda2a0b99" name="aae0e568aa401d4dabcf7208d8a547446a1bb6c69575392eae83c4b03fda2a0b99"></a>SoftShadowOutImage&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="aae0e568aa401d4dabcf7208d8a547446a919b22991b8f0c04856a8b784a04c130" name="aae0e568aa401d4dabcf7208d8a547446a919b22991b8f0c04856a8b784a04c130"></a>DIOutImage&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="renderer_8h_source.html#l00031">31</a> of file <a class="el" href="renderer_8h_source.html">renderer.h</a>.</p>
+
+</div>
+</div>
+<a id="a0adaef779b05a9fec6fdd53e4e038095" name="a0adaef779b05a9fec6fdd53e4e038095"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0adaef779b05a9fec6fdd53e4e038095">&#9670;&#160;</a></span>SceneDataBindings</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">enum</a> <a class="el" href="#a0adaef779b05a9fec6fdd53e4e038095">SceneDataBindings</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a0adaef779b05a9fec6fdd53e4e038095a72159b99f162eb7444ea0810dcce4442" name="a0adaef779b05a9fec6fdd53e4e038095a72159b99f162eb7444ea0810dcce4442"></a>Camera&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a0adaef779b05a9fec6fdd53e4e038095a30be439c8e7aa9c90bfc9c3b83733a4a" name="a0adaef779b05a9fec6fdd53e4e038095a30be439c8e7aa9c90bfc9c3b83733a4a"></a>RenderInstanceData&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a0adaef779b05a9fec6fdd53e4e038095a9b390fa7bebae21fcab29f88101e7e32" name="a0adaef779b05a9fec6fdd53e4e038095a9b390fa7bebae21fcab29f88101e7e32"></a>MaterialData&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="renderer_8h_source.html#l00024">24</a> of file <a class="el" href="renderer_8h_source.html">renderer.h</a>.</p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

@@ -1,0 +1,18 @@
+<map id="raytracing::RayTracingContext" name="raytracing::RayTracingContext">
+<area shape="rect" id="Node000001" title="A Ray Tracing Context uses a render context to initialize dispatch tables required for ray tracing...." alt="" coords="348,1707,544,2043"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_render_context.html" title="THe RenderContext manages the Vulkan instance, device, and swapchain state." alt="" coords="374,395,587,960"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="375,741,301,793,223,858,187,896,153,936,123,979,99,1025,62,1114,34,1193,16,1267,9,1337,13,1406,29,1478,57,1556,99,1641,120,1674,145,1704,204,1757,269,1798,334,1830,331,1835,267,1803,201,1761,141,1708,116,1677,94,1644,52,1558,23,1480,7,1407,3,1337,11,1266,29,1192,57,1112,94,1023,119,976,149,933,183,892,220,854,298,788,372,737"/>
+<area shape="rect" id="Node000005" href="$struct_deferred_host_operations_extension_dispatch_table.html" title=" " alt="" coords="202,1184,454,1483"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="418,960,369,1168,364,1167,412,959"/>
+<area shape="rect" id="Node000006" href="$struct_acceleration_structure_extension_dispatch_table.html" title=" " alt="" coords="479,1024,788,1643"/>
+<area shape="poly" id="edge7_Node000006_Node000002" title=" " alt="" coords="549,959,560,1007,555,1008,544,960"/>
+<area shape="rect" id="Node000007" href="$struct_ray_tracing_extension_dispatch_table.html" title=" " alt="" coords="813,1123,1097,1544"/>
+<area shape="poly" id="edge9_Node000007_Node000002" title=" " alt="" coords="589,776,697,890,752,955,803,1023,854,1106,850,1109,798,1025,748,959,693,894,585,780"/>
+<area shape="rect" id="Node000003" href="$classhri_1_1_render_context_queue_state.html" title="The context queue state creates and maintains the device queue setup." alt="" coords="386,208,575,331"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="483,330,483,378,478,378,478,330"/>
+<area shape="rect" id="Node000004" href="$structhri_1_1_device_queue.html" title="A Device Queue is a queue on the logical device to which operations can be submitted." alt="" coords="420,5,540,96"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="483,96,483,191,478,191,478,96"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="363,1482,408,1689,403,1690,358,1483"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="560,1643,546,1684,542,1692,537,1690,541,1682,555,1641"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="871,1545,839,1597,802,1644,746,1699,684,1747,620,1788,560,1822,558,1818,618,1784,681,1742,743,1695,798,1641,835,1594,867,1543"/>
+</map>

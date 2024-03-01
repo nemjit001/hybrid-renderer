@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.10.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Hybrid Renderer: hybrid-renderer-lib/include/scene.h File Reference</title>
+<title>Hybrid Renderer: demo/include/scene.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -93,66 +93,110 @@ $(function(){initNavTree('scene_8h.html',''); initResizable(); });
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
-<a href="#namespaces">Namespaces</a> &#124;
 <a href="#define-members">Macros</a>  </div>
   <div class="headertitle"><div class="title">scene.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;vector&gt;</code><br />
+<div class="textblock"><code>#include &lt;<a class="el" href="hybrid__renderer_8h_source.html">hybrid_renderer.h</a>&gt;</code><br />
+<code>#include &lt;string&gt;</code><br />
+<code>#include &quot;<a class="el" href="raytracing_8h_source.html">detail/raytracing.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="material_8h_source.html">material.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="mesh_8h_source.html">mesh.h</a>&quot;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for scene.h:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="scene_8h__incl.svg" width="334" height="278"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="scene_8h__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div><div class="textblock"><div class="dynheader">
 This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="scene_8h__dep__incl.svg" width="100%" height="588"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="scene_8h__dep__incl.svg" width="532" height="262"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 </div>
 <p><a href="scene_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structhri_1_1_scene_parameters.html">hri::SceneParameters</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="structhri_1_1_scene_parameters.html" title="The SceneParameters structure contains parameters controlling global scene settings.">SceneParameters</a> structure contains parameters controlling global scene settings.  <a href="structhri_1_1_scene_parameters.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_scene_parameters.html">SceneParameters</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scene parameters allow modifying LOD selection.  <a href="struct_scene_parameters.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structhri_1_1_scene_data.html">hri::SceneData</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="structhri_1_1_scene_data.html" title="The SceneData struct contains data to be referenced by scene nodes.">SceneData</a> struct contains data to be referenced by scene nodes.  <a href="structhri_1_1_scene_data.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_scene_transform.html">SceneTransform</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A Scene Transform is a simple collection of vectors representing translation, rotation, and scale.  <a href="struct_scene_transform.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structhri_1_1_scene_node.html">hri::SceneNode</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A scene node contains references into the scene data arrays.  <a href="structhri_1_1_scene_node.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_scene_node.html">SceneNode</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A Scene Node represents an entry into the <a class="el" href="class_scene_graph.html">SceneGraph</a>, with data relevant for rendering.  <a href="struct_scene_node.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classhri_1_1_scene.html">hri::Scene</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="classhri_1_1_scene.html" title="The Scene class represents the renderable world and its contents.">Scene</a> class represents the renderable world and its contents.  <a href="classhri_1_1_scene.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_render_instance.html">RenderInstance</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A render instance a model matrix and a pointer to instance data.  <a href="struct_render_instance.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
-Namespaces</h2></td></tr>
-<tr class="memitem:namespacehri" id="r_namespacehri"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacehri.html">hri</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_render_instance_data.html">RenderInstanceData</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Render Instance Data contains offsets into scene buffers &amp; buffer addresses for objects.  <a href="struct_render_instance_data.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_scene_buffers.html">SceneBuffers</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scene buffers store device local resources for a scene.  <a href="struct_scene_buffers.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_scene_a_s_manager.html">SceneASManager</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_scene_graph.html">SceneGraph</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_scene_loader.html">SceneLoader</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="class_scene_loader.html" title="The SceneLoader handles loading scene files from disk.">SceneLoader</a> handles loading scene files from disk.  <a href="class_scene_loader.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:adfcf2139120cca6002b470602667c8c2" id="r_adfcf2139120cca6002b470602667c8c2"><td class="memItemLeft" align="right" valign="top">#<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">define</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adfcf2139120cca6002b470602667c8c2">HRI_INVALID_SCENE_INDEX</a>&#160;&#160;&#160;(<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">uint32_t</a>)(~0)</td></tr>
-<tr class="separator:adfcf2139120cca6002b470602667c8c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a332e1705c8135884f35a276c3f73a67c" id="r_a332e1705c8135884f35a276c3f73a67c"><td class="memItemLeft" align="right" valign="top">#<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">define</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a332e1705c8135884f35a276c3f73a67c">INVALID_SCENE_ID</a>&#160;&#160;&#160;(<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">size_t</a>)(~0)</td></tr>
+<tr class="separator:a332e1705c8135884f35a276c3f73a67c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64bcb19c3d0b74886b344664fe551ee0" id="r_a64bcb19c3d0b74886b344664fe551ee0"><td class="memItemLeft" align="right" valign="top">#<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">define</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a64bcb19c3d0b74886b344664fe551ee0">DEFAULT_LOD_FAR</a>&#160;&#160;&#160;100.0f</td></tr>
+<tr class="separator:a64bcb19c3d0b74886b344664fe551ee0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83b791fa3635a4595a2ca1871f635eda" id="r_a83b791fa3635a4595a2ca1871f635eda"><td class="memItemLeft" align="right" valign="top">#<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">define</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a83b791fa3635a4595a2ca1871f635eda">MAX_LOD_LEVELS</a>&#160;&#160;&#160;3</td></tr>
+<tr class="separator:a83b791fa3635a4595a2ca1871f635eda"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
-<a id="adfcf2139120cca6002b470602667c8c2" name="adfcf2139120cca6002b470602667c8c2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adfcf2139120cca6002b470602667c8c2">&#9670;&#160;</a></span>HRI_INVALID_SCENE_INDEX</h2>
+<a id="a64bcb19c3d0b74886b344664fe551ee0" name="a64bcb19c3d0b74886b344664fe551ee0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a64bcb19c3d0b74886b344664fe551ee0">&#9670;&#160;</a></span>DEFAULT_LOD_FAR</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">define</a> HRI_INVALID_SCENE_INDEX&#160;&#160;&#160;(<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">uint32_t</a>)(~0)</td>
+          <td class="memname">#<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">define</a> DEFAULT_LOD_FAR&#160;&#160;&#160;100.0f</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="scene_8h_source.html#l00008">8</a> of file <a class="el" href="scene_8h_source.html">scene.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="scene_8h_source.html#l00010">10</a> of file <a class="el" href="scene_8h_source.html">scene.h</a>.</p>
+
+</div>
+</div>
+<a id="a332e1705c8135884f35a276c3f73a67c" name="a332e1705c8135884f35a276c3f73a67c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a332e1705c8135884f35a276c3f73a67c">&#9670;&#160;</a></span>INVALID_SCENE_ID</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">define</a> INVALID_SCENE_ID&#160;&#160;&#160;(<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">size_t</a>)(~0)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="scene_8h_source.html#l00009">9</a> of file <a class="el" href="scene_8h_source.html">scene.h</a>.</p>
+
+</div>
+</div>
+<a id="a83b791fa3635a4595a2ca1871f635eda" name="a83b791fa3635a4595a2ca1871f635eda"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a83b791fa3635a4595a2ca1871f635eda">&#9670;&#160;</a></span>MAX_LOD_LEVELS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">define</a> MAX_LOD_LEVELS&#160;&#160;&#160;3</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="scene_8h_source.html#l00011">11</a> of file <a class="el" href="scene_8h_source.html">scene.h</a>.</p>
 
 </div>
 </div>
@@ -161,7 +205,7 @@ Macros</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_c3dc3d948fed51b5091fc60f82f6810f.html">hybrid-renderer-lib</a></li><li class="navelem"><a class="el" href="dir_dcda78488e7a3fd7756cc82c710a3898.html">include</a></li><li class="navelem"><a class="el" href="scene_8h.html">scene.h</a></li>
+    <li class="navelem"><a class="el" href="dir_b6c2a257bfab6380ca9b3cb94b12cb25.html">demo</a></li><li class="navelem"><a class="el" href="dir_c417fe8970694d961378a77eb346355e.html">include</a></li><li class="navelem"><a class="el" href="scene_8h.html">scene.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.10.0 </li>
   </ul>
 </div>

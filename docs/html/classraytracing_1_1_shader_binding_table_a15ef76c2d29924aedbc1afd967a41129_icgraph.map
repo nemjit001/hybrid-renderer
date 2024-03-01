@@ -1,0 +1,10 @@
+<map id="raytracing::ShaderBindingTable::indexCount" name="raytracing::ShaderBindingTable::indexCount">
+<area shape="rect" id="Node000001" title="Get the number of shader stage indices in a shader group." alt="" coords="447,35,617,77"/>
+<area shape="rect" id="Node000002" href="$classraytracing_1_1_shader_binding_table.html#ae8f9c78889c59caa2403276f3b3d5ed4" title="Create a new SBT." alt="" coords="5,5,181,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="431,52,181,35,181,30,432,47"/>
+<area shape="rect" id="Node000003" href="$classraytracing_1_1_shader_binding_table.html#a42673cf488a9ab6247be79889d7f6e81" title="Get the size of an SBT Shader Group." alt="" coords="229,64,399,107"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="432,72,400,76,399,71,431,67"/>
+<area shape="poly" id="edge4_Node000003_Node000002" title=" " alt="" coords="216,62,175,51,177,46,217,57"/>
+<area shape="rect" id="Node000004" href="$classraytracing_1_1_shader_binding_table.html#af7218aaad09d256d7e171776f445e005" title="Get an SBT region." alt="" coords="8,72,178,115"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="213,92,179,93,179,88,213,86"/>
+</map>

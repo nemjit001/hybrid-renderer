@@ -1,5 +1,31 @@
 <map id="demo/include/demo.h" name="demo/include/demo.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,151,32"/>
-<area shape="rect" id="Node000002" href="$main_8cpp.html" title=" " alt="" coords="12,80,144,107"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="81,48,81,80,75,80,75,48"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="198,5,343,32"/>
+<area shape="rect" id="Node000002" href="$raytracing_8h.html" title=" " alt="" coords="316,80,449,123"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="302,39,356,77,352,82,299,43"/>
+<area shape="rect" id="Node000004" href="$main_8cpp.html" title=" " alt="" coords="63,395,196,421"/>
+<area shape="poly" id="edge18_Node000001_Node000004" title=" " alt="" coords="184,39,124,58,67,87,43,106,24,128,12,154,8,183,8,260,11,282,19,303,45,340,78,370,109,392,106,396,75,375,41,344,14,305,6,283,3,260,3,182,7,152,20,125,39,102,64,83,121,53,182,33"/>
+<area shape="rect" id="Node000009" href="$scene_8cpp.html" title=" " alt="" coords="93,245,232,272"/>
+<area shape="poly" id="edge19_Node000001_Node000009" title=" " alt="" coords="256,46,221,102,186,172,174,212,167,246,162,245,169,210,182,170,216,100,251,43"/>
+<area shape="rect" id="Node000010" href="$raytracing_8cpp.html" title=" " alt="" coords="726,171,922,197"/>
+<area shape="poly" id="edge17_Node000001_Node000010" title=" " alt="" coords="329,34,782,167,780,173,327,39"/>
+<area shape="rect" id="Node000003" href="$renderer_8h.html" title=" " alt="" coords="240,320,400,347"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="376,138,360,198,326,320,321,319,355,197,371,137"/>
+<area shape="poly" id="edge15_Node000002_Node000004" title=" " alt="" coords="301,116,242,132,180,157,151,174,124,195,102,219,84,246,77,266,76,286,85,328,104,365,122,393,117,396,99,368,80,330,71,287,72,265,79,244,97,215,121,191,148,170,177,153,240,127,300,111"/>
+<area shape="rect" id="Node000005" href="$renderer_8cpp.html" title=" " alt="" coords="562,395,713,421"/>
+<area shape="poly" id="edge16_Node000002_Node000005" title=" " alt="" coords="454,127,496,147,540,173,582,205,618,244,629,262,637,283,645,326,645,365,642,394,637,394,640,365,640,326,632,284,625,265,614,247,579,209,537,178,493,152,452,131"/>
+<area shape="rect" id="Node000006" href="$scene_8h.html" title=" " alt="" coords="197,171,345,197"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="343,134,290,172,287,168,340,130"/>
+<area shape="rect" id="Node000007" href="$subsystems_8h.html" title=" " alt="" coords="420,245,604,272"/>
+<area shape="poly" id="edge13_Node000002_Node000007" title=" " alt="" coords="411,133,504,243,499,246,407,136"/>
+<area shape="poly" id="edge14_Node000002_Node000010" title=" " alt="" coords="465,115,755,167,754,173,464,120"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="273,355,164,397,162,392,272,350"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="391,348,582,391,581,397,390,353"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="282,211,318,319,313,320,277,213"/>
+<area shape="poly" id="edge11_Node000006_Node000004" title=" " alt="" coords="268,213,259,243,246,273,222,311,194,346,145,396,141,392,190,342,218,308,242,271,254,241,263,212"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="328,200,470,242,469,247,327,205"/>
+<area shape="poly" id="edge12_Node000006_Node000009" title=" " alt="" coords="241,209,183,247,180,242,238,204"/>
+<area shape="poly" id="edge8_Node000007_Node000003" title=" " alt="" coords="466,280,355,322,353,317,464,275"/>
+<area shape="poly" id="edge9_Node000007_Node000005" title=" " alt="" coords="560,277,589,294,614,318,625,337,633,358,639,394,634,395,627,359,620,340,610,322,586,299,558,281"/>
+<area shape="rect" id="Node000008" href="$subsystems_8cpp.html" title=" " alt="" coords="424,320,600,347"/>
+<area shape="poly" id="edge10_Node000007_Node000008" title=" " alt="" coords="515,288,515,320,509,320,509,288"/>
 </map>

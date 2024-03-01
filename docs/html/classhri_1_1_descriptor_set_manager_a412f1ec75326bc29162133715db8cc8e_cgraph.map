@@ -1,0 +1,5 @@
+<map id="hri::DescriptorSetManager::DescriptorSetManager" name="hri::DescriptorSetManager::DescriptorSetManager">
+<area shape="rect" id="Node000001" title="Create a new descriptor set manager." alt="" coords="5,5,178,48"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_descriptor_set_allocator.html#a64ffc5c4e0d30080b451a07a3c2049e2" title="Allocate a new descriptor set." alt="" coords="226,5,399,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="178,24,210,24,210,29,178,29"/>
+</map>

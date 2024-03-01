@@ -1,0 +1,7 @@
+<map id="hri::BufferResource::copyToBuffer" name="hri::BufferResource::copyToBuffer">
+<area shape="rect" id="Node000001" title="Copy data to this buffer." alt="" coords="5,27,137,69"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_buffer_resource.html#a285ebf56fb778cfe90a44f5bc01fb999" title=" " alt="" coords="185,5,349,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="137,36,168,31,169,36,138,41"/>
+<area shape="rect" id="Node000003" href="$classhri_1_1_buffer_resource.html#a82f088f94efb7e39684c9755edb6662a" title=" " alt="" coords="201,56,333,99"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="138,55,187,63,186,68,137,60"/>
+</map>

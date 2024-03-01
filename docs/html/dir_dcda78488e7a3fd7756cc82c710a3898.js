@@ -5,9 +5,7 @@ var dir_dcda78488e7a3fd7756cc82c710a3898 =
     [ "config.h", "config_8h.html", "config_8h" ],
     [ "hri_math.h", "hri__math_8h.html", "hri__math_8h" ],
     [ "hybrid_renderer.h", "hybrid__renderer_8h.html", null ],
-    [ "material.h", "material_8h.html", "material_8h" ],
     [ "mesh.h", "mesh_8h.html", "mesh_8h" ],
     [ "platform.h", "platform_8h.html", "platform_8h" ],
-    [ "scene.h", "scene_8h.html", "scene_8h" ],
     [ "texture.h", "texture_8h.html", "texture_8h" ]
 ];

@@ -1,0 +1,5 @@
+<map id="raytracing::AccelerationStructure" name="raytracing::AccelerationStructure">
+<area shape="rect" id="Node000001" title="An acceleration structure is used for ray tracing to improve ray traversal performance." alt="" coords="10,549,234,933"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_buffer_resource.html" title="A Buffer Resource is a collection of a vk buffer and its allocation." alt="" coords="5,5,239,485"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="125,485,125,533,119,533,119,485"/>
+</map>

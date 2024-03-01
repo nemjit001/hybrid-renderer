@@ -1,3 +1,13 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$structhri_1_1_pipeline_state_object.html" title="A pipeline state object (PSO) stores a pipeline and its bind point." alt="" coords="5,5,164,32"/>
+<area shape="rect" id="Node000000" href="$classhri_1_1_i_render_subsystem.html" title="A Render Subsystem manages a render pipeline, layout, and subsystem descriptors. A Render Subsystem b..." alt="" coords="5,81,159,108"/>
+<area shape="rect" id="Node000001" href="$class_g_buffer_layout_subsystem.html" title="The GBuffer Layout Subsystem handles drawing a scene and storing the resulting geometry data (depth,..." alt="" coords="207,5,376,32"/>
+<area shape="poly" id="edge3_Node000000_Node000001" title=" " alt="" coords="128,72,206,41,240,30,242,35,208,47,130,77"/>
+<area shape="rect" id="Node000002" href="$class_i_ray_tracing_sub_system.html" title=" " alt="" coords="213,56,370,83"/>
+<area shape="poly" id="edge4_Node000000_Node000002" title=" " alt="" coords="174,81,212,76,212,82,175,86"/>
+<area shape="rect" id="Node000004" href="$class_presentation_subsystem.html" title="The Presentation Subsystem handles drawing offscreen render results to a swap image." alt="" coords="211,107,372,133"/>
+<area shape="poly" id="edge6_Node000000_Node000004" title=" " alt="" coords="175,103,211,108,210,113,174,108"/>
+<area shape="rect" id="Node000005" href="$class_u_i_subsystem.html" title="The UI Subsystem handles drawing an UI overlay to the swap render pass." alt="" coords="242,157,341,184"/>
+<area shape="poly" id="edge7_Node000000_Node000005" title=" " alt="" coords="130,112,208,143,242,154,240,159,206,148,128,117"/>
+<area shape="rect" id="Node000003" href="$class_hybrid_ray_tracing_subsystem.html" title=" " alt="" coords="424,56,613,83"/>
+<area shape="poly" id="edge5_Node000002_Node000003" title=" " alt="" coords="386,67,424,67,424,72,386,72"/>
 </map>

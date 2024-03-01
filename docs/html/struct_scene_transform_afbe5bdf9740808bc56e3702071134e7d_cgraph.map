@@ -1,0 +1,8 @@
+<map id="SceneTransform::modelMatrix" name="SceneTransform::modelMatrix">
+<area shape="rect" id="Node000001" title="Create a 4x4 transformation matrix representing the model transfom." alt="" coords="5,5,200,32"/>
+<area shape="rect" id="Node000002" href="$namespacehri.html#acd3a7c0c786cee7eb37afe8bfb309464" title=" " alt="" coords="248,5,333,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="200,16,232,16,232,21,200,21"/>
+<area shape="rect" id="Node000003" href="$namespacehri.html#a778909c1320f31774fdf25dc126fcb9d" title=" " alt="" coords="381,5,470,32"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="334,24,365,25,365,30,334,30"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="380,13,349,12,349,7,380,7"/>
+</map>

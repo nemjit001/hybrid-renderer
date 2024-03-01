@@ -1,9 +1,13 @@
 <map id="hri::IRenderSubsystem" name="hri::IRenderSubsystem">
-<area shape="rect" id="Node000001" title="A Render Subsystem manages a render pipeline, layout, and subsystem descriptors. A Render Subsystem b..." alt="" coords="345,5,578,384"/>
-<area shape="rect" id="Node000002" href="$class_g_buffer_layout_subsystem.html" title=" " alt="" coords="5,432,293,720"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="337,351,269,434,265,430,333,348"/>
-<area shape="rect" id="Node000003" href="$class_presentation_subsystem.html" title=" " alt="" coords="317,432,605,720"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="464,399,464,432,459,432,459,399"/>
-<area shape="rect" id="Node000004" href="$class_u_i_subsystem.html" title=" " alt="" coords="630,472,866,680"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="589,361,673,471,668,474,585,364"/>
+<area shape="rect" id="Node000001" title="A Render Subsystem manages a render pipeline, layout, and subsystem descriptors. A Render Subsystem b..." alt="" coords="439,5,671,368"/>
+<area shape="rect" id="Node000002" href="$class_g_buffer_layout_subsystem.html" title="The GBuffer Layout Subsystem handles drawing a scene and storing the resulting geometry data (depth,..." alt="" coords="5,416,273,709"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="430,294,288,418,275,430,271,426,284,414,426,290"/>
+<area shape="rect" id="Node000003" href="$class_i_ray_tracing_sub_system.html" title=" " alt="" coords="298,429,535,696"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="486,383,468,431,463,429,481,381"/>
+<area shape="rect" id="Node000005" href="$class_presentation_subsystem.html" title="The Presentation Subsystem handles drawing offscreen render results to a swap image." alt="" coords="560,416,828,709"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="630,381,643,415,638,417,625,383"/>
+<area shape="rect" id="Node000006" href="$class_u_i_subsystem.html" title="The UI Subsystem handles drawing an UI overlay to the swap render pass." alt="" coords="853,467,1055,659"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="685,278,765,343,843,414,887,465,883,469,839,418,762,347,682,282"/>
+<area shape="rect" id="Node000004" href="$class_hybrid_ray_tracing_subsystem.html" title=" " alt="" coords="271,757,562,981"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="419,711,419,758,414,758,414,711"/>
 </map>

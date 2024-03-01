@@ -18,7 +18,7 @@
 <text text-anchor="start" x="98.5" y="-182.5" font-family="Helvetica,sans-Serif" font-size="10.00"> </text>
 <text text-anchor="start" x="4" y="-166.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="14" y="-166.5" font-family="Helvetica,sans-Serif" font-size="10.00">DescriptorSetLayoutBuilder</text>
-<text text-anchor="start" x="14" y="-154.5" font-family="Helvetica,sans-Serif" font-size="10.00">(RenderContext *ctx)</text>
+<text text-anchor="start" x="14" y="-154.5" font-family="Helvetica,sans-Serif" font-size="10.00">(RenderContext &amp;ctx)</text>
 <text text-anchor="start" x="4" y="-138.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="14" y="-138.5" font-family="Helvetica,sans-Serif" font-size="10.00">virtual ~DescriptorSetLayout</text>
 <text text-anchor="start" x="14" y="-126.5" font-family="Helvetica,sans-Serif" font-size="10.00">Builder()=default</text>

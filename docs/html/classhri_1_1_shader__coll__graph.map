@@ -1,0 +1,9 @@
+<map id="hri::Shader" name="hri::Shader">
+<area shape="rect" id="Node000001" title="A Shader object represents a programmable pipeline stage." alt="" coords="5,1024,228,1397"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_render_context.html" title="THe RenderContext manages the Vulkan instance, device, and swapchain state." alt="" coords="10,395,223,960"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="119,960,119,1007,114,1007,114,960"/>
+<area shape="rect" id="Node000003" href="$classhri_1_1_render_context_queue_state.html" title="The context queue state creates and maintains the device queue setup." alt="" coords="22,208,211,331"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="119,330,119,378,114,378,114,330"/>
+<area shape="rect" id="Node000004" href="$structhri_1_1_device_queue.html" title="A Device Queue is a queue on the logical device to which operations can be submitted." alt="" coords="57,5,177,96"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="119,96,119,191,114,191,114,96"/>
+</map>

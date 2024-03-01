@@ -1,11 +1,19 @@
 var searchData=
 [
-  ['scene_0',['Scene',['../classhri_1_1_scene.html',1,'hri']]],
-  ['scenedata_1',['SceneData',['../structhri_1_1_scene_data.html',1,'hri']]],
-  ['scenenode_2',['SceneNode',['../structhri_1_1_scene_node.html',1,'hri']]],
-  ['sceneparameters_3',['SceneParameters',['../structhri_1_1_scene_parameters.html',1,'hri']]],
-  ['shader_4',['Shader',['../structhri_1_1_shader.html',1,'hri']]],
-  ['shaderdatabase_5',['ShaderDatabase',['../classhri_1_1_shader_database.html',1,'hri']]],
-  ['swapchainpassresourcemanager_6',['SwapchainPassResourceManager',['../classhri_1_1_swapchain_pass_resource_manager.html',1,'hri']]],
-  ['swapchainpresentsetup_7',['SwapchainPresentSetup',['../structhri_1_1_swapchain_present_setup.html',1,'hri']]]
+  ['raytracingcontext_0',['RayTracingContext',['../structraytracing_1_1_ray_tracing_context.html',1,'raytracing']]],
+  ['raytracingextensiondispatchtable_1',['RayTracingExtensionDispatchTable',['../struct_ray_tracing_extension_dispatch_table.html',1,'']]],
+  ['raytracingframeinfo_2',['RayTracingFrameInfo',['../struct_ray_tracing_frame_info.html',1,'']]],
+  ['raytracingpipelinebuilder_3',['RayTracingPipelineBuilder',['../classraytracing_1_1_ray_tracing_pipeline_builder.html',1,'raytracing']]],
+  ['renderattachmentconfig_4',['RenderAttachmentConfig',['../structhri_1_1_render_attachment_config.html',1,'hri']]],
+  ['rendercontext_5',['RenderContext',['../classhri_1_1_render_context.html',1,'hri']]],
+  ['rendercontextcreateinfo_6',['RenderContextCreateInfo',['../structhri_1_1_render_context_create_info.html',1,'hri']]],
+  ['rendercontextqueuestate_7',['RenderContextQueueState',['../classhri_1_1_render_context_queue_state.html',1,'hri']]],
+  ['rendercore_8',['RenderCore',['../classhri_1_1_render_core.html',1,'hri']]],
+  ['renderer_9',['Renderer',['../class_renderer.html',1,'']]],
+  ['rendererframedata_10',['RendererFrameData',['../struct_renderer_frame_data.html',1,'']]],
+  ['renderinstance_11',['RenderInstance',['../struct_render_instance.html',1,'']]],
+  ['renderinstancedata_12',['RenderInstanceData',['../struct_render_instance_data.html',1,'']]],
+  ['renderpassbuilder_13',['RenderPassBuilder',['../classhri_1_1_render_pass_builder.html',1,'hri']]],
+  ['renderpassresourcemanager_14',['RenderPassResourceManager',['../classhri_1_1_render_pass_resource_manager.html',1,'hri']]],
+  ['rendersubsystemmanager_15',['RenderSubsystemManager',['../classhri_1_1_render_subsystem_manager.html',1,'hri']]]
 ];

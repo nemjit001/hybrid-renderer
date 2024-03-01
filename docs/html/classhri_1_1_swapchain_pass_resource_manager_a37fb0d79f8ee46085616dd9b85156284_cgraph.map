@@ -1,0 +1,15 @@
+<map id="hri::SwapchainPassResourceManager::SwapchainPassResourceManager" name="hri::SwapchainPassResourceManager::SwapchainPassResourceManager">
+<area shape="rect" id="Node000001" title="Create a new Swapchain resource manager." alt="" coords="5,97,233,156"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_swapchain_pass_resource_manager.html#a47e6b8357bfa6232737e69cb478ef45e" title="Create resources." alt="" coords="281,105,472,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="233,124,265,124,265,129,233,129"/>
+<area shape="rect" id="Node000003" href="$classhri_1_1_i_render_pass_resource_manager_base.html#a4391328fd9a0316ede758d338bee9fea" title="Create resources." alt="" coords="543,72,750,115"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="472,112,527,105,527,111,473,117"/>
+<area shape="rect" id="Node000007" href="$classhri_1_1_i_render_pass_resource_manager_base.html#a504eb862015a956f74d5020f20a3cb00" title="Get image resource views." alt="" coords="520,139,772,181"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="473,136,505,140,504,145,472,141"/>
+<area shape="rect" id="Node000004" href="$classhri_1_1_image_resource.html#a56ffb48c12007c708401a7cf6c7f9c51" title="Get the default component mapping for images." alt="" coords="831,5,1016,48"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="737,69,816,50,818,55,738,74"/>
+<area shape="rect" id="Node000005" href="$classhri_1_1_i_render_pass_resource_manager_base.html#aabea2269ebd554cf3d75885a4e4dec87" title="Get the render extent configured for this resouce manager." alt="" coords="820,72,1027,115"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="750,91,805,91,805,96,750,96"/>
+<area shape="rect" id="Node000006" href="$classhri_1_1_image_resource.html#acb45dad4bfb49d9e739ed8d5d5a25cf0" title="Create an image subresource range." alt="" coords="854,139,993,181"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="738,113,839,137,838,142,737,118"/>
+</map>

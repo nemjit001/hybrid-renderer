@@ -1,7 +1,9 @@
 <map id="hri::IRenderPassResourceManagerBase::createResources" name="hri::IRenderPassResourceManagerBase::createResources">
-<area shape="rect" id="Node000001" title="Create resources." alt="" coords="5,39,213,81"/>
-<area shape="rect" id="Node000002" href="$classhri_1_1_i_render_pass_resource_manager_base.html#aabea2269ebd554cf3d75885a4e4dec87" title="Get the render extent configured for this resouce manager." alt="" coords="261,5,467,48"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="213,44,245,40,246,45,214,49"/>
-<area shape="rect" id="Node000003" href="$structhri_1_1_image_resource.html#a1d2b3ef1a0d2542bfea8f385b08ae4be" title="Initialize a new image resource." alt="" coords="297,72,431,115"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="214,71,282,80,282,85,213,76"/>
+<area shape="rect" id="Node000001" title="Create resources." alt="" coords="5,72,213,115"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_image_resource.html#a56ffb48c12007c708401a7cf6c7f9c51" title="Get the default component mapping for images." alt="" coords="272,5,456,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="193,69,264,50,266,55,194,74"/>
+<area shape="rect" id="Node000003" href="$classhri_1_1_i_render_pass_resource_manager_base.html#aabea2269ebd554cf3d75885a4e4dec87" title="Get the render extent configured for this resouce manager." alt="" coords="261,72,467,115"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="213,91,245,91,245,96,213,96"/>
+<area shape="rect" id="Node000004" href="$classhri_1_1_image_resource.html#acb45dad4bfb49d9e739ed8d5d5a25cf0" title="Create an image subresource range." alt="" coords="294,139,434,181"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="194,113,280,135,279,141,193,118"/>
 </map>

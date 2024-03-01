@@ -104,10 +104,10 @@ $(function(){initNavTree('namespacehri.html',''); initResizable(); });
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structhri_1_1_active_frame.html">ActiveFrame</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The Active Frame struct maintains information on frame state relevant for recording graphics commands.  <a href="structhri_1_1_active_frame.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The Active Frame struct maintains information on frame state relevant for recording graphics commands. NOTE: currentFrameIndex is in range [0, HRI_FRAMES_IN_FLIGHT - 1].  <a href="structhri_1_1_active_frame.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structhri_1_1_buffer_resource.html">BufferResource</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A Buffer Resource is a collection of a vk buffer and its allocation.  <a href="structhri_1_1_buffer_resource.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classhri_1_1_buffer_resource.html">BufferResource</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A Buffer Resource is a collection of a vk buffer and its allocation.  <a href="classhri_1_1_buffer_resource.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classhri_1_1_camera.html">Camera</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A virtual camera used in rendering operations.  <a href="classhri_1_1_camera.html#details">More...</a><br /></td></tr>
@@ -116,7 +116,10 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The camera parameters struct contains parameters for the projection matrix and viewplane generation.  <a href="structhri_1_1_camera_parameters.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structhri_1_1_camera_shader_data.html">CameraShaderData</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="structhri_1_1_shader.html" title="A Shader object represents a programmable pipeline stage.">Shader</a> layout of camera data.  <a href="structhri_1_1_camera_shader_data.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classhri_1_1_shader.html" title="A Shader object represents a programmable pipeline stage.">Shader</a> layout of camera data.  <a href="structhri_1_1_camera_shader_data.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classhri_1_1_command_pool.html">CommandPool</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A command pool handles command submission &amp; command buffer creation.  <a href="classhri_1_1_command_pool.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classhri_1_1_descriptor_set_allocator.html">DescriptorSetAllocator</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The Descriptor Set Allocator handles allocation of Descriptor Sets from descriptor pools.  <a href="classhri_1_1_descriptor_set_allocator.html#details">More...</a><br /></td></tr>
@@ -139,8 +142,8 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structhri_1_1_graphics_pipeline_builder.html">GraphicsPipelineBuilder</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The Graphics Pipeline Builder allows easy configuration &amp; initialization of fixed function state.  <a href="structhri_1_1_graphics_pipeline_builder.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structhri_1_1_image_resource.html">ImageResource</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">An image resource is a collection of a vk image, allocation, and optional view. The view can be instantiated after creation and is destroyed on image resource destruction.  <a href="structhri_1_1_image_resource.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classhri_1_1_image_resource.html">ImageResource</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">An image resource is a collection of a vk image, allocation, and optional view. The view can be instantiated after creation and is destroyed on image resource destruction.  <a href="classhri_1_1_image_resource.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classhri_1_1_image_sampler.html">ImageSampler</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Image Samplers are used to sample images in shader programs.  <a href="classhri_1_1_image_sampler.html#details">More...</a><br /></td></tr>
@@ -150,9 +153,6 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classhri_1_1_i_render_subsystem.html">IRenderSubsystem</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A Render Subsystem manages a render pipeline, layout, and subsystem descriptors. A Render Subsystem bases its pipeline config on a render pass.  <a href="classhri_1_1_i_render_subsystem.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structhri_1_1_material.html">Material</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="structhri_1_1_material.html" title="The Material struct describes drawing parameters for renderable objects.">Material</a> struct describes drawing parameters for renderable objects.  <a href="structhri_1_1_material.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classhri_1_1_mesh.html">Mesh</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A <a class="el" href="classhri_1_1_mesh.html" title="A Mesh represents a renderable object. It uses indexed drawing to reduce vertex array size.">Mesh</a> represents a renderable object. It uses indexed drawing to reduce vertex array size.  <a href="classhri_1_1_mesh.html#details">More...</a><br /></td></tr>
@@ -170,7 +170,7 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">THe <a class="el" href="classhri_1_1_render_context.html" title="THe RenderContext manages the Vulkan instance, device, and swapchain state.">RenderContext</a> manages the Vulkan instance, device, and swapchain state.  <a href="classhri_1_1_render_context.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structhri_1_1_render_context_create_info.html">RenderContextCreateInfo</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The render context create info allows for specifying context settings.  <a href="structhri_1_1_render_context_create_info.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The render context create info allows for specifying context settings &amp; registering extensions for the created context.  <a href="structhri_1_1_render_context_create_info.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classhri_1_1_render_context_queue_state.html">RenderContextQueueState</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The context queue state creates and maintains the device queue setup.  <a href="classhri_1_1_render_context_queue_state.html#details">More...</a><br /></td></tr>
@@ -187,23 +187,11 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classhri_1_1_render_subsystem_manager.html">RenderSubsystemManager</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The Render Subsystem Manager manages subsystems, allowing registration by name. Different subsystem commands can be recorded using the subsystem manager.  <a href="classhri_1_1_render_subsystem_manager.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classhri_1_1_scene.html">Scene</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="classhri_1_1_scene.html" title="The Scene class represents the renderable world and its contents.">Scene</a> class represents the renderable world and its contents.  <a href="classhri_1_1_scene.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structhri_1_1_scene_data.html">SceneData</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="structhri_1_1_scene_data.html" title="The SceneData struct contains data to be referenced by scene nodes.">SceneData</a> struct contains data to be referenced by scene nodes.  <a href="structhri_1_1_scene_data.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structhri_1_1_scene_node.html">SceneNode</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A scene node contains references into the scene data arrays.  <a href="structhri_1_1_scene_node.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structhri_1_1_scene_parameters.html">SceneParameters</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="structhri_1_1_scene_parameters.html" title="The SceneParameters structure contains parameters controlling global scene settings.">SceneParameters</a> structure contains parameters controlling global scene settings.  <a href="structhri_1_1_scene_parameters.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structhri_1_1_shader.html">Shader</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A <a class="el" href="structhri_1_1_shader.html" title="A Shader object represents a programmable pipeline stage.">Shader</a> object represents a programmable pipeline stage.  <a href="structhri_1_1_shader.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classhri_1_1_shader.html">Shader</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A <a class="el" href="classhri_1_1_shader.html" title="A Shader object represents a programmable pipeline stage.">Shader</a> object represents a programmable pipeline stage.  <a href="classhri_1_1_shader.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classhri_1_1_shader_database.html">ShaderDatabase</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="structhri_1_1_shader.html" title="A Shader object represents a programmable pipeline stage.">Shader</a> Database maintains a cache of <a class="el" href="structhri_1_1_shader.html" title="A Shader object represents a programmable pipeline stage.">Shader</a> Modules and PSO's.  <a href="classhri_1_1_shader_database.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="classhri_1_1_shader.html" title="A Shader object represents a programmable pipeline stage.">Shader</a> Database maintains a cache of <a class="el" href="classhri_1_1_shader.html" title="A Shader object represents a programmable pipeline stage.">Shader</a> Modules and PSO's.  <a href="classhri_1_1_shader_database.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classhri_1_1_swapchain_pass_resource_manager.html">SwapchainPassResourceManager</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The Swapchain pass resource manager is a special type of resource manager that handles rendering to swap resources.  <a href="classhri_1_1_swapchain_pass_resource_manager.html#details">More...</a><br /></td></tr>
@@ -223,11 +211,13 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
+<tr class="memitem:a7e7fcd88732476a117ee2d54dd7ed574" id="r_a7e7fcd88732476a117ee2d54dd7ed574"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">typedef</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">mat3</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7e7fcd88732476a117ee2d54dd7ed574">Float3x3</a></td></tr>
+<tr class="separator:a7e7fcd88732476a117ee2d54dd7ed574"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad04972f2c4c6c9dfd1ce7e1d6d7fd576" id="r_ad04972f2c4c6c9dfd1ce7e1d6d7fd576"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">typedef</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">mat4</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad04972f2c4c6c9dfd1ce7e1d6d7fd576">Float4x4</a></td></tr>
+<tr class="separator:ad04972f2c4c6c9dfd1ce7e1d6d7fd576"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a506c1e315d13fefd91116d08c3615637" id="r_a506c1e315d13fefd91116d08c3615637"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">typedef</a> std::function&lt; <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkResult</a>(vkb::Instance, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkSurfaceKHR</a> *)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a506c1e315d13fefd91116d08c3615637">HRISurfaceCreateFunc</a>)</td></tr>
 <tr class="memdesc:a506c1e315d13fefd91116d08c3615637"><td class="mdescLeft">&#160;</td><td class="mdescRight">The HRI Surface Create function allows for api independent vulkan surface creation.  <br /></td></tr>
 <tr class="separator:a506c1e315d13fefd91116d08c3615637"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af406a524ff410660f734b08e41471847" id="r_af406a524ff410660f734b08e41471847"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">typedef</a> std::function&lt; <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">void</a>(<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkCommandBuffer</a>)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af406a524ff410660f734b08e41471847">HRIImmediateSubmitFunc</a></td></tr>
-<tr class="separator:af406a524ff410660f734b08e41471847"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a675141032226859dbb7fa58555883a30" id="r_a675141032226859dbb7fa58555883a30"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">typedef</a> std::function&lt; <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">void</a>(<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> vkb::Swapchain &amp;)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a675141032226859dbb7fa58555883a30">HRIOnSwapchainInvalidateFunc</a>)</td></tr>
 <tr class="separator:a675141032226859dbb7fa58555883a30"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -247,8 +237,8 @@ Enumerations</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a20d510ca45e7195be7c151a1f9f16850" id="r_a20d510ca45e7195be7c151a1f9f16850"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">struct</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a20d510ca45e7195be7c151a1f9f16850">ALIGNAS</a> (4) <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">Float2</a></td></tr>
-<tr class="separator:a20d510ca45e7195be7c151a1f9f16850"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65f2c9d698bce725e8bc4a1b00cb4d22" id="r_a65f2c9d698bce725e8bc4a1b00cb4d22"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">struct</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a65f2c9d698bce725e8bc4a1b00cb4d22">HRI_ALIGNAS</a> (4) <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">Float2</a></td></tr>
+<tr class="separator:a65f2c9d698bce725e8bc4a1b00cb4d22"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a80da0ea8cafbed379ba92a21796fe33c" id="r_a80da0ea8cafbed379ba92a21796fe33c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">float</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a80da0ea8cafbed379ba92a21796fe33c">rsqrtf</a> (<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">float</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">val</a>)</td></tr>
 <tr class="memdesc:a80da0ea8cafbed379ba92a21796fe33c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Simple inverse square root function.  <br /></td></tr>
 <tr class="separator:a80da0ea8cafbed379ba92a21796fe33c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -256,6 +246,15 @@ Functions</h2></td></tr>
 <tr class="separator:a778909c1320f31774fdf25dc126fcb9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acd3a7c0c786cee7eb37afe8bfb309464" id="r_acd3a7c0c786cee7eb37afe8bfb309464"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">float</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acd3a7c0c786cee7eb37afe8bfb309464">radians</a> (<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">float</a> <a class="el" href="#a778909c1320f31774fdf25dc126fcb9d">degrees</a>)</td></tr>
 <tr class="separator:acd3a7c0c786cee7eb37afe8bfb309464"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adbd92a686825b069ddd3c6eac8bdc70d" id="r_adbd92a686825b069ddd3c6eac8bdc70d"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">typename</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a> &gt; </td></tr>
+<tr class="memitem:adbd92a686825b069ddd3c6eac8bdc70d"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#adbd92a686825b069ddd3c6eac8bdc70d">swap</a> (<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a> &amp;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">a</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a> &amp;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">b</a>)</td></tr>
+<tr class="separator:adbd92a686825b069ddd3c6eac8bdc70d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad174e49d89763692b01496e2615c7d49" id="r_ad174e49d89763692b01496e2615c7d49"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">typename</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a> &gt; </td></tr>
+<tr class="memitem:ad174e49d89763692b01496e2615c7d49"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#ad174e49d89763692b01496e2615c7d49">max</a> (<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a> &amp;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">a</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a> &amp;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">b</a>)</td></tr>
+<tr class="separator:ad174e49d89763692b01496e2615c7d49"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa370e8f80e4c7511e90f1ecfc4f7402f" id="r_aa370e8f80e4c7511e90f1ecfc4f7402f"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">typename</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a> &gt; </td></tr>
+<tr class="memitem:aa370e8f80e4c7511e90f1ecfc4f7402f"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#aa370e8f80e4c7511e90f1ecfc4f7402f">min</a> (<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a> &amp;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">a</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a> &amp;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">b</a>)</td></tr>
+<tr class="separator:aa370e8f80e4c7511e90f1ecfc4f7402f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac3756396c04e1a991938cc6fb5f9e163" id="r_ac3756396c04e1a991938cc6fb5f9e163"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">Float2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac3756396c04e1a991938cc6fb5f9e163">operator+</a> (<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">Float2</a> &amp;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">a</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">Float2</a> &amp;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">b</a>)</td></tr>
 <tr class="separator:ac3756396c04e1a991938cc6fb5f9e163"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a69c3129882980b649a72aa2e4c9e861a" id="r_a69c3129882980b649a72aa2e4c9e861a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">Float3</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a69c3129882980b649a72aa2e4c9e861a">operator+</a> (<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">Float3</a> &amp;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">a</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">Float3</a> &amp;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">b</a>)</td></tr>
@@ -387,19 +386,35 @@ Variables</h2></td></tr>
 <tr class="separator:a14d17b61d80d60de8d64763546279521"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Typedef Documentation</h2>
-<a id="af406a524ff410660f734b08e41471847" name="af406a524ff410660f734b08e41471847"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af406a524ff410660f734b08e41471847">&#9670;&#160;</a></span>HRIImmediateSubmitFunc</h2>
+<a id="a7e7fcd88732476a117ee2d54dd7ed574" name="a7e7fcd88732476a117ee2d54dd7ed574"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7e7fcd88732476a117ee2d54dd7ed574">&#9670;&#160;</a></span>Float3x3</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">typedef</a> std::function&lt;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">void</a>(<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkCommandBuffer</a>)&gt; <a class="el" href="#af406a524ff410660f734b08e41471847">hri::HRIImmediateSubmitFunc</a></td>
+          <td class="memname"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">typedef</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">mat3</a> <a class="el" href="#a7e7fcd88732476a117ee2d54dd7ed574">hri::Float3x3</a></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="render__core_8h_source.html#l00011">11</a> of file <a class="el" href="render__core_8h_source.html">render_core.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00075">75</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+
+</div>
+</div>
+<a id="ad04972f2c4c6c9dfd1ce7e1d6d7fd576" name="ad04972f2c4c6c9dfd1ce7e1d6d7fd576"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad04972f2c4c6c9dfd1ce7e1d6d7fd576">&#9670;&#160;</a></span>Float4x4</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">typedef</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">mat4</a> <a class="el" href="#ad04972f2c4c6c9dfd1ce7e1d6d7fd576">hri::Float4x4</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00076">76</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -415,7 +430,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="render__core_8h_source.html#l00012">12</a> of file <a class="el" href="render__core_8h_source.html">render_core.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="render__core_8h_source.html#l00011">11</a> of file <a class="el" href="render__core_8h_source.html">render_core.h</a>.</p>
 
 </div>
 </div>
@@ -500,25 +515,6 @@ Variables</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="a20d510ca45e7195be7c151a1f9f16850" name="a20d510ca45e7195be7c151a1f9f16850"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a20d510ca45e7195be7c151a1f9f16850">&#9670;&#160;</a></span>ALIGNAS()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">struct</a> hri::ALIGNAS </td>
-          <td>(</td>
-          <td class="paramtype">4</td>          <td class="paramname"><span class="paramname"></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00001">1</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
-
-</div>
-</div>
 <a id="ab81e99a2bbe92d4d1002b786d897d624" name="ab81e99a2bbe92d4d1002b786d897d624"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab81e99a2bbe92d4d1002b786d897d624">&#9670;&#160;</a></span>cross()</h2>
 
@@ -546,11 +542,11 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00145">145</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00170">170</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 <div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="namespacehri_ab81e99a2bbe92d4d1002b786d897d624_icgraph.svg" width="276" height="38"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="namespacehri_ab81e99a2bbe92d4d1002b786d897d624_icgraph.svg" width="374" height="88"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -578,7 +574,7 @@ Here is the caller graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00067">67</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00083">83</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -587,7 +583,7 @@ Here is the call graph for this function:</div>
 <div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="namespacehri_a778909c1320f31774fdf25dc126fcb9d_icgraph.svg" width="234" height="38"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="namespacehri_a778909c1320f31774fdf25dc126fcb9d_icgraph.svg" width="666" height="114"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -619,11 +615,11 @@ Here is the caller graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00147">147</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00172">172</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 <div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="namespacehri_a3f539220562b091be4c7e5409dd4c80e_icgraph.svg" width="414" height="291"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="namespacehri_a3f539220562b091be4c7e5409dd4c80e_icgraph.svg" width="511" height="291"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -655,7 +651,7 @@ Here is the caller graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00148">148</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00173">173</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -686,7 +682,26 @@ Here is the caller graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00149">149</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00174">174</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+
+</div>
+</div>
+<a id="a65f2c9d698bce725e8bc4a1b00cb4d22" name="a65f2c9d698bce725e8bc4a1b00cb4d22"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a65f2c9d698bce725e8bc4a1b00cb4d22">&#9670;&#160;</a></span>HRI_ALIGNAS()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">struct</a> hri::HRI_ALIGNAS </td>
+          <td>(</td>
+          <td class="paramtype">4</td>          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00001">1</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -713,7 +728,7 @@ Here is the caller graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00155">155</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00180">180</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -745,7 +760,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00156">156</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00181">181</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -777,12 +792,83 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00157">157</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00182">182</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
 <div class="center"><iframe scrolling="no" frameborder="0" src="namespacehri_a1f956ec3a8e0bc7137496adba95c3ff4_cgraph.svg" width="224" height="38"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
+
+</div>
+</div>
+<a id="ad174e49d89763692b01496e2615c7d49" name="ad174e49d89763692b01496e2615c7d49"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad174e49d89763692b01496e2615c7d49">&#9670;&#160;</a></span>max()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">typename</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a> &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a> hri::max </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>a</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>b</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00091">91</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="namespacehri_ad174e49d89763692b01496e2615c7d49_icgraph.svg" width="570" height="323"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
+</div>
+</div>
+<a id="aa370e8f80e4c7511e90f1ecfc4f7402f" name="aa370e8f80e4c7511e90f1ecfc4f7402f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa370e8f80e4c7511e90f1ecfc4f7402f">&#9670;&#160;</a></span>min()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">typename</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a> &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a> hri::min </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>a</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>b</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00094">94</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -809,7 +895,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00151">151</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00176">176</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -818,7 +904,7 @@ Here is the call graph for this function:</div>
 <div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="namespacehri_ac37aa10e96e3d4f0775c3a659f16d490_icgraph.svg" width="300" height="38"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="namespacehri_ac37aa10e96e3d4f0775c3a659f16d490_icgraph.svg" width="398" height="88"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -846,7 +932,7 @@ Here is the caller graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00152">152</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00177">177</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -878,7 +964,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00153">153</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00178">178</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -914,7 +1000,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00081">81</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00106">106</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -945,7 +1031,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00113">113</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00138">138</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -976,7 +1062,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00082">82</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00107">107</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1007,7 +1093,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00114">114</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00139">139</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1038,7 +1124,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00083">83</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00108">108</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1069,7 +1155,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00115">115</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00140">140</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1100,7 +1186,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00097">97</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00122">122</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1131,7 +1217,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00098">98</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00123">123</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1162,7 +1248,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00099">99</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00124">124</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1193,7 +1279,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00135">135</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00160">160</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1224,7 +1310,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00136">136</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00161">161</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1255,7 +1341,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00137">137</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00162">162</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1286,7 +1372,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00073">73</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00098">98</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1317,7 +1403,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00105">105</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00130">130</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1348,7 +1434,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00074">74</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00099">99</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1379,7 +1465,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00106">106</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00131">131</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1410,7 +1496,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00075">75</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00100">100</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1441,7 +1527,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00107">107</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00132">132</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1472,7 +1558,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00089">89</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00114">114</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1503,7 +1589,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00090">90</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00115">115</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1534,7 +1620,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00091">91</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00116">116</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1565,7 +1651,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00127">127</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00152">152</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1596,7 +1682,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00128">128</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00153">153</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1627,7 +1713,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00129">129</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00154">154</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1658,7 +1744,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00077">77</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00102">102</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1689,7 +1775,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00109">109</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00134">134</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1716,7 +1802,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00121">121</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00146">146</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1747,7 +1833,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00078">78</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00103">103</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1778,7 +1864,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00110">110</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00135">135</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1805,7 +1891,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00122">122</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00147">147</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1836,7 +1922,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00079">79</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00104">104</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1867,7 +1953,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00111">111</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00136">136</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1894,7 +1980,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00123">123</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00148">148</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1925,7 +2011,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00093">93</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00118">118</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1956,7 +2042,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00094">94</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00119">119</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -1987,7 +2073,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00095">95</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00120">120</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -2018,7 +2104,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00131">131</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00156">156</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -2049,7 +2135,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00132">132</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00157">157</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -2080,7 +2166,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00133">133</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00158">158</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -2111,7 +2197,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00085">85</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00110">110</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -2142,7 +2228,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00117">117</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00142">142</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -2173,7 +2259,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00086">86</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00111">111</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -2204,7 +2290,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00118">118</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00143">143</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -2235,7 +2321,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00087">87</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00112">112</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -2266,7 +2352,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00119">119</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00144">144</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -2297,7 +2383,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00101">101</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00126">126</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -2328,7 +2414,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00102">102</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00127">127</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -2359,7 +2445,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00103">103</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00128">128</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -2390,7 +2476,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00139">139</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00164">164</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -2421,7 +2507,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00140">140</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00165">165</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -2452,7 +2538,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00141">141</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00166">166</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>
@@ -2479,7 +2565,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00069">69</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00085">85</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -2488,7 +2574,7 @@ Here is the call graph for this function:</div>
 <div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="namespacehri_acd3a7c0c786cee7eb37afe8bfb309464_icgraph.svg" width="234" height="38"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="namespacehri_acd3a7c0c786cee7eb37afe8bfb309464_icgraph.svg" width="528" height="164"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -2525,12 +2611,45 @@ Here is the caller graph for this function:</div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The inverse square root of val. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00065">65</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00081">81</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 <div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="namespacehri_a80da0ea8cafbed379ba92a21796fe33c_icgraph.svg" width="420" height="139"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="namespacehri_a80da0ea8cafbed379ba92a21796fe33c_icgraph.svg" width="518" height="164"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
+
+</div>
+</div>
+<a id="adbd92a686825b069ddd3c6eac8bdc70d" name="adbd92a686825b069ddd3c6eac8bdc70d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adbd92a686825b069ddd3c6eac8bdc70d">&#9670;&#160;</a></span>swap()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">typename</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a> &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">void</a> hri::swap </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>a</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">_Ty</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>b</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="hri__math_8h_source.html#l00088">88</a> of file <a class="el" href="hri__math_8h_source.html">hri_math.h</a>.</p>
 
 </div>
 </div>

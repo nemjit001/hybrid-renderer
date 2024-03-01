@@ -99,6 +99,9 @@ $(function(){initNavTree('class_presentation_subsystem.html',''); initResizable(
 </div><!--header-->
 <div class="contents">
 
+<p>The Presentation Subsystem handles drawing offscreen render results to a swap image.  
+ <a href="#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="subsystems_8h_source.html">subsystems.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for PresentationSubsystem:</div>
@@ -113,17 +116,22 @@ Collaboration diagram for PresentationSubsystem:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ad5864d1140ebf0ecb3806016e78215f9" id="r_ad5864d1140ebf0ecb3806016e78215f9"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad5864d1140ebf0ecb3806016e78215f9">PresentationSubsystem</a> (<a class="el" href="classhri_1_1_render_context.html">hri::RenderContext</a> *<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">ctx</a>, <a class="el" href="classhri_1_1_descriptor_set_allocator.html">hri::DescriptorSetAllocator</a> *<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">descriptorSetAllocator</a>, <a class="el" href="classhri_1_1_shader_database.html">hri::ShaderDatabase</a> *<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">shaderDB</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkRenderPass</a> renderPass, <a class="el" href="structhri_1_1_descriptor_set_layout.html">hri::DescriptorSetLayout</a> &amp;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">globalSetLayout</a>, <a class="el" href="classhri_1_1_descriptor_set_manager.html">hri::DescriptorSetManager</a> &amp;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">globalDescriptorSet</a>)</td></tr>
-<tr class="separator:ad5864d1140ebf0ecb3806016e78215f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83e2ec653ef486e434b1636a1c7a3261" id="r_a83e2ec653ef486e434b1636a1c7a3261"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a83e2ec653ef486e434b1636a1c7a3261">PresentationSubsystem</a> (<a class="el" href="classhri_1_1_render_context.html">hri::RenderContext</a> &amp;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">ctx</a>, <a class="el" href="classhri_1_1_shader_database.html">hri::ShaderDatabase</a> &amp;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">shaderDB</a>, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkRenderPass</a> renderPass, <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkDescriptorSetLayout</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">presentInputSetLayout</a>)</td></tr>
+<tr class="memdesc:a83e2ec653ef486e434b1636a1c7a3261"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a new Presentation Subsystem.  <br /></td></tr>
+<tr class="separator:a83e2ec653ef486e434b1636a1c7a3261"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8d72bf8a203447aae418bb0192c2b58d" id="r_a8d72bf8a203447aae418bb0192c2b58d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8d72bf8a203447aae418bb0192c2b58d">~PresentationSubsystem</a> ()=<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">default</a></td></tr>
+<tr class="memdesc:a8d72bf8a203447aae418bb0192c2b58d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default destructor.  <br /></td></tr>
 <tr class="separator:a8d72bf8a203447aae418bb0192c2b58d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa08e6b3f6b728dd7e36648f0ffc7d269" id="r_aa08e6b3f6b728dd7e36648f0ffc7d269"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">virtual</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa08e6b3f6b728dd7e36648f0ffc7d269">record</a> (<a class="el" href="structhri_1_1_active_frame.html">hri::ActiveFrame</a> &amp;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">frame</a>) <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">override</a></td></tr>
-<tr class="memdesc:aa08e6b3f6b728dd7e36648f0ffc7d269"><td class="mdescLeft">&#160;</td><td class="mdescRight">Record this subsystem's render commands.  <br /></td></tr>
+<tr class="memdesc:aa08e6b3f6b728dd7e36648f0ffc7d269"><td class="mdescLeft">&#160;</td><td class="mdescRight">Record Present render commands.  <br /></td></tr>
 <tr class="separator:aa08e6b3f6b728dd7e36648f0ffc7d269"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2227be128f42bc85ed8f89b49829d879" id="r_a2227be128f42bc85ed8f89b49829d879"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2227be128f42bc85ed8f89b49829d879">updateFrameInfo</a> (<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="struct_present_frame_info.html">PresentFrameInfo</a> &amp;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">frameInfo</a>)</td></tr>
+<tr class="memdesc:a2227be128f42bc85ed8f89b49829d879"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update frame info for this subsystem. The FrameInfo will be used for any subsequent command recordings.  <br /></td></tr>
+<tr class="separator:a2227be128f42bc85ed8f89b49829d879"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classhri_1_1_i_render_subsystem"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_classhri_1_1_i_render_subsystem')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classhri_1_1_i_render_subsystem.html">hri::IRenderSubsystem</a></td></tr>
-<tr class="memitem:af0ac828b9f244a909a24114e8cc5c0b0 inherit pub_methods_classhri_1_1_i_render_subsystem" id="r_af0ac828b9f244a909a24114e8cc5c0b0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classhri_1_1_i_render_subsystem.html#af0ac828b9f244a909a24114e8cc5c0b0">IRenderSubsystem</a> (<a class="el" href="classhri_1_1_render_context.html">RenderContext</a> *<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">ctx</a>, <a class="el" href="classhri_1_1_descriptor_set_allocator.html">DescriptorSetAllocator</a> *<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">descriptorSetAllocator</a>)</td></tr>
-<tr class="memdesc:af0ac828b9f244a909a24114e8cc5c0b0 inherit pub_methods_classhri_1_1_i_render_subsystem"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a new render subsystem.  <br /></td></tr>
-<tr class="separator:af0ac828b9f244a909a24114e8cc5c0b0 inherit pub_methods_classhri_1_1_i_render_subsystem"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aefda4e9cf9ab19276967b6a15773a6b7 inherit pub_methods_classhri_1_1_i_render_subsystem" id="r_aefda4e9cf9ab19276967b6a15773a6b7"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classhri_1_1_i_render_subsystem.html#aefda4e9cf9ab19276967b6a15773a6b7">IRenderSubsystem</a> (<a class="el" href="classhri_1_1_render_context.html">RenderContext</a> &amp;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">ctx</a>)</td></tr>
+<tr class="memdesc:aefda4e9cf9ab19276967b6a15773a6b7 inherit pub_methods_classhri_1_1_i_render_subsystem"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a new render subsystem.  <br /></td></tr>
+<tr class="separator:aefda4e9cf9ab19276967b6a15773a6b7 inherit pub_methods_classhri_1_1_i_render_subsystem"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab70a31ad10aae5bcd44eccb6d025b946 inherit pub_methods_classhri_1_1_i_render_subsystem" id="r_ab70a31ad10aae5bcd44eccb6d025b946"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classhri_1_1_i_render_subsystem.html#ab70a31ad10aae5bcd44eccb6d025b946">~IRenderSubsystem</a> ()</td></tr>
 <tr class="memdesc:ab70a31ad10aae5bcd44eccb6d025b946 inherit pub_methods_classhri_1_1_i_render_subsystem"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroy this subsystem.  <br /></td></tr>
 <tr class="separator:ab70a31ad10aae5bcd44eccb6d025b946 inherit pub_methods_classhri_1_1_i_render_subsystem"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -134,24 +142,25 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
-<tr class="memitem:aca9c6290f921b3a7972c71f96b23acfb" id="r_aca9c6290f921b3a7972c71f96b23acfb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classhri_1_1_descriptor_set_manager.html">hri::DescriptorSetManager</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aca9c6290f921b3a7972c71f96b23acfb">m_globalDescriptorSet</a></td></tr>
-<tr class="separator:aca9c6290f921b3a7972c71f96b23acfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af535af71096291eae6c70adacb0bb68f" id="r_af535af71096291eae6c70adacb0bb68f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_present_frame_info.html">PresentFrameInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af535af71096291eae6c70adacb0bb68f">m_currentFrameInfo</a> = <a class="el" href="struct_present_frame_info.html">PresentFrameInfo</a>{}</td></tr>
+<tr class="separator:af535af71096291eae6c70adacb0bb68f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_classhri_1_1_i_render_subsystem"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_classhri_1_1_i_render_subsystem')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="classhri_1_1_i_render_subsystem.html">hri::IRenderSubsystem</a></td></tr>
-<tr class="memitem:aeeaacf857ef6e9bb63558921961b2920 inherit pro_attribs_classhri_1_1_i_render_subsystem" id="r_aeeaacf857ef6e9bb63558921961b2920"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classhri_1_1_render_context.html">RenderContext</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classhri_1_1_i_render_subsystem.html#aeeaacf857ef6e9bb63558921961b2920">m_pCtx</a> = <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">nullptr</a></td></tr>
-<tr class="separator:aeeaacf857ef6e9bb63558921961b2920 inherit pro_attribs_classhri_1_1_i_render_subsystem"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a25011a3030fd658c6a857f6ed433463f inherit pro_attribs_classhri_1_1_i_render_subsystem" id="r_a25011a3030fd658c6a857f6ed433463f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classhri_1_1_descriptor_set_allocator.html">DescriptorSetAllocator</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classhri_1_1_i_render_subsystem.html#a25011a3030fd658c6a857f6ed433463f">m_pDescriptorSetAllocator</a> = <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">nullptr</a></td></tr>
-<tr class="separator:a25011a3030fd658c6a857f6ed433463f inherit pro_attribs_classhri_1_1_i_render_subsystem"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab7709c8ef7bce047cfb4062a560a8311 inherit pro_attribs_classhri_1_1_i_render_subsystem" id="r_ab7709c8ef7bce047cfb4062a560a8311"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classhri_1_1_render_context.html">RenderContext</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classhri_1_1_i_render_subsystem.html#ab7709c8ef7bce047cfb4062a560a8311">m_ctx</a></td></tr>
+<tr class="separator:ab7709c8ef7bce047cfb4062a560a8311 inherit pro_attribs_classhri_1_1_i_render_subsystem"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d0aa068b7292ae83046946ac02a5c2c inherit pro_attribs_classhri_1_1_i_render_subsystem" id="r_a9d0aa068b7292ae83046946ac02a5c2c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classhri__debug_1_1_debug_label_handler.html">hri_debug::DebugLabelHandler</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classhri_1_1_i_render_subsystem.html#a9d0aa068b7292ae83046946ac02a5c2c">m_debug</a></td></tr>
+<tr class="separator:a9d0aa068b7292ae83046946ac02a5c2c inherit pro_attribs_classhri_1_1_i_render_subsystem"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a80ddc85368375936d669ad72a3c64e77 inherit pro_attribs_classhri_1_1_i_render_subsystem" id="r_a80ddc85368375936d669ad72a3c64e77"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkPipelineLayout</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classhri_1_1_i_render_subsystem.html#a80ddc85368375936d669ad72a3c64e77">m_layout</a> = VK_NULL_HANDLE</td></tr>
 <tr class="separator:a80ddc85368375936d669ad72a3c64e77 inherit pro_attribs_classhri_1_1_i_render_subsystem"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a60e7025211e604a5bca79dd8df3a465e inherit pro_attribs_classhri_1_1_i_render_subsystem" id="r_a60e7025211e604a5bca79dd8df3a465e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structhri_1_1_pipeline_state_object.html">PipelineStateObject</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classhri_1_1_i_render_subsystem.html#a60e7025211e604a5bca79dd8df3a465e">m_pPSO</a> = <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">nullptr</a></td></tr>
 <tr class="separator:a60e7025211e604a5bca79dd8df3a465e inherit pro_attribs_classhri_1_1_i_render_subsystem"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="subsystems_8h_source.html#l00044">44</a> of file <a class="el" href="subsystems_8h_source.html">subsystems.h</a>.</p>
+<div class="textblock"><p>The Presentation Subsystem handles drawing offscreen render results to a swap image. </p>
+
+<p class="definition">Definition at line <a class="el" href="subsystems_8h_source.html#l00127">127</a> of file <a class="el" href="subsystems_8h_source.html">subsystems.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="ad5864d1140ebf0ecb3806016e78215f9" name="ad5864d1140ebf0ecb3806016e78215f9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad5864d1140ebf0ecb3806016e78215f9">&#9670;&#160;</a></span>PresentationSubsystem()</h2>
+<a id="a83e2ec653ef486e434b1636a1c7a3261" name="a83e2ec653ef486e434b1636a1c7a3261"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a83e2ec653ef486e434b1636a1c7a3261">&#9670;&#160;</a></span>PresentationSubsystem()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -159,17 +168,12 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname">PresentationSubsystem::PresentationSubsystem </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classhri_1_1_render_context.html">hri::RenderContext</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em>, </span></td>
+          <td class="paramtype"><a class="el" href="classhri_1_1_render_context.html">hri::RenderContext</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>ctx</em>, </span></td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classhri_1_1_descriptor_set_allocator.html">hri::DescriptorSetAllocator</a> *</td>          <td class="paramname"><span class="paramname"><em>descriptorSetAllocator</em>, </span></td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classhri_1_1_shader_database.html">hri::ShaderDatabase</a> *</td>          <td class="paramname"><span class="paramname"><em>shaderDB</em>, </span></td>
+          <td class="paramtype"><a class="el" href="classhri_1_1_shader_database.html">hri::ShaderDatabase</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>shaderDB</em>, </span></td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -179,21 +183,27 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="structhri_1_1_descriptor_set_layout.html">hri::DescriptorSetLayout</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>globalSetLayout</em>, </span></td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classhri_1_1_descriptor_set_manager.html">hri::DescriptorSetManager</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>globalDescriptorSet</em></span>&#160;)</td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkDescriptorSetLayout</a></td>          <td class="paramname"><span class="paramname"><em>presentInputSetLayout</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="subsystems_8cpp_source.html#l00156">156</a> of file <a class="el" href="subsystems_8cpp_source.html">subsystems.cpp</a>.</p>
+<p>Create a new Presentation Subsystem. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>Render Context to use. </td></tr>
+    <tr><td class="paramname">shaderDB</td><td>Shader database to use. </td></tr>
+    <tr><td class="paramname">renderPass</td><td>Render pass to use. </td></tr>
+    <tr><td class="paramname">presentInputSetLayout</td><td>Descriptor set layout describing input images for presentation. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="subsystems_8cpp_source.html#l00284">284</a> of file <a class="el" href="subsystems_8cpp_source.html">subsystems.cpp</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="class_presentation_subsystem_ad5864d1140ebf0ecb3806016e78215f9_cgraph.svg" width="618" height="587"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="class_presentation_subsystem_a83e2ec653ef486e434b1636a1c7a3261_cgraph.svg" width="408" height="587"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -221,6 +231,8 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
+<p>Default destructor. </p>
+
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -247,29 +259,27 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p>Record this subsystem's render commands. </p>
+<p>Record Present render commands. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">frame</td><td><br  />
- </td></tr>
+    <tr><td class="paramname">frame</td><td>Active Frame to record into. </td></tr>
   </table>
   </dd>
 </dl>
 
 <p>Implements <a class="el" href="classhri_1_1_i_render_subsystem.html#a2df7af9b04578bed2a23b2ef2a43a130">hri::IRenderSubsystem</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="subsystems_8cpp_source.html#l00206">206</a> of file <a class="el" href="subsystems_8cpp_source.html">subsystems.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="subsystems_8cpp_source.html#l00331">331</a> of file <a class="el" href="subsystems_8cpp_source.html">subsystems.cpp</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="class_presentation_subsystem_aa08e6b3f6b728dd7e36648f0ffc7d269_cgraph.svg" width="392" height="54"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="class_presentation_subsystem_aa08e6b3f6b728dd7e36648f0ffc7d269_cgraph.svg" width="416" height="120"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
 </div>
-<h2 class="groupheader">Member Data Documentation</h2>
-<a id="aca9c6290f921b3a7972c71f96b23acfb" name="aca9c6290f921b3a7972c71f96b23acfb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aca9c6290f921b3a7972c71f96b23acfb">&#9670;&#160;</a></span>m_globalDescriptorSet</h2>
+<a id="a2227be128f42bc85ed8f89b49829d879" name="a2227be128f42bc85ed8f89b49829d879"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2227be128f42bc85ed8f89b49829d879">&#9670;&#160;</a></span>updateFrameInfo()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -278,7 +288,43 @@ Here is the call graph for this function:</div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classhri_1_1_descriptor_set_manager.html">hri::DescriptorSetManager</a>&amp; PresentationSubsystem::m_globalDescriptorSet</td>
+          <td class="memname"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">void</a> PresentationSubsystem::updateFrameInfo </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="struct_present_frame_info.html">PresentFrameInfo</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>frameInfo</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Update frame info for this subsystem. The FrameInfo will be used for any subsequent command recordings. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">frameInfo</td><td>FrameInfo to pass to the subsystem. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="subsystems_8h_source.html#l00153">153</a> of file <a class="el" href="subsystems_8h_source.html">subsystems.h</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="af535af71096291eae6c70adacb0bb68f" name="af535af71096291eae6c70adacb0bb68f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af535af71096291eae6c70adacb0bb68f">&#9670;&#160;</a></span>m_currentFrameInfo</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_present_frame_info.html">PresentFrameInfo</a> PresentationSubsystem::m_currentFrameInfo = <a class="el" href="struct_present_frame_info.html">PresentFrameInfo</a>{}</td>
         </tr>
       </table>
   </td>
@@ -288,7 +334,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="subsystems_8h_source.html#l00063">63</a> of file <a class="el" href="subsystems_8h_source.html">subsystems.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="subsystems_8h_source.html#l00156">156</a> of file <a class="el" href="subsystems_8h_source.html">subsystems.h</a>.</p>
 
 </div>
 </div>

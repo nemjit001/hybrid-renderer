@@ -1,0 +1,5 @@
+<map id="hri::RenderContext::setVSyncMode" name="hri::RenderContext::setVSyncMode">
+<area shape="rect" id="Node000001" title="Set the VSync mode for the swap chain. Recreates the swap chain. NOTE: does not free any allocated sw..." alt="" coords="224,5,353,48"/>
+<area shape="rect" id="Node000002" href="$class_renderer.html#af0ee1887b75179c4babd9be06f8954b5" title=" " alt="" coords="5,13,176,40"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="208,29,176,29,176,24,208,24"/>
+</map>

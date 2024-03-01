@@ -1,0 +1,5 @@
+<map id="raytracing::ASBuilder::objectToGeometry" name="raytracing::ASBuilder::objectToGeometry">
+<area shape="rect" id="Node000001" title="Convert a Mesh object&#39;s data to AS Input." alt="" coords="5,5,150,48"/>
+<area shape="rect" id="Node000002" href="$namespaceraytracing.html#a88f8e296ad709ea3326ae37c0be49ff5" title="Get the device address from a buffer resource." alt="" coords="198,13,388,40"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="150,24,182,24,182,29,150,29"/>
+</map>

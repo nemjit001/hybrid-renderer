@@ -1,0 +1,3 @@
+<map id="raytracing::ShaderBindingTable" name="raytracing::ShaderBindingTable">
+<area shape="rect" id="Node000001" title="The Shader Binding Table is used by a raytracing pipeline to reference its bounds shaders." alt="" coords="5,5,263,389"/>
+</map>

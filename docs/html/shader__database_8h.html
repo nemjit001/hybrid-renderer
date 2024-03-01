@@ -126,14 +126,14 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structhri_1_1_graphics_pipeline_builder.html">hri::GraphicsPipelineBuilder</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The Graphics Pipeline Builder allows easy configuration &amp; initialization of fixed function state.  <a href="structhri_1_1_graphics_pipeline_builder.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structhri_1_1_shader.html">hri::Shader</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A <a class="el" href="structhri_1_1_shader.html" title="A Shader object represents a programmable pipeline stage.">Shader</a> object represents a programmable pipeline stage.  <a href="structhri_1_1_shader.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classhri_1_1_shader.html">hri::Shader</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A <a class="el" href="classhri_1_1_shader.html" title="A Shader object represents a programmable pipeline stage.">Shader</a> object represents a programmable pipeline stage.  <a href="classhri_1_1_shader.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structhri_1_1_pipeline_state_object.html">hri::PipelineStateObject</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A pipeline state object (PSO) stores a pipeline and its bind point.  <a href="structhri_1_1_pipeline_state_object.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classhri_1_1_shader_database.html">hri::ShaderDatabase</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="structhri_1_1_shader.html" title="A Shader object represents a programmable pipeline stage.">Shader</a> Database maintains a cache of <a class="el" href="structhri_1_1_shader.html" title="A Shader object represents a programmable pipeline stage.">Shader</a> Modules and PSO's.  <a href="classhri_1_1_shader_database.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="classhri_1_1_shader.html" title="A Shader object represents a programmable pipeline stage.">Shader</a> Database maintains a cache of <a class="el" href="classhri_1_1_shader.html" title="A Shader object represents a programmable pipeline stage.">Shader</a> Modules and PSO's.  <a href="classhri_1_1_shader_database.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
@@ -143,7 +143,7 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:ab097597c0ca67763415728f767c1e6b0" id="r_ab097597c0ca67763415728f767c1e6b0"><td class="memItemLeft" align="right" valign="top">#<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">define</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab097597c0ca67763415728f767c1e6b0">HRI_SHADER_DB_BUILTIN_NAME</a>(<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">name</a>)&#160;&#160;&#160;(&quot;Builtin::&quot; <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">name</a>)</td></tr>
+<tr class="memitem:ab097597c0ca67763415728f767c1e6b0" id="r_ab097597c0ca67763415728f767c1e6b0"><td class="memItemLeft" align="right" valign="top">#<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">define</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab097597c0ca67763415728f767c1e6b0">HRI_SHADER_DB_BUILTIN_NAME</a>(name)&#160;&#160;&#160;(&quot;Builtin::&quot; name)</td></tr>
 <tr class="separator:ab097597c0ca67763415728f767c1e6b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
@@ -163,8 +163,8 @@ Variables</h2></td></tr>
         <tr>
           <td class="memname">#<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">define</a> HRI_SHADER_DB_BUILTIN_NAME</td>
           <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">name</a></span></td><td>)</td>
-          <td>&#160;&#160;&#160;(&quot;Builtin::&quot; <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">name</a>)</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname">name</span></td><td>)</td>
+          <td>&#160;&#160;&#160;(&quot;Builtin::&quot; name)</td>
         </tr>
       </table>
 </div><div class="memdoc">

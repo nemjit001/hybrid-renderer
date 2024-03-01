@@ -1,0 +1,11 @@
+<map id="handleCameraInput" name="handleCameraInput">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,138,57"/>
+<area shape="rect" id="Node000002" href="$namespacehri.html#ab81e99a2bbe92d4d1002b786d897d624" title=" " alt="" coords="198,5,273,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="138,31,182,24,183,29,138,36"/>
+<area shape="rect" id="Node000003" href="$namespacehri.html#ac37aa10e96e3d4f0775c3a659f16d490" title=" " alt="" coords="186,56,285,83"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="138,52,170,57,170,62,138,57"/>
+<area shape="rect" id="Node000004" href="$namespacehri.html#a3f539220562b091be4c7e5409dd4c80e" title=" " alt="" coords="339,31,400,57"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="285,57,323,50,324,55,286,63"/>
+<area shape="rect" id="Node000005" href="$namespacehri.html#a80da0ea8cafbed379ba92a21796fe33c" title="Simple inverse square root function." alt="" coords="333,81,405,108"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="286,76,318,82,317,88,285,81"/>
+</map>

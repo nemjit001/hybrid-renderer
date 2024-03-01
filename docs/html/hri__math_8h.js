@@ -1,18 +1,24 @@
 var hri__math_8h =
 [
+    [ "GLM_FORCE_DEPTH_ZERO_TO_ONE", "hri__math_8h.html#aa53e0967978ad7a8792f6961156ec968", null ],
+    [ "GLM_FORCE_LEFT_HANDED", "hri__math_8h.html#ad39ff9bc8a4676f8e1e28d695e637360", null ],
     [ "HRI_2PI", "hri__math_8h.html#ac492fa13f837cbeec381bc93019e6d7b", null ],
     [ "HRI_INV_2PI", "hri__math_8h.html#a96fef187fb10d77b19c23e0515ab719c", null ],
     [ "HRI_INV_PI", "hri__math_8h.html#aa82c03e0acbdcfccd1a94a7a59776cb7", null ],
     [ "HRI_PI", "hri__math_8h.html#a63080f6e1fba92c00666e627de4a0cfe", null ],
-    [ "ALIGNAS", "hri__math_8h.html#a20d510ca45e7195be7c151a1f9f16850", null ],
+    [ "Float3x3", "hri__math_8h.html#a7e7fcd88732476a117ee2d54dd7ed574", null ],
+    [ "Float4x4", "hri__math_8h.html#ad04972f2c4c6c9dfd1ce7e1d6d7fd576", null ],
     [ "cross", "hri__math_8h.html#ab81e99a2bbe92d4d1002b786d897d624", null ],
     [ "degrees", "hri__math_8h.html#a778909c1320f31774fdf25dc126fcb9d", null ],
     [ "dot", "hri__math_8h.html#a3f539220562b091be4c7e5409dd4c80e", null ],
     [ "dot", "hri__math_8h.html#acd460f5ddeee786ccb85916f0bfbe76b", null ],
     [ "dot", "hri__math_8h.html#a1d42407ba5ef59ef18f45862a058839b", null ],
+    [ "HRI_ALIGNAS", "hri__math_8h.html#a65f2c9d698bce725e8bc4a1b00cb4d22", null ],
     [ "magnitude", "hri__math_8h.html#a973384293c0e408c65e034c68d3f29b4", null ],
     [ "magnitude", "hri__math_8h.html#ac16296eb9f9ac2b2fa74fa1d67692fe5", null ],
     [ "magnitude", "hri__math_8h.html#a1f956ec3a8e0bc7137496adba95c3ff4", null ],
+    [ "max", "hri__math_8h.html#ad174e49d89763692b01496e2615c7d49", null ],
+    [ "min", "hri__math_8h.html#aa370e8f80e4c7511e90f1ecfc4f7402f", null ],
     [ "normalize", "hri__math_8h.html#ac37aa10e96e3d4f0775c3a659f16d490", null ],
     [ "normalize", "hri__math_8h.html#a049be5f298c13d3a19e3b014fd1b8a60", null ],
     [ "normalize", "hri__math_8h.html#ae5e9d70d8e442397de8a40bb1af251ac", null ],
@@ -68,5 +74,6 @@ var hri__math_8h =
     [ "operator/=", "hri__math_8h.html#a816e332c4406462aaf78bfc03fcdf63d", null ],
     [ "operator/=", "hri__math_8h.html#a1202ccbf8681002ac59b981381a4979f", null ],
     [ "radians", "hri__math_8h.html#acd3a7c0c786cee7eb37afe8bfb309464", null ],
-    [ "rsqrtf", "hri__math_8h.html#a80da0ea8cafbed379ba92a21796fe33c", null ]
+    [ "rsqrtf", "hri__math_8h.html#a80da0ea8cafbed379ba92a21796fe33c", null ],
+    [ "swap", "hri__math_8h.html#adbd92a686825b069ddd3c6eac8bdc70d", null ]
 ];

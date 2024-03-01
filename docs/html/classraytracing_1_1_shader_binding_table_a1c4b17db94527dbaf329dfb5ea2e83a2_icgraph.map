@@ -1,0 +1,5 @@
+<map id="raytracing::ShaderBindingTable::stride" name="raytracing::ShaderBindingTable::stride">
+<area shape="rect" id="Node000001" title="Get the stride of an SBT Shader Group." alt="" coords="224,5,394,48"/>
+<area shape="rect" id="Node000002" href="$classraytracing_1_1_shader_binding_table.html#af7218aaad09d256d7e171776f445e005" title="Get an SBT region." alt="" coords="5,5,176,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="208,29,176,29,176,24,208,24"/>
+</map>

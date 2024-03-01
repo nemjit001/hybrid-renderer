@@ -1,5 +1,9 @@
 <map id="hri::cross" name="hri::cross">
-<area shape="rect" id="Node000001" title=" " alt="" coords="195,5,270,32"/>
-<area shape="rect" id="Node000002" href="$classhri_1_1_camera.html#af28880b5e06eb181cf5f4afd82f5c7ae" title="Instantiate a camera." alt="" coords="5,5,147,32"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="179,21,147,21,147,16,179,16"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="292,31,367,57"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_camera.html#af28880b5e06eb181cf5f4afd82f5c7ae" title="Instantiate a camera." alt="" coords="103,5,244,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="276,38,244,33,245,28,277,33"/>
+<area shape="rect" id="Node000003" href="$main_8cpp.html#a35afe9a22644f1030e0558cfe105d18b" title=" " alt="" coords="107,56,240,83"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="277,55,240,61,240,56,276,50"/>
+<area shape="rect" id="Node000004" href="$main_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4" title=" " alt="" coords="5,56,55,83"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="92,72,55,72,55,67,92,67"/>
 </map>

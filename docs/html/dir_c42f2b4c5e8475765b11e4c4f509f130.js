@@ -1,6 +1,8 @@
 var dir_c42f2b4c5e8475765b11e4c4f509f130 =
 [
     [ "buffer.h", "buffer_8h.html", "buffer_8h" ],
+    [ "command_submission.h", "command__submission_8h.html", "command__submission_8h" ],
+    [ "debug.h", "debug_8h.html", "debug_8h" ],
     [ "descriptor_management.h", "descriptor__management_8h.html", "descriptor__management_8h" ],
     [ "image.h", "image_8h.html", "image_8h" ],
     [ "render_context.h", "render__context_8h.html", "render__context_8h" ],

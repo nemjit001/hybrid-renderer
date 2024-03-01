@@ -1,0 +1,15 @@
+<map id="hri::RenderPassResourceManager::RenderPassResourceManager" name="hri::RenderPassResourceManager::RenderPassResourceManager">
+<area shape="rect" id="Node000001" title="Create a new Render Pass Resource Manager." alt="" coords="5,105,225,148"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_render_pass_resource_manager.html#af1d3d90e346a5101ecb20e469206669c" title="Create resources." alt="" coords="273,105,492,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="225,124,257,124,257,129,225,129"/>
+<area shape="rect" id="Node000003" href="$classhri_1_1_i_render_pass_resource_manager_base.html#a4391328fd9a0316ede758d338bee9fea" title="Create resources." alt="" coords="563,72,770,115"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="492,111,547,105,547,110,493,116"/>
+<area shape="rect" id="Node000007" href="$classhri_1_1_i_render_pass_resource_manager_base.html#a504eb862015a956f74d5020f20a3cb00" title="Get image resource views." alt="" coords="540,139,792,181"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="493,137,525,141,524,146,492,142"/>
+<area shape="rect" id="Node000004" href="$classhri_1_1_image_resource.html#a56ffb48c12007c708401a7cf6c7f9c51" title="Get the default component mapping for images." alt="" coords="851,5,1036,48"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="757,69,836,50,838,55,758,74"/>
+<area shape="rect" id="Node000005" href="$classhri_1_1_i_render_pass_resource_manager_base.html#aabea2269ebd554cf3d75885a4e4dec87" title="Get the render extent configured for this resouce manager." alt="" coords="840,72,1047,115"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="770,91,825,91,825,96,770,96"/>
+<area shape="rect" id="Node000006" href="$classhri_1_1_image_resource.html#acb45dad4bfb49d9e739ed8d5d5a25cf0" title="Create an image subresource range." alt="" coords="874,139,1013,181"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="758,113,859,137,858,142,757,118"/>
+</map>

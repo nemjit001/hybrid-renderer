@@ -1,0 +1,18 @@
+<map id="raytracing::getDeviceAddress" name="raytracing::getDeviceAddress">
+<area shape="rect" id="Node000001" title="Get the device address from a buffer resource." alt="" coords="537,131,727,157"/>
+<area shape="rect" id="Node000002" href="$class_scene_a_s_manager.html#ac1e394e99a4742852e700bc941a81541" title=" " alt="" coords="301,5,489,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="593,125,488,69,448,51,450,46,490,64,595,120"/>
+<area shape="rect" id="Node000003" href="$class_scene_a_s_manager.html#a3a6567c53fd1bbc025b547db857575aa" title=" " alt="" coords="19,75,239,101"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="565,129,489,113,360,99,239,93,240,87,360,94,489,108,566,124"/>
+<area shape="rect" id="Node000004" href="$classraytracing_1_1_a_s_builder.html#a42350a22f3a56d2e6fa9ad06a032c723" title="Convert an instance buffer to AS Input." alt="" coords="317,123,473,165"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="521,147,474,147,474,141,521,141"/>
+<area shape="rect" id="Node000007" href="$classraytracing_1_1_a_s_builder.html#a001fb433eb6488a9196e30fd27d93bc4" title="Convert a Mesh object&#39;s data to AS Input." alt="" coords="323,189,467,232"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="568,165,468,193,467,188,566,160"/>
+<area shape="rect" id="Node000008" href="$class_scene_graph.html#acb456eb3ad39870d6eaba7e50f76f283" title="Create a new scene graph." alt="" coords="308,256,482,283"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="605,170,554,209,490,246,460,258,458,253,488,242,551,204,602,165"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="301,127,195,105,196,99,302,122"/>
+<area shape="rect" id="Node000005" href="$class_scene_a_s_manager.html#a5d945af1c6136a2dedcba6caba66b74b" title=" " alt="" coords="28,127,230,153"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="301,145,230,144,231,139,302,140"/>
+<area shape="rect" id="Node000006" href="$class_scene_a_s_manager.html#a0b76beddf292469cd273d91ca2cbcf99" title=" " alt="" coords="5,177,253,204"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="302,163,209,179,208,174,301,158"/>
+</map>

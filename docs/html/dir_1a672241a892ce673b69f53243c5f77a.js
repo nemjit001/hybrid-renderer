@@ -1,6 +1,8 @@
 var dir_1a672241a892ce673b69f53243c5f77a =
 [
     [ "buffer.cpp", "buffer_8cpp.html", null ],
+    [ "command_submission.cpp", "command__submission_8cpp.html", null ],
+    [ "debug.cpp", "debug_8cpp.html", null ],
     [ "descriptor_management.cpp", "descriptor__management_8cpp.html", null ],
     [ "image.cpp", "image_8cpp.html", null ],
     [ "render_context.cpp", "render__context_8cpp.html", null ],

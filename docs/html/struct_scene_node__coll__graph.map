@@ -1,0 +1,5 @@
+<map id="SceneNode" name="SceneNode">
+<area shape="rect" id="Node000001" title="A Scene Node represents an entry into the SceneGraph, with data relevant for rendering." alt="" coords="21,197,161,309"/>
+<area shape="rect" id="Node000002" href="$struct_scene_transform.html" title="A Scene Transform is a simple collection of vectors representing translation, rotation,..." alt="" coords="5,5,176,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="93,133,93,180,88,180,88,133"/>
+</map>

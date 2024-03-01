@@ -62,7 +62,7 @@ var sectionId = 'dynsection-0';
 <text text-anchor="start" x="200.88" y="-874.5" font-family="Helvetica,sans-Serif" font-size="10.00">hri::IRenderPassResource</text>
 <text text-anchor="start" x="227.5" y="-862.5" font-family="Helvetica,sans-Serif" font-size="10.00">ManagerBase</text>
 <text text-anchor="start" x="164.88" y="-846.5" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
-<text text-anchor="start" x="174.5" y="-846.5" font-family="Helvetica,sans-Serif" font-size="10.00">RenderContext * m_pCtx</text>
+<text text-anchor="start" x="174.5" y="-846.5" font-family="Helvetica,sans-Serif" font-size="10.00">RenderContext &amp; m_ctx</text>
 <text text-anchor="start" x="164.88" y="-830.5" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
 <text text-anchor="start" x="174.5" y="-830.5" font-family="Helvetica,sans-Serif" font-size="10.00">VkRenderPass m_renderPass</text>
 <text text-anchor="start" x="164.88" y="-814.5" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
@@ -78,7 +78,7 @@ var sectionId = 'dynsection-0';
 <text text-anchor="start" x="174.5" y="-730.5" font-family="Helvetica,sans-Serif" font-size="10.00"> &gt; m_imageResources</text>
 <text text-anchor="start" x="164.5" y="-714.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="174.5" y="-714.5" font-family="Helvetica,sans-Serif" font-size="10.00">IRenderPassResourceManager</text>
-<text text-anchor="start" x="174.5" y="-702.5" font-family="Helvetica,sans-Serif" font-size="10.00">Base(RenderContext *ctx,</text>
+<text text-anchor="start" x="174.5" y="-702.5" font-family="Helvetica,sans-Serif" font-size="10.00">Base(RenderContext &amp;ctx,</text>
 <text text-anchor="start" x="174.5" y="-690.5" font-family="Helvetica,sans-Serif" font-size="10.00"> VkRenderPass renderPass,</text>
 <text text-anchor="start" x="174.5" y="-678.5" font-family="Helvetica,sans-Serif" font-size="10.00"> const std::vector&lt; RenderAttachment</text>
 <text text-anchor="start" x="174.5" y="-666.5" font-family="Helvetica,sans-Serif" font-size="10.00">Config &gt; &amp;attachmentConfigs)</text>
@@ -108,8 +108,8 @@ var sectionId = 'dynsection-0';
 <text text-anchor="start" x="174.5" y="-434.5" font-family="Helvetica,sans-Serif" font-size="10.00">virtual VkRenderPass</text>
 <text text-anchor="start" x="174.5" y="-422.5" font-family="Helvetica,sans-Serif" font-size="10.00"> renderPass() const</text>
 <text text-anchor="start" x="164.5" y="-406.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="174.5" y="-406.5" font-family="Helvetica,sans-Serif" font-size="10.00">virtual ImageResource</text>
-<text text-anchor="start" x="174.5" y="-394.5" font-family="Helvetica,sans-Serif" font-size="10.00"> getAttachmentResource</text>
+<text text-anchor="start" x="174.5" y="-406.5" font-family="Helvetica,sans-Serif" font-size="10.00">virtual const ImageResource</text>
+<text text-anchor="start" x="174.5" y="-394.5" font-family="Helvetica,sans-Serif" font-size="10.00"> &amp; getAttachmentResource</text>
 <text text-anchor="start" x="174.5" y="-382.5" font-family="Helvetica,sans-Serif" font-size="10.00">(uint32_t attachmentIndex) const</text>
 <text text-anchor="start" x="164.5" y="-366.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="174.5" y="-366.5" font-family="Helvetica,sans-Serif" font-size="10.00">virtual void recreateResources()</text>
@@ -140,7 +140,7 @@ var sectionId = 'dynsection-0';
 <text text-anchor="start" x="123" y="-188.5" font-family="Helvetica,sans-Serif" font-size="10.00"> </text>
 <text text-anchor="start" x="4" y="-172.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="14" y="-172.5" font-family="Helvetica,sans-Serif" font-size="10.00">RenderPassResourceManager</text>
-<text text-anchor="start" x="14" y="-160.5" font-family="Helvetica,sans-Serif" font-size="10.00">(RenderContext *ctx, VkRenderPass</text>
+<text text-anchor="start" x="14" y="-160.5" font-family="Helvetica,sans-Serif" font-size="10.00">(RenderContext &amp;ctx, VkRenderPass</text>
 <text text-anchor="start" x="14" y="-148.5" font-family="Helvetica,sans-Serif" font-size="10.00"> renderPass, const std::vector</text>
 <text text-anchor="start" x="14" y="-136.5" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; RenderAttachmentConfig &gt; &amp;attachmentConfigs={})</text>
 <text text-anchor="start" x="4" y="-120.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
@@ -181,7 +181,7 @@ var sectionId = 'dynsection-0';
 <text text-anchor="start" x="390" y="-182.5" font-family="Helvetica,sans-Serif" font-size="10.00"> </text>
 <text text-anchor="start" x="271" y="-166.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="281" y="-166.5" font-family="Helvetica,sans-Serif" font-size="10.00">SwapchainPassResourceManager</text>
-<text text-anchor="start" x="281" y="-154.5" font-family="Helvetica,sans-Serif" font-size="10.00">(RenderContext *ctx, VkRenderPass</text>
+<text text-anchor="start" x="281" y="-154.5" font-family="Helvetica,sans-Serif" font-size="10.00">(RenderContext &amp;ctx, VkRenderPass</text>
 <text text-anchor="start" x="281" y="-142.5" font-family="Helvetica,sans-Serif" font-size="10.00"> renderPass, const std::vector</text>
 <text text-anchor="start" x="281" y="-130.5" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; RenderAttachmentConfig &gt; &amp;attachmentConfigs={})</text>
 <text text-anchor="start" x="271" y="-114.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>

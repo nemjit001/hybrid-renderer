@@ -1,0 +1,14 @@
+<map id="SceneASManager::cmdBuildTLAS" name="SceneASManager::cmdBuildTLAS">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,109,226,136"/>
+<area shape="rect" id="Node000002" href="$classraytracing_1_1_a_s_builder.html#abd3b4d49769f0a8e1d141efda178aac7" title="Build an acceleration structure." alt="" coords="274,5,482,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="149,106,273,58,292,51,293,56,275,62,151,111"/>
+<area shape="rect" id="Node000003" href="$classraytracing_1_1_a_s_builder.html#a735324c0da6b17aa548c590af9b29208" title="Generate build info from input." alt="" coords="305,72,451,115"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="226,108,289,101,289,106,227,113"/>
+<area shape="rect" id="Node000005" href="$namespaceraytracing.html#a88f8e296ad709ea3326ae37c0be49ff5" title="Get the device address from a buffer resource." alt="" coords="530,168,720,195"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="227,133,515,166,514,171,226,138"/>
+<area shape="rect" id="Node000006" href="$classraytracing_1_1_a_s_builder.html#a42350a22f3a56d2e6fa9ad06a032c723" title="Convert an instance buffer to AS Input." alt="" coords="300,189,456,232"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="159,134,298,181,296,186,157,139"/>
+<area shape="rect" id="Node000004" href="$namespacehri.html#ad174e49d89763692b01496e2615c7d49" title=" " alt="" coords="591,80,659,107"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="451,91,576,91,576,96,451,96"/>
+<area shape="poly" id="edge6_Node000006_Node000005" title=" " alt="" coords="456,199,515,192,515,197,457,204"/>
+</map>

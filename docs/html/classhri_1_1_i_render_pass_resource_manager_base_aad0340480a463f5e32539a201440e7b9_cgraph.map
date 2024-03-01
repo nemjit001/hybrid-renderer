@@ -2,12 +2,12 @@
 <area shape="rect" id="Node000001" title="Recreate resources." alt="" coords="5,105,224,148"/>
 <area shape="rect" id="Node000002" href="$classhri_1_1_i_render_pass_resource_manager_base.html#a4391328fd9a0316ede758d338bee9fea" title="Create resources." alt="" coords="275,72,483,115"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="224,110,259,106,260,111,224,116"/>
-<area shape="rect" id="Node000005" href="$classhri_1_1_i_render_pass_resource_manager_base.html#a30f0100697124c38b641948896456521" title="Destroy resources." alt="" coords="272,139,486,181"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="224,138,257,142,256,147,224,143"/>
-<area shape="rect" id="Node000003" href="$classhri_1_1_i_render_pass_resource_manager_base.html#aabea2269ebd554cf3d75885a4e4dec87" title="Get the render extent configured for this resouce manager." alt="" coords="534,5,740,48"/>
+<area shape="rect" id="Node000006" href="$classhri_1_1_i_render_pass_resource_manager_base.html#a30f0100697124c38b641948896456521" title="Destroy resources." alt="" coords="272,139,486,181"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="224,138,257,142,256,147,224,143"/>
+<area shape="rect" id="Node000003" href="$classhri_1_1_image_resource.html#a56ffb48c12007c708401a7cf6c7f9c51" title="Get the default component mapping for images." alt="" coords="545,5,729,48"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="464,69,536,50,538,55,465,74"/>
-<area shape="rect" id="Node000004" href="$structhri_1_1_image_resource.html#a1d2b3ef1a0d2542bfea8f385b08ae4be" title="Initialize a new image resource." alt="" coords="571,72,704,115"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="483,91,555,91,555,96,483,96"/>
-<area shape="rect" id="Node000006" href="$structhri_1_1_image_resource.html#af4c1d34769d3beef7b748af443123088" title="Destroy an image resource." alt="" coords="571,139,704,181"/>
-<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="486,157,555,157,555,163,486,163"/>
+<area shape="rect" id="Node000004" href="$classhri_1_1_i_render_pass_resource_manager_base.html#aabea2269ebd554cf3d75885a4e4dec87" title="Get the render extent configured for this resouce manager." alt="" coords="534,72,740,115"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="483,91,518,91,518,96,483,96"/>
+<area shape="rect" id="Node000005" href="$classhri_1_1_image_resource.html#acb45dad4bfb49d9e739ed8d5d5a25cf0" title="Create an image subresource range." alt="" coords="568,139,707,181"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="465,113,553,136,552,141,464,118"/>
 </map>

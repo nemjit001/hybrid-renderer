@@ -1,0 +1,23 @@
+<map id="GBufferLayoutSubsystem::GBufferLayoutSubsystem" name="GBufferLayoutSubsystem::GBufferLayoutSubsystem">
+<area shape="rect" id="Node000001" title="Create a new GBuffer Layout subsystem." alt="" coords="5,305,183,348"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_pipeline_layout_builder.html#aa7d886ec4265dc7dd15243401f8b23c6" title="Add a new Descriptor Set Layout to the pipeline layout." alt="" coords="237,5,406,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="98,304,113,255,139,189,177,119,201,87,229,58,233,55,236,59,232,62,205,90,182,122,144,191,118,256,103,306"/>
+<area shape="rect" id="Node000003" href="$classhri_1_1_pipeline_layout_builder.html#a4952201b84eef285b8c048b048025bc2" title="Add a push constant to the pipeline layout." alt="" coords="237,72,406,115"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="102,304,121,265,149,218,185,168,229,125,234,121,237,125,232,129,189,172,153,221,125,268,107,306"/>
+<area shape="rect" id="Node000004" href="$classhri_1_1_pipeline_layout_builder.html#ad88e3add16c5f341425531e1db34c77d" title="Build the configured pipeline layout." alt="" coords="237,139,406,181"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="110,303,160,248,193,218,229,191,237,186,240,191,232,196,197,222,164,252,114,307"/>
+<area shape="rect" id="Node000005" href="$structhri_1_1_graphics_pipeline_builder.html#a6c9fa89e6b0675c7f460f67f2d674479" title=" " alt="" coords="231,205,412,248"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="136,302,230,258,243,252,246,257,232,262,138,307"/>
+<area shape="rect" id="Node000006" href="$structhri_1_1_graphics_pipeline_builder.html#aebf69250a889e1ac3196f3c54b147630" title=" " alt="" coords="231,272,412,315"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="182,311,215,306,215,312,183,316"/>
+<area shape="rect" id="Node000007" href="$structhri_1_1_graphics_pipeline_builder.html#a50539a9cc2f38a2da3416d07f069e8b3" title=" " alt="" coords="231,339,412,381"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="183,337,215,342,215,347,182,342"/>
+<area shape="rect" id="Node000008" href="$structhri_1_1_graphics_pipeline_builder.html#abd3ba37381aa860148b95c6feb6ca129" title=" " alt="" coords="231,405,412,448"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="138,346,232,391,246,397,243,402,230,396,136,351"/>
+<area shape="rect" id="Node000009" href="$structhri_1_1_graphics_pipeline_builder.html#ac7a8817225341e5268221226e0040b3b" title=" " alt="" coords="231,472,412,515"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="114,347,164,402,197,431,232,458,240,463,237,467,229,462,193,436,160,405,110,350"/>
+<area shape="rect" id="Node000010" href="$structhri_1_1_graphics_pipeline_builder.html#ac0e003f458114cb94bdce9d73d6b6526" title=" " alt="" coords="231,539,412,581"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="107,347,125,385,153,433,189,482,232,525,237,528,234,532,229,529,185,485,149,436,121,388,102,350"/>
+<area shape="rect" id="Node000011" href="$structhri_1_1_graphics_pipeline_builder.html#aaaa7a563067832f496b46ee8174db0ec" title=" " alt="" coords="231,605,412,648"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="103,348,118,397,144,462,182,531,205,563,232,591,236,594,233,599,229,595,201,567,177,534,139,465,113,399,98,349"/>
+</map>

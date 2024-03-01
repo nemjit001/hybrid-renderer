@@ -1,15 +1,15 @@
 <map id="UISubsystem" name="UISubsystem">
-<area shape="rect" id="Node000001" title=" " alt="" coords="233,1159,469,1367"/>
-<area shape="rect" id="Node000002" href="$classhri_1_1_i_render_subsystem.html" title="A Render Subsystem manages a render pipeline, layout, and subsystem descriptors. A Render Subsystem b..." alt="" coords="234,827,467,1109"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="353,1124,353,1159,348,1159,348,1124"/>
-<area shape="rect" id="Node000003" href="$classhri_1_1_render_context.html" title="THe RenderContext manages the Vulkan instance, device, and swapchain state." alt="" coords="5,363,219,763"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="221,742,261,811,257,813,216,745"/>
-<area shape="rect" id="Node000004" href="$classhri_1_1_render_context_queue_state.html" title="The context queue state creates and maintains the device queue setup." alt="" coords="17,176,207,299"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="115,299,115,346,109,346,109,299"/>
+<area shape="rect" id="Node000001" title="The UI Subsystem handles drawing an UI overlay to the swap render pass." alt="" coords="264,1340,467,1532"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_i_render_subsystem.html" title="A Render Subsystem manages a render pipeline, layout, and subsystem descriptors. A Render Subsystem b..." alt="" coords="249,1024,481,1291"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="368,1306,368,1340,363,1340,363,1306"/>
+<area shape="rect" id="Node000003" href="$classhri_1_1_render_context.html" title="THe RenderContext manages the Vulkan instance, device, and swapchain state." alt="" coords="5,395,219,960"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="221,936,233,959,263,1009,258,1011,228,961,216,938"/>
+<area shape="rect" id="Node000004" href="$classhri_1_1_render_context_queue_state.html" title="The context queue state creates and maintains the device queue setup." alt="" coords="17,208,207,331"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="115,330,115,378,109,378,109,330"/>
 <area shape="rect" id="Node000005" href="$structhri_1_1_device_queue.html" title="A Device Queue is a queue on the logical device to which operations can be submitted." alt="" coords="52,5,172,96"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="115,96,115,159,109,159,109,96"/>
-<area shape="rect" id="Node000006" href="$classhri_1_1_descriptor_set_allocator.html" title="The Descriptor Set Allocator handles allocation of Descriptor Sets from descriptor pools." alt="" coords="243,373,459,752"/>
-<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="353,752,353,809,348,809,348,752"/>
-<area shape="rect" id="Node000007" href="$structhri_1_1_pipeline_state_object.html" title="A pipeline state object (PSO) stores a pipeline and its bind point." alt="" coords="483,509,632,616"/>
-<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="562,616,560,658,555,706,544,756,525,804,505,836,481,866,476,863,501,833,520,801,539,755,550,706,555,658,557,616"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="115,96,115,191,109,191,109,96"/>
+<area shape="rect" id="Node000006" href="$classhri__debug_1_1_debug_label_handler.html" title="The debug label handler allows setting debug labels for Vulkan objects." alt="" coords="243,544,487,811"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="368,810,368,1007,363,1007,363,810"/>
+<area shape="rect" id="Node000007" href="$structhri_1_1_pipeline_state_object.html" title="A pipeline state object (PSO) stores a pipeline and its bind point." alt="" coords="512,624,661,731"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="578,731,549,839,528,901,502,961,475,1011,470,1009,498,959,523,899,544,837,573,730"/>
 </map>

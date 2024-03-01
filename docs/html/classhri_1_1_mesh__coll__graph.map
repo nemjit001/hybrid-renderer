@@ -1,3 +1,5 @@
 <map id="hri::Mesh" name="hri::Mesh">
-<area shape="rect" id="Node000001" title="A Mesh represents a renderable object. It uses indexed drawing to reduce vertex array size." alt="" coords="5,5,176,219"/>
+<area shape="rect" id="Node000001" title="A Mesh represents a renderable object. It uses indexed drawing to reduce vertex array size." alt="" coords="6,565,238,800"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_buffer_resource.html" title="A Buffer Resource is a collection of a vk buffer and its allocation." alt="" coords="5,5,239,485"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="125,485,125,548,119,548,119,485"/>
 </map>

@@ -1,0 +1,5 @@
+<map id="raytracing::ASBuilder::instancesToGeometry" name="raytracing::ASBuilder::instancesToGeometry">
+<area shape="rect" id="Node000001" title="Convert an instance buffer to AS Input." alt="" coords="5,5,162,48"/>
+<area shape="rect" id="Node000002" href="$namespaceraytracing.html#a88f8e296ad709ea3326ae37c0be49ff5" title="Get the device address from a buffer resource." alt="" coords="210,13,400,40"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="162,24,194,24,194,29,162,29"/>
+</map>

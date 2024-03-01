@@ -1,6 +1,14 @@
 <map id="hri::degrees" name="hri::degrees">
-<area shape="rect" id="Node000001" title=" " alt="" coords="139,5,228,32"/>
-<area shape="rect" id="Node000002" href="$namespacehri.html#acd3a7c0c786cee7eb37afe8bfb309464" title=" " alt="" coords="5,5,91,32"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="123,30,91,30,91,24,123,25"/>
-<area shape="poly" id="edge2_Node000002_Node000001" title=" " alt="" coords="107,7,138,7,138,13,106,12"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="570,31,660,57"/>
+<area shape="rect" id="Node000002" href="$namespacehri.html#acd3a7c0c786cee7eb37afe8bfb309464" title=" " alt="" coords="437,31,522,57"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="555,56,523,55,523,50,555,50"/>
+<area shape="poly" id="edge2_Node000002_Node000001" title=" " alt="" coords="538,32,570,33,570,38,538,38"/>
+<area shape="rect" id="Node000003" href="$struct_scene_transform.html#afbe5bdf9740808bc56e3702071134e7d" title="Create a 4x4 transformation matrix representing the model transfom." alt="" coords="195,5,389,32"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="421,39,389,34,390,29,422,34"/>
+<area shape="rect" id="Node000004" href="$classhri_1_1_camera.html#aeb6260cec685087b762690c86519d980" title="Update view &amp; project matrices using basis vectors." alt="" coords="199,56,385,83"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="422,54,385,59,385,54,422,49"/>
+<area shape="rect" id="Node000005" href="$classhri_1_1_camera.html#a1d5d52436f4eb15ae2d4a2b0feb44fbd" title="Instantiate a camera at the world origin, looking forward, with custom parameters." alt="" coords="5,31,147,57"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="183,59,147,55,147,50,184,54"/>
+<area shape="rect" id="Node000006" href="$classhri_1_1_camera.html#af28880b5e06eb181cf5f4afd82f5c7ae" title="Instantiate a camera." alt="" coords="5,81,147,108"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="184,85,147,89,147,84,183,79"/>
 </map>

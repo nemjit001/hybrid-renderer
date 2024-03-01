@@ -1,0 +1,7 @@
+<map id="HybridRayTracingSubsystem::record" name="HybridRayTracingSubsystem::record">
+<area shape="rect" id="Node000001" title="Record this subsystem&#39;s render commands." alt="" coords="5,39,195,81"/>
+<area shape="rect" id="Node000002" href="$classhri__debug_1_1_debug_label_handler.html#aa8deadfbc3d6e9592babb5f4972dcd21" title="Begin a new command buffer label." alt="" coords="243,5,440,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="195,44,227,40,228,45,196,50"/>
+<area shape="rect" id="Node000003" href="$classhri__debug_1_1_debug_label_handler.html#a8b0a90f5f26f6c496299e2a52b92ed2c" title="End a command buffer label region." alt="" coords="243,72,440,115"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="196,70,228,75,227,80,195,76"/>
+</map>

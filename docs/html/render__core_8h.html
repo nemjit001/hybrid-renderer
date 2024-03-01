@@ -121,7 +121,7 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The Frame State manages per frame data such as buffers &amp; sync primitives.  <a href="structhri_1_1_frame_state.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structhri_1_1_active_frame.html">hri::ActiveFrame</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The Active Frame struct maintains information on frame state relevant for recording graphics commands.  <a href="structhri_1_1_active_frame.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The Active Frame struct maintains information on frame state relevant for recording graphics commands. NOTE: currentFrameIndex is in range [0, HRI_FRAMES_IN_FLIGHT - 1].  <a href="structhri_1_1_active_frame.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classhri_1_1_render_core.html">hri::RenderCore</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The Render Core handles frame state and work submission.  <a href="classhri_1_1_render_core.html#details">More...</a><br /></td></tr>
@@ -134,8 +134,6 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:af406a524ff410660f734b08e41471847" id="r_af406a524ff410660f734b08e41471847"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">typedef</a> std::function&lt; <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">void</a>(<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">VkCommandBuffer</a>)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacehri.html#af406a524ff410660f734b08e41471847">hri::HRIImmediateSubmitFunc</a></td></tr>
-<tr class="separator:af406a524ff410660f734b08e41471847"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a675141032226859dbb7fa58555883a30" id="r_a675141032226859dbb7fa58555883a30"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">typedef</a> std::function&lt; <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">void</a>(<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> vkb::Swapchain &amp;)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacehri.html#a675141032226859dbb7fa58555883a30">hri::HRIOnSwapchainInvalidateFunc</a>)</td></tr>
 <tr class="separator:a675141032226859dbb7fa58555883a30"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>

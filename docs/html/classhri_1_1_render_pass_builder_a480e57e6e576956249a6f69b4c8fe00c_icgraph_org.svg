@@ -21,7 +21,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="classhri_1_1_render_pass_builder.html#a6632dbdc51a96161d3ab4d849429bc19" target="_top" xlink:title="Create a new render pass builder.">
+<g id="a_Node000002"><a xlink:href="classhri_1_1_render_pass_builder.html#afccda375ff1eba91cd1cb245e5ebaaf9" target="_top" xlink:title="Create a new render pass builder.">
 <polygon fill="white" stroke="#666666" points="115.75,-32 0,-32 0,0 115.75,0 115.75,-32"/>
 <text text-anchor="start" x="8" y="-18.5" font-family="Helvetica,sans-Serif" font-size="10.00">hri::RenderPassBuilder</text>
 <text text-anchor="middle" x="57.88" y="-6.5" font-family="Helvetica,sans-Serif" font-size="10.00">::RenderPassBuilder</text>

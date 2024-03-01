@@ -1,0 +1,5 @@
+<map id="SceneBuffers" name="SceneBuffers">
+<area shape="rect" id="Node000001" title="Scene buffers store device local resources for a scene." alt="" coords="77,565,167,635"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_buffer_resource.html" title="A Buffer Resource is a collection of a vk buffer and its allocation." alt="" coords="5,5,239,485"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="125,485,125,548,119,548,119,485"/>
+</map>

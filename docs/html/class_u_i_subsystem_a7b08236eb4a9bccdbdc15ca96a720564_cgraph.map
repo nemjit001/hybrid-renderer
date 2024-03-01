@@ -1,0 +1,7 @@
+<map id="UISubsystem::record" name="UISubsystem::record">
+<area shape="rect" id="Node000001" title="Record UI render commands." alt="" coords="5,47,149,73"/>
+<area shape="rect" id="Node000002" href="$classhri__debug_1_1_debug_label_handler.html#aa8deadfbc3d6e9592babb5f4972dcd21" title="Begin a new command buffer label." alt="" coords="197,5,394,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="149,46,181,41,182,47,149,52"/>
+<area shape="rect" id="Node000003" href="$classhri__debug_1_1_debug_label_handler.html#a8b0a90f5f26f6c496299e2a52b92ed2c" title="End a command buffer label region." alt="" coords="197,72,394,115"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="149,68,182,73,181,79,149,74"/>
+</map>

@@ -93,6 +93,7 @@ $(function(){initNavTree('classhri_1_1_render_core.html',''); initResizable(); }
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="classhri_1_1_render_core-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">hri::RenderCore Class Reference</div></div>
 </div><!--header-->
@@ -105,14 +106,14 @@ $(function(){initNavTree('classhri_1_1_render_core.html',''); initResizable(); }
 <div class="dynheader">
 Collaboration diagram for hri::RenderCore:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="classhri_1_1_render_core__coll__graph.svg" width="271" height="448"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="classhri_1_1_render_core__coll__graph.svg" width="271" height="470"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a8a521e87c6f13cf908c77e82fbc98eca" id="r_a8a521e87c6f13cf908c77e82fbc98eca"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8a521e87c6f13cf908c77e82fbc98eca">RenderCore</a> (<a class="el" href="classhri_1_1_render_context.html">RenderContext</a> *<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">ctx</a>)</td></tr>
-<tr class="memdesc:a8a521e87c6f13cf908c77e82fbc98eca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a new <a class="el" href="classhri_1_1_render_core.html" title="The Render Core handles frame state and work submission.">RenderCore</a> instance.  <br /></td></tr>
-<tr class="separator:a8a521e87c6f13cf908c77e82fbc98eca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a21f5d3d2c62ae208528fb3e96e9acd7f" id="r_a21f5d3d2c62ae208528fb3e96e9acd7f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a21f5d3d2c62ae208528fb3e96e9acd7f">RenderCore</a> (<a class="el" href="classhri_1_1_render_context.html">RenderContext</a> &amp;<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">ctx</a>)</td></tr>
+<tr class="memdesc:a21f5d3d2c62ae208528fb3e96e9acd7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a new <a class="el" href="classhri_1_1_render_core.html" title="The Render Core handles frame state and work submission.">RenderCore</a> instance.  <br /></td></tr>
+<tr class="separator:a21f5d3d2c62ae208528fb3e96e9acd7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1bb9f695b5b9ceb28ccee7e7676f2a3d" id="r_a1bb9f695b5b9ceb28ccee7e7676f2a3d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1bb9f695b5b9ceb28ccee7e7676f2a3d">~RenderCore</a> ()</td></tr>
 <tr class="memdesc:a1bb9f695b5b9ceb28ccee7e7676f2a3d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroy this render core instance.  <br /></td></tr>
 <tr class="separator:a1bb9f695b5b9ceb28ccee7e7676f2a3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -129,23 +130,29 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a41c0ca170e62df347e4c7d623b9fef57" id="r_a41c0ca170e62df347e4c7d623b9fef57"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a41c0ca170e62df347e4c7d623b9fef57">awaitFrameFinished</a> () <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a></td></tr>
 <tr class="memdesc:a41c0ca170e62df347e4c7d623b9fef57"><td class="mdescLeft">&#160;</td><td class="mdescRight">Await the finish of the currently active frame.  <br /></td></tr>
 <tr class="separator:a41c0ca170e62df347e4c7d623b9fef57"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a627597418f5a6f9475a74e961b46e7fc" id="r_a627597418f5a6f9475a74e961b46e7fc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a627597418f5a6f9475a74e961b46e7fc">awaitFrameFinished</a> (<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">size_t</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">idx</a>) <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a></td></tr>
+<tr class="memdesc:a627597418f5a6f9475a74e961b46e7fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Await the finish of a frame.  <br /></td></tr>
+<tr class="separator:a627597418f5a6f9475a74e961b46e7fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9baea667f47f366ce6acceaae113dac8" id="r_a9baea667f47f366ce6acceaae113dac8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacehri.html#a675141032226859dbb7fa58555883a30">HRIOnSwapchainInvalidateFunc</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9baea667f47f366ce6acceaae113dac8">setOnSwapchainInvalidateCallback</a> (<a class="el" href="namespacehri.html#a675141032226859dbb7fa58555883a30">HRIOnSwapchainInvalidateFunc</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">onSwapchainInvalidate</a>)</td></tr>
 <tr class="memdesc:a9baea667f47f366ce6acceaae113dac8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register a callback for when the Swap Chain is invalidated. This callback can be used to recreate frame resources for example.  <br /></td></tr>
 <tr class="separator:a9baea667f47f366ce6acceaae113dac8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7ce60949090c189469c0c9dce7a4e7d3" id="r_a7ce60949090c189469c0c9dce7a4e7d3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7ce60949090c189469c0c9dce7a4e7d3">immediateSubmit</a> (<a class="el" href="namespacehri.html#af406a524ff410660f734b08e41471847">HRIImmediateSubmitFunc</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">submitFunc</a>)</td></tr>
-<tr class="memdesc:a7ce60949090c189469c0c9dce7a4e7d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Immeditely record &amp; submit Vulkan commands, e.g. for resource transfer operations.  <br /></td></tr>
-<tr class="separator:a7ce60949090c189469c0c9dce7a4e7d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad89555315c2eb5a161aa35e0363be9b8" id="r_ad89555315c2eb5a161aa35e0363be9b8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a> <a class="el" href="structhri_1_1_active_frame.html">ActiveFrame</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad89555315c2eb5a161aa35e0363be9b8">getActiveFrame</a> () <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">const</a></td></tr>
 <tr class="memdesc:ad89555315c2eb5a161aa35e0363be9b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrive the currently active frame's data.  <br /></td></tr>
 <tr class="separator:ad89555315c2eb5a161aa35e0363be9b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:ab9ba2bdfeb37964e49337191d2391274" id="r_ab9ba2bdfeb37964e49337191d2391274"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">static</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">constexpr</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">uint32_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab9ba2bdfeb37964e49337191d2391274">framesInFlight</a> ()</td></tr>
+<tr class="memdesc:ab9ba2bdfeb37964e49337191d2391274"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve number of frames in flight for this render core.  <br /></td></tr>
+<tr class="separator:ab9ba2bdfeb37964e49337191d2391274"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The Render Core handles frame state and work submission. </p>
 
-<p class="definition">Definition at line <a class="el" href="render__core_8h_source.html#l00109">109</a> of file <a class="el" href="render__core_8h_source.html">render_core.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="render__core_8h_source.html#l00057">57</a> of file <a class="el" href="render__core_8h_source.html">render_core.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a8a521e87c6f13cf908c77e82fbc98eca" name="a8a521e87c6f13cf908c77e82fbc98eca"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8a521e87c6f13cf908c77e82fbc98eca">&#9670;&#160;</a></span>RenderCore() <span class="overload">[1/2]</span></h2>
+<a id="a21f5d3d2c62ae208528fb3e96e9acd7f" name="a21f5d3d2c62ae208528fb3e96e9acd7f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a21f5d3d2c62ae208528fb3e96e9acd7f">&#9670;&#160;</a></span>RenderCore() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -153,7 +160,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">RenderCore::RenderCore </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classhri_1_1_render_context.html">RenderContext</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span></td><td>)</td>
+          <td class="paramtype"><a class="el" href="classhri_1_1_render_context.html">RenderContext</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -167,11 +174,11 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="render__core_8cpp_source.html#l00138">138</a> of file <a class="el" href="render__core_8cpp_source.html">render_core.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="render__core_8cpp_source.html#l00060">60</a> of file <a class="el" href="render__core_8cpp_source.html">render_core.cpp</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="classhri_1_1_render_core_a8a521e87c6f13cf908c77e82fbc98eca_cgraph.svg" width="383" height="38"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="classhri_1_1_render_core_a21f5d3d2c62ae208528fb3e96e9acd7f_cgraph.svg" width="383" height="38"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -201,7 +208,7 @@ Here is the call graph for this function:</div>
 
 <p>Destroy this render core instance. </p>
 
-<p class="definition">Definition at line <a class="el" href="render__core_8cpp_source.html#l00156">156</a> of file <a class="el" href="render__core_8cpp_source.html">render_core.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="render__core_8cpp_source.html#l00075">75</a> of file <a class="el" href="render__core_8cpp_source.html">render_core.cpp</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -237,7 +244,7 @@ Here is the call graph for this function:</div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
 <a id="a41c0ca170e62df347e4c7d623b9fef57" name="a41c0ca170e62df347e4c7d623b9fef57"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a41c0ca170e62df347e4c7d623b9fef57">&#9670;&#160;</a></span>awaitFrameFinished()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a41c0ca170e62df347e4c7d623b9fef57">&#9670;&#160;</a></span>awaitFrameFinished() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -253,12 +260,39 @@ Here is the call graph for this function:</div>
 
 <p>Await the finish of the currently active frame. </p>
 
-<p class="definition">Definition at line <a class="el" href="render__core_8cpp_source.html#l00230">230</a> of file <a class="el" href="render__core_8cpp_source.html">render_core.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="render__core_8cpp_source.html#l00146">146</a> of file <a class="el" href="render__core_8cpp_source.html">render_core.cpp</a>.</p>
 <div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
 <div class="center"><iframe scrolling="no" frameborder="0" src="classhri_1_1_render_core_a41c0ca170e62df347e4c7d623b9fef57_icgraph.svg" width="387" height="54"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
+
+</div>
+</div>
+<a id="a627597418f5a6f9475a74e961b46e7fc" name="a627597418f5a6f9475a74e961b46e7fc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a627597418f5a6f9475a74e961b46e7fc">&#9670;&#160;</a></span>awaitFrameFinished() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">void</a> RenderCore::awaitFrameFinished </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">size_t</a></td>          <td class="paramname"><span class="paramname"><em>idx</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Await the finish of a frame. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">idx</td><td>Set this to a frame idx to await the finish of a specific frame. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="render__core_8cpp_source.html#l00153">153</a> of file <a class="el" href="render__core_8cpp_source.html">render_core.cpp</a>.</p>
 
 </div>
 </div>
@@ -279,11 +313,46 @@ Here is the caller graph for this function:</div>
 
 <p>End the currently active frame, submitting recorded work to the GPU. </p>
 
-<p class="definition">Definition at line <a class="el" href="render__core_8cpp_source.html#l00188">188</a> of file <a class="el" href="render__core_8cpp_source.html">render_core.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="render__core_8cpp_source.html#l00104">104</a> of file <a class="el" href="render__core_8cpp_source.html">render_core.cpp</a>.</p>
 <div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
 <div class="center"><iframe scrolling="no" frameborder="0" src="classhri_1_1_render_core_aaa98d9771acdbbc31ebd77f9e1987ea9_icgraph.svg" width="382" height="38"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
+</div>
+</div>
+<a id="ab9ba2bdfeb37964e49337191d2391274" name="ab9ba2bdfeb37964e49337191d2391274"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab9ba2bdfeb37964e49337191d2391274">&#9670;&#160;</a></span>framesInFlight()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">static</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">constexpr</a> <a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">uint32_t</a> hri::RenderCore::framesInFlight </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Retrieve number of frames in flight for this render core. </p>
+<dl class="section return"><dt>Returns</dt><dd>The max number of frames in flight. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="render__core_8h_source.html#l00096">96</a> of file <a class="el" href="render__core_8h_source.html">render_core.h</a>.</p>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classhri_1_1_render_core_ab9ba2bdfeb37964e49337191d2391274_icgraph.svg" width="372" height="54"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -314,39 +383,12 @@ Here is the caller graph for this function:</div>
 <p>Retrive the currently active frame's data. </p>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="structhri_1_1_active_frame.html" title="The Active Frame struct maintains information on frame state relevant for recording graphics commands...">ActiveFrame</a> struct. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="render__core_8h_source.html#l00143">143</a> of file <a class="el" href="render__core_8h_source.html">render_core.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="render__core_8h_source.html#l00092">92</a> of file <a class="el" href="render__core_8h_source.html">render_core.h</a>.</p>
 <div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
 <div class="center"><iframe scrolling="no" frameborder="0" src="classhri_1_1_render_core_ad89555315c2eb5a161aa35e0363be9b8_icgraph.svg" width="376" height="54"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
-
-</div>
-</div>
-<a id="a7ce60949090c189469c0c9dce7a4e7d3" name="a7ce60949090c189469c0c9dce7a4e7d3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7ce60949090c189469c0c9dce7a4e7d3">&#9670;&#160;</a></span>immediateSubmit()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">void</a> RenderCore::immediateSubmit </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="namespacehri.html#af406a524ff410660f734b08e41471847">HRIImmediateSubmitFunc</a></td>          <td class="paramname"><span class="paramname"><em>submitFunc</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Immeditely record &amp; submit Vulkan commands, e.g. for resource transfer operations. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">submitFunc</td><td>The submit function to use. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-<p class="definition">Definition at line <a class="el" href="render__core_8cpp_source.html#l00245">245</a> of file <a class="el" href="render__core_8cpp_source.html">render_core.cpp</a>.</p>
 
 </div>
 </div>
@@ -399,7 +441,7 @@ Here is the caller graph for this function:</div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The previously registered callback, may be a nullptr. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="render__core_8cpp_source.html#l00237">237</a> of file <a class="el" href="render__core_8cpp_source.html">render_core.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="render__core_8cpp_source.html#l00162">162</a> of file <a class="el" href="render__core_8cpp_source.html">render_core.cpp</a>.</p>
 <div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
@@ -425,7 +467,7 @@ Here is the caller graph for this function:</div>
 
 <p>Start a new frame. </p>
 
-<p class="definition">Definition at line <a class="el" href="render__core_8cpp_source.html#l00168">168</a> of file <a class="el" href="render__core_8cpp_source.html">render_core.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="render__core_8cpp_source.html#l00084">84</a> of file <a class="el" href="render__core_8cpp_source.html">render_core.cpp</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">

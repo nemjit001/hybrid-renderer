@@ -1,6 +1,14 @@
 <map id="hri::radians" name="hri::radians">
-<area shape="rect" id="Node000001" title=" " alt="" coords="143,5,228,32"/>
-<area shape="rect" id="Node000002" href="$namespacehri.html#a778909c1320f31774fdf25dc126fcb9d" title=" " alt="" coords="5,5,95,32"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="127,30,95,30,95,25,127,25"/>
-<area shape="poly" id="edge2_Node000002_Node000001" title=" " alt="" coords="111,7,142,8,142,13,111,12"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="437,31,522,57"/>
+<area shape="rect" id="Node000002" href="$namespacehri.html#a778909c1320f31774fdf25dc126fcb9d" title=" " alt="" coords="247,5,337,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="421,47,337,35,338,30,422,42"/>
+<area shape="rect" id="Node000003" href="$struct_scene_transform.html#afbe5bdf9740808bc56e3702071134e7d" title="Create a 4x4 transformation matrix representing the model transfom." alt="" coords="195,56,389,83"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="422,54,390,59,389,54,421,49"/>
+<area shape="rect" id="Node000004" href="$classhri_1_1_camera.html#aeb6260cec685087b762690c86519d980" title="Update view &amp; project matrices using basis vectors." alt="" coords="199,107,385,133"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="446,68,390,97,356,109,354,104,388,92,444,63"/>
+<area shape="poly" id="edge2_Node000002_Node000001" title=" " alt="" coords="353,16,437,28,436,33,352,21"/>
+<area shape="rect" id="Node000005" href="$classhri_1_1_camera.html#a1d5d52436f4eb15ae2d4a2b0feb44fbd" title="Instantiate a camera at the world origin, looking forward, with custom parameters." alt="" coords="5,81,147,108"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="183,110,147,106,147,100,184,105"/>
+<area shape="rect" id="Node000006" href="$classhri_1_1_camera.html#af28880b5e06eb181cf5f4afd82f5c7ae" title="Instantiate a camera." alt="" coords="5,132,147,159"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="184,135,147,140,147,134,183,130"/>
 </map>

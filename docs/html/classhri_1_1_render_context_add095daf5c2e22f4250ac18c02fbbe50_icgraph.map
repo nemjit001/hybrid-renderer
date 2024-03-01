@@ -1,9 +1,11 @@
 <map id="hri::RenderContext::recreateSwapchain" name="hri::RenderContext::recreateSwapchain">
-<area shape="rect" id="Node000001" title="Recreate the swap chain, freeing old resources. NOTE: does not free any allocated swap images or view..." alt="" coords="429,35,568,77"/>
-<area shape="rect" id="Node000002" href="$classhri_1_1_render_context.html#ac97443dd7688d762d9a865c3b106ae3d" title="Set the VSync mode for the swap chain. Recreates the swap chain. NOTE: does not free any allocated sw..." alt="" coords="225,5,355,48"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="414,47,355,38,355,33,414,41"/>
-<area shape="rect" id="Node000003" href="$classhri_1_1_render_core.html#a0effa6efd78811071c92ffb467678145" title="Start a new frame." alt="" coords="199,72,381,99"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="414,71,382,75,381,70,413,65"/>
-<area shape="rect" id="Node000004" href="$class_renderer.html#ae9ea22eef66c32118c1f96fc6e6d569e" title=" " alt="" coords="5,72,151,99"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="184,88,151,88,151,83,184,83"/>
+<area shape="rect" id="Node000001" title="Recreate the swap chain, freeing old resources. NOTE: does not free any allocated swap images or view..." alt="" coords="454,35,593,77"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_render_context.html#ac97443dd7688d762d9a865c3b106ae3d" title="Set the VSync mode for the swap chain. Recreates the swap chain. NOTE: does not free any allocated sw..." alt="" coords="250,5,380,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="439,47,380,38,380,33,439,41"/>
+<area shape="rect" id="Node000004" href="$classhri_1_1_render_core.html#a0effa6efd78811071c92ffb467678145" title="Start a new frame." alt="" coords="224,72,406,99"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="439,71,407,75,406,70,438,65"/>
+<area shape="rect" id="Node000003" href="$class_renderer.html#af0ee1887b75179c4babd9be06f8954b5" title=" " alt="" coords="5,13,176,40"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="235,29,176,29,176,24,235,24"/>
+<area shape="rect" id="Node000005" href="$class_renderer.html#ae9ea22eef66c32118c1f96fc6e6d569e" title=" " alt="" coords="18,72,163,99"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="208,88,164,88,164,83,208,83"/>
 </map>

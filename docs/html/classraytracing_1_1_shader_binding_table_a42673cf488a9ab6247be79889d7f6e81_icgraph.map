@@ -1,0 +1,7 @@
+<map id="raytracing::ShaderBindingTable::size" name="raytracing::ShaderBindingTable::size">
+<area shape="rect" id="Node000001" title="Get the size of an SBT Shader Group." alt="" coords="229,39,399,81"/>
+<area shape="rect" id="Node000002" href="$classraytracing_1_1_shader_binding_table.html#af7218aaad09d256d7e171776f445e005" title="Get an SBT region." alt="" coords="8,5,178,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="213,47,178,42,179,37,214,42"/>
+<area shape="rect" id="Node000003" href="$classraytracing_1_1_shader_binding_table.html#ae8f9c78889c59caa2403276f3b3d5ed4" title="Create a new SBT." alt="" coords="5,72,181,115"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="214,78,181,83,181,77,213,73"/>
+</map>

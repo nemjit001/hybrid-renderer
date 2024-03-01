@@ -1,0 +1,11 @@
+<map id="SceneGraph" name="SceneGraph">
+<area shape="rect" id="Node000001" title=" " alt="" coords="185,1307,402,1744"/>
+<area shape="rect" id="Node000002" href="$struct_scene_parameters.html" title="Scene parameters allow modifying LOD selection." alt="" coords="5,859,123,949"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="71,949,93,1082,112,1163,137,1242,179,1335,174,1337,132,1244,107,1164,88,1083,66,950"/>
+<area shape="rect" id="Node000003" href="$class_scene_a_s_manager.html" title=" " alt="" coords="147,565,439,1243"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="296,1242,296,1289,291,1289,291,1242"/>
+<area shape="rect" id="Node000004" href="$struct_scene_buffers.html" title="Scene buffers store device local resources for a scene." alt="" coords="463,869,553,939"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="509,939,495,1074,478,1159,455,1244,412,1340,407,1337,449,1242,473,1158,489,1073,504,938"/>
+<area shape="rect" id="Node000005" href="$classhri_1_1_buffer_resource.html" title="A Buffer Resource is a collection of a vk buffer and its allocation." alt="" coords="391,5,625,485"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="511,485,511,852,505,852,505,485"/>
+</map>

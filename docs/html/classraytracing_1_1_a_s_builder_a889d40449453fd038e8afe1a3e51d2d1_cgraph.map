@@ -1,0 +1,5 @@
+<map id="raytracing::ASBuilder::cmdBuildAccelerationStructures" name="raytracing::ASBuilder::cmdBuildAccelerationStructures">
+<area shape="rect" id="Node000001" title="Build a list of acceleration structures." alt="" coords="5,5,221,48"/>
+<area shape="rect" id="Node000002" href="$classraytracing_1_1_a_s_builder.html#abd3b4d49769f0a8e1d141efda178aac7" title="Build an acceleration structure." alt="" coords="269,5,477,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="221,24,253,24,253,29,221,29"/>
+</map>

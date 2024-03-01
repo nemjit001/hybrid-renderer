@@ -1,12 +1,16 @@
 <map id="hybrid&#45;renderer&#45;lib/src/camera.cpp" name="hybrid&#45;renderer&#45;lib/src/camera.cpp">
-<area shape="rect" id="Node000001" title=" " alt="" coords="18,5,143,48"/>
-<area shape="rect" id="Node000002" href="$camera_8h.html" title=" " alt="" coords="5,96,81,123"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="73,50,58,83,53,81,68,47"/>
-<area shape="rect" id="Node000003" href="$hri__math_8h.html" title=" " alt="" coords="39,171,122,197"/>
-<area shape="poly" id="edge5_Node000001_Node000003" title=" " alt="" coords="88,48,94,83,95,123,90,156,84,155,90,122,89,84,83,49"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="52,122,69,156,65,158,47,124"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="6,245,64,272"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="75,199,53,233,49,231,70,196"/>
-<area shape="rect" id="Node000005" href="$platform_8h.html" title=" " alt="" coords="88,245,166,272"/>
-<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="91,196,113,231,109,234,86,199"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="153,5,278,48"/>
+<area shape="rect" id="Node000002" href="$camera_8h.html" title=" " alt="" coords="140,96,216,123"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="208,50,193,83,188,81,203,47"/>
+<area shape="rect" id="Node000003" href="$hri__math_8h.html" title=" " alt="" coords="174,171,257,197"/>
+<area shape="poly" id="edge7_Node000001_Node000003" title=" " alt="" coords="223,48,229,83,230,123,225,156,219,155,225,122,224,84,218,49"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="187,122,204,156,200,158,182,124"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,245,63,272"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="185,200,78,243,76,238,183,195"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="87,245,179,272"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="203,200,160,237,157,233,199,196"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="203,245,393,272"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="231,196,274,233,271,237,228,200"/>
+<area shape="rect" id="Node000007" href="$platform_8h.html" title=" " alt="" coords="418,245,496,272"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="258,195,403,239,402,244,256,200"/>
 </map>

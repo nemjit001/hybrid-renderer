@@ -106,7 +106,7 @@ $(function(){initNavTree('class_window_manager.html',''); initResizable(); });
 <div class="dynheader">
 Collaboration diagram for WindowManager:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="class_window_manager__coll__graph.svg" width="299" height="374"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="class_window_manager__coll__graph.svg" width="299" height="411"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
@@ -120,6 +120,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a8727c0eec5f224a3c5a41beb4471ddf0" id="r_a8727c0eec5f224a3c5a41beb4471ddf0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="window__manager_8h.html#a94643b0c51ce871b9d13554f5700956a">WindowHandle</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8727c0eec5f224a3c5a41beb4471ddf0">createWindow</a> (<a class="el" href="struct_window_create_info.html">WindowCreateInfo</a> *<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">createInfo</a>)</td></tr>
 <tr class="memdesc:a8727c0eec5f224a3c5a41beb4471ddf0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a new Window.  <br /></td></tr>
 <tr class="separator:a8727c0eec5f224a3c5a41beb4471ddf0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad66b9d082ba27c537259a44e7e2fb90f" id="r_ad66b9d082ba27c537259a44e7e2fb90f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad66b9d082ba27c537259a44e7e2fb90f">closeWindow</a> (<a class="el" href="window__manager_8h.html#a94643b0c51ce871b9d13554f5700956a">WindowHandle</a> *<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">window</a>)</td></tr>
+<tr class="memdesc:ad66b9d082ba27c537259a44e7e2fb90f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Close a window.  <br /></td></tr>
+<tr class="separator:ad66b9d082ba27c537259a44e7e2fb90f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0f310438a89846d083bd4c6ba82f2daa" id="r_a0f310438a89846d083bd4c6ba82f2daa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0f310438a89846d083bd4c6ba82f2daa">destroyWindow</a> (<a class="el" href="window__manager_8h.html#a94643b0c51ce871b9d13554f5700956a">WindowHandle</a> *<a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">window</a>)</td></tr>
 <tr class="memdesc:a0f310438a89846d083bd4c6ba82f2daa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroy a window.  <br /></td></tr>
 <tr class="separator:a0f310438a89846d083bd4c6ba82f2daa"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -195,6 +198,33 @@ Static Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="ad66b9d082ba27c537259a44e7e2fb90f" name="ad66b9d082ba27c537259a44e7e2fb90f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad66b9d082ba27c537259a44e7e2fb90f">&#9670;&#160;</a></span>closeWindow()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="timer_8h.html#aa9b015ef49e0ade762df7b5b36bdbdb0">void</a> WindowManager::closeWindow </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="window__manager_8h.html#a94643b0c51ce871b9d13554f5700956a">WindowHandle</a> *</td>          <td class="paramname"><span class="paramname"><em>window</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Close a window. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">window</td><td>Window to close. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="window__manager_8cpp_source.html#l00036">36</a> of file <a class="el" href="window__manager_8cpp_source.html">window_manager.cpp</a>.</p>
+
+</div>
+</div>
 <a id="a2f1e418183951bcd11d15577d802c226" name="a2f1e418183951bcd11d15577d802c226"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2f1e418183951bcd11d15577d802c226">&#9670;&#160;</a></span>createVulkanSurface()</h2>
 
@@ -244,7 +274,7 @@ Static Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A VkResult value indicating success or failure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="window__manager_8cpp_source.html#l00063">63</a> of file <a class="el" href="window__manager_8cpp_source.html">window_manager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="window__manager_8cpp_source.html#l00068">68</a> of file <a class="el" href="window__manager_8cpp_source.html">window_manager.cpp</a>.</p>
 <div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
@@ -304,7 +334,7 @@ Here is the caller graph for this function:</div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="window__manager_8cpp_source.html#l00036">36</a> of file <a class="el" href="window__manager_8cpp_source.html">window_manager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="window__manager_8cpp_source.html#l00041">41</a> of file <a class="el" href="window__manager_8cpp_source.html">window_manager.cpp</a>.</p>
 
 </div>
 </div>
@@ -332,7 +362,7 @@ Here is the caller graph for this function:</div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A boolean indicating window minimization. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="window__manager_8cpp_source.html#l00050">50</a> of file <a class="el" href="window__manager_8cpp_source.html">window_manager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="window__manager_8cpp_source.html#l00055">55</a> of file <a class="el" href="window__manager_8cpp_source.html">window_manager.cpp</a>.</p>
 
 </div>
 </div>
@@ -353,7 +383,7 @@ Here is the caller graph for this function:</div>
 
 <p>Poll for window events. </p>
 
-<p class="definition">Definition at line <a class="el" href="window__manager_8cpp_source.html#l00058">58</a> of file <a class="el" href="window__manager_8cpp_source.html">window_manager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="window__manager_8cpp_source.html#l00063">63</a> of file <a class="el" href="window__manager_8cpp_source.html">window_manager.cpp</a>.</p>
 
 </div>
 </div>
@@ -381,7 +411,7 @@ Here is the caller graph for this function:</div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A boolean indicating closure status. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="window__manager_8cpp_source.html#l00043">43</a> of file <a class="el" href="window__manager_8cpp_source.html">window_manager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="window__manager_8cpp_source.html#l00048">48</a> of file <a class="el" href="window__manager_8cpp_source.html">window_manager.cpp</a>.</p>
 
 </div>
 </div>

@@ -1,0 +1,5 @@
+<map id="hri::Shader::Shader" name="hri::Shader::Shader">
+<area shape="rect" id="Node000001" title="Create a new Shader." alt="" coords="191,5,324,32"/>
+<area shape="rect" id="Node000002" href="$classhri_1_1_shader.html#a6f6009fd42221d6a12c07d4e079ec3f7" title="Load a SPIR&#45;V shader file from the filesystem." alt="" coords="5,5,143,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="175,21,143,21,143,16,175,16"/>
+</map>
