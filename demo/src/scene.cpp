@@ -185,11 +185,12 @@ void SceneASManager::cmdBuildBLASses(
 		batchHandles.push_back(blasList[instance.instanceId].accelerationStructure);
 	}
 
+	VkDeviceAddress scratchBufferAddress = raytracing::getDeviceAddress(m_ctx, scratchBuffer);
 	m_asBuilder.cmdBuildAccelerationStructures(
 		commandBuffer,
 		batchInfo,
 		batchHandles,
-		raytracing::getDeviceAddress(m_ctx, scratchBuffer)
+		scratchBufferAddress
 	);
 }
 

@@ -147,17 +147,8 @@ void IRenderPassResourceManagerBase::createResources()
 
 		attachment.createView(
 			VK_IMAGE_VIEW_TYPE_2D,
-			VkComponentMapping{
-				VK_COMPONENT_SWIZZLE_IDENTITY,
-				VK_COMPONENT_SWIZZLE_IDENTITY,
-				VK_COMPONENT_SWIZZLE_IDENTITY,
-				VK_COMPONENT_SWIZZLE_IDENTITY,
-			},
-			VkImageSubresourceRange{
-				config.aspect,
-				0, 1,
-				0, 1
-			}
+			ImageResource::DefaultComponentMapping(),
+			ImageResource::SubresourceRange(config.aspect, 0, 1, 0, 1)
 		);
 
 		m_imageResources.push_back(std::move(attachment));

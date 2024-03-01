@@ -75,7 +75,7 @@ private:
 
 	void initRendererFrameData();
 
-	void recreateSwapDependentResources();
+	void recreateSwapDependentResources(const vkb::Swapchain& swapchain);
 
 	void updateFrameDescriptors(RendererFrameData& frame);
 

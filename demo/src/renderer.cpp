@@ -27,8 +27,8 @@ Renderer::Renderer(raytracing::RayTracingContext& ctx, hri::Camera& camera, Scen
 	initRenderSubsystems();
 	initRendererFrameData();
 
-	m_renderCore.setOnSwapchainInvalidateCallback([this](const vkb::Swapchain& _swapchain) {
-		recreateSwapDependentResources();
+	m_renderCore.setOnSwapchainInvalidateCallback([&](const vkb::Swapchain& swapchain) {
+		recreateSwapDependentResources(swapchain);
 	});
 
 	// Prepare first frame resources
@@ -43,7 +43,7 @@ Renderer::~Renderer()
 void Renderer::setVSyncMode(hri::VSyncMode vsyncMode)
 {
 	m_context.setVSyncMode(vsyncMode);
-	recreateSwapDependentResources();
+	recreateSwapDependentResources(m_context.swapchain);
 }
 
 void Renderer::drawFrame()
@@ -514,10 +514,11 @@ void Renderer::initRendererFrameData()
 	}
 }
 
-void Renderer::recreateSwapDependentResources()
+void Renderer::recreateSwapDependentResources(const vkb::Swapchain& swapchain)
 {
-	VkExtent2D swapExtent = m_context.swapchain.extent;
+	VkExtent2D swapExtent = swapchain.extent;
 
+	// Recreate render pass resources
 	m_gbufferLayoutPassManager->recreateResources();
 	m_swapchainPassManager->recreateResources();
 

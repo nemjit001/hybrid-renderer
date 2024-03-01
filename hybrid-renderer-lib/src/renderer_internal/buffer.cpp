@@ -24,12 +24,15 @@ BufferResource::BufferResource(RenderContext& ctx, size_t size, VkBufferUsageFla
 	bufferCreateInfo.pQueueFamilyIndices = nullptr;
 
 	VmaAllocationCreateInfo allocateInfo = VmaAllocationCreateInfo{};
-	allocateInfo.usage = VMA_MEMORY_USAGE_AUTO;
 	allocateInfo.flags = 0;
+	allocateInfo.preferredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+	allocateInfo.usage = VMA_MEMORY_USAGE_AUTO;
 
 	if (hostVisible)
 	{
 		allocateInfo.flags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+		allocateInfo.preferredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+		allocateInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
 	}
 
 	HRI_VK_CHECK(vmaCreateBuffer(m_ctx.allocator, &bufferCreateInfo, &allocateInfo, &buffer, &m_allocation, nullptr));

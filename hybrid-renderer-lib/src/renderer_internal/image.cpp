@@ -44,8 +44,9 @@ ImageResource::ImageResource(
     imageCreateInfo.initialLayout = initialLayout;
 
 	VmaAllocationCreateInfo allocationInfo = VmaAllocationCreateInfo{};
-	allocationInfo.flags = 0;
-	allocationInfo.usage = VMA_MEMORY_USAGE_AUTO;
+	allocationInfo.flags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
+	allocationInfo.preferredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+	allocationInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
 	HRI_VK_CHECK(vmaCreateImage(m_ctx.allocator, &imageCreateInfo, &allocationInfo, &image, &m_allocation, nullptr));
 }
 
@@ -59,7 +60,10 @@ ImageResource::ImageResource(ImageResource&& other) noexcept
 	m_ctx(other.m_ctx),
 	m_allocation(other.m_allocation),
 	extent(other.extent),
+	imageType(other.imageType),
 	format(other.format),
+	samples(other.samples),
+	usage(other.usage),
 	image(other.image),
 	view(other.view)
 {
@@ -79,7 +83,10 @@ ImageResource& ImageResource::operator=(ImageResource&& other) noexcept
 	m_ctx = std::move(other.m_ctx);
 	m_allocation = other.m_allocation;
 	extent = other.extent;
+	imageType = other.imageType;
 	format = other.format;
+	samples = other.samples;
+	usage = other.usage;
 	image = other.image;
 	view = other.view;
 
