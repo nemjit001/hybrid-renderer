@@ -89,17 +89,29 @@ void Renderer::drawFrame()
 		gbufferEmissionBarrier.image = m_gbufferLayoutPassManager->getAttachmentResource(1).image;
 		gbufferEmissionBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
 
-		VkImageMemoryBarrier2 gbufferWPosBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
-		gbufferWPosBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
-		gbufferWPosBarrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
-		gbufferWPosBarrier.srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
-		gbufferWPosBarrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
-		gbufferWPosBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-		gbufferWPosBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		gbufferWPosBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		gbufferWPosBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		gbufferWPosBarrier.image = m_gbufferLayoutPassManager->getAttachmentResource(2).image;
-		gbufferWPosBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
+		VkImageMemoryBarrier2 gbufferSpecularBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
+		gbufferSpecularBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+		gbufferSpecularBarrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
+		gbufferSpecularBarrier.srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
+		gbufferSpecularBarrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
+		gbufferSpecularBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		gbufferSpecularBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		gbufferSpecularBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		gbufferSpecularBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		gbufferSpecularBarrier.image = m_gbufferLayoutPassManager->getAttachmentResource(2).image;
+		gbufferSpecularBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
+
+		VkImageMemoryBarrier2 gbufferTransmittanceBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
+		gbufferTransmittanceBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+		gbufferTransmittanceBarrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
+		gbufferTransmittanceBarrier.srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
+		gbufferTransmittanceBarrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
+		gbufferTransmittanceBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		gbufferTransmittanceBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		gbufferTransmittanceBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		gbufferTransmittanceBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		gbufferTransmittanceBarrier.image = m_gbufferLayoutPassManager->getAttachmentResource(3).image;
+		gbufferTransmittanceBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
 
 		VkImageMemoryBarrier2 gbufferNormalBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
 		gbufferNormalBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -110,7 +122,7 @@ void Renderer::drawFrame()
 		gbufferNormalBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		gbufferNormalBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		gbufferNormalBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		gbufferNormalBarrier.image = m_gbufferLayoutPassManager->getAttachmentResource(3).image;
+		gbufferNormalBarrier.image = m_gbufferLayoutPassManager->getAttachmentResource(4).image;
 		gbufferNormalBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
 
 		VkImageMemoryBarrier2 gbufferDepthBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
@@ -122,13 +134,14 @@ void Renderer::drawFrame()
 		gbufferDepthBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		gbufferDepthBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		gbufferDepthBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		gbufferDepthBarrier.image = m_gbufferLayoutPassManager->getAttachmentResource(4).image;
+		gbufferDepthBarrier.image = m_gbufferLayoutPassManager->getAttachmentResource(5).image;
 		gbufferDepthBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1);
 
 		frame.pipelineBarrier({
 			gbufferAlbedoBarrier,
 			gbufferEmissionBarrier,
-			gbufferWPosBarrier,
+			gbufferSpecularBarrier,
+			gbufferTransmittanceBarrier,
 			gbufferNormalBarrier,
 			gbufferDepthBarrier
 		});
@@ -241,7 +254,14 @@ void Renderer::initRenderPasses()
 				VK_ATTACHMENT_LOAD_OP_CLEAR,
 				VK_ATTACHMENT_STORE_OP_STORE
 			)
-			.addAttachment(	// World Pos
+			.addAttachment( // Specular & Shininess
+				VK_FORMAT_R32G32B32A32_SFLOAT,
+				VK_SAMPLE_COUNT_1_BIT,
+				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+				VK_ATTACHMENT_LOAD_OP_CLEAR,
+				VK_ATTACHMENT_STORE_OP_STORE
+			)
+			.addAttachment( // Transmittance & IOR
 				VK_FORMAT_R32G32B32A32_SFLOAT,
 				VK_SAMPLE_COUNT_1_BIT,
 				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
@@ -279,8 +299,12 @@ void Renderer::initRenderPasses()
 				VkAttachmentReference{ 3, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL }
 			)
 			.setAttachmentReference(
+				hri::AttachmentType::Color,
+				VkAttachmentReference{ 4, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL }
+			)
+			.setAttachmentReference(
 				hri::AttachmentType::DepthStencil,
-				VkAttachmentReference{ 4, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL }
+				VkAttachmentReference{ 5, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL }
 			);
 
 		const std::vector<hri::RenderAttachmentConfig> gbufferAttachmentConfigs = {
@@ -298,7 +322,14 @@ void Renderer::initRenderPasses()
 				| VK_IMAGE_USAGE_SAMPLED_BIT,
 				VK_IMAGE_ASPECT_COLOR_BIT
 			},
-			hri::RenderAttachmentConfig{ // wPos target
+			hri::RenderAttachmentConfig{ // Material specular & shininess target
+				VK_FORMAT_R32G32B32A32_SFLOAT,
+				VK_SAMPLE_COUNT_1_BIT,
+				VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
+				| VK_IMAGE_USAGE_SAMPLED_BIT,
+				VK_IMAGE_ASPECT_COLOR_BIT
+			},
+			hri::RenderAttachmentConfig{ // Material transmittance & IOR target
 				VK_FORMAT_R32G32B32A32_SFLOAT,
 				VK_SAMPLE_COUNT_1_BIT,
 				VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
@@ -353,7 +384,8 @@ void Renderer::initRenderPasses()
 	m_gbufferLayoutPassManager->setClearValue(1, VkClearValue{ { 0.0f, 0.0f, 0.0f, 0.0f } });
 	m_gbufferLayoutPassManager->setClearValue(2, VkClearValue{ { 0.0f, 0.0f, 0.0f, 0.0f } });
 	m_gbufferLayoutPassManager->setClearValue(3, VkClearValue{ { 0.0f, 0.0f, 0.0f, 0.0f } });
-	m_gbufferLayoutPassManager->setClearValue(4, VkClearValue{ { 1.0f, 0x00 } });
+	m_gbufferLayoutPassManager->setClearValue(4, VkClearValue{ { 0.0f, 0.0f, 0.0f, 0.0f } });
+	m_gbufferLayoutPassManager->setClearValue(5, VkClearValue{ { 1.0f, 0x00 } });
 
 	m_swapchainPassManager->setClearValue(0, VkClearValue{ { 0.0f, 0.0f, 0.0f, 1.0f } });
 }
@@ -428,7 +460,8 @@ void Renderer::initGlobalDescriptorSets()
 		.addBinding(RayTracingBindings::Tlas, VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR)
 		.addBinding(RayTracingBindings::GBufferAlbedo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
 		.addBinding(RayTracingBindings::GBufferEmission, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
-		.addBinding(RayTracingBindings::GBufferWorldPos, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
+		.addBinding(RayTracingBindings::GBufferMatSpecular, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
+		.addBinding(RayTracingBindings::GBufferMatTransmittance, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
 		.addBinding(RayTracingBindings::GBufferNormal, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
 		.addBinding(RayTracingBindings::GBufferDepth, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
 		.addBinding(RayTracingBindings::SoftShadowOutImage, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
@@ -604,19 +637,24 @@ void Renderer::updateFrameDescriptors(RendererFrameData& frame)
 		gbufferEmissionResult.imageView = m_gbufferLayoutPassManager->getAttachmentResource(1).view;
 		gbufferEmissionResult.sampler = m_renderResultNearestSampler->sampler;
 		
-		VkDescriptorImageInfo gbufferWorldPosResult = VkDescriptorImageInfo{};
-		gbufferWorldPosResult.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		gbufferWorldPosResult.imageView = m_gbufferLayoutPassManager->getAttachmentResource(2).view;
-		gbufferWorldPosResult.sampler = m_renderResultNearestSampler->sampler;
+		VkDescriptorImageInfo gbufferSpecularResult = VkDescriptorImageInfo{};
+		gbufferSpecularResult.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		gbufferSpecularResult.imageView = m_gbufferLayoutPassManager->getAttachmentResource(2).view;
+		gbufferSpecularResult.sampler = m_renderResultNearestSampler->sampler;
+
+		VkDescriptorImageInfo gbufferTransmittanceResult = VkDescriptorImageInfo{};
+		gbufferTransmittanceResult.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		gbufferTransmittanceResult.imageView = m_gbufferLayoutPassManager->getAttachmentResource(2).view;
+		gbufferTransmittanceResult.sampler = m_renderResultNearestSampler->sampler;
 
 		VkDescriptorImageInfo gbufferNormalResult = VkDescriptorImageInfo{};
 		gbufferNormalResult.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		gbufferNormalResult.imageView = m_gbufferLayoutPassManager->getAttachmentResource(3).view;
+		gbufferNormalResult.imageView = m_gbufferLayoutPassManager->getAttachmentResource(4).view;
 		gbufferNormalResult.sampler = m_renderResultNearestSampler->sampler;
 
 		VkDescriptorImageInfo gbufferDepthResult = VkDescriptorImageInfo{};
 		gbufferDepthResult.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		gbufferDepthResult.imageView = m_gbufferLayoutPassManager->getAttachmentResource(4).view;
+		gbufferDepthResult.imageView = m_gbufferLayoutPassManager->getAttachmentResource(5).view;
 		gbufferDepthResult.sampler = m_renderResultNearestSampler->sampler;
 
 		VkDescriptorImageInfo softShadowOutInfo = VkDescriptorImageInfo{};
@@ -632,7 +670,8 @@ void Renderer::updateFrameDescriptors(RendererFrameData& frame)
 		(*frame.raytracingSet)
 			.writeImage(RayTracingBindings::GBufferAlbedo, &gbufferAlbedoResult)
 			.writeImage(RayTracingBindings::GBufferEmission, &gbufferEmissionResult)
-			.writeImage(RayTracingBindings::GBufferWorldPos, &gbufferWorldPosResult)
+			.writeImage(RayTracingBindings::GBufferMatSpecular, &gbufferSpecularResult)
+			.writeImage(RayTracingBindings::GBufferMatTransmittance, &gbufferTransmittanceResult)
 			.writeImage(RayTracingBindings::GBufferNormal, &gbufferNormalResult)
 			.writeImage(RayTracingBindings::GBufferDepth, &gbufferDepthResult)
 			.writeImage(RayTracingBindings::SoftShadowOutImage, &softShadowOutInfo)

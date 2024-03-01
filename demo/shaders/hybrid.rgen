@@ -6,7 +6,7 @@
 #include "shader_common.glsl"
 #include "raytracing_common.glsl"
 
-#define HYBRID_RENDERING	0
+#define HYBRID_RENDERING	1
 
 layout(location = 0) rayPayloadEXT RayHitPayload prd;
 
@@ -15,11 +15,12 @@ layout(set = 0, binding = 0) uniform CAMERA { Camera camera; };
 layout(set = 1, binding = 0) uniform accelerationStructureEXT TLAS;
 layout(set = 1, binding = 1) uniform sampler2D GBufferAlbedo;
 layout(set = 1, binding = 2) uniform sampler2D GBufferEmission;
-layout(set = 1, binding = 3) uniform sampler2D GBufferWorldPos;
-layout(set = 1, binding = 4) uniform sampler2D GBufferNormal;
-layout(set = 1, binding = 5) uniform sampler2D GBufferDepth;
-layout(set = 1, binding = 6, r32f) uniform image2D softShadowOut;
-layout(set = 1, binding = 7, rgba32f) uniform image2D DirectIlluminationOut;
+layout(set = 1, binding = 3) uniform sampler2D GBufferMatSpecular;
+layout(set = 1, binding = 4) uniform sampler2D GBufferMatTransmittance;
+layout(set = 1, binding = 5) uniform sampler2D GBufferNormal;
+layout(set = 1, binding = 6) uniform sampler2D GBufferDepth;
+layout(set = 1, binding = 7, r32f) uniform image2D softShadowOut;
+layout(set = 1, binding = 8, rgba32f) uniform image2D DirectIlluminationOut;
 
 void main()
 {
@@ -35,7 +36,7 @@ void main()
 	// Calculate initial ray data
 	const mat4 invProj = inverse(camera.project);
 	const mat4 invView = inverse(camera.view);
-	const vec2 dir2D = inUV * 2.0 - 1.0;
+	const vec2 ndc = inUV * 2.0 - 1.0;
 
 	// Initialize ray payload
 	prd.seed = initSeed(launchIndex);
@@ -48,21 +49,27 @@ void main()
 
 #if HYBRID_RENDERING == 1
 	// Get initial hit data from GBuffer
-	vec3 wPos = vec3(texture(GBufferWorldPos, inUV));
-	vec3 wNormal = vec3(texture(GBufferNormal, inUV));
 	float initialHitDepth = float(texture(GBufferDepth, inUV));
+	vec3 wPos = depthToWorldPos(invProj, invView, ndc, initialHitDepth);
+	vec3 wNormal = vec3(texture(GBufferNormal, inUV));
 	wNormal = normalize(wNormal);
 
 	// Get material params from GBuffer
-	vec3 diffuseColor = vec3(texture(GBufferAlbedo, inUV));
-	vec3 specular = vec3(0.5);		// TODO: add GBuffer attachment
-	vec3 transmittance = vec3(0);	// TODO: add GBuffer attachment
-	vec3 emissionColor = vec3(texture(GBufferEmission, inUV));
-	float shininess = 0.0;			// TODO: add GBuffer attachment
-	float ior = 1.45;				// TODO: add GBuffer attachment
+	vec4 specularShininess = texture(GBufferMatSpecular, inUV);
+	vec4 transmittanceIOR = texture(GBufferMatTransmittance, inUV);
+
+	Material hitMaterial = Material(
+		vec3(texture(GBufferAlbedo, inUV)),		// diffuse color
+		specularShininess.rgb,					// specular color
+		transmittanceIOR.rgb,					// transmittance
+		vec3(texture(GBufferEmission, inUV)),	// emission color & strength
+		specularShininess.a,					// shininess
+		transmittanceIOR.a						// IOR
+	);
+	
 
 	// Evaluate initial material hit
-	vec4 iRayDirection = invProj * vec4(dir2D.x, dir2D.y, 1, 1);
+	vec4 iRayDirection = invProj * vec4(ndc, 1, 1);
 	vec3 wRayOrigin = vec3(invView * vec4(0, 0, 0, 1));
 	vec3 wInDir = vec3(invView * vec4(normalize(iRayDirection.xyz), 0));
 	
@@ -72,10 +79,10 @@ void main()
 		prd.energy += prd.transmission * sampleSkyColor(wInDir);
 	}
 
-	if (isEmissive(emissionColor))
+	if (isEmissive(hitMaterial.emission))
 	{
 		prd.terminated = true;
-		prd.energy += prd.transmission * emissionColor;
+		prd.energy += prd.transmission * hitMaterial.emission;
 	}
 
 	if (dot(wNormal, wInDir) > 0.0)
@@ -83,10 +90,10 @@ void main()
 
 	vec3 wOutDir = randomWalk(prd.seed, wInDir, wNormal);
 	float pdf = evaluatePDF(wOutDir, wNormal);
-	vec3 brdf = evaluateBRDF(wInDir, wOutDir, wNormal, diffuseColor);
+	vec3 brdf = evaluateBRDF(wInDir, wOutDir, wNormal, hitMaterial.diffuse);
 	prd.transmission *= pdf * brdf;
 #else
-	vec4 iRayDirection = invProj * vec4(dir2D.x, dir2D.y, 1, 1);
+	vec4 iRayDirection = invProj * vec4(ndc, 1, 1);
 	vec3 wPos = vec3(invView * vec4(0, 0, 0, 1));
 	vec3 wOutDir = vec3(invView * vec4(normalize(iRayDirection.xyz), 0));
 #endif

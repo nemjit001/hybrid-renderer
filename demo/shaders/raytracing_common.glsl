@@ -2,7 +2,7 @@
 #define RT_COMMON_GLSL
 
 #define RAYTRACE_MAX_BOUNCE_COUNT	5
-#define RAYTRACE_RANGE_TMIN			1e-5
+#define RAYTRACE_RANGE_TMIN			1e-3
 #define RAYTRACE_RANGE_TMAX			1e30
 
 #define RT_PI		3.14159265358979323846264
@@ -88,6 +88,7 @@ vec3 diffuseReflect(inout uint seed, vec3 wI, vec3 N)
 vec3 randomWalk(inout uint seed, vec3 wI, vec3 N)
 {
 	return diffuseReflect(seed, wI, N);
+	// return reflect(wI, N);
 }
 
 /// --- Material evaluation functions

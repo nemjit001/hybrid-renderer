@@ -16,8 +16,9 @@ layout(location = 0) in VS_OUT
 
 layout(location = 0) out vec4 FragAlbedo;
 layout(location = 1) out vec4 FragEmission;
-layout(location = 2) out vec4 FragWPos;
-layout(location = 3) out vec4 FragNormal;
+layout(location = 2) out vec4 FragMatSpecular;
+layout(location = 3) out vec4 FragTransmittance;
+layout(location = 4) out vec4 FragNormal;
 
 layout(push_constant) uniform INSTANCE_PC
 {
@@ -39,6 +40,7 @@ void main()
 
     FragAlbedo = vec4(material.diffuse, 1);
     FragEmission = vec4(material.emission, 1);
-    FragWPos = vec4(fs_in.wPos.xyz / fs_in.wPos.w, 1);
+    FragMatSpecular = vec4(material.specular, material.shininess);
+    FragTransmittance = vec4(material.transmittance, material.ior);
     FragNormal = vec4(normalize(fs_in.normal), 1);
 }

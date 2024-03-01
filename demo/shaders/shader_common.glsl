@@ -39,4 +39,12 @@ struct Camera
     mat4 project;
 };
 
+vec3 depthToWorldPos(mat4 invProject, mat4 invView, vec2 ndc, float depth)
+{
+	vec4 clip = invProject * vec4(ndc, depth, 1);
+	vec4 view = invView * vec4(clip.xyz / clip.w, 1.0);
+
+	return view.xyz;
+}
+
 #endif // SHADER_COMMON_GLSL
