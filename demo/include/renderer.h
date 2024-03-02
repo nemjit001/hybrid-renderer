@@ -12,6 +12,7 @@ struct RendererFrameData
 {
 	// Per frame resources
 	std::unique_ptr<hri::BufferResource> cameraUBO;
+	std::unique_ptr<hri::BufferResource> lightSSBO;
 	std::unique_ptr<raytracing::AccelerationStructure> tlas;
 	std::vector<raytracing::AccelerationStructure> blasList;
 
@@ -24,8 +25,9 @@ struct RendererFrameData
 enum SceneDataBindings
 {
 	Camera,
-	RenderInstanceData,
-	MaterialData,
+	RenderInstanceBuffer,
+	MaterialBuffer,
+	LightBuffer
 };
 
 enum RayTracingBindings

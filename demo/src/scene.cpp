@@ -26,9 +26,6 @@ bool SceneASManager::shouldReallocTLAS(
 ) const
 {
 	size_t instanceCount = instances.size();
-	if (instanceCount == 0)
-		return false;
-
 	hri::BufferResource tlasInstanceBuffer = generateTLASInstances(instances, blasList);
 	raytracing::ASBuilder::ASInput tlasInput = m_asBuilder.instancesToGeometry(
 		tlasInstanceBuffer,
@@ -116,9 +113,6 @@ void SceneASManager::cmdBuildTLAS(
 ) const
 {
 	size_t instanceCount = instances.size();
-	if (instanceCount == 0)	// Nothing to do
-		return;
-
 	hri::BufferResource tlasInstanceBuffer = generateTLASInstances(instances, blasList);
 
 	raytracing::ASBuilder::ASInput tlasInput = m_asBuilder.instancesToGeometry(
@@ -270,6 +264,7 @@ SceneGraph::SceneGraph(
 	materials(std::move(materials)),
 	meshes(std::move(meshes)),
 	nodes(std::move(nodes)),
+	lightCount(0),
 	accelStructManager(ctx, this->meshes),
 	buffers{
 		hri::BufferResource(
@@ -296,6 +291,10 @@ SceneGraph::SceneGraph(
 	m_instanceData.resize(this->meshes.size());
 	for (auto const& node : this->nodes)
 	{
+		const Material& mat = this->materials[node.material];
+		if (mat.emission.r > 0 || mat.emission.g > 0 || mat.emission.b > 0)
+			this->lightCount++;
+
 		for (size_t lodIdx = 0; lodIdx < MAX_LOD_LEVELS; lodIdx++)
 		{
 			size_t meshLOD = node.meshLODs[lodIdx];
@@ -306,6 +305,7 @@ SceneGraph::SceneGraph(
 			RenderInstanceData& instanceData = m_instanceData[meshLOD];
 
 			instanceData.materialIdx = static_cast<uint32_t>(node.material);
+			instanceData.indexCount = mesh.indexCount;
 			instanceData.vertexBufferAddress = raytracing::getDeviceAddress(m_ctx, mesh.vertexBuffer);
 			instanceData.indexBufferAddress = raytracing::getDeviceAddress(m_ctx, mesh.indexBuffer);
 		}
@@ -347,7 +347,7 @@ const std::vector<RenderInstance>& SceneGraph::generateRenderInstanceList(const 
 	for (auto const& node : nodes)
 	{
 		SceneNode::SceneId meshLOD = calculateLODLevel(camera, node);
-		if (meshLOD == INVALID_SCENE_ID)	// Don't show out of bounds meshes
+		if (meshLOD == INVALID_SCENE_ID)	// Don't show nonexistant meshes
 			continue;
 
 		// TODO: upload mesh data into scene buffers, build TLAS from instance BLASses
@@ -366,9 +366,6 @@ SceneNode::SceneId SceneGraph::calculateLODLevel(const hri::Camera& camera, cons
 	const float nodeDist = hri::magnitude(camToNode);
 	const float LODRange = parameters.farPoint - parameters.nearPoint;
 	const float LODSegmentSize = LODRange / static_cast<float>(MAX_LOD_LEVELS);
-
-	if (nodeDist > parameters.farPoint)
-		return INVALID_SCENE_ID;
 
 	// XXX: Check -> is Linear LOD sufficient, or should better algorithm be used?
 	SceneNode::SceneId LODIndex = 0;

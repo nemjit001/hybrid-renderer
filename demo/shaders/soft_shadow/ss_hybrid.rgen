@@ -1,7 +1,9 @@
 #version 460
 
 #extension GL_EXT_ray_tracing : require
+#extension GL_EXT_scalar_block_layout : enable
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+#extension GL_EXT_buffer_reference2 : require
 
 #include "../shader_common.glsl"
 #include "../raytracing_common.glsl"
@@ -21,6 +23,7 @@ void main()
 	const uint launchIndex = calculateLaunchIndex(gl_LaunchIDEXT, gl_LaunchSizeEXT);
 	const vec2 pixelCenter = gl_LaunchIDEXT.xy + vec2(0.5);
 	const vec2 inUV = pixelCenter / vec2(gl_LaunchSizeEXT.xy);
+	uint seed = initSeed(launchIndex);
 
 	// Calculate some params
 	const mat4 invProj = inverse(camera.project);
@@ -31,15 +34,16 @@ void main()
 	float initialHitDepth = float(texture(GBufferDepth, inUV));
 	vec3 wPos = depthToWorldPos(invProj, invView, ndc, initialHitDepth);
 	vec3 wNormal = vec3(texture(GBufferNormal, inUV));
+	vec3 Wi = vec3(invView * vec4(normalize((invProj * vec4(ndc, 1, 1)).xyz), 0));
+
 	wNormal = normalize(wNormal);
+	if (dot(wNormal, Wi) > 0.0) wNormal *= -1.0;
 
 	// Initialize ray payload
 	ssPayload.miss = false;
 
-	// TODO: randomly sample light
-	vec3 L = LIGHT_POS - wPos;
-	vec3 Ldir = normalize(L);
-	float Ldist = length(L);
+	// TODO: some way of importance sampling lights in scene
+	vec3 Wo = randomWalk(seed, Wi, wNormal);
 
 	if (gbufferRayHit(initialHitDepth))
 	{
@@ -52,8 +56,8 @@ void main()
 			0, 0, 0,
 			wPos,
 			RAYTRACE_RANGE_TMIN,
-			Ldir,
-			Ldist,
+			Wo,
+			RAYTRACE_RANGE_TMAX,
 			0
 		);
 	}

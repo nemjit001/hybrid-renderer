@@ -10,8 +10,9 @@
 #define RT_INV_PI	0.31830988618379067153777
 #define RT_INV_2PI	0.15915494309189533576888
 
-#define LIGHT_POS	vec3(0, 4, 0)
-#define LIGHT_COLOR vec3(1)
+#define SKY_COLOR	vec3(0.7, 0.85, 0.95)
+
+#include "shader_common.glsl"
 
 /// Shared include file for raytracing shader definitions
 
@@ -25,18 +26,6 @@ struct DIRayPayload
 	vec3 transmission;
 	vec3 energy;
 };
-
-/// --- Common functions
-
-uint calculateLaunchIndex(uvec3 launchID, uvec3 launchSize)
-{
-	return launchID.x + launchID.y * launchSize.x + launchID.z * launchSize.x * launchSize.y;
-}
-
-bool gbufferRayHit(float depth)
-{
-	return depth < 1.0;
-}
 
 /// --- Random noise functions
 
@@ -79,6 +68,18 @@ uint randomRangeU32(inout uint seed, uint minRange, uint maxRange)
 	return (randomUint(seed) + minRange) % maxRange;
 }
 
+/// --- Common functions
+
+uint calculateLaunchIndex(uvec3 launchID, uvec3 launchSize)
+{
+	return launchID.x + launchID.y * launchSize.x + launchID.z * launchSize.x * launchSize.y;
+}
+
+bool gbufferRayHit(float depth)
+{
+	return depth < 1.0;
+}
+
 /// --- Random walk functions
 
 vec3 diffuseReflect(inout uint seed, vec3 wI, vec3 N)
@@ -99,9 +100,9 @@ vec3 diffuseReflect(inout uint seed, vec3 wI, vec3 N)
 	return normalize(outDir);
 }
 
-vec3 randomWalk(inout uint seed, vec3 wI, vec3 N)
+vec3 randomWalk(inout uint seed, vec3 Wi, vec3 N)
 {
-	return diffuseReflect(seed, wI, N);
+	return diffuseReflect(seed, Wi, N);
 }
 
 /// --- Material evaluation functions
@@ -111,12 +112,12 @@ float luminance(vec3 color)
 	return color.r + color.g + color.b;
 }
 
-float evaluatePDF(vec3 wO, vec3 N)
+float evaluatePDF(vec3 Wo, vec3 N)
 {
-	return dot(wO, N) / RT_2PI;
+	return dot(Wo, N) / RT_2PI;
 }
 
-vec3 evaluateBRDF(vec3 wI, vec3 wO, vec3 N, vec3 diffuse)
+vec3 evaluateBRDF(vec3 Wi, vec3 Wo, vec3 N, vec3 diffuse)
 {
 	return diffuse * RT_INV_PI;
 }

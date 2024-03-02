@@ -51,6 +51,7 @@ struct RenderInstance
 struct RenderInstanceData
 {
 	uint32_t materialIdx;
+	uint32_t indexCount;
 	VkDeviceAddress vertexBufferAddress;
 	VkDeviceAddress indexBufferAddress;
 };
@@ -107,8 +108,6 @@ private:
 
 	std::vector<raytracing::ASBuilder::ASInput> generateBLASInputs(const std::vector<hri::Mesh>& meshes) const;
 
-	
-
 private:
 	raytracing::RayTracingContext& m_ctx;
 	raytracing::ASBuilder m_asBuilder;
@@ -145,6 +144,8 @@ public:
 	/// @return A newly generated list of render instances.
 	const std::vector<RenderInstance>& generateRenderInstanceList(const hri::Camera& camera);
 
+	inline const RenderInstanceData& getInstanceData(size_t idx) const { return m_instanceData.at(idx); }
+
 private:
 	/// @brief Calculate the LOD level for a given scene node.
 	/// @param camera Camera to use for LOD generation.
@@ -157,6 +158,7 @@ public:
 	std::vector<Material> materials;
 	std::vector<hri::Mesh> meshes;
 	std::vector<SceneNode> nodes;
+	uint32_t lightCount;
 	SceneASManager accelStructManager;
 	SceneBuffers buffers;
 

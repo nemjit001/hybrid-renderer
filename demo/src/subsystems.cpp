@@ -193,16 +193,22 @@ HybridRayTracingSubsystem::HybridRayTracingSubsystem(
 	// Direct Illumination
 	hri::Shader* pDIRayGen = shaderDB.getShader("DIRayGen");
 	hri::Shader* pDIMiss = shaderDB.getShader("DIMiss");
+	hri::Shader* pDICHit = shaderDB.getShader("DICHit");
 
 	raytracing::RayTracingPipelineBuilder rtPipelineBuilder = raytracing::RayTracingPipelineBuilder(ctx)
 		.addShaderStage(pSSRayGen->stage, pSSRayGen->module)
 		.addShaderStage(pSSMiss->stage, pSSMiss->module)
 		.addShaderStage(pDIRayGen->stage, pDIRayGen->module)
 		.addShaderStage(pDIMiss->stage, pDIMiss->module)
+		.addShaderStage(pDICHit->stage, pDICHit->module)
+		// SS shader groups
 		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR, 0)
 		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR, 1)
+		// DI shader groups
 		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR, 2)
 		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR, 3)
+		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR, VK_SHADER_UNUSED_KHR, 4)
+		// TODO: GI shader groups
 		.setMaxRecursionDepth()
 		.setLayout(m_layout);
 

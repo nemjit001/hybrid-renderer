@@ -7,6 +7,7 @@
 struct RenderInstanceData
 {
 	uint materialIdx;
+	uint indexCount;
 	uint64_t vertexBufferAddress;
 	uint64_t indexBufferAddress;
 };

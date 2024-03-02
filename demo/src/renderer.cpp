@@ -20,6 +20,8 @@ Renderer::Renderer(raytracing::RayTracingContext& ctx, hri::Camera& camera, Scen
 	m_camera(camera),
 	m_activeScene(activeScene)
 {
+	assert(m_activeScene.lightCount > 0);
+
 	initShaderDB();
 	initRenderPasses();
 	initSharedResources();
@@ -227,6 +229,7 @@ void Renderer::initShaderDB()
 	//	Direct Illumination
 	m_shaderDatabase.registerShader("DIRayGen", hri::Shader::loadFile(m_context, "./shaders/di_hybrid.rgen.spv", VK_SHADER_STAGE_RAYGEN_BIT_KHR));
 	m_shaderDatabase.registerShader("DIMiss", hri::Shader::loadFile(m_context, "./shaders/di_hybrid.rmiss.spv", VK_SHADER_STAGE_MISS_BIT_KHR));
+	m_shaderDatabase.registerShader("DICHit", hri::Shader::loadFile(m_context, "./shaders/di_hybrid.rchit.spv", VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR));
 
 	// Vertex shaders
 	m_shaderDatabase.registerShader("PresentVert", hri::Shader::loadFile(m_context, "./shaders/present.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
@@ -454,9 +457,37 @@ void Renderer::initGlobalDescriptorSets()
 {
 	// Create set layouts
 	hri::DescriptorSetLayoutBuilder sceneDataSetBuilder = hri::DescriptorSetLayoutBuilder(m_context)
-		.addBinding(SceneDataBindings::Camera, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_RAYGEN_BIT_KHR)
-		.addBinding(SceneDataBindings::RenderInstanceData, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR)
-		.addBinding(SceneDataBindings::MaterialData, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
+		.addBinding(
+			SceneDataBindings::Camera,
+			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+			VK_SHADER_STAGE_VERTEX_BIT
+			| VK_SHADER_STAGE_RAYGEN_BIT_KHR
+		)
+		.addBinding(
+			SceneDataBindings::RenderInstanceBuffer,
+			VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			VK_SHADER_STAGE_VERTEX_BIT
+			| VK_SHADER_STAGE_FRAGMENT_BIT
+			| VK_SHADER_STAGE_RAYGEN_BIT_KHR
+			| VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR
+			| VK_SHADER_STAGE_ANY_HIT_BIT_KHR
+			| VK_SHADER_STAGE_MISS_BIT_KHR
+		)
+		.addBinding(
+			SceneDataBindings::MaterialBuffer, 
+			VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			VK_SHADER_STAGE_VERTEX_BIT
+			| VK_SHADER_STAGE_FRAGMENT_BIT
+			| VK_SHADER_STAGE_RAYGEN_BIT_KHR
+			| VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR
+			| VK_SHADER_STAGE_ANY_HIT_BIT_KHR
+			| VK_SHADER_STAGE_MISS_BIT_KHR
+		)
+		.addBinding(
+			SceneDataBindings::LightBuffer,
+			VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			VK_SHADER_STAGE_RAYGEN_BIT_KHR
+		);
 
 	hri::DescriptorSetLayoutBuilder rtGlobalDescriptorSetBuilder = hri::DescriptorSetLayoutBuilder(m_context)
 		.addBinding(RayTracingBindings::Tlas, VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR)
@@ -519,30 +550,24 @@ void Renderer::initRendererFrameData()
 	{
 		RendererFrameData& frame = m_frames[i];
 		frame.cameraUBO = std::unique_ptr<hri::BufferResource>(new hri::BufferResource(
-			m_context,
-			sizeof(hri::CameraShaderData),
-			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-			true
+			m_context, sizeof(hri::CameraShaderData), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, true
+		));
+
+		frame.lightSSBO = std::unique_ptr<hri::BufferResource>(new hri::BufferResource(
+			m_context, sizeof(uint32_t) * m_activeScene.lightCount, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true	// TODO: calculate buffer size based on lights in scene
 		));
 
 		frame.blasList = m_activeScene.accelStructManager.createBLASList(m_activeScene.meshes);
 
 		frame.sceneDataSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(
-			m_context,
-			m_descriptorSetAllocator,
-			*m_sceneDataSetLayout
+			m_context, m_descriptorSetAllocator, *m_sceneDataSetLayout
 		));
-
 		frame.raytracingSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(
-			m_context,
-			m_descriptorSetAllocator,
-			*m_rtDescriptorSetLayout
+			m_context, m_descriptorSetAllocator, *m_rtDescriptorSetLayout
 		));
 
 		frame.presentInputSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(
-			m_context,
-			m_descriptorSetAllocator,
-			*m_presentInputSetLayout
+			m_context, m_descriptorSetAllocator, *m_presentInputSetLayout
 		));
 
 		updateFrameDescriptors(frame);
@@ -620,10 +645,16 @@ void Renderer::updateFrameDescriptors(RendererFrameData& frame)
 		materialSSBOInfo.offset = 0;
 		materialSSBOInfo.range = m_activeScene.buffers.materialSSBO.bufferSize;
 
+		VkDescriptorBufferInfo lightSSBOInfo = VkDescriptorBufferInfo{};
+		lightSSBOInfo.buffer = frame.lightSSBO->buffer;
+		lightSSBOInfo.offset = 0;
+		lightSSBOInfo.range = frame.lightSSBO->bufferSize;
+
 		(*frame.sceneDataSet)
 			.writeBuffer(SceneDataBindings::Camera, &cameraUBOInfo)
-			.writeBuffer(SceneDataBindings::RenderInstanceData, &instanceSSBOInfo)
-			.writeBuffer(SceneDataBindings::MaterialData, &materialSSBOInfo)
+			.writeBuffer(SceneDataBindings::RenderInstanceBuffer, &instanceSSBOInfo)
+			.writeBuffer(SceneDataBindings::MaterialBuffer, &materialSSBOInfo)
+			.writeBuffer(SceneDataBindings::LightBuffer, &lightSSBOInfo)
 			.flush();
 	}
 
@@ -705,6 +736,18 @@ void Renderer::prepareFrameResources(uint32_t frameIdx)
 	// Update UBO staging buffers
 	hri::CameraShaderData cameraData = m_camera.getShaderData();
 	rendererFrameData.cameraUBO->copyToBuffer(&cameraData, sizeof(hri::CameraShaderData));
+
+	// Fill instance light buffer
+	std::vector<uint32_t> lightBuffer; lightBuffer.reserve(m_activeScene.lightCount);
+	for (auto const& instance : renderInstanceList)
+	{
+		const RenderInstanceData& instanceData = m_activeScene.getInstanceData(instance.instanceId);
+		const Material& mat = m_activeScene.materials[instanceData.materialIdx];
+		if (mat.emission.r > 0.0 || mat.emission.g > 0.0 || mat.emission.b > 0.0)
+			lightBuffer.push_back(instance.instanceId);
+	}
+	assert(lightBuffer.size() == m_activeScene.lightCount);
+	rendererFrameData.lightSSBO->copyToBuffer(lightBuffer.data(), sizeof(uint32_t) * lightBuffer.size());
 
 	// Create or reallocate TLAS
 	if (rendererFrameData.tlas.get() == nullptr
