@@ -23,6 +23,14 @@ struct RendererFrameData
 	std::unique_ptr<hri::DescriptorSetManager> presentInputSet;
 };
 
+struct RTTargets
+{
+	std::unique_ptr<hri::ImageResource> softShadowRTPassResult;
+	std::unique_ptr<hri::ImageResource> directIlluminationRTPassResult;
+
+	static void init(hri::RenderContext& ctx, RTTargets& targets);
+};
+
 enum SceneDataBindings
 {
 	Camera,
@@ -99,6 +107,7 @@ private:
 
 	// Renderer state
 	uint32_t m_frameCounter;
+	hri::Camera m_prevCamera;
 	hri::Camera& m_camera;
 	SceneGraph& m_activeScene;
 
@@ -117,10 +126,8 @@ private:
 	std::unique_ptr<hri::RenderPassResourceManager> m_composePassManager;
 	std::unique_ptr<hri::SwapchainPassResourceManager> m_swapchainPassManager;
 
-	// Ray Tracing Targets
-	std::unique_ptr<hri::ImageResource> m_softShadowRTPassResult;
-	std::unique_ptr<hri::ImageResource> m_directIlluminationRTPassResult;
-	std::unique_ptr<hri::ImageResource> m_globalIlluminationRTPassResult;
+	// Ray Tracing Targets, previous & current frame
+	RTTargets m_raytracingTargets;
 
 	// Render subsystems
 	std::unique_ptr<GBufferLayoutSubsystem> m_gbufferLayoutSubsystem;

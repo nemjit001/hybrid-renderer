@@ -6,6 +6,47 @@
 #include "detail/raytracing.h"
 #include "subsystems.h"
 
+void RTTargets::init(hri::RenderContext& ctx, RTTargets& targets)
+{
+	VkExtent2D swapExtent = ctx.swapchain.extent;
+
+	targets.softShadowRTPassResult = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
+		ctx,
+		VK_IMAGE_TYPE_2D,
+		VK_FORMAT_R8_UNORM,
+		VK_SAMPLE_COUNT_1_BIT,
+		{ swapExtent.width, swapExtent.height, 1 },
+		1,
+		1,
+		VK_IMAGE_USAGE_STORAGE_BIT
+		| VK_IMAGE_USAGE_SAMPLED_BIT
+	));
+
+	targets.directIlluminationRTPassResult = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
+		ctx,
+		VK_IMAGE_TYPE_2D,
+		VK_FORMAT_R8G8B8A8_UNORM,
+		VK_SAMPLE_COUNT_1_BIT,
+		{ swapExtent.width, swapExtent.height, 1 },
+		1,
+		1,
+		VK_IMAGE_USAGE_STORAGE_BIT
+		| VK_IMAGE_USAGE_SAMPLED_BIT
+	));
+
+	targets.softShadowRTPassResult->createView(
+		VK_IMAGE_VIEW_TYPE_2D,
+		hri::ImageResource::DefaultComponentMapping(),
+		hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1)
+	);
+
+	targets.directIlluminationRTPassResult->createView(
+		VK_IMAGE_VIEW_TYPE_2D,
+		hri::ImageResource::DefaultComponentMapping(),
+		hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1)
+	);
+}
+
 Renderer::Renderer(raytracing::RayTracingContext& ctx, hri::Camera& camera, SceneGraph& activeScene)
 	:
 	m_context(ctx.renderContext),
@@ -19,6 +60,7 @@ Renderer::Renderer(raytracing::RayTracingContext& ctx, hri::Camera& camera, Scen
 	m_computePool(m_context, m_context.queues.computeQueue, VK_COMMAND_POOL_CREATE_TRANSIENT_BIT),
 	m_stagingPool(m_context, m_context.queues.transferQueue, VK_COMMAND_POOL_CREATE_TRANSIENT_BIT),
 	m_frameCounter(0),
+	m_prevCamera(camera),
 	m_camera(camera),
 	m_activeScene(activeScene)
 {
@@ -183,7 +225,7 @@ void Renderer::drawFrame()
 		softShadowGeneralBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
 		softShadowGeneralBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		softShadowGeneralBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		softShadowGeneralBarrier.image = m_softShadowRTPassResult->image;
+		softShadowGeneralBarrier.image = m_raytracingTargets.softShadowRTPassResult->image;
 		softShadowGeneralBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
 
 		VkImageMemoryBarrier2 DIGeneralBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
@@ -195,7 +237,7 @@ void Renderer::drawFrame()
 		DIGeneralBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
 		DIGeneralBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		DIGeneralBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		DIGeneralBarrier.image = m_directIlluminationRTPassResult->image;
+		DIGeneralBarrier.image = m_raytracingTargets.directIlluminationRTPassResult->image;
 		DIGeneralBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
 
 		frame.pipelineBarrier({ softShadowGeneralBarrier, DIGeneralBarrier });
@@ -215,7 +257,7 @@ void Renderer::drawFrame()
 		softShadowSampleBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		softShadowSampleBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		softShadowSampleBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		softShadowSampleBarrier.image = m_softShadowRTPassResult->image;
+		softShadowSampleBarrier.image = m_raytracingTargets.softShadowRTPassResult->image;
 		softShadowSampleBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
 
 		VkImageMemoryBarrier2 DISampleBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
@@ -227,7 +269,7 @@ void Renderer::drawFrame()
 		DISampleBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		DISampleBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		DISampleBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		DISampleBarrier.image = m_directIlluminationRTPassResult->image;
+		DISampleBarrier.image = m_raytracingTargets.directIlluminationRTPassResult->image;
 		DISampleBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
 
 		frame.pipelineBarrier({ softShadowSampleBarrier, DISampleBarrier });
@@ -263,6 +305,7 @@ void Renderer::drawFrame()
 	frame.endCommands();
 	m_renderCore.endFrame();
 
+	m_prevCamera = m_camera;
 	m_frameCounter++;
 }
 
@@ -497,47 +540,8 @@ void Renderer::initSharedResources()
 		));
 	}
 
-	// Init raytracing targets
-	{
-		m_softShadowRTPassResult = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
-			m_context,
-			VK_IMAGE_TYPE_2D,
-			VK_FORMAT_R8_UNORM,
-			VK_SAMPLE_COUNT_1_BIT,
-			{ swapExtent.width, swapExtent.height, 1 },
-			1,
-			1,
-			VK_IMAGE_USAGE_STORAGE_BIT
-			| VK_IMAGE_USAGE_SAMPLED_BIT
-		));
-
-		m_directIlluminationRTPassResult = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
-			m_context,
-			VK_IMAGE_TYPE_2D,
-			VK_FORMAT_R8G8B8A8_UNORM,
-			VK_SAMPLE_COUNT_1_BIT,
-			{ swapExtent.width, swapExtent.height, 1 },
-			1,
-			1,
-			VK_IMAGE_USAGE_STORAGE_BIT
-			| VK_IMAGE_USAGE_SAMPLED_BIT
-		));
-	}
-
-	// Initialize raytracing target views
-	{
-		m_softShadowRTPassResult->createView(
-			VK_IMAGE_VIEW_TYPE_2D,
-			hri::ImageResource::DefaultComponentMapping(),
-			hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1)
-		);
-
-		m_directIlluminationRTPassResult->createView(
-			VK_IMAGE_VIEW_TYPE_2D,
-			hri::ImageResource::DefaultComponentMapping(),
-			hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1)
-		);
-	}
+	// Init ray tracing targets
+	RTTargets::init(m_context, m_raytracingTargets);
 }
 
 void Renderer::initGlobalDescriptorSets()
@@ -685,45 +689,8 @@ void Renderer::recreateSwapDependentResources(const vkb::Swapchain& swapchain)
 	m_composePassManager->recreateResources();
 	m_swapchainPassManager->recreateResources();
 
-	// Recreate raytracing targets
-	{
-		m_softShadowRTPassResult = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
-			m_context,
-			m_softShadowRTPassResult->imageType,
-			m_softShadowRTPassResult->format,	// Reuse format, that's fine
-			m_softShadowRTPassResult->samples,
-			{ swapExtent.width, swapExtent.height, 1 },
-			1,
-			1,
-			m_softShadowRTPassResult->usage
-		));
-
-		m_directIlluminationRTPassResult = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
-			m_context,
-			m_directIlluminationRTPassResult->imageType,
-			m_directIlluminationRTPassResult->format,
-			m_directIlluminationRTPassResult->samples,
-			{ swapExtent.width, swapExtent.height, 1 },
-			1,
-			1,
-			m_directIlluminationRTPassResult->usage
-		));
-	}
-
-	// Recreate raytracing target views
-	{
-		m_softShadowRTPassResult->createView(
-			VK_IMAGE_VIEW_TYPE_2D,
-			hri::ImageResource::DefaultComponentMapping(),
-			hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1)
-		);
-
-		m_directIlluminationRTPassResult->createView(
-			VK_IMAGE_VIEW_TYPE_2D,
-			hri::ImageResource::DefaultComponentMapping(),
-			hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1)
-		);
-	}
+	// Reinit raytracing targets
+	RTTargets::init(m_context, m_raytracingTargets);
 
 	// Update descriptor sets
 	for (size_t frameIdx = 0; frameIdx < hri::RenderCore::framesInFlight(); frameIdx++)
@@ -799,12 +766,12 @@ void Renderer::updateFrameDescriptors(RendererFrameData& frame)
 
 		VkDescriptorImageInfo softShadowOutInfo = VkDescriptorImageInfo{};
 		softShadowOutInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-		softShadowOutInfo.imageView = m_softShadowRTPassResult->view;
+		softShadowOutInfo.imageView = m_raytracingTargets.softShadowRTPassResult->view;
 		softShadowOutInfo.sampler = VK_NULL_HANDLE;
 
 		VkDescriptorImageInfo DIOutInfo = VkDescriptorImageInfo{};
 		DIOutInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-		DIOutInfo.imageView = m_directIlluminationRTPassResult->view;
+		DIOutInfo.imageView = m_raytracingTargets.directIlluminationRTPassResult->view;
 		DIOutInfo.sampler = VK_NULL_HANDLE;
 
 		(*frame.raytracingSet)
@@ -823,12 +790,12 @@ void Renderer::updateFrameDescriptors(RendererFrameData& frame)
 	{
 		VkDescriptorImageInfo ssResult = VkDescriptorImageInfo{};
 		ssResult.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		ssResult.imageView = m_softShadowRTPassResult->view;
+		ssResult.imageView = m_raytracingTargets.softShadowRTPassResult->view;
 		ssResult.sampler = m_renderResultLinearSampler->sampler;
 
 		VkDescriptorImageInfo diResult = VkDescriptorImageInfo{};
 		diResult.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		diResult.imageView = m_directIlluminationRTPassResult->view;
+		diResult.imageView = m_raytracingTargets.directIlluminationRTPassResult->view;
 		diResult.sampler = m_renderResultLinearSampler->sampler;
 
 		(*frame.composeSet)
