@@ -69,26 +69,47 @@ struct SceneBuffers
 	hri::BufferResource materialSSBO;
 };
 
+/// @brief The Scene Acceleration Structure Manager abstracts away some tedious setup for acceleration structure building.
 class SceneASManager
 {
 public:
+	/// @brief Create a new AS Manager.
+	/// @param ctx Ray Tracing Context to use.
 	SceneASManager(raytracing::RayTracingContext& ctx);
 
+	/// @brief Destroy this AS Manager.
 	virtual ~SceneASManager() = default;
 
+	/// @brief Check if the TLAS should be reallocated.
+	/// @param tlas TLAS to check for.
+	/// @param instances Instances that should fit in the TLAS.
+	/// @param blasList BLAS list with data for instances.
+	/// @return A boolean indicating realloc.
 	bool shouldReallocTLAS(
 		const raytracing::AccelerationStructure& tlas,
 		const std::vector<RenderInstance>& instances,
 		const std::vector<raytracing::AccelerationStructure>& blasList
 	) const;
 
+	/// @brief Create a TLAS using a BLAS and instance list.
+	/// @param instances Instances to use.
+	/// @param blasList BLASses to use.
+	/// @return A newly created TLAS.
 	raytracing::AccelerationStructure createTLAS(
 		const std::vector<RenderInstance>& instances,
 		const std::vector<raytracing::AccelerationStructure>& blasList
 	);
 
+	/// @brief Generate a BLAS list from a list of meshes. Should be done once for all meshes in scene.
+	/// @param meshes Meshes to generate BLASses for.
+	/// @return A vector of BLAS structues.
 	std::vector<raytracing::AccelerationStructure> createBLASList(const std::vector<hri::Mesh>& meshes);
 
+	/// @brief Record TLAS building commands.
+	/// @param commandBuffer Command buffer to record into.
+	/// @param instances Instances to use for building.
+	/// @param blasList BLAS list with per instance data.
+	/// @param tlas TLAS to build.
 	void cmdBuildTLAS(
 		VkCommandBuffer commandBuffer,
 		const std::vector<RenderInstance>& instances,
@@ -96,6 +117,11 @@ public:
 		raytracing::AccelerationStructure& tlas
 	) const;
 
+	/// @brief Record BLAS building commands.
+	/// @param commandBuffer Command buffer to record into.
+	/// @param instances Instances to build BLASses for.
+	/// @param meshes Meshes associated with the BLASses.
+	/// @param blasList BLAS List to build.
 	void cmdBuildBLASses(
 		VkCommandBuffer commandBuffer,
 		const std::vector<RenderInstance>& instances,
@@ -104,11 +130,18 @@ public:
 	) const;
 
 private:
+	/// @brief Generate an instance buffer for a TLAS.
+	/// @param instances Instances to store in TLAS.
+	/// @param blasList BLAS list with instance data.
+	/// @return A buffer resource containing instance data.
 	hri::BufferResource generateTLASInstances(
 		const std::vector<RenderInstance>& instances,
 		const std::vector<raytracing::AccelerationStructure>& blasList
 	) const;
 
+	/// @brief Generate a list of ASInputs from a list of meshes.
+	/// @param meshes Meshes to generate inputs from.
+	/// @return A list of AS Inputs for BLAS building.
 	std::vector<raytracing::ASBuilder::ASInput> generateBLASInputs(const std::vector<hri::Mesh>& meshes) const;
 
 private:
