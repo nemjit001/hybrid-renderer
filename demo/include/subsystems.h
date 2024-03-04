@@ -14,6 +14,11 @@ struct InstancePushConstant
 	HRI_ALIGNAS(16) hri::Float3x3 normal 	= hri::Float3x3(1.0f);
 };
 
+struct RTFrameInfoPushConstant
+{
+	HRI_ALIGNAS(4) uint32_t frameIdx;
+};
+
 struct GBufferLayoutFrameInfo
 {
 	VkDescriptorSet sceneDataSetHandle	= VK_NULL_HANDLE;
@@ -22,6 +27,7 @@ struct GBufferLayoutFrameInfo
 
 struct RayTracingFrameInfo
 {
+	uint32_t frameCounter				= 0;
 	VkDescriptorSet sceneDataSetHandle	= VK_NULL_HANDLE;
 	VkDescriptorSet raytracingSetHandle = VK_NULL_HANDLE;
 };

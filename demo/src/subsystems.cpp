@@ -182,6 +182,7 @@ HybridRayTracingSubsystem::HybridRayTracingSubsystem(
 	IRayTracingSubSystem(ctx)
 {
 	m_layout = hri::PipelineLayoutBuilder(ctx.renderContext)
+		.addPushConstant(sizeof(RTFrameInfoPushConstant), VK_SHADER_STAGE_RAYGEN_BIT_KHR)
 		.addDescriptorSetLayout(sceneDataSetLayout)
 		.addDescriptorSetLayout(rtSetLayout)
 		.build();
@@ -236,13 +237,23 @@ void HybridRayTracingSubsystem::record(hri::ActiveFrame& frame) const
 		m_currentFrameInfo.sceneDataSetHandle,
 		m_currentFrameInfo.raytracingSetHandle,
 	};
-
 	vkCmdBindDescriptorSets(
 		frame.commandBuffer,
 		m_pPSO->bindPoint,
 		m_layout,
 		0, 2, descriptorSets,
 		0, nullptr
+	);
+
+	RTFrameInfoPushConstant frameInfoPC = RTFrameInfoPushConstant{
+		m_currentFrameInfo.frameCounter,
+	};
+	vkCmdPushConstants(
+		frame.commandBuffer,
+		m_layout,
+		VK_SHADER_STAGE_RAYGEN_BIT_KHR,
+		0, sizeof(RTFrameInfoPushConstant),
+		&frameInfoPC
 	);
 
 	vkCmdBindPipeline(frame.commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);

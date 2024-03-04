@@ -16,6 +16,11 @@
 
 /// Shared include file for raytracing shader definitions
 
+struct FrameInfo
+{
+	uint frameIdx;
+};
+
 struct HybridInitialHit
 {
 	bool miss;

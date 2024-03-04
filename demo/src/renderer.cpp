@@ -18,6 +18,7 @@ Renderer::Renderer(raytracing::RayTracingContext& ctx, hri::Camera& camera, Scen
 	m_accelStructManager(ctx),
 	m_computePool(m_context, m_context.queues.computeQueue, VK_COMMAND_POOL_CREATE_TRANSIENT_BIT),
 	m_stagingPool(m_context, m_context.queues.transferQueue, VK_COMMAND_POOL_CREATE_TRANSIENT_BIT),
+	m_frameCounter(0),
 	m_camera(camera),
 	m_activeScene(activeScene)
 {
@@ -53,10 +54,31 @@ void Renderer::drawFrame()
 {
 	m_renderCore.startFrame();
 	hri::ActiveFrame frame = m_renderCore.getActiveFrame();
+	RendererFrameData& frameData = m_frames[frame.currentFrameIndex];
 
 	// Prepare next frame's resources
 	uint32_t nextFrameIdx = (frame.currentFrameIndex + 1) % hri::RenderCore::framesInFlight();
 	prepareFrameResources(nextFrameIdx);
+
+	// Update subsystem frame info
+	m_gbufferLayoutSubsystem->updateFrameInfo(GBufferLayoutFrameInfo{
+		frameData.sceneDataSet->set,
+		&m_activeScene,
+		});
+
+	m_hybridRTSubsystem->updateFrameInfo(RayTracingFrameInfo{
+		m_frameCounter,
+		frameData.sceneDataSet->set,
+		frameData.raytracingSet->set,
+		});
+
+	m_composeSubsystem->updateFrameInfo(ComposeFrameInfo{
+		frameData.composeSet->set,
+	});
+
+	m_presentSubsystem->updateFrameInfo(PresentFrameInfo{
+		frameData.presentInputSet->set,
+	});
 
 	// Begin command recording for this frame
 	frame.beginCommands();
@@ -240,6 +262,8 @@ void Renderer::drawFrame()
 
 	frame.endCommands();
 	m_renderCore.endFrame();
+
+	m_frameCounter++;
 }
 
 void Renderer::initShaderDB()
@@ -658,6 +682,7 @@ void Renderer::recreateSwapDependentResources(const vkb::Swapchain& swapchain)
 
 	// Recreate render pass resources
 	m_gbufferLayoutPassManager->recreateResources();
+	m_composePassManager->recreateResources();
 	m_swapchainPassManager->recreateResources();
 
 	// Recreate raytracing targets
@@ -878,23 +903,4 @@ void Renderer::prepareFrameResources(uint32_t frameIdx)
 	(*rendererFrameData.raytracingSet)
 		.writeEXT(RayTracingBindings::Tlas, &tlasInfo)
 		.flush();
-
-	// Update subsystem frame info
-	m_gbufferLayoutSubsystem->updateFrameInfo(GBufferLayoutFrameInfo{
-		rendererFrameData.sceneDataSet->set,
-		&m_activeScene,
-	});
-
-	m_hybridRTSubsystem->updateFrameInfo(RayTracingFrameInfo{
-		rendererFrameData.sceneDataSet->set,
-		rendererFrameData.raytracingSet->set,
-	});
-
-	m_composeSubsystem->updateFrameInfo(ComposeFrameInfo{
-		rendererFrameData.composeSet->set,
-	});
-
-	m_presentSubsystem->updateFrameInfo(PresentFrameInfo{
-		rendererFrameData.presentInputSet->set,
-	});
 }

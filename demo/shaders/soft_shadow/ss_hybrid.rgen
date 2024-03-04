@@ -18,13 +18,15 @@ layout(set = 1, binding = 5) uniform sampler2D GBufferNormal;
 layout(set = 1, binding = 6) uniform sampler2D GBufferDepth;
 layout(set = 1, binding = 7, r32f) uniform image2D softShadowOut;
 
+layout(push_constant) uniform FRAME_INFO { FrameInfo frameInfo; };
+
 void main()
 {
 	// Calculate launch data
 	const uint launchIndex = calculateLaunchIndex(gl_LaunchIDEXT, gl_LaunchSizeEXT);
 	const vec2 pixelCenter = gl_LaunchIDEXT.xy + vec2(0.5);
 	const vec2 inUV = pixelCenter / vec2(gl_LaunchSizeEXT.xy);
-	uint seed = initSeed(launchIndex);
+	uint seed = initSeed(launchIndex + frameInfo.frameIdx * 1799);
 
 	// Calculate some params
 	const mat4 invProj = inverse(camera.project);
