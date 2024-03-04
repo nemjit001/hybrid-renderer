@@ -224,10 +224,10 @@ void Renderer::drawFrame()
 void Renderer::initShaderDB()
 {
 	// Raytracing Shaders
-	//	Soft shadows
+	//		Soft shadows
 	m_shaderDatabase.registerShader("SSRayGen", hri::Shader::loadFile(m_context, "./shaders/ss_hybrid.rgen.spv", VK_SHADER_STAGE_RAYGEN_BIT_KHR));
 	m_shaderDatabase.registerShader("SSMiss", hri::Shader::loadFile(m_context, "./shaders/ss_hybrid.rmiss.spv", VK_SHADER_STAGE_MISS_BIT_KHR));
-	//	Direct Illumination
+	//		Direct Illumination
 	m_shaderDatabase.registerShader("DIRayGen", hri::Shader::loadFile(m_context, "./shaders/di_hybrid.rgen.spv", VK_SHADER_STAGE_RAYGEN_BIT_KHR));
 	m_shaderDatabase.registerShader("DIMiss", hri::Shader::loadFile(m_context, "./shaders/di_hybrid.rmiss.spv", VK_SHADER_STAGE_MISS_BIT_KHR));
 	m_shaderDatabase.registerShader("DICHit", hri::Shader::loadFile(m_context, "./shaders/di_hybrid.rchit.spv", VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR));
@@ -401,57 +401,63 @@ void Renderer::initSharedResources()
 	VkExtent2D swapExtent = m_context.swapchain.extent;
 
 	// init shared samplers
-	m_renderResultNearestSampler = std::unique_ptr<hri::ImageSampler>(new hri::ImageSampler(
-		m_context,
-		VK_FILTER_NEAREST,
-		VK_FILTER_NEAREST,
-		VK_SAMPLER_MIPMAP_MODE_NEAREST
-	));
+	{
+		m_renderResultNearestSampler = std::unique_ptr<hri::ImageSampler>(new hri::ImageSampler(
+			m_context,
+			VK_FILTER_NEAREST,
+			VK_FILTER_NEAREST,
+			VK_SAMPLER_MIPMAP_MODE_NEAREST
+		));
 
-	m_renderResultLinearSampler = std::unique_ptr<hri::ImageSampler>(new hri::ImageSampler(
-		m_context,
-		VK_FILTER_LINEAR,
-		VK_FILTER_LINEAR,
-		VK_SAMPLER_MIPMAP_MODE_LINEAR
-	));
+		m_renderResultLinearSampler = std::unique_ptr<hri::ImageSampler>(new hri::ImageSampler(
+			m_context,
+			VK_FILTER_LINEAR,
+			VK_FILTER_LINEAR,
+			VK_SAMPLER_MIPMAP_MODE_LINEAR
+		));
+	}
 
 	// Init raytracing targets
-	m_softShadowRTPassResult = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
-		m_context,
-		VK_IMAGE_TYPE_2D,
-		VK_FORMAT_R8_UNORM,
-		VK_SAMPLE_COUNT_1_BIT,
-		{ swapExtent.width, swapExtent.height, 1 },
-		1,
-		1,
-		VK_IMAGE_USAGE_STORAGE_BIT
-		| VK_IMAGE_USAGE_SAMPLED_BIT
-	));
+	{
+		m_softShadowRTPassResult = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
+			m_context,
+			VK_IMAGE_TYPE_2D,
+			VK_FORMAT_R8_UNORM,
+			VK_SAMPLE_COUNT_1_BIT,
+			{ swapExtent.width, swapExtent.height, 1 },
+			1,
+			1,
+			VK_IMAGE_USAGE_STORAGE_BIT
+			| VK_IMAGE_USAGE_SAMPLED_BIT
+		));
 
-	m_directIlluminationRTPassResult = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
-		m_context,
-		VK_IMAGE_TYPE_2D,
-		VK_FORMAT_R8G8B8A8_UNORM,
-		VK_SAMPLE_COUNT_1_BIT,
-		{ swapExtent.width, swapExtent.height, 1 },
-		1,
-		1,
-		VK_IMAGE_USAGE_STORAGE_BIT
-		| VK_IMAGE_USAGE_SAMPLED_BIT
-	));
+		m_directIlluminationRTPassResult = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
+			m_context,
+			VK_IMAGE_TYPE_2D,
+			VK_FORMAT_R8G8B8A8_UNORM,
+			VK_SAMPLE_COUNT_1_BIT,
+			{ swapExtent.width, swapExtent.height, 1 },
+			1,
+			1,
+			VK_IMAGE_USAGE_STORAGE_BIT
+			| VK_IMAGE_USAGE_SAMPLED_BIT
+		));
+	}
 
 	// Initialize raytracing target views
-	m_softShadowRTPassResult->createView(
-		VK_IMAGE_VIEW_TYPE_2D,
-		hri::ImageResource::DefaultComponentMapping(),
-		hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1)
-	);
+	{
+		m_softShadowRTPassResult->createView(
+			VK_IMAGE_VIEW_TYPE_2D,
+			hri::ImageResource::DefaultComponentMapping(),
+			hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1)
+		);
 
-	m_directIlluminationRTPassResult->createView(
-		VK_IMAGE_VIEW_TYPE_2D,
-		hri::ImageResource::DefaultComponentMapping(),
-		hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1)
-	);
+		m_directIlluminationRTPassResult->createView(
+			VK_IMAGE_VIEW_TYPE_2D,
+			hri::ImageResource::DefaultComponentMapping(),
+			hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1)
+		);
+	}
 }
 
 void Renderer::initGlobalDescriptorSets()
@@ -584,40 +590,44 @@ void Renderer::recreateSwapDependentResources(const vkb::Swapchain& swapchain)
 	m_swapchainPassManager->recreateResources();
 
 	// Recreate raytracing targets
-	m_softShadowRTPassResult = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
-		m_context,
-		m_softShadowRTPassResult->imageType,
-		m_softShadowRTPassResult->format,	// Reuse format, that's fine
-		m_softShadowRTPassResult->samples,
-		{ swapExtent.width, swapExtent.height, 1 },
-		1,
-		1,
-		m_softShadowRTPassResult->usage
-	));
+	{
+		m_softShadowRTPassResult = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
+			m_context,
+			m_softShadowRTPassResult->imageType,
+			m_softShadowRTPassResult->format,	// Reuse format, that's fine
+			m_softShadowRTPassResult->samples,
+			{ swapExtent.width, swapExtent.height, 1 },
+			1,
+			1,
+			m_softShadowRTPassResult->usage
+		));
 
-	m_directIlluminationRTPassResult = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
-		m_context,
-		m_directIlluminationRTPassResult->imageType,
-		m_directIlluminationRTPassResult->format,
-		m_directIlluminationRTPassResult->samples,
-		{ swapExtent.width, swapExtent.height, 1 },
-		1,
-		1,
-		m_directIlluminationRTPassResult->usage
-	));
+		m_directIlluminationRTPassResult = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
+			m_context,
+			m_directIlluminationRTPassResult->imageType,
+			m_directIlluminationRTPassResult->format,
+			m_directIlluminationRTPassResult->samples,
+			{ swapExtent.width, swapExtent.height, 1 },
+			1,
+			1,
+			m_directIlluminationRTPassResult->usage
+		));
+	}
 
 	// Recreate raytracing target views
-	m_softShadowRTPassResult->createView(
-		VK_IMAGE_VIEW_TYPE_2D,
-		hri::ImageResource::DefaultComponentMapping(),
-		hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1)
-	);
+	{
+		m_softShadowRTPassResult->createView(
+			VK_IMAGE_VIEW_TYPE_2D,
+			hri::ImageResource::DefaultComponentMapping(),
+			hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1)
+		);
 
-	m_directIlluminationRTPassResult->createView(
-		VK_IMAGE_VIEW_TYPE_2D,
-		hri::ImageResource::DefaultComponentMapping(),
-		hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1)
-	);
+		m_directIlluminationRTPassResult->createView(
+			VK_IMAGE_VIEW_TYPE_2D,
+			hri::ImageResource::DefaultComponentMapping(),
+			hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1)
+		);
+	}
 
 	// Update descriptor sets
 	for (size_t frameIdx = 0; frameIdx < hri::RenderCore::framesInFlight(); frameIdx++)

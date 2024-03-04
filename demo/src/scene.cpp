@@ -383,6 +383,9 @@ SceneNode::SceneId SceneGraph::calculateLODLevel(const hri::Camera& camera, cons
 SceneGraph SceneLoader::load(raytracing::RayTracingContext& context, const std::string& path)
 {
 	std::ifstream sceneFile = std::ifstream(path);
+	if (!sceneFile.good())
+		FATAL_ERROR("Failed to load scene file!");
+
 	nlohmann::json sceneJSON = nlohmann::json::parse(sceneFile);
 
 	std::vector<Material> materials = {};

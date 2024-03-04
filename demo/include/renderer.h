@@ -116,6 +116,7 @@ private:
 	// Ray Tracing Targets
 	std::unique_ptr<hri::ImageResource> m_softShadowRTPassResult;
 	std::unique_ptr<hri::ImageResource> m_directIlluminationRTPassResult;
+	std::unique_ptr<hri::ImageResource> m_globalIlluminationRTPassResult;
 
 	// Render subsystems
 	std::unique_ptr<GBufferLayoutSubsystem> m_gbufferLayoutSubsystem;

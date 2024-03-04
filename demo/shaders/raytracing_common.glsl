@@ -21,7 +21,7 @@ struct SSRayPayload
 	bool miss;
 };
 
-struct IlluminationRayPayload
+struct DIRayPayload
 {
 	vec3 transmission;
 	vec3 energy;

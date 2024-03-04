@@ -208,7 +208,6 @@ HybridRayTracingSubsystem::HybridRayTracingSubsystem(
 		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR, 2)
 		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR, 3)
 		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR, VK_SHADER_UNUSED_KHR, 4)
-		// TODO: GI shader groups
 		.setMaxRecursionDepth()
 		.setLayout(m_layout);
 
