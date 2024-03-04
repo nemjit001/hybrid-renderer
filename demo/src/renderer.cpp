@@ -6,23 +6,11 @@
 #include "detail/raytracing.h"
 #include "subsystems.h"
 
-void RTTargets::init(hri::RenderContext& ctx, RTTargets& targets)
+void RayTracingTargets::init(hri::RenderContext& ctx, RayTracingTargets& targets)
 {
 	VkExtent2D swapExtent = ctx.swapchain.extent;
 
-	targets.softShadowRTPassResult = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
-		ctx,
-		VK_IMAGE_TYPE_2D,
-		VK_FORMAT_R8_UNORM,
-		VK_SAMPLE_COUNT_1_BIT,
-		{ swapExtent.width, swapExtent.height, 1 },
-		1,
-		1,
-		VK_IMAGE_USAGE_STORAGE_BIT
-		| VK_IMAGE_USAGE_SAMPLED_BIT
-	));
-
-	targets.directIlluminationRTPassResult = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
+	targets.globalIllumination = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
 		ctx,
 		VK_IMAGE_TYPE_2D,
 		VK_FORMAT_R8G8B8A8_UNORM,
@@ -34,13 +22,7 @@ void RTTargets::init(hri::RenderContext& ctx, RTTargets& targets)
 		| VK_IMAGE_USAGE_SAMPLED_BIT
 	));
 
-	targets.softShadowRTPassResult->createView(
-		VK_IMAGE_VIEW_TYPE_2D,
-		hri::ImageResource::DefaultComponentMapping(),
-		hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1)
-	);
-
-	targets.directIlluminationRTPassResult->createView(
+	targets.globalIllumination->createView(
 		VK_IMAGE_VIEW_TYPE_2D,
 		hri::ImageResource::DefaultComponentMapping(),
 		hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1)
@@ -54,7 +36,6 @@ Renderer::Renderer(raytracing::RayTracingContext& ctx, hri::Camera& camera, Scen
 	m_debug(m_context),
 	m_renderCore(m_context),
 	m_shaderDatabase(m_context),
-	m_subsystemManager(),
 	m_descriptorSetAllocator(m_context),
 	m_accelStructManager(ctx),
 	m_computePool(m_context, m_context.queues.computeQueue, VK_COMMAND_POOL_CREATE_TRANSIENT_BIT),
@@ -102,204 +83,78 @@ void Renderer::drawFrame()
 	uint32_t nextFrameIdx = (frame.currentFrameIndex + 1) % hri::RenderCore::framesInFlight();
 	prepareFrameResources(nextFrameIdx);
 
-	// Update subsystem frame info
-	m_gbufferLayoutSubsystem->updateFrameInfo(GBufferLayoutFrameInfo{
-		frameData.sceneDataSet->set,
-		&m_activeScene,
-		});
-
-	m_hybridRTSubsystem->updateFrameInfo(RayTracingFrameInfo{
-		m_frameCounter,
-		frameData.sceneDataSet->set,
-		frameData.raytracingSet->set,
-		});
-
-	m_composeSubsystem->updateFrameInfo(ComposeFrameInfo{
-		frameData.composeSet->set,
-	});
-
-	m_presentSubsystem->updateFrameInfo(PresentFrameInfo{
-		frameData.presentInputSet->set,
-	});
-
 	// Begin command recording for this frame
 	frame.beginCommands();
 
 	// Record GBufferLayout pass
 	m_gbufferLayoutPassManager->beginRenderPass(frame);
-	m_subsystemManager.recordSubsystem("GBufferLayoutSystem", frame);
+	m_gbufferLayoutSubsystem->record(frame, GBufferLayoutFrameInfo{ frameData.sceneDataSet->set, &m_activeScene, });
 	m_gbufferLayoutPassManager->endRenderPass(frame);
 
-	// Transition GBuffer output resources
-	{
-		VkImageMemoryBarrier2 gbufferAlbedoBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
-		gbufferAlbedoBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
-		gbufferAlbedoBarrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
-		gbufferAlbedoBarrier.srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
-		gbufferAlbedoBarrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
-		gbufferAlbedoBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-		gbufferAlbedoBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		gbufferAlbedoBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		gbufferAlbedoBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		gbufferAlbedoBarrier.image = m_gbufferLayoutPassManager->getAttachmentResource(0).image;
-		gbufferAlbedoBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
-
-		VkImageMemoryBarrier2 gbufferEmissionBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
-		gbufferEmissionBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
-		gbufferEmissionBarrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
-		gbufferEmissionBarrier.srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
-		gbufferEmissionBarrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
-		gbufferEmissionBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-		gbufferEmissionBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		gbufferEmissionBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		gbufferEmissionBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		gbufferEmissionBarrier.image = m_gbufferLayoutPassManager->getAttachmentResource(1).image;
-		gbufferEmissionBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
-
-		VkImageMemoryBarrier2 gbufferSpecularBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
-		gbufferSpecularBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
-		gbufferSpecularBarrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
-		gbufferSpecularBarrier.srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
-		gbufferSpecularBarrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
-		gbufferSpecularBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-		gbufferSpecularBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		gbufferSpecularBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		gbufferSpecularBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		gbufferSpecularBarrier.image = m_gbufferLayoutPassManager->getAttachmentResource(2).image;
-		gbufferSpecularBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
-
-		VkImageMemoryBarrier2 gbufferTransmittanceBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
-		gbufferTransmittanceBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
-		gbufferTransmittanceBarrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
-		gbufferTransmittanceBarrier.srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
-		gbufferTransmittanceBarrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
-		gbufferTransmittanceBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-		gbufferTransmittanceBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		gbufferTransmittanceBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		gbufferTransmittanceBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		gbufferTransmittanceBarrier.image = m_gbufferLayoutPassManager->getAttachmentResource(3).image;
-		gbufferTransmittanceBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
-
-		VkImageMemoryBarrier2 gbufferNormalBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
-		gbufferNormalBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
-		gbufferNormalBarrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
-		gbufferNormalBarrier.srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
-		gbufferNormalBarrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
-		gbufferNormalBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-		gbufferNormalBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		gbufferNormalBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		gbufferNormalBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		gbufferNormalBarrier.image = m_gbufferLayoutPassManager->getAttachmentResource(4).image;
-		gbufferNormalBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
-
-		VkImageMemoryBarrier2 gbufferDepthBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
-		gbufferDepthBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
-		gbufferDepthBarrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
-		gbufferDepthBarrier.srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
-		gbufferDepthBarrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
-		gbufferDepthBarrier.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-		gbufferDepthBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		gbufferDepthBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		gbufferDepthBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		gbufferDepthBarrier.image = m_gbufferLayoutPassManager->getAttachmentResource(5).image;
-		gbufferDepthBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1);
-
-		frame.pipelineBarrier({
-			gbufferAlbedoBarrier,
-			gbufferEmissionBarrier,
-			gbufferSpecularBarrier,
-			gbufferTransmittanceBarrier,
-			gbufferNormalBarrier,
-			gbufferDepthBarrier
-		});
-	}
-	
-	// Transition Raytracing targets to storage layouts
-	{
-		VkImageMemoryBarrier2 softShadowGeneralBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
-		softShadowGeneralBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
-		softShadowGeneralBarrier.dstStageMask = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR;
-		softShadowGeneralBarrier.srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
-		softShadowGeneralBarrier.dstAccessMask = VK_ACCESS_2_SHADER_WRITE_BIT_KHR;
-		softShadowGeneralBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		softShadowGeneralBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
-		softShadowGeneralBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		softShadowGeneralBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		softShadowGeneralBarrier.image = m_raytracingTargets.softShadowRTPassResult->image;
-		softShadowGeneralBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
-
-		VkImageMemoryBarrier2 DIGeneralBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
-		DIGeneralBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
-		DIGeneralBarrier.dstStageMask = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR;
-		DIGeneralBarrier.srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
-		DIGeneralBarrier.dstAccessMask = VK_ACCESS_2_SHADER_WRITE_BIT_KHR;
-		DIGeneralBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		DIGeneralBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
-		DIGeneralBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		DIGeneralBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		DIGeneralBarrier.image = m_raytracingTargets.directIlluminationRTPassResult->image;
-		DIGeneralBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
-
-		frame.pipelineBarrier({ softShadowGeneralBarrier, DIGeneralBarrier });
-	}
-
 	// Execute raytracing passes
-	m_subsystemManager.recordSubsystem("HybridRTSystem", frame);
+	RayTracingFrameInfo rtFrameInfo = RayTracingFrameInfo{
+		m_frameCounter,
+		&m_gbufferLayoutPassManager->getAttachmentResource(0),
+		&m_gbufferLayoutPassManager->getAttachmentResource(1),
+		&m_gbufferLayoutPassManager->getAttachmentResource(2),
+		&m_gbufferLayoutPassManager->getAttachmentResource(3),
+		&m_gbufferLayoutPassManager->getAttachmentResource(4),
+		&m_gbufferLayoutPassManager->getAttachmentResource(5),
+		m_raytracingTargets.globalIllumination.get(),
+		frameData.sceneDataSet->set,
+		frameData.raytracingSet->set
+	};
 
-	// Transition Raytracing targets to sample layouts
+	m_GISubsystem->transitionGbufferResources(frame, rtFrameInfo);
+	m_GISubsystem->record(frame, rtFrameInfo);
+
+	// Transition raytracing resources
 	{
-		VkImageMemoryBarrier2 softShadowSampleBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
-		softShadowSampleBarrier.srcStageMask = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR;
-		softShadowSampleBarrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
-		softShadowSampleBarrier.srcAccessMask = VK_ACCESS_2_SHADER_WRITE_BIT_KHR;
-		softShadowSampleBarrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
-		softShadowSampleBarrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
-		softShadowSampleBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		softShadowSampleBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		softShadowSampleBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		softShadowSampleBarrier.image = m_raytracingTargets.softShadowRTPassResult->image;
-		softShadowSampleBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
+		VkImageMemoryBarrier2 sampleBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
+		sampleBarrier.srcStageMask = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR;
+		sampleBarrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
+		sampleBarrier.srcAccessMask = VK_ACCESS_2_SHADER_WRITE_BIT_KHR;
+		sampleBarrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
+		sampleBarrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+		sampleBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		sampleBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		sampleBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 
-		VkImageMemoryBarrier2 DISampleBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
-		DISampleBarrier.srcStageMask = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR;
-		DISampleBarrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
-		DISampleBarrier.srcAccessMask = VK_ACCESS_2_SHADER_WRITE_BIT_KHR;
-		DISampleBarrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
-		DISampleBarrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
-		DISampleBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		DISampleBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		DISampleBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		DISampleBarrier.image = m_raytracingTargets.directIlluminationRTPassResult->image;
-		DISampleBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
-
-		frame.pipelineBarrier({ softShadowSampleBarrier, DISampleBarrier });
+		sampleBarrier.image = m_raytracingTargets.globalIllumination->image;
+		sampleBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
+		frame.pipelineBarrier({ sampleBarrier });
 	}
 
-	m_composePassManager->beginRenderPass(frame);
-	m_subsystemManager.recordSubsystem("ComposeSystem", frame);
-	m_composePassManager->endRenderPass(frame);
+	// Record a deferred shading pass, composing the final output image
+	m_deferredShadingPassManager->beginRenderPass(frame);
+	m_deferredShadingSubsystem->record(frame, DeferredShadingFrameInfo{
+		frameData.deferredShadingSet->set
+	});
+	m_deferredShadingPassManager->endRenderPass(frame);
 
-	// Transition compose output resources
+	// Transition presentable image
 	{
-		VkImageMemoryBarrier2 composeResultBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
-		composeResultBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
-		composeResultBarrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
-		composeResultBarrier.srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
-		composeResultBarrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
-		composeResultBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-		composeResultBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		composeResultBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		composeResultBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		composeResultBarrier.image = m_composePassManager->getAttachmentResource(0).image;
-		composeResultBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
+		VkImageMemoryBarrier2 presentSampleBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
+		presentSampleBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+		presentSampleBarrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
+		presentSampleBarrier.srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
+		presentSampleBarrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
+		presentSampleBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		presentSampleBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		presentSampleBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		presentSampleBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		presentSampleBarrier.image = m_deferredShadingPassManager->getAttachmentResource(0).image;
+		presentSampleBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
 
-		frame.pipelineBarrier({ composeResultBarrier });
+		frame.pipelineBarrier({ presentSampleBarrier });
 	}
 
 	// Record swapchain output passes
 	m_swapchainPassManager->beginRenderPass(frame);
-	m_subsystemManager.recordSubsystem("PresentationSystem", frame);
-	m_subsystemManager.recordSubsystem("UISystem", frame);	// Must be drawn after present as overlay
+	m_presentSubsystem->record(frame, PresentFrameInfo{
+		frameData.presentInputSet->set
+	});
+	m_uiSubsystem->record(frame, UIFrameInfo{});
 	m_swapchainPassManager->endRenderPass(frame);
 
 	frame.endCommands();
@@ -312,13 +167,9 @@ void Renderer::drawFrame()
 void Renderer::initShaderDB()
 {
 	// Raytracing Shaders
-	//		Soft shadows
-	m_shaderDatabase.registerShader("SSRayGen", hri::Shader::loadFile(m_context, "./shaders/ss_hybrid.rgen.spv", VK_SHADER_STAGE_RAYGEN_BIT_KHR));
-	m_shaderDatabase.registerShader("SSMiss", hri::Shader::loadFile(m_context, "./shaders/ss_hybrid.rmiss.spv", VK_SHADER_STAGE_MISS_BIT_KHR));
-	//		Direct Illumination
-	m_shaderDatabase.registerShader("DIRayGen", hri::Shader::loadFile(m_context, "./shaders/di_hybrid.rgen.spv", VK_SHADER_STAGE_RAYGEN_BIT_KHR));
-	m_shaderDatabase.registerShader("DIMiss", hri::Shader::loadFile(m_context, "./shaders/di_hybrid.rmiss.spv", VK_SHADER_STAGE_MISS_BIT_KHR));
-	m_shaderDatabase.registerShader("DICHit", hri::Shader::loadFile(m_context, "./shaders/di_hybrid.rchit.spv", VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR));
+	m_shaderDatabase.registerShader("GIRayGen", hri::Shader::loadFile(m_context, "./shaders/gi_hybrid.rgen.spv", VK_SHADER_STAGE_RAYGEN_BIT_KHR));
+	m_shaderDatabase.registerShader("GIMiss", hri::Shader::loadFile(m_context, "./shaders/gi.rmiss.spv", VK_SHADER_STAGE_MISS_BIT_KHR));
+	m_shaderDatabase.registerShader("GICHit", hri::Shader::loadFile(m_context, "./shaders/gi.rchit.spv", VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR));
 
 	// Vertex shaders
 	m_shaderDatabase.registerShader("PresentVert", hri::Shader::loadFile(m_context, "./shaders/present.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
@@ -326,7 +177,7 @@ void Renderer::initShaderDB()
 
 	// Fragment shaders
 	m_shaderDatabase.registerShader("GBufferLayoutFrag", hri::Shader::loadFile(m_context, "./shaders/gbuffer_layout.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
-	m_shaderDatabase.registerShader("ComposeFrag", hri::Shader::loadFile(m_context, "./shaders/compose.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
+	m_shaderDatabase.registerShader("DeferredShadingFrag", hri::Shader::loadFile(m_context, "./shaders/deferred_shading.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
 	m_shaderDatabase.registerShader("PresentFrag", hri::Shader::loadFile(m_context, "./shaders/present.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
 }
 
@@ -335,6 +186,14 @@ void Renderer::initRenderPasses()
 	// GBuffer Layout pass
 	{
 		hri::RenderPassBuilder gbufferLayoutPassBuilder = hri::RenderPassBuilder(m_context)
+			.addDependency(
+				VK_SUBPASS_EXTERNAL,
+				0,
+				VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+				VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+				VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+				VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT
+			)
 			.addAttachment(	// Albedo
 				VK_FORMAT_R8G8B8A8_UNORM,
 				VK_SAMPLE_COUNT_1_BIT,
@@ -454,9 +313,9 @@ void Renderer::initRenderPasses()
 		));
 	}
 
-	// Compose pass
+	// deferred pass
 	{
-		hri::RenderPassBuilder composePassBuilder = hri::RenderPassBuilder(m_context)
+		hri::RenderPassBuilder deferredPassBuilder = hri::RenderPassBuilder(m_context)
 			.addAttachment(
 				VK_FORMAT_R8G8B8A8_UNORM,
 				VK_SAMPLE_COUNT_1_BIT,
@@ -469,8 +328,8 @@ void Renderer::initRenderPasses()
 				VkAttachmentReference{ 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL }
 			);
 
-		const std::vector<hri::RenderAttachmentConfig> composeAttachmentConfigs = {
-			hri::RenderAttachmentConfig{ // Albedo target
+		const std::vector<hri::RenderAttachmentConfig> deferredAttachmentConfigs = {
+			hri::RenderAttachmentConfig{
 				VK_FORMAT_R8G8B8A8_UNORM,
 				VK_SAMPLE_COUNT_1_BIT,
 				VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
@@ -479,10 +338,10 @@ void Renderer::initRenderPasses()
 			},
 		};
 
-		m_composePassManager = std::unique_ptr<hri::RenderPassResourceManager>(new hri::RenderPassResourceManager(
+		m_deferredShadingPassManager = std::unique_ptr<hri::RenderPassResourceManager>(new hri::RenderPassResourceManager(
 			m_context,
-			composePassBuilder.build(),
-			composeAttachmentConfigs
+			deferredPassBuilder.build(),
+			deferredAttachmentConfigs
 		));
 	}
 
@@ -514,7 +373,7 @@ void Renderer::initRenderPasses()
 	m_gbufferLayoutPassManager->setClearValue(4, VkClearValue{ { 0.0f, 0.0f, 0.0f, 0.0f } });
 	m_gbufferLayoutPassManager->setClearValue(5, VkClearValue{ { 1.0f, 0x00 } });
 
-	m_composePassManager->setClearValue(0, VkClearValue{ { 0.0f, 0.0f, 0.0f, 0.0f } });
+	m_deferredShadingPassManager->setClearValue(0, VkClearValue{ { 0.0f, 0.0f, 0.0f, 0.0f } });
 
 	m_swapchainPassManager->setClearValue(0, VkClearValue{ { 0.0f, 0.0f, 0.0f, 1.0f } });
 }
@@ -541,7 +400,7 @@ void Renderer::initSharedResources()
 	}
 
 	// Init ray tracing targets
-	RTTargets::init(m_context, m_raytracingTargets);
+	RayTracingTargets::init(m_context, m_raytracingTargets);
 }
 
 void Renderer::initGlobalDescriptorSets()
@@ -588,12 +447,10 @@ void Renderer::initGlobalDescriptorSets()
 		.addBinding(RayTracingBindings::GBufferMatTransmittance, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
 		.addBinding(RayTracingBindings::GBufferNormal, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
 		.addBinding(RayTracingBindings::GBufferDepth, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
-		.addBinding(RayTracingBindings::SoftShadowOutImage, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
-		.addBinding(RayTracingBindings::DIOutImage, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR);
+		.addBinding(RayTracingBindings::GIOutImage, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR);
 
-	hri::DescriptorSetLayoutBuilder composeSetBuilder = hri::DescriptorSetLayoutBuilder(m_context)
-		.addBinding(ComposeInputBindings::SoftShadowImage, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-		.addBinding(ComposeInputBindings::DirectIlluminationImage, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
+	hri::DescriptorSetLayoutBuilder deferredShadingSetBuilder = hri::DescriptorSetLayoutBuilder(m_context)
+		.addBinding(DeferredShadingBindings::GlobalIlluminationResult, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
 
 	hri::DescriptorSetLayoutBuilder presentInputSetBuilder = hri::DescriptorSetLayoutBuilder(m_context)
 		.addBinding(PresentInputBindings::RenderResult, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
@@ -601,7 +458,7 @@ void Renderer::initGlobalDescriptorSets()
 	// Allocate descriptor set layouts
 	m_sceneDataSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(sceneDataSetBuilder.build()));
 	m_rtDescriptorSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(rtGlobalDescriptorSetBuilder.build()));
-	m_composeSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(composeSetBuilder.build()));
+	m_deferredShadingSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(deferredShadingSetBuilder.build()));
 	m_presentInputSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(presentInputSetBuilder.build()));
 }
 
@@ -614,7 +471,7 @@ void Renderer::initRenderSubsystems()
 		m_sceneDataSetLayout->setLayout
 	));
 
-	m_hybridRTSubsystem = std::unique_ptr<HybridRayTracingSubsystem>(new HybridRayTracingSubsystem(
+	m_GISubsystem = std::unique_ptr<GlobalIlluminationSubsystem>(new GlobalIlluminationSubsystem(
 		m_raytracingContext,
 		m_shaderDatabase,
 		m_sceneDataSetLayout->setLayout,
@@ -627,11 +484,11 @@ void Renderer::initRenderSubsystems()
 		m_descriptorSetAllocator.fixedPool()
 	));
 
-	m_composeSubsystem = std::unique_ptr<ComposeSubsystem>(new ComposeSubsystem(
+	m_deferredShadingSubsystem = std::unique_ptr<DeferredShadingSubsystem>(new DeferredShadingSubsystem(
 		m_context,
 		m_shaderDatabase,
-		m_composePassManager->renderPass(),
-		m_composeSetLayout->setLayout
+		m_deferredShadingPassManager->renderPass(),
+		m_deferredShadingSetLayout->setLayout
 	));
 
 	m_presentSubsystem = std::unique_ptr<PresentationSubsystem>(new PresentationSubsystem(
@@ -640,12 +497,6 @@ void Renderer::initRenderSubsystems()
 		m_swapchainPassManager->renderPass(),
 		m_presentInputSetLayout->setLayout
 	));
-
-	m_subsystemManager.registerSubsystem("GBufferLayoutSystem", m_gbufferLayoutSubsystem.get());
-	m_subsystemManager.registerSubsystem("HybridRTSystem", m_hybridRTSubsystem.get());
-	m_subsystemManager.registerSubsystem("UISystem", m_uiSubsystem.get());
-	m_subsystemManager.registerSubsystem("ComposeSystem", m_composeSubsystem.get());
-	m_subsystemManager.registerSubsystem("PresentationSystem", m_presentSubsystem.get());
 }
 
 void Renderer::initRendererFrameData()
@@ -669,8 +520,8 @@ void Renderer::initRendererFrameData()
 		frame.raytracingSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(
 			m_context, m_descriptorSetAllocator, *m_rtDescriptorSetLayout
 		));
-		frame.composeSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(
-			m_context, m_descriptorSetAllocator, *m_composeSetLayout
+		frame.deferredShadingSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(
+			m_context, m_descriptorSetAllocator, *m_deferredShadingSetLayout
 		));
 		frame.presentInputSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(
 			m_context, m_descriptorSetAllocator, *m_presentInputSetLayout
@@ -686,11 +537,11 @@ void Renderer::recreateSwapDependentResources(const vkb::Swapchain& swapchain)
 
 	// Recreate render pass resources
 	m_gbufferLayoutPassManager->recreateResources();
-	m_composePassManager->recreateResources();
+	m_deferredShadingPassManager->recreateResources();
 	m_swapchainPassManager->recreateResources();
 
 	// Reinit raytracing targets
-	RTTargets::init(m_context, m_raytracingTargets);
+	RayTracingTargets::init(m_context, m_raytracingTargets);
 
 	// Update descriptor sets
 	for (size_t frameIdx = 0; frameIdx < hri::RenderCore::framesInFlight(); frameIdx++)
@@ -764,15 +615,10 @@ void Renderer::updateFrameDescriptors(RendererFrameData& frame)
 		gbufferDepthResult.imageView = m_gbufferLayoutPassManager->getAttachmentResource(5).view;
 		gbufferDepthResult.sampler = m_renderResultNearestSampler->sampler;
 
-		VkDescriptorImageInfo softShadowOutInfo = VkDescriptorImageInfo{};
-		softShadowOutInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-		softShadowOutInfo.imageView = m_raytracingTargets.softShadowRTPassResult->view;
-		softShadowOutInfo.sampler = VK_NULL_HANDLE;
-
-		VkDescriptorImageInfo DIOutInfo = VkDescriptorImageInfo{};
-		DIOutInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-		DIOutInfo.imageView = m_raytracingTargets.directIlluminationRTPassResult->view;
-		DIOutInfo.sampler = VK_NULL_HANDLE;
+		VkDescriptorImageInfo GIOutInfo = VkDescriptorImageInfo{};
+		GIOutInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+		GIOutInfo.imageView = m_raytracingTargets.globalIllumination->view;
+		GIOutInfo.sampler = VK_NULL_HANDLE;
 
 		(*frame.raytracingSet)
 			.writeImage(RayTracingBindings::GBufferAlbedo, &gbufferAlbedoResult)
@@ -781,26 +627,19 @@ void Renderer::updateFrameDescriptors(RendererFrameData& frame)
 			.writeImage(RayTracingBindings::GBufferMatTransmittance, &gbufferTransmittanceResult)
 			.writeImage(RayTracingBindings::GBufferNormal, &gbufferNormalResult)
 			.writeImage(RayTracingBindings::GBufferDepth, &gbufferDepthResult)
-			.writeImage(RayTracingBindings::SoftShadowOutImage, &softShadowOutInfo)
-			.writeImage(RayTracingBindings::DIOutImage, &DIOutInfo)
+			.writeImage(RayTracingBindings::GIOutImage, &GIOutInfo)
 			.flush();
 	}
 
-	// Compose set
+	// Deferred shading set
 	{
-		VkDescriptorImageInfo ssResult = VkDescriptorImageInfo{};
-		ssResult.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		ssResult.imageView = m_raytracingTargets.softShadowRTPassResult->view;
-		ssResult.sampler = m_renderResultLinearSampler->sampler;
+		VkDescriptorImageInfo giResult = VkDescriptorImageInfo{};
+		giResult.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		giResult.imageView = m_raytracingTargets.globalIllumination->view;
+		giResult.sampler = m_renderResultLinearSampler->sampler;
 
-		VkDescriptorImageInfo diResult = VkDescriptorImageInfo{};
-		diResult.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		diResult.imageView = m_raytracingTargets.directIlluminationRTPassResult->view;
-		diResult.sampler = m_renderResultLinearSampler->sampler;
-
-		(*frame.composeSet)
-			.writeImage(ComposeInputBindings::SoftShadowImage, &ssResult)
-			.writeImage(ComposeInputBindings::DirectIlluminationImage, &diResult)
+		(*frame.deferredShadingSet)
+			.writeImage(DeferredShadingBindings::GlobalIlluminationResult, &giResult)
 			.flush();
 	}
 
@@ -808,7 +647,7 @@ void Renderer::updateFrameDescriptors(RendererFrameData& frame)
 	{
 		VkDescriptorImageInfo renderResultInfo = VkDescriptorImageInfo{};
 		renderResultInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		renderResultInfo.imageView = m_composePassManager->getAttachmentResource(0).view;
+		renderResultInfo.imageView = m_deferredShadingPassManager->getAttachmentResource(0).view;
 		renderResultInfo.sampler = m_renderResultLinearSampler->sampler;
 
 		(*frame.presentInputSet)

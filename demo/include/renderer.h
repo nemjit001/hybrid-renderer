@@ -19,16 +19,15 @@ struct RendererFrameData
 	// Descriptor sets
 	std::unique_ptr<hri::DescriptorSetManager> sceneDataSet;
 	std::unique_ptr<hri::DescriptorSetManager> raytracingSet;
-	std::unique_ptr<hri::DescriptorSetManager> composeSet;
+	std::unique_ptr<hri::DescriptorSetManager> deferredShadingSet;
 	std::unique_ptr<hri::DescriptorSetManager> presentInputSet;
 };
 
-struct RTTargets
+struct RayTracingTargets
 {
-	std::unique_ptr<hri::ImageResource> softShadowRTPassResult;
-	std::unique_ptr<hri::ImageResource> directIlluminationRTPassResult;
+	std::unique_ptr<hri::ImageResource> globalIllumination;
 
-	static void init(hri::RenderContext& ctx, RTTargets& targets);
+	static void init(hri::RenderContext& ctx, RayTracingTargets& targets);
 };
 
 enum SceneDataBindings
@@ -48,14 +47,12 @@ enum RayTracingBindings
 	GBufferMatTransmittance,
 	GBufferNormal,
 	GBufferDepth,
-	SoftShadowOutImage,
-	DIOutImage,
+	GIOutImage,
 };
 
-enum ComposeInputBindings
+enum DeferredShadingBindings
 {
-	SoftShadowImage,
-	DirectIlluminationImage,
+	GlobalIlluminationResult,
 };
 
 enum PresentInputBindings
@@ -99,7 +96,6 @@ private:
 	hri_debug::DebugLabelHandler m_debug;
 	hri::RenderCore m_renderCore;
 	hri::ShaderDatabase m_shaderDatabase;
-	hri::RenderSubsystemManager m_subsystemManager;
 	hri::DescriptorSetAllocator m_descriptorSetAllocator;
 	SceneASManager m_accelStructManager;
 	hri::CommandPool m_computePool;
@@ -118,22 +114,22 @@ private:
 	// Global descriptor set layouts
 	std::unique_ptr<hri::DescriptorSetLayout> m_sceneDataSetLayout;
 	std::unique_ptr<hri::DescriptorSetLayout> m_rtDescriptorSetLayout;
-	std::unique_ptr<hri::DescriptorSetLayout> m_composeSetLayout;
+	std::unique_ptr<hri::DescriptorSetLayout> m_deferredShadingSetLayout;
 	std::unique_ptr<hri::DescriptorSetLayout> m_presentInputSetLayout;
 
 	// Render pass managers
 	std::unique_ptr<hri::RenderPassResourceManager> m_gbufferLayoutPassManager;
-	std::unique_ptr<hri::RenderPassResourceManager> m_composePassManager;
+	std::unique_ptr<hri::RenderPassResourceManager> m_deferredShadingPassManager;
 	std::unique_ptr<hri::SwapchainPassResourceManager> m_swapchainPassManager;
 
 	// Ray Tracing Targets, previous & current frame
-	RTTargets m_raytracingTargets;
+	RayTracingTargets m_raytracingTargets;
 
 	// Render subsystems
 	std::unique_ptr<GBufferLayoutSubsystem> m_gbufferLayoutSubsystem;
-	std::unique_ptr<HybridRayTracingSubsystem> m_hybridRTSubsystem;
+	std::unique_ptr<GlobalIlluminationSubsystem> m_GISubsystem;
 	std::unique_ptr<UISubsystem> m_uiSubsystem;
-	std::unique_ptr<ComposeSubsystem> m_composeSubsystem;
+	std::unique_ptr<DeferredShadingSubsystem> m_deferredShadingSubsystem;
 	std::unique_ptr<PresentationSubsystem> m_presentSubsystem;
 
 	// Renderer per frame data

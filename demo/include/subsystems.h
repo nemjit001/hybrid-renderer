@@ -6,19 +6,6 @@
 #include "detail/raytracing.h"
 #include "scene.h"
 
-/// @brief The Instance Push Constant is used to push instance & transformation data for renderable objects to shaders.
-struct InstancePushConstant
-{
-	HRI_ALIGNAS(4)  uint32_t instanceId;
-	HRI_ALIGNAS(16) hri::Float4x4 model 	= hri::Float4x4(1.0f);
-	HRI_ALIGNAS(16) hri::Float3x3 normal 	= hri::Float3x3(1.0f);
-};
-
-struct RTFrameInfoPushConstant
-{
-	HRI_ALIGNAS(4) uint32_t frameIdx;
-};
-
 struct GBufferLayoutFrameInfo
 {
 	VkDescriptorSet sceneDataSetHandle	= VK_NULL_HANDLE;
@@ -27,26 +14,44 @@ struct GBufferLayoutFrameInfo
 
 struct RayTracingFrameInfo
 {
-	uint32_t frameCounter				= 0;
-	VkDescriptorSet sceneDataSetHandle	= VK_NULL_HANDLE;
-	VkDescriptorSet raytracingSetHandle = VK_NULL_HANDLE;
+	uint32_t frameCounter						= 0;
+
+	// gbuffer targets
+	hri::ImageResource* gbufferAlbedo			= nullptr;
+	hri::ImageResource* gbufferEmission			= nullptr;
+	hri::ImageResource* gbufferSpecular			= nullptr;
+	hri::ImageResource* gbufferTransmittance	= nullptr;
+	hri::ImageResource* gbufferNormal			= nullptr;
+	hri::ImageResource* gbufferDepth			= nullptr;
+
+	// current frame targets
+	hri::ImageResource* globalIlluminationOut	= nullptr;
+
+	// Descriptor sets
+	VkDescriptorSet sceneDataSetHandle			= VK_NULL_HANDLE;
+	VkDescriptorSet raytracingSetHandle			= VK_NULL_HANDLE;
 };
 
-struct ComposeFrameInfo
+struct DeferredShadingFrameInfo
 {
-	VkDescriptorSet composeSetHandle = VK_NULL_HANDLE;
+	VkDescriptorSet deferedShadingSetHandle		= VK_NULL_HANDLE;
+};
+
+struct UIFrameInfo
+{
+	//
 };
 
 struct PresentFrameInfo
 {
-	VkDescriptorSet presentInputSetHandle = VK_NULL_HANDLE;
+	VkDescriptorSet presentInputSetHandle	= VK_NULL_HANDLE;
 };
 
 /// @brief The GBuffer Layout Subsystem handles drawing a scene and storing the resulting geometry data (depth, world position, normal, etc.)
 ///		in its pass render attachments.
 class GBufferLayoutSubsystem
 	:
-	public hri::IRenderSubsystem
+	public hri::IRenderSubsystem<GBufferLayoutFrameInfo>
 {
 public:
 	/// @brief Create a new GBuffer Layout subsystem.
@@ -66,54 +71,46 @@ public:
 
 	/// @brief Record GBuffer Layout render commands.
 	/// @param frame Active Frame to record into.
-	virtual void record(hri::ActiveFrame& frame) const override;
-
-	/// @brief Update frame info for this subsystem. The FrameInfo will be used for any subsequent command recordings.
-	/// @param frameInfo FrameInfo to pass to the subsystem.
-	inline void updateFrameInfo(const GBufferLayoutFrameInfo& frameInfo) { m_currentFrameInfo = frameInfo; }
-
-protected:
-	GBufferLayoutFrameInfo m_currentFrameInfo = GBufferLayoutFrameInfo{};
+	virtual void record(hri::ActiveFrame& frame, GBufferLayoutFrameInfo& frameInfo) const override;
 };
 
 class IRayTracingSubSystem
 	:
-	public hri::IRenderSubsystem
+	public hri::IRenderSubsystem<RayTracingFrameInfo>
 {
 public:
 	IRayTracingSubSystem(raytracing::RayTracingContext& ctx);
 
 	virtual ~IRayTracingSubSystem() = default;
 
-	inline void updateFrameInfo(const RayTracingFrameInfo& frameInfo) { m_currentFrameInfo = frameInfo; }
+	void transitionGbufferResources(hri::ActiveFrame& frame, RayTracingFrameInfo& frameInfo) const;
 
 protected:
 	raytracing::RayTracingContext& m_rtCtx;
 	std::unique_ptr<raytracing::ShaderBindingTable> m_SBT;
-	RayTracingFrameInfo m_currentFrameInfo = RayTracingFrameInfo{};
 };
 
-class HybridRayTracingSubsystem
+class GlobalIlluminationSubsystem
 	:
 	public IRayTracingSubSystem
 {
 public:
-	HybridRayTracingSubsystem(
+	GlobalIlluminationSubsystem(
 		raytracing::RayTracingContext& ctx,
 		hri::ShaderDatabase& shaderDB,
 		VkDescriptorSetLayout sceneDataSetLayout,
 		VkDescriptorSetLayout rtSetLayout
 	);
 
-	virtual ~HybridRayTracingSubsystem() = default;
+	virtual ~GlobalIlluminationSubsystem() = default;
 
-	virtual void record(hri::ActiveFrame& frame) const override;
+	virtual void record(hri::ActiveFrame& frame, RayTracingFrameInfo& frameInfo) const override;
 };
 
 /// @brief The UI Subsystem handles drawing an UI overlay to the swap render pass.
 class UISubsystem
 	:
-	public hri::IRenderSubsystem
+	public hri::IRenderSubsystem<UIFrameInfo>
 {
 public:
 	/// @brief Create a new UI Subsystem.
@@ -131,35 +128,30 @@ public:
 
 	/// @brief Record UI render commands.
 	/// @param frame Active Frame to record into.
-	virtual void record(hri::ActiveFrame& frame) const override;
+	virtual void record(hri::ActiveFrame& frame, UIFrameInfo& frameInfo) const override;
 };
 
-class ComposeSubsystem
+class DeferredShadingSubsystem
 	:
-	public hri::IRenderSubsystem
+	public hri::IRenderSubsystem<DeferredShadingFrameInfo>
 {
 public:
-	ComposeSubsystem(
+	DeferredShadingSubsystem(
 		hri::RenderContext& ctx,
 		hri::ShaderDatabase& shaderDB,
 		VkRenderPass renderPass,
 		VkDescriptorSetLayout composeSetLayout
 	);
 
-	virtual ~ComposeSubsystem() = default;
+	virtual ~DeferredShadingSubsystem() = default;
 
-	virtual void record(hri::ActiveFrame& frame) const override;
-
-	inline void updateFrameInfo(const ComposeFrameInfo& frameInfo) { m_currentFrameInfo = frameInfo; }
-
-protected:
-	ComposeFrameInfo m_currentFrameInfo = ComposeFrameInfo{};
+	virtual void record(hri::ActiveFrame& frame, DeferredShadingFrameInfo& frameInfo) const override;
 };
 
 /// @brief The Presentation Subsystem handles drawing offscreen render results to a swap image.
 class PresentationSubsystem
 	:
-	public hri::IRenderSubsystem
+	public hri::IRenderSubsystem<PresentFrameInfo>
 {
 public:
 	/// @brief Create a new Presentation Subsystem.
@@ -179,12 +171,5 @@ public:
 
 	/// @brief Record Present render commands.
 	/// @param frame Active Frame to record into.
-	virtual void record(hri::ActiveFrame& frame) const override;
-
-	/// @brief Update frame info for this subsystem. The FrameInfo will be used for any subsequent command recordings.
-	/// @param frameInfo FrameInfo to pass to the subsystem.
-	inline void updateFrameInfo(const PresentFrameInfo& frameInfo) { m_currentFrameInfo = frameInfo; }
-
-protected:
-	PresentFrameInfo m_currentFrameInfo = PresentFrameInfo{};
+	virtual void record(hri::ActiveFrame& frame, PresentFrameInfo& frameInfo) const override;
 };

@@ -14,6 +14,8 @@ namespace hri
 {
     /// @brief A Render Subsystem manages a render pipeline, layout, and subsystem descriptors.
     ///     A Render Subsystem bases its pipeline config on a render pass.
+    /// @tparam _FrameInfo per frame info for subsystem.
+    template<typename _FrameInfo>
     class IRenderSubsystem
     {
     public:
@@ -30,7 +32,8 @@ namespace hri
 
         /// @brief Record this subsystem's render commands.
         /// @param frame 
-        virtual void record(ActiveFrame& frame) const = 0;
+        /// @param frameInfo
+        virtual void record(ActiveFrame& frame, _FrameInfo& frameInfo) const = 0;
 
     protected:
         RenderContext& m_ctx;
@@ -39,28 +42,18 @@ namespace hri
         PipelineStateObject* m_pPSO = nullptr;
     };
 
-    /// @brief The Render Subsystem Manager manages subsystems, allowing registration by name.
-    ///     Different subsystem commands can be recorded using the subsystem manager.
-    class RenderSubsystemManager
+    template<typename _FrameInfo>
+    IRenderSubsystem<_FrameInfo>::IRenderSubsystem(RenderContext& ctx)
+        :
+        m_ctx(ctx),
+        m_debug(m_ctx)
     {
-    public:
-        /// @brief Create a new subsystem manager.
-        RenderSubsystemManager() = default;
+        //
+    }
 
-        /// @brief Destroy this Subsystem Manager.
-        virtual ~RenderSubsystemManager() = default;
-
-        /// @brief Record a subsystem's render commands.
-        /// @param name Name of the subsystem to record commands for.
-        /// @param frame Active Frame given by Render Core.
-        virtual void recordSubsystem(const std::string& name, ActiveFrame& frame) const;
-
-        /// @brief Register a new subsystem.
-        /// @param name Name of the subsystem, MUST be unique.
-        /// @param subsystem Subsystem to register.
-        void registerSubsystem(const std::string& name, IRenderSubsystem* subsystem);
-
-    private:
-        std::unordered_map<std::string, IRenderSubsystem*> m_subsystems = {};
-    };
+    template<typename _FrameInfo>
+    IRenderSubsystem<_FrameInfo>::~IRenderSubsystem()
+    {
+        vkDestroyPipelineLayout(m_ctx.device, m_layout, nullptr);
+    }
 }

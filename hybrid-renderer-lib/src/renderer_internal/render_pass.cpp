@@ -41,6 +41,29 @@ RenderPassBuilder& RenderPassBuilder::addAttachment(
 	return *this;
 }
 
+RenderPassBuilder& RenderPassBuilder::addDependency(
+	uint32_t srcSubpass,
+	uint32_t dstSubpass,
+	VkPipelineStageFlags srcStageMask,
+	VkPipelineStageFlags dstStageMask,
+	VkAccessFlags srcAccessMask,
+	VkAccessFlags dstAccessMask,
+	VkDependencyFlags flags
+)
+{
+	m_dependencies.push_back(VkSubpassDependency{
+		srcSubpass,
+		dstSubpass,
+		srcStageMask,
+		dstStageMask,
+		srcAccessMask,
+		dstAccessMask,
+		flags
+	});
+
+	return *this;
+}
+
 RenderPassBuilder& RenderPassBuilder::nextSubpass()
 {
 	m_subpasses.push_back(SubpassData{});
@@ -87,8 +110,8 @@ VkRenderPass RenderPassBuilder::build()
 	createInfo.pAttachments = m_attachments.data();
 	createInfo.subpassCount = static_cast<uint32_t>(subpasses.size());
 	createInfo.pSubpasses = subpasses.data();
-	createInfo.dependencyCount = 0;
-	createInfo.pDependencies = nullptr;
+	createInfo.dependencyCount = static_cast<uint32_t>(m_dependencies.size());
+	createInfo.pDependencies = m_dependencies.data();
 
 	VkRenderPass newPass = VK_NULL_HANDLE;
 	HRI_VK_CHECK(vkCreateRenderPass(m_ctx.device, &createInfo, nullptr, &newPass));

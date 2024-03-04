@@ -29,15 +29,12 @@ struct HybridInitialHit
 	vec3 Wi;
 };
 
-struct SSRayPayload
+struct GIRayPayload
 {
-	bool miss;
-};
-
-struct DIRayPayload
-{
-	vec3 transmission;
+	uint seed;
+	uint traceDepth;
 	vec3 energy;
+	vec3 transmission;
 };
 
 /// --- Random noise functions

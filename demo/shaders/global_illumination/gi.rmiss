@@ -1,14 +1,14 @@
 #version 460
 
 #extension GL_EXT_ray_tracing : require
-#extension GL_GOOGLE_include_directive : enable
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
 
+#include "../shader_common.glsl"
 #include "../raytracing_common.glsl"
 
-layout(location = 0) rayPayloadInEXT SSRayPayload ssPayload;
+layout(location = 0) rayPayloadInEXT GIRayPayload prd;
 
 void main()
 {
-	ssPayload.miss = true;
+	prd.energy += prd.transmission * SKY_COLOR;
 }

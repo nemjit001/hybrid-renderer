@@ -50,6 +50,16 @@ namespace hri
 			VkImageLayout initialLayout = VK_IMAGE_LAYOUT_UNDEFINED
 		);
 
+		RenderPassBuilder& addDependency(
+			uint32_t srcSubpass,
+			uint32_t dstSubpass,
+			VkPipelineStageFlags srcStageMask,
+			VkPipelineStageFlags dstStageMask,
+			VkAccessFlags srcAccessMask,
+			VkAccessFlags dstAccessMask,
+			VkDependencyFlags flags = 0
+		);
+
 		/// @brief Start a new subpass.
 		/// @return RenderPassBuilder reference.
 		RenderPassBuilder& nextSubpass();
@@ -74,6 +84,7 @@ namespace hri
 		RenderContext& m_ctx;
 		std::vector<VkAttachmentDescription> m_attachments;
 		std::vector<SubpassData> m_subpasses;
+		std::vector<VkSubpassDependency> m_dependencies;
 	};
 
 	/// @brief The Render Attachment Configuration is used by Render Pass resource managers to create and recreate
@@ -128,7 +139,8 @@ namespace hri
 		/// @brief Get a managed attachment resource.
 		/// @param attachmentIndex Attachment resource index to retrieve.
 		/// @return An ImageResource managed by this resource manager.
-		inline virtual const ImageResource& getAttachmentResource(uint32_t attachmentIndex) const {
+		inline virtual ImageResource& getAttachmentResource(uint32_t attachmentIndex)
+		{
 			assert(attachmentIndex < m_imageResources.size());
 			return m_imageResources[attachmentIndex];
 		}

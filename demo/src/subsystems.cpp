@@ -4,6 +4,20 @@
 #include <imgui_impl_vulkan.h>
 #include <vector>
 
+/// @brief The Instance Push Constant is used to push instance & transformation data for renderable objects to shaders.
+struct InstancePushConstant
+{
+	HRI_ALIGNAS(4)  uint32_t instanceId;
+	HRI_ALIGNAS(16) hri::Float4x4 model = hri::Float4x4(1.0f);
+	HRI_ALIGNAS(16) hri::Float3x3 normal = hri::Float3x3(1.0f);
+};
+
+/// @brief The RT Frame Info PC contains per frame data needed for ray tracing.
+struct RTFrameInfoPushConstant
+{
+	HRI_ALIGNAS(4) uint32_t frameIdx;
+};
+
 GBufferLayoutSubsystem::GBufferLayoutSubsystem(
 	hri::RenderContext& ctx,
 	hri::ShaderDatabase& shaderDB,
@@ -11,7 +25,7 @@ GBufferLayoutSubsystem::GBufferLayoutSubsystem(
 	VkDescriptorSetLayout sceneDataSetLayout
 )
 	:
-	hri::IRenderSubsystem(ctx)
+	hri::IRenderSubsystem<GBufferLayoutFrameInfo>(ctx)
 {
 	m_layout = hri::PipelineLayoutBuilder(ctx)
 		.addPushConstant(
@@ -103,10 +117,10 @@ GBufferLayoutSubsystem::GBufferLayoutSubsystem(
 	);
 }
 
-void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
+void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame, GBufferLayoutFrameInfo& frameInfo) const
 {
 	assert(m_pPSO != nullptr);
-	assert(m_currentFrameInfo.sceneDataSetHandle != VK_NULL_HANDLE);
+	assert(frameInfo.sceneDataSetHandle != VK_NULL_HANDLE);
 	m_debug.cmdBeginLabel(frame.commandBuffer, "GBuffer Layout Pass");
 
 	VkExtent2D swapExtent = m_ctx.swapchain.extent;
@@ -130,13 +144,13 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 		frame.commandBuffer,
 		m_pPSO->bindPoint,
 		m_layout,
-		0, 1, &m_currentFrameInfo.sceneDataSetHandle,
+		0, 1, &frameInfo.sceneDataSetHandle,
 		0, nullptr
 	);
 
 	vkCmdBindPipeline(frame.commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
 
-	for (auto const& instance : m_currentFrameInfo.pSceneGraph->getRenderInstanceList())
+	for (auto const& instance : frameInfo.pSceneGraph->getRenderInstanceList())
 	{
 		InstancePushConstant instancePC = InstancePushConstant{
 			instance.instanceId,
@@ -153,7 +167,7 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 			&instancePC
 		);
 
-		const hri::Mesh& mesh = m_currentFrameInfo.pSceneGraph->meshes[instance.instanceId];
+		const hri::Mesh& mesh = frameInfo.pSceneGraph->meshes[instance.instanceId];
 
 		VkDeviceSize vertexOffsets[] = { 0 };
 		vkCmdBindVertexBuffers(frame.commandBuffer, 0, 1, &mesh.vertexBuffer.buffer, vertexOffsets);
@@ -167,12 +181,50 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame) const
 IRayTracingSubSystem::IRayTracingSubSystem(raytracing::RayTracingContext& ctx)
 	:
 	m_rtCtx(ctx),
-	hri::IRenderSubsystem(ctx.renderContext)
+	hri::IRenderSubsystem<RayTracingFrameInfo>(ctx.renderContext)
 {
 	//
 }
 
-HybridRayTracingSubsystem::HybridRayTracingSubsystem(
+void IRayTracingSubSystem::transitionGbufferResources(hri::ActiveFrame& frame, RayTracingFrameInfo& frameInfo) const
+{
+	VkImageMemoryBarrier2 gbufferSampleBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
+	gbufferSampleBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+	gbufferSampleBarrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
+	gbufferSampleBarrier.srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
+	gbufferSampleBarrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
+	gbufferSampleBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	gbufferSampleBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	gbufferSampleBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	gbufferSampleBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+
+	gbufferSampleBarrier.image = frameInfo.gbufferAlbedo->image;
+	gbufferSampleBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
+	frame.pipelineBarrier({ gbufferSampleBarrier });
+
+	gbufferSampleBarrier.image = frameInfo.gbufferEmission->image;
+	gbufferSampleBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
+	frame.pipelineBarrier({ gbufferSampleBarrier });
+
+	gbufferSampleBarrier.image = frameInfo.gbufferSpecular->image;
+	gbufferSampleBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
+	frame.pipelineBarrier({ gbufferSampleBarrier });
+
+	gbufferSampleBarrier.image = frameInfo.gbufferTransmittance->image;
+	gbufferSampleBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
+	frame.pipelineBarrier({ gbufferSampleBarrier });
+
+	gbufferSampleBarrier.image = frameInfo.gbufferNormal->image;
+	gbufferSampleBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
+	frame.pipelineBarrier({ gbufferSampleBarrier });
+
+	gbufferSampleBarrier.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+	gbufferSampleBarrier.image = frameInfo.gbufferDepth->image;
+	gbufferSampleBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1);
+	frame.pipelineBarrier({ gbufferSampleBarrier });
+}
+
+GlobalIlluminationSubsystem::GlobalIlluminationSubsystem(
 	raytracing::RayTracingContext& ctx,
 	hri::ShaderDatabase& shaderDB,
 	VkDescriptorSetLayout sceneDataSetLayout,
@@ -187,34 +239,24 @@ HybridRayTracingSubsystem::HybridRayTracingSubsystem(
 		.addDescriptorSetLayout(rtSetLayout)
 		.build();
 
-	// Soft shadows
-	hri::Shader* pSSRayGen = shaderDB.getShader("SSRayGen");
-	hri::Shader* pSSMiss = shaderDB.getShader("SSMiss");
-
 	// Direct Illumination
-	hri::Shader* pDIRayGen = shaderDB.getShader("DIRayGen");
-	hri::Shader* pDIMiss = shaderDB.getShader("DIMiss");
-	hri::Shader* pDICHit = shaderDB.getShader("DICHit");
+	hri::Shader* pGIRayGen = shaderDB.getShader("GIRayGen");
+	hri::Shader* pGIMiss = shaderDB.getShader("GIMiss");
+	hri::Shader* pGICHit = shaderDB.getShader("GICHit");
 
 	raytracing::RayTracingPipelineBuilder rtPipelineBuilder = raytracing::RayTracingPipelineBuilder(ctx)
-		.addShaderStage(pSSRayGen->stage, pSSRayGen->module)
-		.addShaderStage(pSSMiss->stage, pSSMiss->module)
-		.addShaderStage(pDIRayGen->stage, pDIRayGen->module)
-		.addShaderStage(pDIMiss->stage, pDIMiss->module)
-		.addShaderStage(pDICHit->stage, pDICHit->module)
-		// SS shader groups
+		.addShaderStage(pGIRayGen->stage, pGIRayGen->module)
+		.addShaderStage(pGIMiss->stage, pGIMiss->module)
+		.addShaderStage(pGICHit->stage, pGICHit->module)
 		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR, 0)
 		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR, 1)
-		// DI shader groups
-		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR, 2)
-		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR, 3)
-		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR, VK_SHADER_UNUSED_KHR, 4)
+		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR, VK_SHADER_UNUSED_KHR, 2)
 		.setMaxRecursionDepth()
 		.setLayout(m_layout);
 
 	VkPipeline raytracingPipeline = rtPipelineBuilder.build(shaderDB.pipelineCache());
 	m_pPSO = shaderDB.registerPipeline(
-		"HybridRenderingRTPipeline",
+		"GIRTPipeline",
 		VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR,
 		raytracingPipeline);
 
@@ -226,17 +268,34 @@ HybridRayTracingSubsystem::HybridRayTracingSubsystem(
 	));
 }
 
-void HybridRayTracingSubsystem::record(hri::ActiveFrame& frame) const
+void GlobalIlluminationSubsystem::record(hri::ActiveFrame& frame, RayTracingFrameInfo& frameInfo) const
 {
 	assert(m_pPSO != nullptr);
-	m_debug.cmdBeginLabel(frame.commandBuffer, "Hybrid Rendering Raytracing Pass");
-
+	m_debug.cmdBeginLabel(frame.commandBuffer, "GI Raytracing Pass");
 	VkExtent2D swapExtent = m_ctx.swapchain.extent;
 
+	// pass resource barriers
+	{
+		VkImageMemoryBarrier2 storageImageBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
+		storageImageBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+		storageImageBarrier.dstStageMask = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR;
+		storageImageBarrier.srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
+		storageImageBarrier.dstAccessMask = VK_ACCESS_2_SHADER_WRITE_BIT_KHR;
+		storageImageBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		storageImageBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+		storageImageBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		storageImageBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		storageImageBarrier.image = frameInfo.globalIlluminationOut->image;
+		storageImageBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
+
+		frame.pipelineBarrier({ storageImageBarrier });
+	}
+
 	VkDescriptorSet descriptorSets[] = {
-		m_currentFrameInfo.sceneDataSetHandle,
-		m_currentFrameInfo.raytracingSetHandle,
+		frameInfo.sceneDataSetHandle,
+		frameInfo.raytracingSetHandle,
 	};
+
 	vkCmdBindDescriptorSets(
 		frame.commandBuffer,
 		m_pPSO->bindPoint,
@@ -246,8 +305,9 @@ void HybridRayTracingSubsystem::record(hri::ActiveFrame& frame) const
 	);
 
 	RTFrameInfoPushConstant frameInfoPC = RTFrameInfoPushConstant{
-		m_currentFrameInfo.frameCounter,
+		frameInfo.frameCounter,
 	};
+
 	vkCmdPushConstants(
 		frame.commandBuffer,
 		m_layout,
@@ -258,8 +318,7 @@ void HybridRayTracingSubsystem::record(hri::ActiveFrame& frame) const
 
 	vkCmdBindPipeline(frame.commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
 
-	VkStridedDeviceAddressRegionKHR SSRayGenRegion = m_SBT->getRegion(raytracing::ShaderBindingTable::SBTShaderGroup::SGRayGen, 0);
-	VkStridedDeviceAddressRegionKHR DIRayGenRegion = m_SBT->getRegion(raytracing::ShaderBindingTable::SBTShaderGroup::SGRayGen, 1);
+	VkStridedDeviceAddressRegionKHR RayGenRegion = m_SBT->getRegion(raytracing::ShaderBindingTable::SBTShaderGroup::SGRayGen, 0);
 	VkStridedDeviceAddressRegionKHR missRegion = m_SBT->getRegion(raytracing::ShaderBindingTable::SBTShaderGroup::SGMiss);
 	VkStridedDeviceAddressRegionKHR hitRegion = m_SBT->getRegion(raytracing::ShaderBindingTable::SBTShaderGroup::SGHit);
 	VkStridedDeviceAddressRegionKHR callRegion = m_SBT->getRegion(raytracing::ShaderBindingTable::SBTShaderGroup::SGCall);
@@ -267,19 +326,7 @@ void HybridRayTracingSubsystem::record(hri::ActiveFrame& frame) const
 	// Soft Shadow subpass
 	m_rtCtx.rayTracingDispatch.vkCmdTraceRays(
 		frame.commandBuffer,
-		&SSRayGenRegion,
-		&missRegion,
-		&hitRegion,
-		&callRegion,
-		swapExtent.width,
-		swapExtent.height,
-		1
-	);
-
-	// Direct Illumination subpass
-	m_rtCtx.rayTracingDispatch.vkCmdTraceRays(
-		frame.commandBuffer,
-		&DIRayGenRegion,
+		&RayGenRegion,
 		&missRegion,
 		&hitRegion,
 		&callRegion,
@@ -297,7 +344,7 @@ UISubsystem::UISubsystem(
 	VkDescriptorPool uiPool
 )
 	:
-	hri::IRenderSubsystem(ctx)
+	hri::IRenderSubsystem<UIFrameInfo>(ctx)
 {
 	ImGui_ImplVulkan_InitInfo initInfo = {};
 	initInfo.Instance = m_ctx.instance;
@@ -320,21 +367,21 @@ UISubsystem::~UISubsystem()
 	ImGui_ImplVulkan_Shutdown();
 }
 
-void UISubsystem::record(hri::ActiveFrame& frame) const
+void UISubsystem::record(hri::ActiveFrame& frame, UIFrameInfo& frameInfo) const
 {
 	m_debug.cmdBeginLabel(frame.commandBuffer, "UI Pass");
 	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), frame.commandBuffer);
 	m_debug.cmdEndLabel(frame.commandBuffer);
 }
 
-ComposeSubsystem::ComposeSubsystem(
+DeferredShadingSubsystem::DeferredShadingSubsystem(
 	hri::RenderContext& ctx,
 	hri::ShaderDatabase& shaderDB,
 	VkRenderPass renderPass,
 	VkDescriptorSetLayout composeSetLayout
 )
 	:
-	hri::IRenderSubsystem(ctx)
+	hri::IRenderSubsystem<DeferredShadingFrameInfo>(ctx)
 {
 	m_layout = hri::PipelineLayoutBuilder(ctx)
 		.addDescriptorSetLayout(composeSetLayout)
@@ -368,18 +415,17 @@ ComposeSubsystem::ComposeSubsystem(
 	composePipelineConfig.subpass = 0;
 
 	m_pPSO = shaderDB.createPipeline(
-		"ComposePipeline",
-		{ "PresentVert", "ComposeFrag" },
+		"DeferredShadingPipeline",
+		{ "PresentVert", "DeferredShadingFrag" },
 		composePipelineConfig
 	);
 }
 
-void ComposeSubsystem::record(hri::ActiveFrame& frame) const
+void DeferredShadingSubsystem::record(hri::ActiveFrame& frame, DeferredShadingFrameInfo& frameInfo) const
 {
 	assert(m_pPSO != nullptr);
-	assert(m_currentFrameInfo.composeSetHandle != VK_NULL_HANDLE);
-	m_debug.cmdBeginLabel(frame.commandBuffer, "Compose Pass");
-
+	assert(frameInfo.deferedShadingSetHandle != VK_NULL_HANDLE);
+	m_debug.cmdBeginLabel(frame.commandBuffer, "Deferred Pass");
 	VkExtent2D swapExtent = m_ctx.swapchain.extent;
 
 	VkViewport viewport = VkViewport{
@@ -401,7 +447,7 @@ void ComposeSubsystem::record(hri::ActiveFrame& frame) const
 		frame.commandBuffer,
 		m_pPSO->bindPoint,
 		m_layout,
-		0, 1, &m_currentFrameInfo.composeSetHandle,
+		0, 1, &frameInfo.deferedShadingSetHandle,
 		0, nullptr
 	);
 
@@ -418,7 +464,7 @@ PresentationSubsystem::PresentationSubsystem(
 	VkDescriptorSetLayout presentInputSetLayout
 )
 	:
-	hri::IRenderSubsystem(ctx)
+	hri::IRenderSubsystem<PresentFrameInfo>(ctx)
 {
 	m_layout = hri::PipelineLayoutBuilder(ctx)
 		.addDescriptorSetLayout(presentInputSetLayout)
@@ -458,12 +504,11 @@ PresentationSubsystem::PresentationSubsystem(
 	);
 }
 
-void PresentationSubsystem::record(hri::ActiveFrame& frame) const
+void PresentationSubsystem::record(hri::ActiveFrame& frame, PresentFrameInfo& frameInfo) const
 {
 	assert(m_pPSO != nullptr);
-	assert(m_currentFrameInfo.presentInputSetHandle != VK_NULL_HANDLE);
+	assert(frameInfo.presentInputSetHandle != VK_NULL_HANDLE);
 	m_debug.cmdBeginLabel(frame.commandBuffer, "Present Pass");
-
 	VkExtent2D swapExtent = m_ctx.swapchain.extent;
 
 	VkViewport viewport = VkViewport{
@@ -485,7 +530,7 @@ void PresentationSubsystem::record(hri::ActiveFrame& frame) const
 		frame.commandBuffer,
 		m_pPSO->bindPoint,
 		m_layout,
-		0, 1, &m_currentFrameInfo.presentInputSetHandle,
+		0, 1, &frameInfo.presentInputSetHandle,
 		0, nullptr
 	);
 
