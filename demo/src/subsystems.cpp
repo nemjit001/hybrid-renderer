@@ -316,6 +316,90 @@ void UISubsystem::record(hri::ActiveFrame& frame) const
 	m_debug.cmdEndLabel(frame.commandBuffer);
 }
 
+ComposeSubsystem::ComposeSubsystem(
+	hri::RenderContext& ctx,
+	hri::ShaderDatabase& shaderDB,
+	VkRenderPass renderPass,
+	VkDescriptorSetLayout composeSetLayout
+)
+	:
+	hri::IRenderSubsystem(ctx)
+{
+	m_layout = hri::PipelineLayoutBuilder(ctx)
+		.addDescriptorSetLayout(composeSetLayout)
+		.build();
+
+	std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments = {
+		VkPipelineColorBlendAttachmentState{
+			VK_FALSE,
+			VK_BLEND_FACTOR_ONE, VK_BLEND_FACTOR_ZERO, VK_BLEND_OP_ADD,
+			VK_BLEND_FACTOR_ONE, VK_BLEND_FACTOR_ZERO, VK_BLEND_OP_ADD,
+			VK_COLOR_COMPONENT_R_BIT
+			| VK_COLOR_COMPONENT_G_BIT
+			| VK_COLOR_COMPONENT_B_BIT
+			| VK_COLOR_COMPONENT_A_BIT
+		}
+	};
+
+	hri::GraphicsPipelineBuilder composePipelineConfig = hri::GraphicsPipelineBuilder{};
+	composePipelineConfig.vertexInputBindings = {};
+	composePipelineConfig.vertexInputAttributes = {};
+	composePipelineConfig.inputAssemblyState = hri::GraphicsPipelineBuilder::initInputAssemblyState(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_FALSE);
+	composePipelineConfig.viewport = hri::GraphicsPipelineBuilder::initDefaultViewport(1.0f, 1.0f);
+	composePipelineConfig.scissor = hri::GraphicsPipelineBuilder::initDefaultScissor(1, 1);
+	composePipelineConfig.rasterizationState = hri::GraphicsPipelineBuilder::initRasterizationState(VK_FALSE, VK_POLYGON_MODE_FILL, VK_CULL_MODE_NONE, VK_FRONT_FACE_COUNTER_CLOCKWISE);
+	composePipelineConfig.multisampleState = hri::GraphicsPipelineBuilder::initMultisampleState(VK_SAMPLE_COUNT_1_BIT);
+	composePipelineConfig.depthStencilState = hri::GraphicsPipelineBuilder::initDepthStencilState(VK_FALSE, VK_FALSE);
+	composePipelineConfig.colorBlendState = hri::GraphicsPipelineBuilder::initColorBlendState(colorBlendAttachments);
+	composePipelineConfig.dynamicStates = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
+	composePipelineConfig.layout = m_layout;
+	composePipelineConfig.renderPass = renderPass;
+	composePipelineConfig.subpass = 0;
+
+	m_pPSO = shaderDB.createPipeline(
+		"ComposePipeline",
+		{ "PresentVert", "ComposeFrag" },
+		composePipelineConfig
+	);
+}
+
+void ComposeSubsystem::record(hri::ActiveFrame& frame) const
+{
+	assert(m_pPSO != nullptr);
+	assert(m_currentFrameInfo.composeSetHandle != VK_NULL_HANDLE);
+	m_debug.cmdBeginLabel(frame.commandBuffer, "Compose Pass");
+
+	VkExtent2D swapExtent = m_ctx.swapchain.extent;
+
+	VkViewport viewport = VkViewport{
+		0.0f, 0.0f,
+		static_cast<float>(swapExtent.width), static_cast<float>(swapExtent.height),
+		hri::DefaultViewportMinDepth, hri::DefaultViewportMaxDepth
+	};
+
+	VkRect2D scissor = VkRect2D
+	{
+		VkOffset2D{ 0, 0 },
+		swapExtent
+	};
+
+	vkCmdSetViewport(frame.commandBuffer, 0, 1, &viewport);
+	vkCmdSetScissor(frame.commandBuffer, 0, 1, &scissor);
+
+	vkCmdBindDescriptorSets(
+		frame.commandBuffer,
+		m_pPSO->bindPoint,
+		m_layout,
+		0, 1, &m_currentFrameInfo.composeSetHandle,
+		0, nullptr
+	);
+
+	vkCmdBindPipeline(frame.commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
+	vkCmdDraw(frame.commandBuffer, 3, 1, 0, 0);
+
+	m_debug.cmdEndLabel(frame.commandBuffer);
+}
+
 PresentationSubsystem::PresentationSubsystem(
 	hri::RenderContext& ctx,
 	hri::ShaderDatabase& shaderDB,

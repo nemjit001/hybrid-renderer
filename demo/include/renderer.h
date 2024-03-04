@@ -19,6 +19,7 @@ struct RendererFrameData
 	// Descriptor sets
 	std::unique_ptr<hri::DescriptorSetManager> sceneDataSet;
 	std::unique_ptr<hri::DescriptorSetManager> raytracingSet;
+	std::unique_ptr<hri::DescriptorSetManager> composeSet;
 	std::unique_ptr<hri::DescriptorSetManager> presentInputSet;
 };
 
@@ -107,10 +108,12 @@ private:
 	// Global descriptor set layouts
 	std::unique_ptr<hri::DescriptorSetLayout> m_sceneDataSetLayout;
 	std::unique_ptr<hri::DescriptorSetLayout> m_rtDescriptorSetLayout;
+	std::unique_ptr<hri::DescriptorSetLayout> m_composeSetLayout;
 	std::unique_ptr<hri::DescriptorSetLayout> m_presentInputSetLayout;
 
 	// Render pass managers
 	std::unique_ptr<hri::RenderPassResourceManager> m_gbufferLayoutPassManager;
+	std::unique_ptr<hri::RenderPassResourceManager> m_composePassManager;
 	std::unique_ptr<hri::SwapchainPassResourceManager> m_swapchainPassManager;
 
 	// Ray Tracing Targets
@@ -122,6 +125,7 @@ private:
 	std::unique_ptr<GBufferLayoutSubsystem> m_gbufferLayoutSubsystem;
 	std::unique_ptr<HybridRayTracingSubsystem> m_hybridRTSubsystem;
 	std::unique_ptr<UISubsystem> m_uiSubsystem;
+	std::unique_ptr<ComposeSubsystem> m_composeSubsystem;
 	std::unique_ptr<PresentationSubsystem> m_presentSubsystem;
 
 	// Renderer per frame data

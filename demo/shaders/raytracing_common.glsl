@@ -16,6 +16,14 @@
 
 /// Shared include file for raytracing shader definitions
 
+struct HybridInitialHit
+{
+	bool miss;
+	vec3 worldPos;
+	vec3 worldNormal;
+	vec3 Wi;
+};
+
 struct SSRayPayload
 {
 	bool miss;
@@ -78,6 +86,50 @@ uint calculateLaunchIndex(uvec3 launchID, uvec3 launchSize)
 bool gbufferRayHit(float depth)
 {
 	return depth < 1.0;
+}
+
+HybridInitialHit getInitialHitData(mat4 inverseView, mat4 inverseProject, vec2 inUV, sampler2D GBufferNormal, sampler2D GBufferDepth)
+{
+	vec2 ndc = 2.0 * inUV - 1.0;
+
+	float initialHitDepth = float(texture(GBufferDepth, inUV));
+	vec3 wPos = depthToWorldPos(inverseProject, inverseView, ndc, initialHitDepth);
+
+	vec3 wNormal = vec3(texture(GBufferNormal, inUV));
+	vec3 Wi = vec3(inverseView * vec4(normalize((inverseProject * vec4(ndc, 1, 1)).xyz), 0));
+
+	wNormal = normalize(wNormal);
+	if (dot(Wi, wNormal) > 0.0) wNormal *= -1.0;
+
+	HybridInitialHit hit;
+	hit.miss = !gbufferRayHit(initialHitDepth);
+	hit.worldPos = wPos;
+	hit.worldNormal = wNormal;
+	hit.Wi = Wi;
+
+	return hit;
+}
+
+Material getMaterialFromGBuffer(
+	vec2 inUV,
+	sampler2D GBufferAlbedo,
+	sampler2D GBufferMatSpecular,
+	sampler2D GBufferMatTransmittance,
+	sampler2D GBufferEmission
+)
+{
+	vec4 specularShininess = texture(GBufferMatSpecular, inUV);
+	vec4 transmittanceIOR = texture(GBufferMatTransmittance, inUV);
+	Material material = Material(
+		vec3(texture(GBufferAlbedo, inUV)),		// diffuse color
+		specularShininess.rgb,					// specular color
+		transmittanceIOR.rgb,					// transmittance
+		vec3(texture(GBufferEmission, inUV)),	// emission color & strength
+		specularShininess.a,					// shininess
+		transmittanceIOR.a						// IOR
+	);
+
+	return material;
 }
 
 /// --- Random walk functions

@@ -32,34 +32,22 @@ void main()
 	// Calculate some params
 	const mat4 invProj = inverse(camera.project);
 	const mat4 invView = inverse(camera.view);
-	const vec2 ndc = inUV * 2.0 - 1.0;
-
-	// Get initial hit data from GBuffer
-	float initialHitDepth = float(texture(GBufferDepth, inUV));
-	vec3 wPos = depthToWorldPos(invProj, invView, ndc, initialHitDepth);
-	vec3 wNormal = vec3(texture(GBufferNormal, inUV));
-	vec3 Wi = vec3(invView * vec4(normalize((invProj * vec4(ndc, 1, 1)).xyz), 0));
-
-	wNormal = normalize(wNormal);
-	if (dot(wNormal, Wi) > 0.0) wNormal *= -1.0;
-
-	// Get initial material data from GBuffer
-	vec4 specularShininess = texture(GBufferMatSpecular, inUV);
-	vec4 transmittanceIOR = texture(GBufferMatTransmittance, inUV);
-	Material hitMaterial = Material(
-		vec3(texture(GBufferAlbedo, inUV)),		// diffuse color
-		specularShininess.rgb,					// specular color
-		transmittanceIOR.rgb,					// transmittance
-		vec3(texture(GBufferEmission, inUV)),	// emission color & strength
-		specularShininess.a,					// shininess
-		transmittanceIOR.a						// IOR
+	
+	// Get data from gbuffer
+	HybridInitialHit hit = getInitialHitData(invView, invProj, inUV, GBufferNormal, GBufferDepth);
+	Material hitMaterial = getMaterialFromGBuffer(
+		inUV,
+		GBufferAlbedo,
+		GBufferMatSpecular,
+		GBufferMatTransmittance,
+		GBufferEmission
 	);
 
 	// Initialize ray payload
 	diPayload.transmission = vec3(1);
 	diPayload.energy = vec3(0);
 
-	if (!gbufferRayHit(initialHitDepth))			// missed
+	if (hit.miss)
 	{
 		diPayload.energy += diPayload.transmission * SKY_COLOR;
 	}
@@ -71,15 +59,15 @@ void main()
 	{
 		// TODO: some way of importance sampling lights in scene
 		// evaluate material
-		vec3 Wo = randomWalk(seed, Wi, wNormal);
-		diPayload.transmission *= evaluatePDF(Wo, wNormal) * evaluateBRDF(Wi, Wo, wNormal, hitMaterial.diffuse);
+		vec3 Wo = randomWalk(seed, hit.Wi, hit.worldNormal);
+		diPayload.transmission *= evaluatePDF(Wo, hit.worldNormal) * evaluateBRDF(hit.Wi, Wo, hit.worldNormal, hitMaterial.diffuse);
 
 		traceRayEXT(
 			TLAS,
 			gl_RayFlagsOpaqueEXT,
 			0xFF,
 			0, 0, 1,
-			wPos,
+			hit.worldPos,
 			RAYTRACE_RANGE_TMIN,
 			Wo,
 			RAYTRACE_RANGE_TMAX,

@@ -189,7 +189,7 @@ int main()
 	);
 
 	// Load scene file & Create renderer
-	SceneGraph scene = SceneLoader::load(rtContext, "./assets/interior_scene.json");
+	SceneGraph scene = SceneLoader::load(rtContext, "./assets/default_scene.json");
 	Renderer renderer = Renderer(rtContext, camera, scene);
 
 	printf("Startup complete\n");

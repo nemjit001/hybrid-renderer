@@ -211,6 +211,27 @@ void Renderer::drawFrame()
 		frame.pipelineBarrier({ softShadowSampleBarrier, DISampleBarrier });
 	}
 
+	m_composePassManager->beginRenderPass(frame);
+	m_subsystemManager.recordSubsystem("ComposeSystem", frame);
+	m_composePassManager->endRenderPass(frame);
+
+	// Transition compose output resources
+	{
+		VkImageMemoryBarrier2 composeResultBarrier = VkImageMemoryBarrier2{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
+		composeResultBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+		composeResultBarrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
+		composeResultBarrier.srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
+		composeResultBarrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
+		composeResultBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		composeResultBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		composeResultBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		composeResultBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		composeResultBarrier.image = m_composePassManager->getAttachmentResource(0).image;
+		composeResultBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
+
+		frame.pipelineBarrier({ composeResultBarrier });
+	}
+
 	// Record swapchain output passes
 	m_swapchainPassManager->beginRenderPass(frame);
 	m_subsystemManager.recordSubsystem("PresentationSystem", frame);
@@ -238,6 +259,7 @@ void Renderer::initShaderDB()
 
 	// Fragment shaders
 	m_shaderDatabase.registerShader("GBufferLayoutFrag", hri::Shader::loadFile(m_context, "./shaders/gbuffer_layout.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
+	m_shaderDatabase.registerShader("ComposeFrag", hri::Shader::loadFile(m_context, "./shaders/compose.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
 	m_shaderDatabase.registerShader("PresentFrag", hri::Shader::loadFile(m_context, "./shaders/present.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
 }
 
@@ -365,7 +387,39 @@ void Renderer::initRenderPasses()
 		));
 	}
 
-	// Swapchain pass pass
+	// Compose pass
+	{
+		hri::RenderPassBuilder composePassBuilder = hri::RenderPassBuilder(m_context)
+			.addAttachment(
+				VK_FORMAT_R8G8B8A8_UNORM,
+				VK_SAMPLE_COUNT_1_BIT,
+				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+				VK_ATTACHMENT_LOAD_OP_CLEAR,
+				VK_ATTACHMENT_STORE_OP_STORE
+			)
+			.setAttachmentReference(
+				hri::AttachmentType::Color,
+				VkAttachmentReference{ 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL }
+			);
+
+		const std::vector<hri::RenderAttachmentConfig> composeAttachmentConfigs = {
+			hri::RenderAttachmentConfig{ // Albedo target
+				VK_FORMAT_R8G8B8A8_UNORM,
+				VK_SAMPLE_COUNT_1_BIT,
+				VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
+				| VK_IMAGE_USAGE_SAMPLED_BIT,
+				VK_IMAGE_ASPECT_COLOR_BIT
+			},
+		};
+
+		m_composePassManager = std::unique_ptr<hri::RenderPassResourceManager>(new hri::RenderPassResourceManager(
+			m_context,
+			composePassBuilder.build(),
+			composeAttachmentConfigs
+		));
+	}
+
+	// Swapchain pass
 	{
 		hri::RenderPassBuilder swapchainPassBuilder = hri::RenderPassBuilder(m_context)
 			.addAttachment(
@@ -392,6 +446,8 @@ void Renderer::initRenderPasses()
 	m_gbufferLayoutPassManager->setClearValue(3, VkClearValue{ { 0.0f, 0.0f, 0.0f, 0.0f } });
 	m_gbufferLayoutPassManager->setClearValue(4, VkClearValue{ { 0.0f, 0.0f, 0.0f, 0.0f } });
 	m_gbufferLayoutPassManager->setClearValue(5, VkClearValue{ { 1.0f, 0x00 } });
+
+	m_composePassManager->setClearValue(0, VkClearValue{ { 0.0f, 0.0f, 0.0f, 0.0f } });
 
 	m_swapchainPassManager->setClearValue(0, VkClearValue{ { 0.0f, 0.0f, 0.0f, 1.0f } });
 }
@@ -507,12 +563,17 @@ void Renderer::initGlobalDescriptorSets()
 		.addBinding(RayTracingBindings::SoftShadowOutImage, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
 		.addBinding(RayTracingBindings::DIOutImage, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR);
 
+	hri::DescriptorSetLayoutBuilder composeSetBuilder = hri::DescriptorSetLayoutBuilder(m_context)
+		.addBinding(ComposeInputBindings::SoftShadowImage, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+		.addBinding(ComposeInputBindings::DirectIlluminationImage, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
+
 	hri::DescriptorSetLayoutBuilder presentInputSetBuilder = hri::DescriptorSetLayoutBuilder(m_context)
 		.addBinding(PresentInputBindings::RenderResult, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
 
 	// Allocate descriptor set layouts
 	m_sceneDataSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(sceneDataSetBuilder.build()));
 	m_rtDescriptorSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(rtGlobalDescriptorSetBuilder.build()));
+	m_composeSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(composeSetBuilder.build()));
 	m_presentInputSetLayout = std::unique_ptr<hri::DescriptorSetLayout>(new hri::DescriptorSetLayout(presentInputSetBuilder.build()));
 }
 
@@ -538,6 +599,13 @@ void Renderer::initRenderSubsystems()
 		m_descriptorSetAllocator.fixedPool()
 	));
 
+	m_composeSubsystem = std::unique_ptr<ComposeSubsystem>(new ComposeSubsystem(
+		m_context,
+		m_shaderDatabase,
+		m_composePassManager->renderPass(),
+		m_composeSetLayout->setLayout
+	));
+
 	m_presentSubsystem = std::unique_ptr<PresentationSubsystem>(new PresentationSubsystem(
 		m_context,
 		m_shaderDatabase,
@@ -548,6 +616,7 @@ void Renderer::initRenderSubsystems()
 	m_subsystemManager.registerSubsystem("GBufferLayoutSystem", m_gbufferLayoutSubsystem.get());
 	m_subsystemManager.registerSubsystem("HybridRTSystem", m_hybridRTSubsystem.get());
 	m_subsystemManager.registerSubsystem("UISystem", m_uiSubsystem.get());
+	m_subsystemManager.registerSubsystem("ComposeSystem", m_composeSubsystem.get());
 	m_subsystemManager.registerSubsystem("PresentationSystem", m_presentSubsystem.get());
 }
 
@@ -572,7 +641,9 @@ void Renderer::initRendererFrameData()
 		frame.raytracingSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(
 			m_context, m_descriptorSetAllocator, *m_rtDescriptorSetLayout
 		));
-
+		frame.composeSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(
+			m_context, m_descriptorSetAllocator, *m_composeSetLayout
+		));
 		frame.presentInputSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(
 			m_context, m_descriptorSetAllocator, *m_presentInputSetLayout
 		));
@@ -723,11 +794,29 @@ void Renderer::updateFrameDescriptors(RendererFrameData& frame)
 			.flush();
 	}
 
+	// Compose set
+	{
+		VkDescriptorImageInfo ssResult = VkDescriptorImageInfo{};
+		ssResult.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		ssResult.imageView = m_softShadowRTPassResult->view;
+		ssResult.sampler = m_renderResultLinearSampler->sampler;
+
+		VkDescriptorImageInfo diResult = VkDescriptorImageInfo{};
+		diResult.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		diResult.imageView = m_directIlluminationRTPassResult->view;
+		diResult.sampler = m_renderResultLinearSampler->sampler;
+
+		(*frame.composeSet)
+			.writeImage(ComposeInputBindings::SoftShadowImage, &ssResult)
+			.writeImage(ComposeInputBindings::DirectIlluminationImage, &diResult)
+			.flush();
+	}
+
 	// Present input set
 	{
 		VkDescriptorImageInfo renderResultInfo = VkDescriptorImageInfo{};
 		renderResultInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		renderResultInfo.imageView = m_directIlluminationRTPassResult->view;
+		renderResultInfo.imageView = m_composePassManager->getAttachmentResource(0).view;
 		renderResultInfo.sampler = m_renderResultLinearSampler->sampler;
 
 		(*frame.presentInputSet)
@@ -799,6 +888,10 @@ void Renderer::prepareFrameResources(uint32_t frameIdx)
 	m_hybridRTSubsystem->updateFrameInfo(RayTracingFrameInfo{
 		rendererFrameData.sceneDataSet->set,
 		rendererFrameData.raytracingSet->set,
+	});
+
+	m_composeSubsystem->updateFrameInfo(ComposeFrameInfo{
+		rendererFrameData.composeSet->set,
 	});
 
 	m_presentSubsystem->updateFrameInfo(PresentFrameInfo{

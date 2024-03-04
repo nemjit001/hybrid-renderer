@@ -26,6 +26,11 @@ struct RayTracingFrameInfo
 	VkDescriptorSet raytracingSetHandle = VK_NULL_HANDLE;
 };
 
+struct ComposeFrameInfo
+{
+	VkDescriptorSet composeSetHandle = VK_NULL_HANDLE;
+};
+
 struct PresentFrameInfo
 {
 	VkDescriptorSet presentInputSetHandle = VK_NULL_HANDLE;
@@ -121,6 +126,28 @@ public:
 	/// @brief Record UI render commands.
 	/// @param frame Active Frame to record into.
 	virtual void record(hri::ActiveFrame& frame) const override;
+};
+
+class ComposeSubsystem
+	:
+	public hri::IRenderSubsystem
+{
+public:
+	ComposeSubsystem(
+		hri::RenderContext& ctx,
+		hri::ShaderDatabase& shaderDB,
+		VkRenderPass renderPass,
+		VkDescriptorSetLayout composeSetLayout
+	);
+
+	virtual ~ComposeSubsystem() = default;
+
+	virtual void record(hri::ActiveFrame& frame) const override;
+
+	inline void updateFrameInfo(const ComposeFrameInfo& frameInfo) { m_currentFrameInfo = frameInfo; }
+
+protected:
+	ComposeFrameInfo m_currentFrameInfo = ComposeFrameInfo{};
 };
 
 /// @brief The Presentation Subsystem handles drawing offscreen render results to a swap image.
