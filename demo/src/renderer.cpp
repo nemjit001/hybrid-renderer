@@ -15,6 +15,7 @@ Renderer::Renderer(raytracing::RayTracingContext& ctx, hri::Camera& camera, Scen
 	m_shaderDatabase(m_context),
 	m_subsystemManager(),
 	m_descriptorSetAllocator(m_context),
+	m_accelStructManager(ctx),
 	m_computePool(m_context, m_context.queues.computeQueue, VK_COMMAND_POOL_CREATE_TRANSIENT_BIT),
 	m_stagingPool(m_context, m_context.queues.transferQueue, VK_COMMAND_POOL_CREATE_TRANSIENT_BIT),
 	m_camera(camera),
@@ -557,7 +558,7 @@ void Renderer::initRendererFrameData()
 			m_context, sizeof(LightArrayEntry) * m_activeScene.lightCount, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true
 		));
 
-		frame.blasList = m_activeScene.accelStructManager.createBLASList(m_activeScene.meshes);
+		frame.blasList = m_accelStructManager.createBLASList(m_activeScene.meshes);
 
 		frame.sceneDataSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(
 			m_context, m_descriptorSetAllocator, *m_sceneDataSetLayout
@@ -755,18 +756,18 @@ void Renderer::prepareFrameResources(uint32_t frameIdx)
 
 	// Create or reallocate TLAS
 	if (rendererFrameData.tlas.get() == nullptr
-		|| m_activeScene.accelStructManager.shouldReallocTLAS(*rendererFrameData.tlas, renderInstanceList, rendererFrameData.blasList)
+		|| m_accelStructManager.shouldReallocTLAS(*rendererFrameData.tlas, renderInstanceList, rendererFrameData.blasList)
 	)
 	{
 		rendererFrameData.tlas = std::make_unique<raytracing::AccelerationStructure>(
-			m_activeScene.accelStructManager.createTLAS(renderInstanceList, rendererFrameData.blasList)
+			m_accelStructManager.createTLAS(renderInstanceList, rendererFrameData.blasList)
 		);
 	}
 
 	// Build BLAS list & TLAS
 	VkCommandBuffer oneshot = m_computePool.createCommandBuffer();
-	m_activeScene.accelStructManager.cmdBuildBLASses(oneshot, renderInstanceList, m_activeScene.meshes, rendererFrameData.blasList);
-	m_activeScene.accelStructManager.cmdBuildTLAS(oneshot, renderInstanceList, rendererFrameData.blasList, *rendererFrameData.tlas);
+	m_accelStructManager.cmdBuildBLASses(oneshot, renderInstanceList, m_activeScene.meshes, rendererFrameData.blasList);
+	m_accelStructManager.cmdBuildTLAS(oneshot, renderInstanceList, rendererFrameData.blasList, *rendererFrameData.tlas);
 	m_computePool.submitAndWait(oneshot);
 	m_computePool.freeCommandBuffer(oneshot);
 

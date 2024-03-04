@@ -72,10 +72,7 @@ struct SceneBuffers
 class SceneASManager
 {
 public:
-	SceneASManager(
-		raytracing::RayTracingContext& ctx,
-		const std::vector<hri::Mesh>& meshes
-	);
+	SceneASManager(raytracing::RayTracingContext& ctx);
 
 	virtual ~SceneASManager() = default;
 
@@ -165,7 +162,6 @@ public:
 	std::vector<hri::Mesh> meshes;
 	std::vector<SceneNode> nodes;
 	uint32_t lightCount;
-	SceneASManager accelStructManager;
 	SceneBuffers buffers;
 
 private:

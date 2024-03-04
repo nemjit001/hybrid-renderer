@@ -9,8 +9,7 @@
 #include "demo.h"
 
 SceneASManager::SceneASManager(
-	raytracing::RayTracingContext& ctx,
-	const std::vector<hri::Mesh>& meshes
+	raytracing::RayTracingContext& ctx
 )
 	:
 	m_ctx(ctx),
@@ -265,7 +264,6 @@ SceneGraph::SceneGraph(
 	meshes(std::move(meshes)),
 	nodes(std::move(nodes)),
 	lightCount(0),
-	accelStructManager(ctx, this->meshes),
 	buffers{
 		hri::BufferResource(
 			ctx.renderContext,

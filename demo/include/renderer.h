@@ -92,6 +92,7 @@ private:
 	hri::ShaderDatabase m_shaderDatabase;
 	hri::RenderSubsystemManager m_subsystemManager;
 	hri::DescriptorSetAllocator m_descriptorSetAllocator;
+	SceneASManager m_accelStructManager;
 	hri::CommandPool m_computePool;
 	hri::CommandPool m_stagingPool;
 
