@@ -6,7 +6,7 @@
 
 #include "../raytracing_common.glsl"
 
-layout(location = 0) rayPayloadInEXT DIRayPayload diPayload;
+layout(location = 0) rayPayloadInEXT IlluminationRayPayload diPayload;
 
 void main()
 {

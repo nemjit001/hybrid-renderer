@@ -47,6 +47,12 @@ struct RenderInstance
 	uint32_t instanceId;
 };
 
+/// @brief A LightArrayEntry is an index pointing to a light's mesh, used for importance sampling scene lights.
+struct LightArrayEntry
+{
+	uint32_t lightIdx;
+};
+
 /// @brief Render Instance Data contains offsets into scene buffers & buffer addresses for objects.
 struct RenderInstanceData
 {

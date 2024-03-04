@@ -554,7 +554,7 @@ void Renderer::initRendererFrameData()
 		));
 
 		frame.lightSSBO = std::unique_ptr<hri::BufferResource>(new hri::BufferResource(
-			m_context, sizeof(uint32_t) * m_activeScene.lightCount, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true	// TODO: calculate buffer size based on lights in scene
+			m_context, sizeof(LightArrayEntry) * m_activeScene.lightCount, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true
 		));
 
 		frame.blasList = m_activeScene.accelStructManager.createBLASList(m_activeScene.meshes);
@@ -738,16 +738,20 @@ void Renderer::prepareFrameResources(uint32_t frameIdx)
 	rendererFrameData.cameraUBO->copyToBuffer(&cameraData, sizeof(hri::CameraShaderData));
 
 	// Fill instance light buffer
-	std::vector<uint32_t> lightBuffer; lightBuffer.reserve(m_activeScene.lightCount);
+	std::vector<LightArrayEntry> lightBuffer; lightBuffer.reserve(m_activeScene.lightCount);
 	for (auto const& instance : renderInstanceList)
 	{
 		const RenderInstanceData& instanceData = m_activeScene.getInstanceData(instance.instanceId);
 		const Material& mat = m_activeScene.materials[instanceData.materialIdx];
 		if (mat.emission.r > 0.0 || mat.emission.g > 0.0 || mat.emission.b > 0.0)
-			lightBuffer.push_back(instance.instanceId);
+		{
+			lightBuffer.push_back(LightArrayEntry{
+				instance.instanceId
+			});
+		}
 	}
 	assert(lightBuffer.size() == m_activeScene.lightCount);
-	rendererFrameData.lightSSBO->copyToBuffer(lightBuffer.data(), sizeof(uint32_t) * lightBuffer.size());
+	rendererFrameData.lightSSBO->copyToBuffer(lightBuffer.data(), rendererFrameData.lightSSBO->bufferSize);
 
 	// Create or reallocate TLAS
 	if (rendererFrameData.tlas.get() == nullptr

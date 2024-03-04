@@ -8,7 +8,7 @@
 #include "../shader_common.glsl"
 #include "../raytracing_common.glsl"
 
-layout(location = 0) rayPayloadInEXT DIRayPayload diPayload;
+layout(location = 0) rayPayloadInEXT IlluminationRayPayload diPayload;
 
 layout(set = 0, binding = 1, scalar) buffer RENDER_INSTANCE_DATA { RenderInstanceData instances[]; };
 layout(set = 0, binding = 2) buffer MATERIAL_DATA { Material materials[]; };

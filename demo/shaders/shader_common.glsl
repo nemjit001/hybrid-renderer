@@ -12,6 +12,11 @@ struct RenderInstanceData
 	uint64_t indexBufferAddress;
 };
 
+struct LighArrayEntry
+{
+	uint lightIdx;
+};
+
 // Mirrors material data from material.h
 struct Material
 {
