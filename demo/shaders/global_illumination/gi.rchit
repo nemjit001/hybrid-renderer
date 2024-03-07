@@ -67,7 +67,7 @@ void main()
 	traceRayEXT(
 		TLAS,
 		gl_RayFlagsOpaqueEXT,
-		0xFF,
+		prd.rayMask,
 		0, 0, 0,
 		wPos,
 		RAYTRACE_RANGE_TMIN,

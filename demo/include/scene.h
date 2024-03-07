@@ -7,14 +7,17 @@
 #include "material.h"
 
 #define INVALID_SCENE_ID	(size_t)(~0)
-#define DEFAULT_LOD_FAR		100.0f
 #define MAX_LOD_LEVELS		3
+#define INSTANCE_MASK_BITS	8
+#define VALID_MASK			((1 << INSTANCE_MASK_BITS) - 1)
 
 /// @brief Scene parameters allow modifying LOD selection.
 struct SceneParameters
 {
-	float nearPoint = 0.0f;
-	float farPoint	= DEFAULT_LOD_FAR;
+	float lodBias				= 0.0f;
+	float transitionInterval	= 0.5f;
+	float nearPoint				= 0.0f;
+	float farPoint				= 100.0f;
 };
 
 /// @brief A Scene Transform is a simple collection of vectors representing translation, rotation, and scale.
@@ -37,6 +40,7 @@ struct SceneNode
 	std::string name					= "No Name";
 	SceneTransform transform			= SceneTransform{};
 	SceneId material					= INVALID_SCENE_ID;
+	uint32_t numLods					= 0;
 	SceneId meshLODs[MAX_LOD_LEVELS]	= { INVALID_SCENE_ID, INVALID_SCENE_ID, INVALID_SCENE_ID };
 };
 
@@ -44,7 +48,9 @@ struct SceneNode
 struct RenderInstance
 {
 	hri::Float4x4 modelMatrix;
-	uint32_t instanceId;
+	float lodBlendFactor;
+	uint32_t instanceIdLOD0;
+	uint32_t instanceIdLOD1;
 };
 
 /// @brief A LightArrayEntry is an index pointing to a light's mesh, used for importance sampling scene lights.
@@ -144,6 +150,8 @@ private:
 	/// @return A list of AS Inputs for BLAS building.
 	std::vector<raytracing::ASBuilder::ASInput> generateBLASInputs(const std::vector<hri::Mesh>& meshes) const;
 
+	uint32_t generateLODMask(const RenderInstance& instance) const;
+
 private:
 	raytracing::RayTracingContext& m_ctx;
 	raytracing::ASBuilder m_asBuilder;
@@ -186,8 +194,10 @@ private:
 	/// @brief Calculate the LOD level for a given scene node.
 	/// @param camera Camera to use for LOD generation.
 	/// @param node Node to calculate LOD for.
-	/// @return A SceneId pointing to a mesh LOD in the mesh list.
-	SceneNode::SceneId calculateLODLevel(const hri::Camera& camera, const SceneNode& node);
+	/// @param LODBlendFactor blend factor between LODs
+	/// @param LOD0 current lod level
+	/// @param LOD1 next lod level
+	void calculateLODLevel(const hri::Camera& camera, const SceneNode& node, float& LODBlendFactor, SceneNode::SceneId& LOD0, SceneNode::SceneId& LOD1);
 
 public:
 	SceneParameters parameters;

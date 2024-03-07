@@ -34,13 +34,14 @@ void main()
 	// init payload
 	prd.seed = initSeed(launchIndex + frameInfo.frameIdx * 1799);
 	prd.traceDepth = 0;
+	prd.rayMask = generateLODMask(prd.seed);
 	prd.energy = vec3(0);
 	prd.transmission = vec3(1);
 
 	traceRayEXT(
 		TLAS,
 		gl_RayFlagsOpaqueEXT,
-		0xFF,
+		prd.rayMask,
 		0, 0, 0,
 		wPos,
 		RAYTRACE_RANGE_TMIN,

@@ -21,6 +21,7 @@ namespace hri
 	struct CameraShaderData
 	{
 		HRI_ALIGNAS(16) Float3 position;
+		HRI_ALIGNAS(16) Float3 forward;
 		HRI_ALIGNAS(16) Float4x4 view;
 		HRI_ALIGNAS(16) Float4x4 project;
 	};

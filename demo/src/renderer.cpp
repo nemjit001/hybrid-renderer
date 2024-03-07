@@ -79,9 +79,8 @@ void Renderer::drawFrame()
 	hri::ActiveFrame frame = m_renderCore.getActiveFrame();
 	RendererFrameData& frameData = m_frames[frame.currentFrameIndex];
 
-	// Prepare next frame's resources
-	uint32_t nextFrameIdx = (frame.currentFrameIndex + 1) % hri::RenderCore::framesInFlight();
-	prepareFrameResources(nextFrameIdx);
+	// Prepare frame resources
+	prepareFrameResources(frame.currentFrameIndex);
 
 	// Begin command recording for this frame
 	frame.beginCommands();
@@ -672,12 +671,12 @@ void Renderer::prepareFrameResources(uint32_t frameIdx)
 	std::vector<LightArrayEntry> lightBuffer; lightBuffer.reserve(m_activeScene.lightCount);
 	for (auto const& instance : renderInstanceList)
 	{
-		const RenderInstanceData& instanceData = m_activeScene.getInstanceData(instance.instanceId);
+		const RenderInstanceData& instanceData = m_activeScene.getInstanceData(instance.instanceIdLOD0);
 		const Material& mat = m_activeScene.materials[instanceData.materialIdx];
 		if (mat.emission.r > 0.0 || mat.emission.g > 0.0 || mat.emission.b > 0.0)
 		{
 			lightBuffer.push_back(LightArrayEntry{
-				instance.instanceId
+				instance.instanceIdLOD0
 			});
 		}
 	}

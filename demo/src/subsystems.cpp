@@ -153,7 +153,7 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame, GBufferLayoutFrameI
 	for (auto const& instance : frameInfo.pSceneGraph->getRenderInstanceList())
 	{
 		InstancePushConstant instancePC = InstancePushConstant{
-			instance.instanceId,
+			instance.instanceIdLOD0,
 			instance.modelMatrix,
 			hri::Float3x3(1.0f),
 		};
@@ -167,7 +167,7 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame, GBufferLayoutFrameI
 			&instancePC
 		);
 
-		const hri::Mesh& mesh = frameInfo.pSceneGraph->meshes[instance.instanceId];
+		const hri::Mesh& mesh = frameInfo.pSceneGraph->meshes[instance.instanceIdLOD0];
 
 		VkDeviceSize vertexOffsets[] = { 0 };
 		vkCmdBindVertexBuffers(frame.commandBuffer, 0, 1, &mesh.vertexBuffer.buffer, vertexOffsets);
