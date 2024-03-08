@@ -121,7 +121,9 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame, GBufferLayoutFrameI
 {
 	assert(m_pPSO != nullptr);
 	assert(frameInfo.sceneDataSetHandle != VK_NULL_HANDLE);
+	m_debug.resetTimer();
 	m_debug.cmdBeginLabel(frame.commandBuffer, "GBuffer Layout Pass");
+	m_debug.cmdRecordStartTimestamp(frame.commandBuffer);
 
 	VkExtent2D swapExtent = m_ctx.swapchain.extent;
 
@@ -175,6 +177,7 @@ void GBufferLayoutSubsystem::record(hri::ActiveFrame& frame, GBufferLayoutFrameI
 		vkCmdDrawIndexed(frame.commandBuffer, mesh.indexCount, 1, 0, 0, 0);
 	}
 
+	m_debug.cmdRecordEndTimestamp(frame.commandBuffer);
 	m_debug.cmdEndLabel(frame.commandBuffer);
 }
 
@@ -271,7 +274,9 @@ GlobalIlluminationSubsystem::GlobalIlluminationSubsystem(
 void GlobalIlluminationSubsystem::record(hri::ActiveFrame& frame, RayTracingFrameInfo& frameInfo) const
 {
 	assert(m_pPSO != nullptr);
+	m_debug.resetTimer();
 	m_debug.cmdBeginLabel(frame.commandBuffer, "GI Raytracing Pass");
+	m_debug.cmdRecordStartTimestamp(frame.commandBuffer);
 	VkExtent2D swapExtent = m_ctx.swapchain.extent;
 
 	// pass resource barriers
@@ -335,6 +340,7 @@ void GlobalIlluminationSubsystem::record(hri::ActiveFrame& frame, RayTracingFram
 		1
 	);
 
+	m_debug.cmdRecordEndTimestamp(frame.commandBuffer);
 	m_debug.cmdEndLabel(frame.commandBuffer);
 }
 

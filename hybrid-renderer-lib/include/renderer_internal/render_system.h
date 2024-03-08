@@ -35,6 +35,8 @@ namespace hri
         /// @param frameInfo
         virtual void record(ActiveFrame& frame, _FrameInfo& frameInfo) const = 0;
 
+        inline float timeDelta() const { return m_debug.timeDelta(); }
+
     protected:
         RenderContext& m_ctx;
         hri_debug::DebugLabelHandler m_debug;

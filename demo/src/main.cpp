@@ -167,6 +167,7 @@ int main()
 	rtPipelineFeatures.rayTracingPipeline = true;
 
 	ctxCreateInfo.deviceFeatures.shaderInt64 = true;
+	ctxCreateInfo.deviceFeatures12.hostQueryReset = true;
 	ctxCreateInfo.deviceFeatures12.bufferDeviceAddress = true;
 	ctxCreateInfo.deviceFeatures12.descriptorIndexing = true;
 	ctxCreateInfo.deviceFeatures12.scalarBlockLayout = true;

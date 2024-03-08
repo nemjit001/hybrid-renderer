@@ -75,6 +75,11 @@ void Renderer::setVSyncMode(hri::VSyncMode vsyncMode)
 
 void Renderer::drawFrame()
 {
+	printf("Prev frame pass times: %06.2f ms (GBuffer) | %06.2f ms (GI)\n",
+		m_gbufferLayoutSubsystem->timeDelta(),
+		m_GISubsystem->timeDelta()
+	);
+
 	m_renderCore.startFrame();
 	hri::ActiveFrame frame = m_renderCore.getActiveFrame();
 	RendererFrameData& frameData = m_frames[frame.currentFrameIndex];

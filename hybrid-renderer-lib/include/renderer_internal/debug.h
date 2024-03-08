@@ -17,7 +17,11 @@ namespace hri_debug
 		DebugLabelHandler(RenderContext& ctx);
 
 		/// @brief Destroy this Debug Label Handler.
-		virtual ~DebugLabelHandler() = default;
+		virtual ~DebugLabelHandler();
+
+		// Disallow copy behaviour
+		DebugLabelHandler(const DebugLabelHandler&) = delete;
+		DebugLabelHandler& operator=(const DebugLabelHandler&) = delete;
 
 		/// @brief Begin a new command buffer label.
 		/// @param commandBuffer Command buffer to use.
@@ -28,8 +32,23 @@ namespace hri_debug
 		/// @param commandBuffer Command buffer to use.
 		void cmdEndLabel(VkCommandBuffer commandBuffer) const;
 
+		void cmdRecordStartTimestamp(VkCommandBuffer commandBuffer) const;
+
+		void cmdRecordEndTimestamp(VkCommandBuffer commandBuffer) const;
+
+		void resetTimer() const;
+
+		float timeDelta() const;
+
 	protected:
+		// function pointers for debug functions
 		PFN_vkCmdBeginDebugUtilsLabelEXT vkBeginDebugUtilsLabelEXT;
 		PFN_vkCmdEndDebugUtilsLabelEXT vkEndDebugUtilsLabelEXT;
+
+		RenderContext& m_ctx;
+
+		// Timestamp stuff
+		VkQueryPool m_timerPool = VK_NULL_HANDLE;
+		float m_timestampPeriod = 0.0f;
 	};
 }
