@@ -75,8 +75,10 @@ void Renderer::setVSyncMode(hri::VSyncMode vsyncMode)
 
 void Renderer::drawFrame()
 {
-	printf("Prev frame pass times: %06.2f ms (GBuffer) | %06.2f ms (GI)\n",
+	printf("Prev frame pass times: %06.2f ms (GBuffer Lo Res) | %06.2f ms (GBuffer Hi Res) | %06.2f ms (SS) | %06.2f ms (GI)\n",
+		0.0,
 		m_gbufferLayoutSubsystem->timeDelta(),
+		0.0,
 		m_GISubsystem->timeDelta()
 	);
 
