@@ -212,7 +212,7 @@ hri::BufferResource SceneASManager::generateTLASInstances(
 	std::vector<VkAccelerationStructureInstanceKHR> tlasInstances = {}; tlasInstances.reserve(instanceCount);
 	for (auto const& renderInstance : instances)
 	{
-		uint32_t lodLoMask = generateLODMask(renderInstance);
+		uint32_t lodLoMask = SceneGraph::generateLODMask(renderInstance);
 		uint32_t lodHiMask = (~lodLoMask) & VALID_MASK;
 		auto const& blasHi = blasList[renderInstance.instanceIdLOD0];
 		auto const& blasLo = blasList[renderInstance.instanceIdLOD1];
@@ -264,12 +264,6 @@ std::vector<raytracing::ASBuilder::ASInput> SceneASManager::generateBLASInputs(c
 	}
 
 	return blasInputs;
-}
-
-uint32_t SceneASManager::generateLODMask(const RenderInstance& instance) const
-{
-	// Calculate LOD mask
-	return (1 << static_cast<uint32_t>((INSTANCE_MASK_BITS + 1) * instance.lodBlendFactor)) - 1;
 }
 
 SceneGraph::SceneGraph(

@@ -7,7 +7,7 @@
 using namespace hri;
 using namespace hri_debug;
 
-DebugLabelHandler::DebugLabelHandler(RenderContext& ctx)
+DebugHandler::DebugHandler(RenderContext& ctx)
 	:
 	m_ctx(ctx),
 	vkBeginDebugUtilsLabelEXT(ctx.getInstanceFunction<PFN_vkCmdBeginDebugUtilsLabelEXT>("vkCmdBeginDebugUtilsLabelEXT")),
@@ -27,12 +27,12 @@ DebugLabelHandler::DebugLabelHandler(RenderContext& ctx)
 	vkResetQueryPool(m_ctx.device, m_timerPool, 0, 2);
 }
 
-DebugLabelHandler::~DebugLabelHandler()
+DebugHandler::~DebugHandler()
 {
 	vkDestroyQueryPool(m_ctx.device, m_timerPool, nullptr);
 }
 
-void DebugLabelHandler::cmdBeginLabel(VkCommandBuffer commandBuffer, const char* pName) const
+void DebugHandler::cmdBeginLabel(VkCommandBuffer commandBuffer, const char* pName) const
 {
 	VkDebugUtilsLabelEXT labelInfo = VkDebugUtilsLabelEXT{ VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT };
 	labelInfo.pLabelName = pName;
@@ -40,27 +40,27 @@ void DebugLabelHandler::cmdBeginLabel(VkCommandBuffer commandBuffer, const char*
 	this->vkBeginDebugUtilsLabelEXT(commandBuffer, &labelInfo);
 }
 
-void DebugLabelHandler::cmdEndLabel(VkCommandBuffer commandBuffer) const
+void DebugHandler::cmdEndLabel(VkCommandBuffer commandBuffer) const
 {
 	this->vkEndDebugUtilsLabelEXT(commandBuffer);
 }
 
-void DebugLabelHandler::cmdRecordStartTimestamp(VkCommandBuffer commandBuffer) const
+void DebugHandler::cmdRecordStartTimestamp(VkCommandBuffer commandBuffer) const
 {
 	vkCmdWriteTimestamp(commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, m_timerPool, 0);
 }
 
-void DebugLabelHandler::cmdRecordEndTimestamp(VkCommandBuffer commandBuffer) const
+void DebugHandler::cmdRecordEndTimestamp(VkCommandBuffer commandBuffer) const
 {
 	vkCmdWriteTimestamp(commandBuffer, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, m_timerPool, 1);
 }
 
-void DebugLabelHandler::resetTimer() const
+void DebugHandler::resetTimer() const
 {
 	vkResetQueryPool(m_ctx.device, m_timerPool, 0, 2);
 }
 
-float DebugLabelHandler::timeDelta() const
+float DebugHandler::timeDelta() const
 {
 	uint64_t timestamps[2] = { 0, 0 };
 	VkResult result = vkGetQueryPoolResults(m_ctx.device, m_timerPool, 0, 2, sizeof(timestamps), timestamps, sizeof(uint64_t), VK_QUERY_RESULT_64_BIT);

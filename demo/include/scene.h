@@ -150,8 +150,6 @@ private:
 	/// @return A list of AS Inputs for BLAS building.
 	std::vector<raytracing::ASBuilder::ASInput> generateBLASInputs(const std::vector<hri::Mesh>& meshes) const;
 
-	uint32_t generateLODMask(const RenderInstance& instance) const;
-
 private:
 	raytracing::RayTracingContext& m_ctx;
 	raytracing::ASBuilder m_asBuilder;
@@ -189,6 +187,8 @@ public:
 	const std::vector<RenderInstance>& generateRenderInstanceList(const hri::Camera& camera);
 
 	inline const RenderInstanceData& getInstanceData(size_t idx) const { return m_instanceData.at(idx); }
+
+	static inline uint32_t generateLODMask(const RenderInstance& instance) { return (1 << static_cast<uint32_t>((INSTANCE_MASK_BITS + 1) * instance.lodBlendFactor)) - 1; }
 
 private:
 	/// @brief Calculate the LOD level for a given scene node.

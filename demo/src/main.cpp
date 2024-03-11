@@ -212,6 +212,7 @@ int main()
 
 		// Update scene & draw renderer frame
 		scene.update(gFrameTimer.deltaTime);
+		renderer.prepareFrame();
 		renderer.drawFrame();
 
 		// Update camera state

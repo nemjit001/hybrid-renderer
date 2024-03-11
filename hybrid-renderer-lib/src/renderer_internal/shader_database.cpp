@@ -260,8 +260,7 @@ Shader* ShaderDatabase::registerShader(const std::string& name, Shader&& shader)
 {
     if (isExistingShader(name))
     {
-        fprintf(stderr, "Shader [%s] already exists in DB!\n", name.c_str());
-        abort();
+        return getShader(name);
     }
 
     const auto& [it, success] = m_shaderMap.insert(std::pair<std::string, Shader>(name, std::move(shader)));
@@ -282,8 +281,7 @@ PipelineStateObject* ShaderDatabase::createPipeline(
 {
     if (isExistingPipeline(name))
     {
-        fprintf(stderr, "Pipeline [%s] already exists in DB!\n", name.c_str());
-        abort();
+        return getPipeline(name);
     }
 
     // Create pipeline shader stages
@@ -373,8 +371,7 @@ PipelineStateObject* ShaderDatabase::createPipeline(
 {
     if (isExistingPipeline(name))
     {
-        fprintf(stderr, "Pipeline [%s] already exists in DB!\n", name.c_str());
-        abort();
+        return getPipeline(name);
     }
 
     // Get shader
@@ -427,8 +424,7 @@ PipelineStateObject* ShaderDatabase::registerPipeline(
 
     if (isExistingPipeline(name))
     {
-        fprintf(stderr, "Pipeline [%s] already exists in DB!\n", name.c_str());
-        abort();
+        return getPipeline(name);
     }
 
     // Create PSO object

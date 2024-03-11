@@ -4,24 +4,24 @@
 
 #include "renderer_internal/render_context.h"
 
-using namespace hri;
-
 namespace hri_debug
 {
-	/// @brief The debug label handler allows setting debug labels for Vulkan objects.
-	class DebugLabelHandler
+	using namespace hri;
+
+	/// @brief The debug handler allows setting debug state for Vulkan objects.
+	class DebugHandler
 	{
 	public:
 		/// @brief Create a new debug label handler.
 		/// @param ctx Render Context to use.
-		DebugLabelHandler(RenderContext& ctx);
+		DebugHandler(RenderContext& ctx);
 
 		/// @brief Destroy this Debug Label Handler.
-		virtual ~DebugLabelHandler();
+		virtual ~DebugHandler();
 
 		// Disallow copy behaviour
-		DebugLabelHandler(const DebugLabelHandler&) = delete;
-		DebugLabelHandler& operator=(const DebugLabelHandler&) = delete;
+		DebugHandler(const DebugHandler&) = delete;
+		DebugHandler& operator=(const DebugHandler&) = delete;
 
 		/// @brief Begin a new command buffer label.
 		/// @param commandBuffer Command buffer to use.
