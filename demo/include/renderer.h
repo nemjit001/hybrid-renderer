@@ -43,6 +43,7 @@ private:
 
 	// Render passes
 	std::unique_ptr<PathTracingPass> m_pathTracingPass;
+	std::unique_ptr<GBufferLayoutPass> m_gbufferLayoutPass;
 	std::unique_ptr<PresentPass> m_presentPass;
 	std::unique_ptr<UIPass> m_uiPass;
 };

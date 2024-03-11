@@ -50,5 +50,7 @@ void main()
 		0
 	);
 
-	imageStore(PathTracingOut, ivec2(gl_LaunchIDEXT.xy), vec4(prd.energy, 1));
+	// TODO: use accumulator or reprojection
+	ivec2 pixel = ivec2(gl_LaunchIDEXT.xy);
+	imageStore(PathTracingOut, pixel, vec4(prd.energy, 1));
 }

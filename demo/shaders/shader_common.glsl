@@ -7,6 +7,13 @@
 
 #define INSTANCE_MASK_BITS 8
 
+struct InstanceInfo
+{
+	uint instanceId;
+	uint lodMask;
+	mat4 model;
+};
+
 // Mirrors render instance data from scene.h
 struct RenderInstanceData
 {

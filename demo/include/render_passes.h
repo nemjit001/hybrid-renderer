@@ -10,6 +10,7 @@
 struct CommonResources
 {
 	uint32_t frameIndex;
+	SceneGraph* activeScene;
 	std::unique_ptr<hri::BufferResource> cameraUBO;
 	hri::BufferResource* instanceDataSSBO;
 	hri::BufferResource* materialSSBO;
@@ -75,7 +76,43 @@ class GBufferLayoutPass
 	:
 	public IRenderPass
 {
-	//
+public:
+	enum class LODMode
+	{
+		LODNear,
+		LODFar,
+	};
+
+	struct PushConstantData
+	{
+		HRI_ALIGNAS(4)  uint32_t instanceId;
+		HRI_ALIGNAS(4)	uint32_t lodMask;
+		HRI_ALIGNAS(16) hri::Float4x4 modelMatrix;
+	};
+
+public:
+	GBufferLayoutPass(hri::RenderContext& ctx, hri::ShaderDatabase& shaderDB, hri::DescriptorSetAllocator& descriptorAllocator);
+
+	virtual ~GBufferLayoutPass();
+
+	virtual void prepareFrame(CommonResources& resources) override;
+
+	virtual void drawFrame(hri::ActiveFrame& frame, CommonResources& resources) override;
+
+private:
+	void executeGBufferPass(hri::RenderPassResourceManager& pResourceManager, hri::ActiveFrame& frame, CommonResources& resources, LODMode mode);
+
+public:
+	std::unique_ptr<hri::DescriptorSetLayout> sceneDescriptorSetLayout;
+	std::unique_ptr<hri::DescriptorSetManager> sceneDescriptorSet;
+
+	// 2 passes in one, for near & far LODs
+	std::unique_ptr<hri::RenderPassResourceManager> loDefLODPassResources;
+	std::unique_ptr<hri::RenderPassResourceManager> hiDefLODPassResources;
+
+protected:
+	VkPipelineLayout m_layout = VK_NULL_HANDLE;
+	hri::PipelineStateObject* m_pPSO = nullptr;
 };
 
 /// @brief GBuffer sample pass that samples 2 GBuffer layouts and blends between them using stochastic sampling

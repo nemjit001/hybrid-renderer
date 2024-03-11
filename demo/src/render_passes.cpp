@@ -194,7 +194,7 @@ void PathTracingPass::recreateResources(VkExtent2D resolution)
 	renderResult = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
 		context,
 		VK_IMAGE_TYPE_2D,
-		VK_FORMAT_R8G8B8A8_SNORM,
+		VK_FORMAT_R32G32B32A32_SFLOAT,
 		VK_SAMPLE_COUNT_1_BIT,
 		VkExtent3D{ resolution.width, resolution.height, 1 },
 		1,
@@ -204,6 +204,321 @@ void PathTracingPass::recreateResources(VkExtent2D resolution)
 	));
 
 	renderResult->createView(VK_IMAGE_VIEW_TYPE_2D, hri::ImageResource::DefaultComponentMapping(), hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1));
+}
+
+// --- GBUFFER LAYOUT PASS ---
+
+GBufferLayoutPass::GBufferLayoutPass(hri::RenderContext& ctx, hri::ShaderDatabase& shaderDB, hri::DescriptorSetAllocator& descriptorAllocator)
+	:
+	IRenderPass(ctx)
+{
+	// Set up descriptor set
+	{
+		hri::DescriptorSetLayoutBuilder sceneDescriptorSetLayoutBuilder(context);
+		sceneDescriptorSetLayoutBuilder
+			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT)
+			.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT);
+
+		sceneDescriptorSetLayout = std::make_unique<hri::DescriptorSetLayout>(sceneDescriptorSetLayoutBuilder.build());
+		sceneDescriptorSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(context, descriptorAllocator, *sceneDescriptorSetLayout));
+	}
+
+	// Set up render pass
+	{
+		hri::RenderPassBuilder passBuilder(context);
+		passBuilder
+			.addAttachment( // Albedo target
+				VK_FORMAT_R8G8B8A8_SNORM, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE
+			)
+			.addAttachment( // Emission target
+				VK_FORMAT_R32G32B32A32_SFLOAT, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE
+			)
+			.addAttachment( // Specular target
+				VK_FORMAT_R32G32B32A32_SFLOAT, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE
+			)
+			.addAttachment( // Transmittance target
+				VK_FORMAT_R32G32B32A32_SFLOAT, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE
+			)
+			.addAttachment( // Normal target
+				VK_FORMAT_R32G32B32A32_SFLOAT, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE
+			)
+			.addAttachment( // LOD Mask target
+				VK_FORMAT_R32_UINT, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE
+			)
+			.addAttachment( // Depth target
+				VK_FORMAT_D32_SFLOAT, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE
+			)
+			.setAttachmentReference(hri::AttachmentType::Color, VkAttachmentReference{ 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL })
+			.setAttachmentReference(hri::AttachmentType::Color, VkAttachmentReference{ 1, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL })
+			.setAttachmentReference(hri::AttachmentType::Color, VkAttachmentReference{ 2, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL })
+			.setAttachmentReference(hri::AttachmentType::Color, VkAttachmentReference{ 3, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL })
+			.setAttachmentReference(hri::AttachmentType::Color, VkAttachmentReference{ 4, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL })
+			.setAttachmentReference(hri::AttachmentType::Color, VkAttachmentReference{ 5, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL })
+			.setAttachmentReference(hri::AttachmentType::DepthStencil, VkAttachmentReference{ 6, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL });
+
+		// Attachment configs
+		std::vector<hri::RenderAttachmentConfig> attachmentConfigs = {
+			hri::RenderAttachmentConfig{ VK_FORMAT_R8G8B8A8_SNORM, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT },
+			hri::RenderAttachmentConfig{ VK_FORMAT_R32G32B32A32_SFLOAT, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT },
+			hri::RenderAttachmentConfig{ VK_FORMAT_R32G32B32A32_SFLOAT, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT },
+			hri::RenderAttachmentConfig{ VK_FORMAT_R32G32B32A32_SFLOAT, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT },
+			hri::RenderAttachmentConfig{ VK_FORMAT_R32G32B32A32_SFLOAT, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT },
+			hri::RenderAttachmentConfig{ VK_FORMAT_R32_UINT, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT },
+			hri::RenderAttachmentConfig{ VK_FORMAT_D32_SFLOAT, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_DEPTH_BIT },
+		};
+
+		loDefLODPassResources = std::make_unique<hri::RenderPassResourceManager>(ctx, passBuilder.build(), attachmentConfigs);
+		hiDefLODPassResources = std::make_unique<hri::RenderPassResourceManager>(ctx, passBuilder.build(), attachmentConfigs);
+
+		// lo def clear values
+		loDefLODPassResources->setClearValue(0, VkClearValue{ { 0.0f, 0.0f, 0.0f, 0.0f } });
+		loDefLODPassResources->setClearValue(1, VkClearValue{ { 0.0f, 0.0f, 0.0f, 0.0f } });
+		loDefLODPassResources->setClearValue(2, VkClearValue{ { 0.0f, 0.0f, 0.0f, 0.0f } });
+		loDefLODPassResources->setClearValue(3, VkClearValue{ { 0.0f, 0.0f, 0.0f, 0.0f } });
+		loDefLODPassResources->setClearValue(4, VkClearValue{ { 0.0f, 0.0f, 0.0f, 0.0f } });
+		loDefLODPassResources->setClearValue(5, VkClearValue{ { 0.0f, 0.0f, 0.0f, 0.0f } });
+		loDefLODPassResources->setClearValue(6, VkClearValue{ { 1.0f, 0x00 } });
+
+		// hi def clear values
+		hiDefLODPassResources->setClearValue(0, VkClearValue{ { 0.0f, 0.0f, 0.0f, 0.0f } });
+		hiDefLODPassResources->setClearValue(1, VkClearValue{ { 0.0f, 0.0f, 0.0f, 0.0f } });
+		hiDefLODPassResources->setClearValue(2, VkClearValue{ { 0.0f, 0.0f, 0.0f, 0.0f } });
+		hiDefLODPassResources->setClearValue(3, VkClearValue{ { 0.0f, 0.0f, 0.0f, 0.0f } });
+		hiDefLODPassResources->setClearValue(4, VkClearValue{ { 0.0f, 0.0f, 0.0f, 0.0f } });
+		hiDefLODPassResources->setClearValue(5, VkClearValue{ { 0.0f, 0.0f, 0.0f, 0.0f } });
+		hiDefLODPassResources->setClearValue(6, VkClearValue{ { 1.0f, 0x00 } });
+	}
+
+	// Set up render pipeline
+	{
+		hri::PipelineLayoutBuilder layoutBuilder(context);
+		m_layout = layoutBuilder
+			.addPushConstant(sizeof(GBufferLayoutPass::PushConstantData), VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
+			.addDescriptorSetLayout(*sceneDescriptorSetLayout)
+			.build();
+
+		shaderDB.registerShader("StaticVert", hri::Shader::loadFile(context, "shaders/static.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
+		shaderDB.registerShader("GBufferLayoutFrag", hri::Shader::loadFile(context, "shaders/gbuffer_layout.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
+
+		VkExtent2D swapExtent = context.swapchain.extent;
+		std::vector<VkPipelineColorBlendAttachmentState> blendAttachments = {
+			VkPipelineColorBlendAttachmentState{
+				false,
+				VK_BLEND_FACTOR_ONE,
+				VK_BLEND_FACTOR_ZERO,
+				VK_BLEND_OP_ADD,
+				VK_BLEND_FACTOR_ONE,
+				VK_BLEND_FACTOR_ZERO,
+				VK_BLEND_OP_ADD,
+				VK_COLOR_COMPONENT_R_BIT
+				| VK_COLOR_COMPONENT_G_BIT
+				| VK_COLOR_COMPONENT_B_BIT
+				| VK_COLOR_COMPONENT_A_BIT
+			},
+			VkPipelineColorBlendAttachmentState{
+				false,
+				VK_BLEND_FACTOR_ONE,
+				VK_BLEND_FACTOR_ZERO,
+				VK_BLEND_OP_ADD,
+				VK_BLEND_FACTOR_ONE,
+				VK_BLEND_FACTOR_ZERO,
+				VK_BLEND_OP_ADD,
+				VK_COLOR_COMPONENT_R_BIT
+				| VK_COLOR_COMPONENT_G_BIT
+				| VK_COLOR_COMPONENT_B_BIT
+				| VK_COLOR_COMPONENT_A_BIT
+			},
+			VkPipelineColorBlendAttachmentState{
+				false,
+				VK_BLEND_FACTOR_ONE,
+				VK_BLEND_FACTOR_ZERO,
+				VK_BLEND_OP_ADD,
+				VK_BLEND_FACTOR_ONE,
+				VK_BLEND_FACTOR_ZERO,
+				VK_BLEND_OP_ADD,
+				VK_COLOR_COMPONENT_R_BIT
+				| VK_COLOR_COMPONENT_G_BIT
+				| VK_COLOR_COMPONENT_B_BIT
+				| VK_COLOR_COMPONENT_A_BIT
+			},
+			VkPipelineColorBlendAttachmentState{
+				false,
+				VK_BLEND_FACTOR_ONE,
+				VK_BLEND_FACTOR_ZERO,
+				VK_BLEND_OP_ADD,
+				VK_BLEND_FACTOR_ONE,
+				VK_BLEND_FACTOR_ZERO,
+				VK_BLEND_OP_ADD,
+				VK_COLOR_COMPONENT_R_BIT
+				| VK_COLOR_COMPONENT_G_BIT
+				| VK_COLOR_COMPONENT_B_BIT
+				| VK_COLOR_COMPONENT_A_BIT
+			},
+			VkPipelineColorBlendAttachmentState{
+				false,
+				VK_BLEND_FACTOR_ONE,
+				VK_BLEND_FACTOR_ZERO,
+				VK_BLEND_OP_ADD,
+				VK_BLEND_FACTOR_ONE,
+				VK_BLEND_FACTOR_ZERO,
+				VK_BLEND_OP_ADD,
+				VK_COLOR_COMPONENT_R_BIT
+				| VK_COLOR_COMPONENT_G_BIT
+				| VK_COLOR_COMPONENT_B_BIT
+				| VK_COLOR_COMPONENT_A_BIT
+			},
+			VkPipelineColorBlendAttachmentState{
+				false,
+				VK_BLEND_FACTOR_ONE,
+				VK_BLEND_FACTOR_ZERO,
+				VK_BLEND_OP_ADD,
+				VK_BLEND_FACTOR_ONE,
+				VK_BLEND_FACTOR_ZERO,
+				VK_BLEND_OP_ADD,
+				VK_COLOR_COMPONENT_R_BIT
+				| VK_COLOR_COMPONENT_G_BIT
+				| VK_COLOR_COMPONENT_B_BIT
+				| VK_COLOR_COMPONENT_A_BIT
+			},
+		};
+
+		hri::GraphicsPipelineBuilder pipelineBuilder = hri::GraphicsPipelineBuilder{};
+		pipelineBuilder.vertexInputBindings = { VkVertexInputBindingDescription{ 0, sizeof(hri::Vertex), VK_VERTEX_INPUT_RATE_VERTEX } };
+		pipelineBuilder.vertexInputAttributes = {
+			VkVertexInputAttributeDescription{ 0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(hri::Vertex, position) },
+			VkVertexInputAttributeDescription{ 1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(hri::Vertex, normal) },
+			VkVertexInputAttributeDescription{ 2, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(hri::Vertex, tangent) },
+			VkVertexInputAttributeDescription{ 3, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(hri::Vertex, textureCoord) },
+		};
+		pipelineBuilder.inputAssemblyState = hri::GraphicsPipelineBuilder::initInputAssemblyState(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, false);
+		pipelineBuilder.viewport = hri::GraphicsPipelineBuilder::initDefaultViewport(static_cast<float>(swapExtent.width), static_cast<float>(swapExtent.height));
+		pipelineBuilder.scissor = hri::GraphicsPipelineBuilder::initDefaultScissor(swapExtent.width, swapExtent.height);
+		pipelineBuilder.rasterizationState = hri::GraphicsPipelineBuilder::initRasterizationState(false, VK_POLYGON_MODE_FILL, VK_CULL_MODE_NONE, VK_FRONT_FACE_COUNTER_CLOCKWISE);
+		pipelineBuilder.multisampleState = hri::GraphicsPipelineBuilder::initMultisampleState(VK_SAMPLE_COUNT_1_BIT);
+		pipelineBuilder.depthStencilState = hri::GraphicsPipelineBuilder::initDepthStencilState(true, true, VK_COMPARE_OP_LESS);
+		pipelineBuilder.colorBlendState = hri::GraphicsPipelineBuilder::initColorBlendState(blendAttachments);
+		pipelineBuilder.dynamicStates = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
+		pipelineBuilder.layout = m_layout;
+		pipelineBuilder.renderPass = loDefLODPassResources->renderPass();	// This is OK because lo & hi def both use the same render pass setup
+		pipelineBuilder.subpass = 0;
+
+		m_pPSO = shaderDB.createPipeline("GBufferLayoutPipeline", { "StaticVert", "GBufferLayoutFrag" }, pipelineBuilder);
+	}
+}
+
+GBufferLayoutPass::~GBufferLayoutPass()
+{
+	vkDestroyPipelineLayout(context.device, m_layout, nullptr);
+}
+
+void GBufferLayoutPass::prepareFrame(CommonResources& resources)
+{
+	VkDescriptorBufferInfo cameraInfo = VkDescriptorBufferInfo{};
+	cameraInfo.buffer = resources.cameraUBO->buffer;
+	cameraInfo.offset = 0;
+	cameraInfo.range = resources.cameraUBO->bufferSize;
+
+	VkDescriptorBufferInfo instanceInfo = VkDescriptorBufferInfo{};
+	instanceInfo.buffer = resources.instanceDataSSBO->buffer;
+	instanceInfo.offset = 0;
+	instanceInfo.range = resources.instanceDataSSBO->bufferSize;
+
+	VkDescriptorBufferInfo materialInfo = VkDescriptorBufferInfo{};
+	materialInfo.buffer = resources.materialSSBO->buffer;
+	materialInfo.offset = 0;
+	materialInfo.range = resources.materialSSBO->bufferSize;
+
+	(*sceneDescriptorSet)
+		.writeBuffer(0, &cameraInfo)
+		.writeBuffer(1, &instanceInfo)
+		.writeBuffer(2, &materialInfo)
+		.flush();
+}
+
+void GBufferLayoutPass::drawFrame(hri::ActiveFrame& frame, CommonResources& resources)
+{
+	debug.resetTimer();
+	debug.cmdRecordStartTimestamp(frame.commandBuffer);
+
+	executeGBufferPass(*loDefLODPassResources, frame, resources, LODMode::LODFar);
+	executeGBufferPass(*hiDefLODPassResources, frame, resources, LODMode::LODNear);
+
+	VkMemoryBarrier2 memoryBarrier = VkMemoryBarrier2{ VK_STRUCTURE_TYPE_MEMORY_BARRIER_2 };
+	memoryBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+	memoryBarrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
+	memoryBarrier.srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
+	memoryBarrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
+	frame.pipelineBarrier({ memoryBarrier });
+
+	debug.cmdRecordEndTimestamp(frame.commandBuffer);
+}
+
+void GBufferLayoutPass::executeGBufferPass(hri::RenderPassResourceManager& pResourceManager, hri::ActiveFrame& frame, CommonResources& resources, LODMode mode)
+{
+	pResourceManager.beginRenderPass(frame);
+	debug.cmdBeginLabel(frame.commandBuffer, (mode == LODMode::LODNear) ? "GBuffer Layout LOD Near" : "GBuffer Layout LOD Far");
+
+	VkExtent2D swapExtent = context.swapchain.extent;
+	VkViewport viewport = VkViewport{ 0.0f, 0.0f, static_cast<float>(swapExtent.width), static_cast<float>(swapExtent.height), hri::DefaultViewportMinDepth, hri::DefaultViewportMaxDepth };
+	VkRect2D scissor = VkRect2D{ VkOffset2D{0, 0}, swapExtent };
+
+	vkCmdSetViewport(frame.commandBuffer, 0, 1, &viewport);
+	vkCmdSetScissor(frame.commandBuffer, 0, 1, &scissor);
+
+	vkCmdBindDescriptorSets(
+		frame.commandBuffer,
+		m_pPSO->bindPoint,
+		m_layout,
+		0, 1, &sceneDescriptorSet->set,
+		0, nullptr
+	);
+
+	vkCmdBindPipeline(
+		frame.commandBuffer,
+		m_pPSO->bindPoint,
+		m_pPSO->pipeline
+	);
+
+	const auto instances = resources.activeScene->getRenderInstanceList();
+	const bool useNearLOD = (mode == LODMode::LODNear);
+	for (auto const& instance : instances)
+	{
+		// Get lod instance, lod mask, and mesh
+		uint32_t instanceId = (useNearLOD) ? instance.instanceIdLOD0 : instance.instanceIdLOD1;
+		uint32_t lodMask = SceneGraph::generateLODMask(instance);
+		const hri::Mesh& mesh = resources.activeScene->meshes[instanceId];
+
+		// Set up push constants
+		PushConstantData pushConstants = PushConstantData{};
+		pushConstants.instanceId = instanceId;
+		pushConstants.lodMask = (useNearLOD) ? ((~lodMask) & VALID_MASK) : (lodMask & VALID_MASK);
+		pushConstants.modelMatrix = instance.modelMatrix;
+
+		vkCmdPushConstants(
+			frame.commandBuffer,
+			m_layout,
+			VK_SHADER_STAGE_VERTEX_BIT
+			| VK_SHADER_STAGE_FRAGMENT_BIT,
+			0, sizeof(GBufferLayoutPass::PushConstantData),
+			&pushConstants
+		);
+
+		VkDeviceSize offsets[] = {0};
+		vkCmdBindVertexBuffers(frame.commandBuffer, 0, 1, &mesh.vertexBuffer.buffer, offsets);
+		vkCmdBindIndexBuffer(frame.commandBuffer, mesh.indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdDrawIndexed(frame.commandBuffer, mesh.indexCount, 1, 0, 0, 0);
+	}
+
+	debug.cmdEndLabel(frame.commandBuffer);
+	pResourceManager.endRenderPass(frame);
 }
 
 // --- PRESENT PASS ---
@@ -233,9 +548,7 @@ PresentPass::PresentPass(hri::RenderContext& ctx, hri::ShaderDatabase& shaderDB,
 	passBuilder
 		.addAttachment(
 			ctx.swapFormat(), VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-			VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE,
-			VK_ATTACHMENT_LOAD_OP_DONT_CARE, VK_ATTACHMENT_STORE_OP_DONT_CARE,
-			VK_IMAGE_LAYOUT_UNDEFINED
+			VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE
 		)
 		.setAttachmentReference(hri::AttachmentType::Color, VkAttachmentReference{ 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
 

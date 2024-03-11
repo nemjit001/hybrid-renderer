@@ -6,6 +6,8 @@
 #include "detail/raytracing.h"
 #include "render_passes.h"
 
+#define USE_REFERENCE_PATH_TRACER	1
+
 Renderer::Renderer(raytracing::RayTracingContext& ctx, hri::Camera& camera, SceneGraph& activeScene)
 	:
 	m_context(ctx.renderContext),
@@ -53,6 +55,7 @@ void Renderer::prepareFrame()
 	// update instance list & frame resource state
 	auto instances = m_activeScene.generateRenderInstanceList(m_camera);
 	m_frameResources.frameIndex = m_frameCounter;
+	m_frameResources.activeScene = &m_activeScene;
 
 	// Copy SSBO & UBO data to buffers and check if TLAS realloc is needed
 	m_frameResources.cameraUBO->copyToBuffer(&m_camera.getShaderData(), sizeof(hri::CameraShaderData));
@@ -67,23 +70,37 @@ void Renderer::prepareFrame()
 	m_computePool.freeCommandBuffer(ASBuildCommands);
 
 	// Prepare pass I/O descriptors
+#if USE_REFERENCE_PATH_TRACER == 1
 	VkDescriptorImageInfo renderResultInfo = VkDescriptorImageInfo{};
 	renderResultInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 	renderResultInfo.imageView = m_pathTracingPass->renderResult->view;
 	renderResultInfo.sampler = m_presentPass->passInputSampler->sampler;
+#else
+	// TODO: non path tracing result sampling
+	VkDescriptorImageInfo renderResultInfo = VkDescriptorImageInfo{};
+	renderResultInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	renderResultInfo.imageView = m_gbufferLayoutPass->hiDefLODPassResources->getAttachmentResource(0).view;
+	renderResultInfo.sampler = m_presentPass->passInputSampler->sampler;
+#endif
+
 	(*m_presentPass->presentDescriptorSet)
 		.writeImage(0, &renderResultInfo)
 		.flush();
 
 	// Prepare per pass frame resources
 	m_pathTracingPass->prepareFrame(m_frameResources);
+	m_gbufferLayoutPass->prepareFrame(m_frameResources);
 	m_presentPass->prepareFrame(m_frameResources);
 	m_uiPass->prepareFrame(m_frameResources);
 }
 
 void Renderer::drawFrame()
 {
-	// TODO: debug frame timing output
+#if USE_REFERENCE_PATH_TRACER == 1
+	printf("PathTracing: %8.4f ms\n", m_pathTracingPass->debug.timeDelta());
+#else
+	printf("GbufferLayout: %8.4f ms\n", m_gbufferLayoutPass->debug.timeDelta());
+#endif
 
 	m_renderCore.startFrame();
 	hri::ActiveFrame frame = m_renderCore.getActiveFrame();
@@ -91,7 +108,13 @@ void Renderer::drawFrame()
 	// Begin command recording for this frame
 	frame.beginCommands();
 
+#if USE_REFERENCE_PATH_TRACER == 1
 	m_pathTracingPass->drawFrame(frame, m_frameResources);
+#else
+	m_gbufferLayoutPass->drawFrame(frame, m_frameResources);
+	// TODO: GBuffer sample, DI, Deferred Shading passes
+#endif
+
 	m_presentPass->drawFrame(frame, m_frameResources);
 	m_uiPass->drawFrame(frame, m_frameResources);
 
@@ -104,6 +127,7 @@ void Renderer::drawFrame()
 void Renderer::initRenderPasses()
 {
 	m_pathTracingPass = std::unique_ptr<PathTracingPass>(new PathTracingPass(m_raytracingContext, m_shaderDatabase, m_descriptorSetAllocator));
+	m_gbufferLayoutPass = std::unique_ptr<GBufferLayoutPass>(new GBufferLayoutPass(m_context, m_shaderDatabase, m_descriptorSetAllocator));
 	m_presentPass = std::unique_ptr<PresentPass>(new PresentPass(m_context, m_shaderDatabase, m_descriptorSetAllocator));
 	m_uiPass = std::unique_ptr<UIPass>(new UIPass(m_context, m_descriptorSetAllocator.fixedPool()));
 }
@@ -111,9 +135,11 @@ void Renderer::initRenderPasses()
 void Renderer::recreateSwapDependentResources(const vkb::Swapchain& swapchain)
 {
 	m_pathTracingPass->recreateResources(swapchain.extent);
+	m_gbufferLayoutPass->loDefLODPassResources->recreateResources();
+	m_gbufferLayoutPass->hiDefLODPassResources->recreateResources();
 	m_presentPass->passResources->recreateResources();
 	m_uiPass->passResources->recreateResources();
 
-	// XXX: hacky way to ensure resources are valid, is there a better way?
+	// XXX: hacky way to ensure resources are valid, check if this should be done differently
 	prepareFrame();
 }
