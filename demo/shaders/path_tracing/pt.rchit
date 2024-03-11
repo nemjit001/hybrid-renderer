@@ -10,7 +10,7 @@
 #include "../raytracing_common.glsl"
 
 hitAttributeEXT vec2 triangleHitCoords;
-layout(location = 0) rayPayloadInEXT GIRayPayload prd;
+layout(location = 0) rayPayloadInEXT PTRayPayload prd;
 
 layout(buffer_reference, scalar) buffer VertexBuffer  { Vertex v[]; };
 layout(buffer_reference, scalar) buffer IndexBuffer { ivec3 i[]; };
@@ -58,9 +58,12 @@ void main()
 		return;
 	}
 
-	vec3 Wo = randomWalk(prd.seed, Wi, wNormal);
-	float pdf = evaluatePDF(Wo, wNormal);
-	vec3 brdf = evaluateBRDF(Wi, Wo, wNormal, material.diffuse);
+	bool specularEvent = false;
+	vec3 Wo = vec3(0);
+	randomWalk(prd.seed, Wi, wNormal, material, Wo, specularEvent);
+
+	float pdf = evaluatePDF(Wo, wNormal, material, specularEvent);
+	vec3 brdf = evaluateBRDF(Wi, Wo, wNormal, material, specularEvent);
 	prd.transmission *= pdf * brdf;
 
 	prd.traceDepth++;

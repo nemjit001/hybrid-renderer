@@ -39,7 +39,7 @@ private:
 	uint32_t m_frameCounter;
 	hri::Camera& m_camera;
 	SceneGraph& m_activeScene;
-	std::vector<CommonResources> m_frameResources;
+	CommonResources m_frameResources;
 
 	// Render passes
 	std::unique_ptr<PathTracingPass> m_pathTracingPass;

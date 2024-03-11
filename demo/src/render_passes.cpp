@@ -23,16 +23,35 @@ void IRenderPass::prepareFrame(CommonResources& resources)
 
 // --- Path Tracing Pass ---
 
-PathTracingPass::PathTracingPass(raytracing::RayTracingContext& ctx, hri::ShaderDatabase& shaderDB)
+PathTracingPass::PathTracingPass(raytracing::RayTracingContext& ctx, hri::ShaderDatabase& shaderDB, hri::DescriptorSetAllocator& descriptorAllocator)
 	:
 	IRenderPass(ctx.renderContext),
 	rtContext(ctx)
 {
 	recreateResources(context.swapchain.extent);
 
+	hri::DescriptorSetLayoutBuilder sceneDescriptorSetLayoutBuilder(context);
+	sceneDescriptorSetLayoutBuilder
+		.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
+		.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR)
+		.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
+
+	hri::DescriptorSetLayoutBuilder rtDescriptorSetLayoutBuilder(context);
+	rtDescriptorSetLayoutBuilder
+		.addBinding(0, VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR)
+		.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR);
+
+	sceneDescriptorSetLayout = std::make_unique<hri::DescriptorSetLayout>(sceneDescriptorSetLayoutBuilder.build());
+	rtDescriptorSetLayout = std::make_unique<hri::DescriptorSetLayout>(rtDescriptorSetLayoutBuilder.build());
+
+	sceneDescriptorSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(context, descriptorAllocator, *sceneDescriptorSetLayout));
+	rtDescriptorSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(context, descriptorAllocator, *rtDescriptorSetLayout));
+
 	hri::PipelineLayoutBuilder layoutBuilder(context);
 	m_layout = layoutBuilder
-		// TODO: set shader descriptor layouts here
+		.addPushConstant(sizeof(PathTracingPass::PushConstantData), VK_SHADER_STAGE_RAYGEN_BIT_KHR)
+		.addDescriptorSetLayout(*sceneDescriptorSetLayout)
+		.addDescriptorSetLayout(*rtDescriptorSetLayout)
 		.build();
 
 	hri::Shader* pRayGen = shaderDB.registerShader("PathTracingRayGen", hri::Shader::loadFile(context, "shaders/pt.rgen.spv", VK_SHADER_STAGE_RAYGEN_BIT_KHR));
@@ -59,7 +78,45 @@ PathTracingPass::~PathTracingPass()
 	vkDestroyPipelineLayout(context.device, m_layout, nullptr);
 }
 
-void PathTracingPass::drawFrame(hri::ActiveFrame& frame)
+void PathTracingPass::prepareFrame(CommonResources& resources)
+{
+	VkDescriptorBufferInfo cameraInfo = VkDescriptorBufferInfo{};
+	cameraInfo.buffer = resources.cameraUBO->buffer;
+	cameraInfo.offset = 0;
+	cameraInfo.range = resources.cameraUBO->bufferSize;
+
+	VkDescriptorBufferInfo instanceInfo = VkDescriptorBufferInfo{};
+	instanceInfo.buffer = resources.instanceDataSSBO->buffer;
+	instanceInfo.offset = 0;
+	instanceInfo.range = resources.instanceDataSSBO->bufferSize;
+
+	VkDescriptorBufferInfo materialInfo = VkDescriptorBufferInfo{};
+	materialInfo.buffer = resources.materialSSBO->buffer;
+	materialInfo.offset = 0;
+	materialInfo.range = resources.materialSSBO->bufferSize;
+
+	(*sceneDescriptorSet)
+		.writeBuffer(0, &cameraInfo)
+		.writeBuffer(1, &instanceInfo)
+		.writeBuffer(2, &materialInfo)
+		.flush();
+
+	VkWriteDescriptorSetAccelerationStructureKHR tlasWrite = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR };
+	tlasWrite.accelerationStructureCount = 1;
+	tlasWrite.pAccelerationStructures = &resources.tlas->accelerationStructure;
+
+	VkDescriptorImageInfo renderResultInfo = VkDescriptorImageInfo{};
+	renderResultInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+	renderResultInfo.imageView = renderResult->view;
+	renderResultInfo.sampler = VK_NULL_HANDLE;
+
+	(*rtDescriptorSet)
+		.writeEXT(0, &tlasWrite)
+		.writeImage(1, &renderResultInfo)
+		.flush();
+}
+
+void PathTracingPass::drawFrame(hri::ActiveFrame& frame, CommonResources& resources)
 {
 	debug.resetTimer();
 	debug.cmdBeginLabel(frame.commandBuffer, "Path Tracing Pass");
@@ -83,23 +140,42 @@ void PathTracingPass::drawFrame(hri::ActiveFrame& frame)
 	VkStridedDeviceAddressRegionKHR hit = m_SBT->getRegion(raytracing::ShaderBindingTable::SGHit);
 	VkStridedDeviceAddressRegionKHR call = m_SBT->getRegion(raytracing::ShaderBindingTable::SGCall);
 
+	PushConstantData pushConstants = PushConstantData{};
+	pushConstants.frameIdx = resources.frameIndex;
+
+	vkCmdPushConstants(
+		frame.commandBuffer,
+		m_layout,
+		VK_SHADER_STAGE_RAYGEN_BIT_KHR,
+		0, sizeof(PathTracingPass::PushConstantData),
+		&pushConstants
+	);
+
+	VkDescriptorSet sets[] = { sceneDescriptorSet->set, rtDescriptorSet->set, };
+	vkCmdBindDescriptorSets(
+		frame.commandBuffer,
+		m_pPSO->bindPoint,
+		m_layout,
+		0, 2, sets,
+		0, nullptr
+	);
+
 	vkCmdBindPipeline(
 		frame.commandBuffer,
 		m_pPSO->bindPoint,
 		m_pPSO->pipeline
 	);
 
-	// TODO: once descriptor set updating & binding works, uncomment this
-	//rtContext.rayTracingDispatch.vkCmdTraceRays(
-	//	frame.commandBuffer,
-	//	&raygen,
-	//	&miss,
-	//	&hit,
-	//	&call,
-	//	context.swapchain.extent.width,
-	//	context.swapchain.extent.height,
-	//	1
-	//);
+	rtContext.rayTracingDispatch.vkCmdTraceRays(
+		frame.commandBuffer,
+		&raygen,
+		&miss,
+		&hit,
+		&call,
+		context.swapchain.extent.width,
+		context.swapchain.extent.height,
+		1
+	);
 
 	renderResultBarrier.srcStageMask = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR;
 	renderResultBarrier.dstStageMask = VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT;
@@ -132,10 +208,27 @@ void PathTracingPass::recreateResources(VkExtent2D resolution)
 
 // --- PRESENT PASS ---
 
-PresentPass::PresentPass(hri::RenderContext& ctx, hri::ShaderDatabase& shaderDB)
+PresentPass::PresentPass(hri::RenderContext& ctx, hri::ShaderDatabase& shaderDB, hri::DescriptorSetAllocator& descriptorAllocator)
 	:
 	IRenderPass(ctx)
 {
+	// Set up input sampler
+	passInputSampler = std::unique_ptr<hri::ImageSampler>(new hri::ImageSampler(
+		context,
+		VK_FILTER_LINEAR,
+		VK_FILTER_LINEAR,
+		VK_SAMPLER_MIPMAP_MODE_LINEAR
+	));
+
+	// Set up descriptor sets
+	hri::DescriptorSetLayoutBuilder presentDescriptorSetLayoutBuilder(context);
+	presentDescriptorSetLayoutBuilder
+		.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
+
+	presentDescriptorSetLayout = std::make_unique<hri::DescriptorSetLayout>(presentDescriptorSetLayoutBuilder.build());
+	presentDescriptorSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(context, descriptorAllocator, *presentDescriptorSetLayout));
+
+	// Set up render pass
 	hri::RenderPassBuilder passBuilder(ctx);
 	passBuilder
 		.addAttachment(
@@ -149,15 +242,32 @@ PresentPass::PresentPass(hri::RenderContext& ctx, hri::ShaderDatabase& shaderDB)
 	passResources = std::make_unique<hri::SwapchainPassResourceManager>(ctx, passBuilder.build());
 	passResources->setClearValue(0, VkClearValue{ { 0.0f, 0.0f, 0.0f, 0.0f } });
 
+	// Set up render pipeline
 	hri::PipelineLayoutBuilder layoutBuilder(context);
 	m_layout = layoutBuilder
-		// TODO: set input descriptor layouts
+		.addDescriptorSetLayout(*presentDescriptorSetLayout)
 		.build();
 
 	shaderDB.registerShader("FullscreenQuadVert", hri::Shader::loadFile(context, "shaders/fullscreen_quad.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
 	shaderDB.registerShader("PresentFrag", hri::Shader::loadFile(context, "shaders/present.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
 
 	VkExtent2D swapExtent = context.swapchain.extent;
+	std::vector<VkPipelineColorBlendAttachmentState> blendAttachments = {
+		VkPipelineColorBlendAttachmentState{
+			false,
+			VK_BLEND_FACTOR_ONE,
+			VK_BLEND_FACTOR_ZERO,
+			VK_BLEND_OP_ADD,
+			VK_BLEND_FACTOR_ONE,
+			VK_BLEND_FACTOR_ZERO,
+			VK_BLEND_OP_ADD,
+			VK_COLOR_COMPONENT_R_BIT
+			| VK_COLOR_COMPONENT_G_BIT
+			| VK_COLOR_COMPONENT_B_BIT
+			| VK_COLOR_COMPONENT_A_BIT
+		},
+	};
+
 	hri::GraphicsPipelineBuilder pipelineBuilder = hri::GraphicsPipelineBuilder{};
 	pipelineBuilder.vertexInputBindings = {};
 	pipelineBuilder.vertexInputAttributes = {};
@@ -167,7 +277,7 @@ PresentPass::PresentPass(hri::RenderContext& ctx, hri::ShaderDatabase& shaderDB)
 	pipelineBuilder.rasterizationState = hri::GraphicsPipelineBuilder::initRasterizationState(false, VK_POLYGON_MODE_FILL, VK_CULL_MODE_NONE, VK_FRONT_FACE_COUNTER_CLOCKWISE);
 	pipelineBuilder.multisampleState = hri::GraphicsPipelineBuilder::initMultisampleState(VK_SAMPLE_COUNT_1_BIT);
 	pipelineBuilder.depthStencilState = hri::GraphicsPipelineBuilder::initDepthStencilState(false, false);
-	pipelineBuilder.colorBlendState = hri::GraphicsPipelineBuilder::initColorBlendState({});
+	pipelineBuilder.colorBlendState = hri::GraphicsPipelineBuilder::initColorBlendState(blendAttachments);
 	pipelineBuilder.dynamicStates = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
 	pipelineBuilder.layout = m_layout;
 	pipelineBuilder.renderPass = passResources->renderPass();
@@ -181,7 +291,7 @@ PresentPass::~PresentPass()
 	vkDestroyPipelineLayout(context.device, m_layout, nullptr);
 }
 
-void PresentPass::drawFrame(hri::ActiveFrame& frame)
+void PresentPass::drawFrame(hri::ActiveFrame& frame, CommonResources& resources)
 {
 	passResources->beginRenderPass(frame);
 
@@ -196,7 +306,13 @@ void PresentPass::drawFrame(hri::ActiveFrame& frame)
 	vkCmdSetViewport(frame.commandBuffer, 0, 1, &viewport);
 	vkCmdSetScissor(frame.commandBuffer, 0, 1, &scissor);
 
-	// TODO: Bind resource descriptors
+	vkCmdBindDescriptorSets(
+		frame.commandBuffer,
+		m_pPSO->bindPoint,
+		m_layout,
+		0, 1, &presentDescriptorSet->set,
+		0, nullptr
+	);
 
 	vkCmdBindPipeline(
 		frame.commandBuffer,
@@ -251,7 +367,7 @@ UIPass::~UIPass()
 	ImGui_ImplVulkan_Shutdown();
 }
 
-void UIPass::drawFrame(hri::ActiveFrame& frame)
+void UIPass::drawFrame(hri::ActiveFrame& frame, CommonResources& resources)
 {
 	passResources->beginRenderPass(frame);
 

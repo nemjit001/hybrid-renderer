@@ -274,7 +274,6 @@ SceneGraph::SceneGraph(
 )
 	:
 	m_ctx(ctx),
-	m_asBuilder(ctx),
 	materials(std::move(materials)),
 	meshes(std::move(meshes)),
 	nodes(std::move(nodes)),

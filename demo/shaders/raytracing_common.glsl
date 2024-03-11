@@ -20,7 +20,7 @@
 
 struct FrameInfo
 {
-	uint frameIdx;
+	uint frameIndex;
 };
 
 struct HybridInitialHit
@@ -31,7 +31,7 @@ struct HybridInitialHit
 	vec3 Wi;
 };
 
-struct GIRayPayload
+struct PTRayPayload
 {
 	uint seed;
 	uint traceDepth;
@@ -116,9 +116,20 @@ vec3 diffuseReflect(inout uint seed, vec3 wI, vec3 N)
 	return normalize(outDir);
 }
 
-vec3 randomWalk(inout uint seed, vec3 Wi, vec3 N)
+void randomWalk(inout uint seed, vec3 Wi, vec3 N, Material material, out vec3 Wo, out bool specularEvent)
 {
-	return diffuseReflect(seed, Wi, N);
+	float rng = randomFloat(seed);
+
+// TODO: uncomment when frame accumulation works
+//	if (rng < material.specular.r || rng < material.specular.g || rng < material.specular.b)
+//	{
+//		specularEvent = true;
+//		Wo = reflect(Wi, N);
+//		return;
+//	}
+
+	specularEvent = false;
+	Wo = diffuseReflect(seed, Wi, N);
 }
 
 /// --- Material evaluation functions
@@ -128,14 +139,20 @@ float luminance(vec3 color)
 	return color.r + color.g + color.b;
 }
 
-float evaluatePDF(vec3 Wo, vec3 N)
+float evaluatePDF(vec3 Wo, vec3 N, Material material, bool specularEvent)
 {
+	if (specularEvent)
+		return 1.0;
+
 	return dot(Wo, N) / RT_2PI;
 }
 
-vec3 evaluateBRDF(vec3 Wi, vec3 Wo, vec3 N, vec3 diffuse)
+vec3 evaluateBRDF(vec3 Wi, vec3 Wo, vec3 N, Material material, bool specularEvent)
 {
-	return diffuse * RT_INV_PI;
+	if (specularEvent)
+		return material.diffuse * material.specular;
+
+	return material.diffuse * RT_INV_PI;
 }
 
 #endif // RT_COMMON_GLSL

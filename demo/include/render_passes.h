@@ -9,7 +9,10 @@
 /// @brief Common render resources used by subpasses
 struct CommonResources
 {
-	hri::Camera camera;
+	uint32_t frameIndex;
+	std::unique_ptr<hri::BufferResource> cameraUBO;
+	hri::BufferResource* instanceDataSSBO;
+	hri::BufferResource* materialSSBO;
 	std::vector<raytracing::AccelerationStructure> blasList;
 	std::unique_ptr<raytracing::AccelerationStructure> tlas;
 };
@@ -24,7 +27,7 @@ public:
 
 	virtual void prepareFrame(CommonResources& resources);
 
-	virtual void drawFrame(hri::ActiveFrame& frame) = 0;
+	virtual void drawFrame(hri::ActiveFrame& frame, CommonResources& resources) = 0;
 
 public:
 	hri::RenderContext& context;
@@ -37,16 +40,28 @@ class PathTracingPass
 	public IRenderPass
 {
 public:
-	PathTracingPass(raytracing::RayTracingContext& ctx, hri::ShaderDatabase& shaderDB);
+	struct PushConstantData
+	{
+		HRI_ALIGNAS(4) uint32_t frameIdx;
+	};
+
+public:
+	PathTracingPass(raytracing::RayTracingContext& ctx, hri::ShaderDatabase& shaderDB, hri::DescriptorSetAllocator& descriptorAllocator);
 
 	virtual ~PathTracingPass();
 
-	virtual void drawFrame(hri::ActiveFrame& frame) override;
+	virtual void prepareFrame(CommonResources& resources) override;
+
+	virtual void drawFrame(hri::ActiveFrame& frame, CommonResources& resources) override;
 
 	void recreateResources(VkExtent2D resolution);
 
 public:
 	raytracing::RayTracingContext& rtContext;
+	std::unique_ptr<hri::DescriptorSetLayout> sceneDescriptorSetLayout;
+	std::unique_ptr<hri::DescriptorSetLayout> rtDescriptorSetLayout;
+	std::unique_ptr<hri::DescriptorSetManager> sceneDescriptorSet;
+	std::unique_ptr<hri::DescriptorSetManager> rtDescriptorSet;
 	std::unique_ptr<hri::ImageResource> renderResult;
 
 protected:
@@ -93,13 +108,16 @@ struct PresentPass
 	public IRenderPass
 {
 public:
-	PresentPass(hri::RenderContext& ctx, hri::ShaderDatabase& shaderDB);
+	PresentPass(hri::RenderContext& ctx, hri::ShaderDatabase& shaderDB, hri::DescriptorSetAllocator& descriptorAllocator);
 
 	virtual ~PresentPass();
 
-	virtual void drawFrame(hri::ActiveFrame& frame) override;
+	virtual void drawFrame(hri::ActiveFrame& frame, CommonResources& resources) override;
 
 public:
+	std::unique_ptr<hri::ImageSampler> passInputSampler;
+	std::unique_ptr<hri::DescriptorSetLayout> presentDescriptorSetLayout;
+	std::unique_ptr<hri::DescriptorSetManager> presentDescriptorSet;
 	std::unique_ptr<hri::SwapchainPassResourceManager> passResources;
 
 protected:
@@ -117,7 +135,7 @@ public:
 
 	virtual ~UIPass();
 
-	virtual void drawFrame(hri::ActiveFrame& frame) override;
+	virtual void drawFrame(hri::ActiveFrame& frame, CommonResources& resources) override;
 
 public:
 	std::unique_ptr<hri::SwapchainPassResourceManager> passResources;

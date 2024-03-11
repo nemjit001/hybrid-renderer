@@ -209,7 +209,6 @@ public:
 
 private:
 	raytracing::RayTracingContext& m_ctx;
-	raytracing::ASBuilder m_asBuilder;
 	std::vector<RenderInstanceData> m_instanceData	= {};
 	std::vector<RenderInstance> m_instances			= {};
 };

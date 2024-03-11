@@ -6,7 +6,7 @@
 #include "../shader_common.glsl"
 #include "../raytracing_common.glsl"
 
-layout(location = 0) rayPayloadInEXT GIRayPayload prd;
+layout(location = 0) rayPayloadInEXT PTRayPayload prd;
 
 void main()
 {
