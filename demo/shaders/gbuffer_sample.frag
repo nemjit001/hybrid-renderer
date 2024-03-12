@@ -39,9 +39,12 @@ layout(push_constant) uniform IMAGE_INFO { vec2 resolution; };
 void main()
 {
 	uint rng = uint(texture(RNGSource, ScreenUV).r);
+	uint rayMask = generateRayMask(rng);
+
 	uint LODLoDefMask = uint(texture(GBufferLoLODMask, ScreenUV).r);
 	uint LODHiDefMask = uint(texture(GBufferHiLODMask, ScreenUV).r);
-	uint rayMask = generateRayMask(rng);
+	float LODLoDefDepth = texture(GBufferLoDepth, ScreenUV).r;
+	float LODHiDefDepth = texture(GBufferHiDepth, ScreenUV).r;
 
 	// Set default values
 	FragAlbedo = vec4(0);
@@ -51,22 +54,48 @@ void main()
 	FragNormal = vec4(0);
 	FragDepth = 1.0;
 
-	if ((LODLoDefMask & rayMask) != 0)	// TODO: check how to blend between 2 layers so that no parts are missing
+	// Check based on depth which level should be sampled first
+	bool sampleLoFirst = LODLoDefDepth < LODHiDefDepth;
+	if (sampleLoFirst)
 	{
-		FragAlbedo = texture(GBufferLoAlbedo, ScreenUV);
-		FragEmission = texture(GBufferLoEmission, ScreenUV);
-		FragSpecular = texture(GBufferLoSpecular, ScreenUV);
-		FragTransmittance = texture(GBufferLoTransmittance, ScreenUV);
-		FragNormal = texture(GBufferLoNormal, ScreenUV);
-		FragDepth = texture(GBufferLoDepth, ScreenUV).r;
+		if ((LODLoDefMask & rayMask) != 0)
+		{
+			FragAlbedo = texture(GBufferLoAlbedo, ScreenUV);
+			FragEmission = texture(GBufferLoEmission, ScreenUV);
+			FragSpecular = texture(GBufferLoSpecular, ScreenUV);
+			FragTransmittance = texture(GBufferLoTransmittance, ScreenUV);
+			FragNormal = texture(GBufferLoNormal, ScreenUV);
+			FragDepth = LODLoDefDepth;
+		}
+		else
+		{
+			FragAlbedo = texture(GBufferHiAlbedo, ScreenUV);
+			FragEmission = texture(GBufferHiEmission, ScreenUV);
+			FragSpecular = texture(GBufferHiSpecular, ScreenUV);
+			FragTransmittance = texture(GBufferHiTransmittance, ScreenUV);
+			FragNormal = texture(GBufferHiNormal, ScreenUV);
+			FragDepth = LODHiDefDepth;
+		}
 	}
-	else
+	else	// sample hi first
 	{
-		FragAlbedo = texture(GBufferHiAlbedo, ScreenUV);
-		FragEmission = texture(GBufferHiEmission, ScreenUV);
-		FragSpecular = texture(GBufferHiSpecular, ScreenUV);
-		FragTransmittance = texture(GBufferHiTransmittance, ScreenUV);
-		FragNormal = texture(GBufferHiNormal, ScreenUV);
-		FragDepth = texture(GBufferHiDepth, ScreenUV).r;
+		if ((LODHiDefMask & rayMask) != 0)
+		{
+			FragAlbedo = texture(GBufferHiAlbedo, ScreenUV);
+			FragEmission = texture(GBufferHiEmission, ScreenUV);
+			FragSpecular = texture(GBufferHiSpecular, ScreenUV);
+			FragTransmittance = texture(GBufferHiTransmittance, ScreenUV);
+			FragNormal = texture(GBufferHiNormal, ScreenUV);
+			FragDepth = LODHiDefDepth;
+		}
+		else
+		{
+			FragAlbedo = texture(GBufferLoAlbedo, ScreenUV);
+			FragEmission = texture(GBufferLoEmission, ScreenUV);
+			FragSpecular = texture(GBufferLoSpecular, ScreenUV);
+			FragTransmittance = texture(GBufferLoTransmittance, ScreenUV);
+			FragNormal = texture(GBufferLoNormal, ScreenUV);
+			FragDepth = LODLoDefDepth;
+		}
 	}
 }

@@ -7,7 +7,7 @@
 #include "render_passes.h"
 
 #define SHOW_DEBUG_OUTPUT			1
-#define USE_REFERENCE_PATH_TRACER	1
+#define USE_REFERENCE_PATH_TRACER	0
 
 Renderer::Renderer(raytracing::RayTracingContext& ctx, hri::Camera& camera, SceneGraph& activeScene)
 	:
@@ -123,7 +123,7 @@ void Renderer::prepareFrame()
 	// TODO: non path tracing result sampling from deferred shading pass
 	VkDescriptorImageInfo renderResultInfo = VkDescriptorImageInfo{};
 	renderResultInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-	renderResultInfo.imageView = m_gbufferSamplePass->passResources->getAttachmentResource(0).view;
+	renderResultInfo.imageView = m_gbufferSamplePass->passResources->getAttachmentResource(4).view;
 	renderResultInfo.sampler = m_presentPass->passInputSampler->sampler;
 #endif
 
