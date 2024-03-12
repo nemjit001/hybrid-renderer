@@ -51,7 +51,7 @@ void main()
 	FragNormal = vec4(0);
 	FragDepth = 1.0;
 
-	if ((LODLoDefMask & rayMask) != 0)	// TODO: check how to blend between 2 layers
+	if ((LODLoDefMask & rayMask) != 0)	// TODO: check how to blend between 2 layers so that no parts are missing
 	{
 		FragAlbedo = texture(GBufferLoAlbedo, ScreenUV);
 		FragEmission = texture(GBufferLoEmission, ScreenUV);

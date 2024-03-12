@@ -561,7 +561,7 @@ bool SceneLoader::loadOBJMesh(
 			material = Material{};
 			int materialId = shape.mesh.material_ids[0];
 
-			if (materialId > 0)	// A material is used for this mesh
+			if (materialId >= 0)	// A material is used for this mesh
 			{
 				tinyobj::material_t objMaterial = objMaterials[materialId];
 				material.diffuse = hri::Float3(objMaterial.diffuse[0], objMaterial.diffuse[1], objMaterial.diffuse[2]);
