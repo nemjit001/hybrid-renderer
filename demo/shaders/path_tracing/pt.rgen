@@ -50,7 +50,8 @@ void main()
 		0
 	);
 
-	// TODO: use accumulator or reprojection
+	// TODO: use reprojection to use prev frame result
 	ivec2 pixel = ivec2(gl_LaunchIDEXT.xy);
-	imageStore(PathTracingOut, pixel, vec4(prd.energy, 1));
+	vec4 outColor = vec4(prd.energy, 1);
+	imageStore(PathTracingOut, pixel, outColor);
 }

@@ -6,8 +6,8 @@
 #include "detail/raytracing.h"
 #include "render_passes.h"
 
-#define SHOW_DEBUG_OUTPUT			0
-#define USE_REFERENCE_PATH_TRACER	0
+#define SHOW_DEBUG_OUTPUT			1
+#define USE_REFERENCE_PATH_TRACER	1
 
 Renderer::Renderer(raytracing::RayTracingContext& ctx, hri::Camera& camera, SceneGraph& activeScene)
 	:
