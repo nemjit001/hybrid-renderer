@@ -6,7 +6,8 @@
 #include "detail/raytracing.h"
 #include "render_passes.h"
 
-#define USE_REFERENCE_PATH_TRACER	1
+#define SHOW_DEBUG_OUTPUT			0
+#define USE_REFERENCE_PATH_TRACER	0
 
 Renderer::Renderer(raytracing::RayTracingContext& ctx, hri::Camera& camera, SceneGraph& activeScene)
 	:
@@ -76,10 +77,47 @@ void Renderer::prepareFrame()
 	renderResultInfo.imageView = m_pathTracingPass->renderResult->view;
 	renderResultInfo.sampler = m_presentPass->passInputSampler->sampler;
 #else
-	// TODO: non path tracing result sampling
+	
+	auto writeGBufferSampleDescriptors = [](
+		hri::DescriptorSetManager& descriptorSet,
+		hri::ImageSampler& sampler,
+		hri::RenderPassResourceManager& manager
+	) {
+		VkDescriptorImageInfo albedoInfo		= VkDescriptorImageInfo{ sampler.sampler, manager.getAttachmentResource(0).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+		VkDescriptorImageInfo emissionInfo		= VkDescriptorImageInfo{ sampler.sampler, manager.getAttachmentResource(1).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+		VkDescriptorImageInfo specularInfo		= VkDescriptorImageInfo{ sampler.sampler, manager.getAttachmentResource(2).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+		VkDescriptorImageInfo transmittanceInfo = VkDescriptorImageInfo{ sampler.sampler, manager.getAttachmentResource(3).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+		VkDescriptorImageInfo normalInfo		= VkDescriptorImageInfo{ sampler.sampler, manager.getAttachmentResource(4).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+		VkDescriptorImageInfo maskInfo			= VkDescriptorImageInfo{ sampler.sampler, manager.getAttachmentResource(5).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+		VkDescriptorImageInfo depthInfo			= VkDescriptorImageInfo{ sampler.sampler, manager.getAttachmentResource(6).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+
+		descriptorSet
+			.writeImage(0, &albedoInfo)
+			.writeImage(1, &emissionInfo)
+			.writeImage(2, &specularInfo)
+			.writeImage(3, &transmittanceInfo)
+			.writeImage(4, &normalInfo)
+			.writeImage(5, &maskInfo)
+			.writeImage(6, &depthInfo)
+			.flush();
+	};
+
+	VkDescriptorImageInfo rngSourceInfo = VkDescriptorImageInfo{};
+	rngSourceInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	rngSourceInfo.imageView = m_rngGenPass->rngSource->view;
+	rngSourceInfo.sampler = m_gbufferSamplePass->passInputSampler->sampler;
+	(*m_gbufferSamplePass->rngDescriptorSet)
+		.writeImage(0, &rngSourceInfo)
+		.flush();
+
+	writeGBufferSampleDescriptors(*m_gbufferSamplePass->loDefDescriptorSet, *m_gbufferSamplePass->passInputSampler, *m_gbufferLayoutPass->loDefLODPassResources);
+	writeGBufferSampleDescriptors(*m_gbufferSamplePass->hiDefDescriptorSet, *m_gbufferSamplePass->passInputSampler, *m_gbufferLayoutPass->hiDefLODPassResources);
+
+	// TODO: update deferred pass descriptors
+	// TODO: non path tracing result sampling from deferred shading pass
 	VkDescriptorImageInfo renderResultInfo = VkDescriptorImageInfo{};
 	renderResultInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-	renderResultInfo.imageView = m_gbufferLayoutPass->hiDefLODPassResources->getAttachmentResource(0).view;
+	renderResultInfo.imageView = m_gbufferSamplePass->passResources->getAttachmentResource(0).view;
 	renderResultInfo.sampler = m_presentPass->passInputSampler->sampler;
 #endif
 
@@ -88,18 +126,32 @@ void Renderer::prepareFrame()
 		.flush();
 
 	// Prepare per pass frame resources
+	m_rngGenPass->prepareFrame(m_frameResources);
+
+#if USE_REFERENCE_PATH_TRACER == 1
 	m_pathTracingPass->prepareFrame(m_frameResources);
+#else
 	m_gbufferLayoutPass->prepareFrame(m_frameResources);
+	m_gbufferSamplePass->prepareFrame(m_frameResources);
+#endif
+
 	m_presentPass->prepareFrame(m_frameResources);
 	m_uiPass->prepareFrame(m_frameResources);
 }
 
 void Renderer::drawFrame()
 {
-#if USE_REFERENCE_PATH_TRACER == 1
-	printf("PathTracing: %8.4f ms\n", m_pathTracingPass->debug.timeDelta());
-#else
-	printf("GbufferLayout: %8.4f ms\n", m_gbufferLayoutPass->debug.timeDelta());
+#if		USE_REFERENCE_PATH_TRACER == 1 && SHOW_DEBUG_OUTPUT == 1
+	printf("RNGGen: %8.4f ms, PathTracing: %8.4f ms\n", m_rngGenPass->debug.timeDelta(), m_pathTracingPass->debug.timeDelta());
+#elif	SHOW_DEBUG_OUTPUT == 1
+	printf(
+		"RNGGen: %8.4f ms, GBufLayout: %8.4f ms, GBufSample: %8.4f ms, DI: %8.4f ms, DS: %8.4f ms\n",
+		m_rngGenPass->debug.timeDelta(),
+		m_gbufferLayoutPass->debug.timeDelta(),
+		m_gbufferSamplePass->debug.timeDelta(),
+		0.0f,
+		0.0f
+	);
 #endif
 
 	m_renderCore.startFrame();
@@ -108,11 +160,14 @@ void Renderer::drawFrame()
 	// Begin command recording for this frame
 	frame.beginCommands();
 
+	m_rngGenPass->drawFrame(frame, m_frameResources);
+
 #if USE_REFERENCE_PATH_TRACER == 1
 	m_pathTracingPass->drawFrame(frame, m_frameResources);
 #else
 	m_gbufferLayoutPass->drawFrame(frame, m_frameResources);
-	// TODO: GBuffer sample, DI, Deferred Shading passes
+	m_gbufferSamplePass->drawFrame(frame, m_frameResources);
+	// TODO: DI, Deferred Shading passes
 #endif
 
 	m_presentPass->drawFrame(frame, m_frameResources);
@@ -126,17 +181,21 @@ void Renderer::drawFrame()
 
 void Renderer::initRenderPasses()
 {
+	m_rngGenPass = std::unique_ptr<RngGenerationPass>(new RngGenerationPass(m_context, m_shaderDatabase, m_descriptorSetAllocator));
 	m_pathTracingPass = std::unique_ptr<PathTracingPass>(new PathTracingPass(m_raytracingContext, m_shaderDatabase, m_descriptorSetAllocator));
 	m_gbufferLayoutPass = std::unique_ptr<GBufferLayoutPass>(new GBufferLayoutPass(m_context, m_shaderDatabase, m_descriptorSetAllocator));
+	m_gbufferSamplePass = std::unique_ptr<GBufferSamplePass>(new GBufferSamplePass(m_context, m_shaderDatabase, m_descriptorSetAllocator));
 	m_presentPass = std::unique_ptr<PresentPass>(new PresentPass(m_context, m_shaderDatabase, m_descriptorSetAllocator));
 	m_uiPass = std::unique_ptr<UIPass>(new UIPass(m_context, m_descriptorSetAllocator.fixedPool()));
 }
 
 void Renderer::recreateSwapDependentResources(const vkb::Swapchain& swapchain)
 {
+	m_rngGenPass->recreateResources(swapchain.extent);
 	m_pathTracingPass->recreateResources(swapchain.extent);
 	m_gbufferLayoutPass->loDefLODPassResources->recreateResources();
 	m_gbufferLayoutPass->hiDefLODPassResources->recreateResources();
+	m_gbufferSamplePass->passResources->recreateResources();
 	m_presentPass->passResources->recreateResources();
 	m_uiPass->passResources->recreateResources();
 

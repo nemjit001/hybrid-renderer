@@ -34,7 +34,7 @@ void main()
 	// init payload
 	prd.seed = initSeed(launchIndex + frameInfo.frameIndex * 1799);
 	prd.traceDepth = 0;
-	prd.rayMask = generateLODMask(prd.seed);
+	prd.rayMask = generateRayMask(prd.seed);
 	prd.energy = vec3(0);
 	prd.transmission = vec3(1);
 

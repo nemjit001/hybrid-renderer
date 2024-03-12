@@ -35,6 +35,38 @@ public:
 	hri_debug::DebugHandler debug = hri_debug::DebugHandler(context);
 };
 
+/// @brief Simple RNG source. White Noise
+class RngGenerationPass
+	:
+	public IRenderPass
+{
+public:
+	struct PushConstantData
+	{
+		uint32_t frameIndex;
+	};
+
+public:
+	RngGenerationPass(hri::RenderContext& ctx, hri::ShaderDatabase& shaderDB, hri::DescriptorSetAllocator& descriptorAllocator);
+
+	virtual ~RngGenerationPass();
+
+	virtual void prepareFrame(CommonResources& resources) override;
+
+	virtual void drawFrame(hri::ActiveFrame& frame, CommonResources& resources) override;
+
+	void recreateResources(VkExtent2D resolution);
+
+public:
+	std::unique_ptr<hri::DescriptorSetLayout> rngDescriptorSetLayout;
+	std::unique_ptr<hri::DescriptorSetManager> rngDescriptorSet;
+	std::unique_ptr<hri::ImageResource> rngSource;
+
+private:
+	VkPipelineLayout m_layout			= VK_NULL_HANDLE;
+	hri::PipelineStateObject* m_pPSO	= nullptr;
+};
+
 /// @brief Path tracing render pass
 class PathTracingPass
 	:
@@ -120,7 +152,38 @@ class GBufferSamplePass
 	:
 	public IRenderPass
 {
-	//
+public:
+	struct PushConstantData
+	{
+		HRI_ALIGNAS(16) hri::Float2 resolution;
+	};
+
+public:
+	GBufferSamplePass(hri::RenderContext& context, hri::ShaderDatabase& shaderDB, hri::DescriptorSetAllocator& descriptorAllocator);
+
+	virtual ~GBufferSamplePass();
+
+	virtual void drawFrame(hri::ActiveFrame& frame, CommonResources& resources) override;
+
+public:
+	// Pass sampler
+	std::unique_ptr<hri::ImageSampler> passInputSampler;
+
+	// Descriptor set layouts
+	std::unique_ptr<hri::DescriptorSetLayout> rngDescriptorSetLayout;
+	std::unique_ptr<hri::DescriptorSetLayout> gbufferSampleDescriptorSetLayout;
+
+	// Descriptor sets
+	std::unique_ptr<hri::DescriptorSetManager> rngDescriptorSet;
+	std::unique_ptr<hri::DescriptorSetManager> loDefDescriptorSet;
+	std::unique_ptr<hri::DescriptorSetManager> hiDefDescriptorSet;
+
+	// Pass resources
+	std::unique_ptr<hri::RenderPassResourceManager> passResources;
+
+protected:
+	VkPipelineLayout m_layout			= VK_NULL_HANDLE;
+	hri::PipelineStateObject* m_pPSO	= nullptr;
 };
 
 /// @brief Direct illumination ray tracing pass

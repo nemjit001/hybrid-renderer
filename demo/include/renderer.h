@@ -42,8 +42,10 @@ private:
 	CommonResources m_frameResources;
 
 	// Render passes
+	std::unique_ptr<RngGenerationPass> m_rngGenPass;
 	std::unique_ptr<PathTracingPass> m_pathTracingPass;
 	std::unique_ptr<GBufferLayoutPass> m_gbufferLayoutPass;
+	std::unique_ptr<GBufferSamplePass> m_gbufferSamplePass;
 	std::unique_ptr<PresentPass> m_presentPass;
 	std::unique_ptr<UIPass> m_uiPass;
 };
