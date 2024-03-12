@@ -192,6 +192,7 @@ int main()
 	);
 
 	// Load scene file & Create renderer
+	// TODO: add define to load in benchmark scene
 	SceneGraph scene = SceneLoader::load(rtContext, "./assets/default_scene.json");
 	Renderer renderer = Renderer(rtContext, camera, scene);
 

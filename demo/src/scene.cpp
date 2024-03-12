@@ -418,7 +418,7 @@ SceneGraph SceneLoader::load(raytracing::RayTracingContext& context, const std::
 		newNode.name = node["name"];
 		newNode.transform = SceneTransform{};
 		newNode.material = materials.size();
-		newNode.numLods = static_cast<uint32_t>(node["lod_levels"].size());
+		newNode.numLods = 0;
 
 		// Set node transform
 		newNode.transform.position = hri::Float3(transform["position"][0], transform["position"][1], transform["position"][2]);
@@ -427,16 +427,18 @@ SceneGraph SceneLoader::load(raytracing::RayTracingContext& context, const std::
 
 		// Load meshes
 		Material newMaterial = Material{};
-		uint32_t lodIndex = 0;
 		for (auto const& lodLevel : node["lod_levels"])
 		{
-			bool loadMaterial = lodIndex == 0;	// Only load material of first LOD, assume materials are the same.
+			if (newNode.numLods >= MAX_LOD_LEVELS)
+				break;
+
+			bool loadMaterial = (newNode.numLods == 0);	// Only load material of first LOD, assume materials are the same.
 			std::vector<hri::Vertex> vertices = {};
 			std::vector<uint32_t> indices = {};
 
 			if (loadOBJMesh(meshFile, lodLevel, newMaterial, vertices, indices, loadMaterial))
 			{
-				newNode.meshLODs[lodIndex] = meshes.size();
+				newNode.meshLODs[newNode.numLods] = meshes.size();
 				meshes.push_back(std::move(hri::Mesh(
 					context.renderContext,
 					vertices,
@@ -446,10 +448,7 @@ SceneGraph SceneLoader::load(raytracing::RayTracingContext& context, const std::
 				)));
 			}
 
-			if (lodIndex >= MAX_LOD_LEVELS)
-				break;
-
-			lodIndex++;
+			newNode.numLods++;
 		}
 
 		materials.push_back(newMaterial);
@@ -518,22 +517,19 @@ bool SceneLoader::loadOBJMesh(
 			size_t normalIndex = index.normal_index * 3;
 			size_t texCoordIndex = index.texcoord_index * 2;
 
+			hri::Float3 vertexPosition = hri::Float3(objAttributes.vertices[vertexIndex + 0], objAttributes.vertices[vertexIndex + 1], objAttributes.vertices[vertexIndex + 2]);
+			hri::Float3 vertexNormal = hri::Float3(objAttributes.normals[normalIndex + 0], objAttributes.normals[normalIndex + 1], objAttributes.normals[normalIndex + 2]);
+			hri::Float2 texCoord = hri::Float2(0.0f, 0.0f);
+
+			// Check if tex coords exist
+			if (objAttributes.texcoords.size() > 0)
+				texCoord = hri::Float2(objAttributes.texcoords[texCoordIndex + 0], objAttributes.texcoords[texCoordIndex + 1]);
+
 			hri::Vertex newVertex = hri::Vertex{
-				hri::Float3(
-					objAttributes.vertices[vertexIndex + 0],
-					objAttributes.vertices[vertexIndex + 1],
-					objAttributes.vertices[vertexIndex + 2]
-				),
-				hri::Float3(
-					objAttributes.normals[normalIndex + 0],
-					objAttributes.normals[normalIndex + 1],
-					objAttributes.normals[normalIndex + 2]
-				),
+				vertexPosition,
+				vertexNormal,
 				hri::Float3(0.0f),	// The tangent vector is initialy (0, 0, 0), because it can only be calculated AFTER triangles are loaded
-				hri::Float2(
-					objAttributes.texcoords[texCoordIndex + 0],
-					objAttributes.texcoords[texCoordIndex + 1]
-				),
+				texCoord,
 			};
 
 			vertices.push_back(newVertex);
@@ -562,15 +558,19 @@ bool SceneLoader::loadOBJMesh(
 		if (loadMaterial)
 		{
 			// Set material params & load textures
-			tinyobj::material_t objMaterial = objMaterials[shape.mesh.material_ids[0]];
 			material = Material{};
+			int materialId = shape.mesh.material_ids[0];
 
-			material.diffuse = hri::Float3(objMaterial.diffuse[0], objMaterial.diffuse[1], objMaterial.diffuse[2]);
-			material.specular = hri::Float3(objMaterial.specular[0], objMaterial.specular[1], objMaterial.specular[2]);
-			material.transmittance = hri::Float3(objMaterial.transmittance[0], objMaterial.transmittance[1], objMaterial.transmittance[2]);
-			material.emission = hri::Float3(objMaterial.emission[0], objMaterial.emission[1], objMaterial.emission[2]);
-			material.shininess = objMaterial.shininess;
-			material.ior = objMaterial.ior;
+			if (materialId > 0)	// A material is used for this mesh
+			{
+				tinyobj::material_t objMaterial = objMaterials[materialId];
+				material.diffuse = hri::Float3(objMaterial.diffuse[0], objMaterial.diffuse[1], objMaterial.diffuse[2]);
+				material.specular = hri::Float3(objMaterial.specular[0], objMaterial.specular[1], objMaterial.specular[2]);
+				material.transmittance = hri::Float3(objMaterial.transmittance[0], objMaterial.transmittance[1], objMaterial.transmittance[2]);
+				material.emission = hri::Float3(objMaterial.emission[0], objMaterial.emission[1], objMaterial.emission[2]);
+				material.shininess = objMaterial.shininess;
+				material.ior = objMaterial.ior;
+			}
 		}
 
 		break;
