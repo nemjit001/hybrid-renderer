@@ -616,7 +616,6 @@ void GBufferLayoutPass::executeGBufferPass(hri::RenderPassResourceManager& pReso
 	for (auto const& instance : instances)
 	{
 		// Get lod instance, lod mask, and mesh
-		const bool sameLods = (instance.instanceIdLOD0 == instance.instanceIdLOD1);
 		uint32_t instanceId = (useNearLOD) ? instance.instanceIdLOD0 : instance.instanceIdLOD1;
 		uint32_t lodMask = SceneGraph::generateLODMask(instance);
 		const hri::Mesh& mesh = resources.activeScene->meshes[instanceId];
@@ -626,8 +625,6 @@ void GBufferLayoutPass::executeGBufferPass(hri::RenderPassResourceManager& pReso
 		pushConstants.instanceId = instanceId;
 		pushConstants.lodMask = (useNearLOD) ? ((~lodMask) & VALID_MASK) : (lodMask & VALID_MASK);
 		pushConstants.modelMatrix = instance.modelMatrix;
-
-		if (sameLods) pushConstants.lodMask = VALID_MASK; // if same lods are used, should be visible in both passes
 
 		vkCmdPushConstants(
 			frame.commandBuffer,
