@@ -33,6 +33,7 @@ private:
 	hri::DescriptorSetAllocator m_descriptorSetAllocator;
 	hri::CommandPool m_computePool;
 	hri::CommandPool m_stagingPool;
+	hri_debug::DebugHandler m_asBuildTimer;
 	SceneASManager m_accelerationStructureManager;
 
 	// Renderer state

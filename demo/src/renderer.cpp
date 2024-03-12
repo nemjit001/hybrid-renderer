@@ -18,6 +18,7 @@ Renderer::Renderer(raytracing::RayTracingContext& ctx, hri::Camera& camera, Scen
 	m_descriptorSetAllocator(m_context),
 	m_computePool(m_context, m_context.queues.computeQueue, VK_COMMAND_POOL_CREATE_TRANSIENT_BIT),
 	m_stagingPool(m_context, m_context.queues.transferQueue, VK_COMMAND_POOL_CREATE_TRANSIENT_BIT),
+	m_asBuildTimer(m_context),
 	m_accelerationStructureManager(ctx),
 	m_frameCounter(0),
 	m_camera(camera),
@@ -65,8 +66,13 @@ void Renderer::prepareFrame()
 
 	// Build acceleration structures for this frame
 	VkCommandBuffer ASBuildCommands = m_computePool.createCommandBuffer(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+	m_asBuildTimer.cmdBeginLabel(ASBuildCommands, "Acceleration Structure Rebuild");
+	m_asBuildTimer.cmdRecordStartTimestamp(ASBuildCommands);
 	m_accelerationStructureManager.cmdBuildBLASses(ASBuildCommands, instances, m_activeScene.meshes, m_frameResources.blasList);
 	m_accelerationStructureManager.cmdBuildTLAS(ASBuildCommands, instances, m_frameResources.blasList, *m_frameResources.tlas);
+	m_asBuildTimer.cmdRecordEndTimestamp(ASBuildCommands);
+	m_asBuildTimer.cmdEndLabel(ASBuildCommands);
+
 	m_computePool.submitAndWait(ASBuildCommands);
 	m_computePool.freeCommandBuffer(ASBuildCommands);
 
@@ -142,15 +148,16 @@ void Renderer::prepareFrame()
 void Renderer::drawFrame()
 {
 #if		USE_REFERENCE_PATH_TRACER == 1 && SHOW_DEBUG_OUTPUT == 1
-	printf("RNGGen: %8.4f ms, PathTracing: %8.4f ms\n", m_rngGenPass->debug.timeDelta(), m_pathTracingPass->debug.timeDelta());
+	printf("RNGGen: %8.4f ms, PathTracing: %8.4f ms, AS Build %8.4f ms\n", m_rngGenPass->debug.timeDelta(), m_pathTracingPass->debug.timeDelta(), m_asBuildTimer.timeDelta());
 #elif	SHOW_DEBUG_OUTPUT == 1
 	printf(
-		"RNGGen: %8.4f ms, GBufLayout: %8.4f ms, GBufSample: %8.4f ms, DI: %8.4f ms, DS: %8.4f ms\n",
+		"RNGGen: %8.4f ms, GBufLayout: %8.4f ms, GBufSample: %8.4f ms, DI: %8.4f ms, DS: %8.4f ms, AS Build %8.4f ms\n",
 		m_rngGenPass->debug.timeDelta(),
 		m_gbufferLayoutPass->debug.timeDelta(),
 		m_gbufferSamplePass->debug.timeDelta(),
 		0.0f,
-		0.0f
+		0.0f,
+		m_asBuildTimer.timeDelta()
 	);
 #endif
 
