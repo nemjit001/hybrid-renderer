@@ -8,10 +8,13 @@
 
 layout(location = 0) rayPayloadEXT PTRayPayload prd;
 
-layout(set = 0, binding = 0) uniform CAMERA { Camera camera; };
+layout(set = 0, binding = 0) uniform CURR_CAMERA { Camera currCamera; };
+layout(set = 0, binding = 1) uniform PREV_CAMERA { Camera prevCamera; };
 
 layout(set = 1, binding = 0) uniform accelerationStructureEXT TLAS;
-layout(set = 1, binding = 1, rgba32f) uniform image2D PathTracingOut;
+layout(set = 1, binding = 1, rgba32f) uniform writeonly image2D PathTracingOut;
+layout(set = 1, binding = 2, rgba32f) uniform readonly image2D PrevSample;
+layout(set = 1, binding = 3, rgba32f) uniform image2D ReprojectHistory;
 
 layout(push_constant) uniform FRAME_INFO { FrameInfo frameInfo; };
 
@@ -23,13 +26,13 @@ void main()
 	const vec2 pixelCenter = pixelLocation + vec2(0.5);
 	const vec2 inUV = pixelCenter / vec2(gl_LaunchSizeEXT.xy);
 
-	const mat4 invProj = inverse(camera.project);
-	const mat4 invView = inverse(camera.view);
+	const mat4 invProj = inverse(currCamera.project);
+	const mat4 invView = inverse(currCamera.view);
 	const vec2 ndc = inUV * 2.0 - 1.0;
 
-	vec4 iRayDirection = invProj * vec4(ndc, 1, 1);
+	vec4 rayDirection = invProj * vec4(ndc, 1, 1);
 	vec3 wPos = vec3(invView * vec4(0, 0, 0, 1));
-	vec3 Wo = vec3(invView * vec4(normalize(iRayDirection.xyz), 0));
+	vec3 Wo = vec3(invView * vec4(normalize(rayDirection.xyz), 0));
 
 	// init payload
 	prd.seed = initSeed(launchIndex + frameInfo.frameIndex * 1799);
@@ -50,8 +53,33 @@ void main()
 		0
 	);
 
-	// TODO: use reprojection to use prev frame result
+	// Reproject previous frame results	
 	ivec2 pixel = ivec2(gl_LaunchIDEXT.xy);
-	vec4 outColor = vec4(prd.energy, 1);
-	imageStore(PathTracingOut, pixel, outColor);
+	ivec2 imageResolution = ivec2(gl_LaunchSizeEXT.xy);
+	float aspectRatio = float(imageResolution.x) / float(imageResolution.y);
+	vec2 motionVector = calculateMotionVector(prevCamera, currCamera, prd.hitPos, aspectRatio);
+	vec2 reprojectedUV = inUV + motionVector;
+
+	vec4 currSample = vec4(prd.energy, 1);
+	vec4 prevSample = vec4(0);
+	vec3 prevHitPos = vec3(0);
+	float historyLength = 1.0;
+
+	if (uvWithinRange(reprojectedUV))
+	{
+		ivec2 prevPixel = ivec2(reprojectedUV * imageResolution);
+		vec4 reprojectHistory = imageLoad(ReprojectHistory, prevPixel);
+
+		prevHitPos = screenToWorldSpace(prevCamera, reprojectedUV, reprojectHistory.b);
+		if (reprojectValid(prd.hitPos, prevHitPos, prd.hitNormal))
+		{
+			prevSample = imageLoad(PrevSample, prevPixel);
+			historyLength = reprojectHistory.a + 1.0;
+		}
+	}
+
+	float rayDepth = length(prd.hitPos - currCamera.position);
+	vec4 outColor = mix(prevSample, currSample, 1.0 / historyLength);
+	imageStore(PathTracingOut, pixel, vec4(prevHitPos - prd.hitPos, 1));
+	imageStore(ReprojectHistory, pixel, vec4(motionVector, rayDepth, historyLength));
 }

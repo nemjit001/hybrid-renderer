@@ -38,6 +38,7 @@ private:
 
 	// Renderer state
 	uint32_t m_frameCounter;
+	hri::Camera m_prevCamera;
 	hri::Camera& m_camera;
 	SceneGraph& m_activeScene;
 	CommonResources m_frameResources;

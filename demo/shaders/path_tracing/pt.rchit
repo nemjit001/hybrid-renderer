@@ -15,8 +15,8 @@ layout(location = 0) rayPayloadInEXT PTRayPayload prd;
 layout(buffer_reference, scalar) buffer VertexBuffer  { Vertex v[]; };
 layout(buffer_reference, scalar) buffer IndexBuffer { ivec3 i[]; };
 
-layout(set = 0, binding = 1, scalar) buffer RENDER_INSTANCE_DATA { RenderInstanceData instances[]; };
-layout(set = 0, binding = 2) buffer MATERIAL_DATA { Material materials[]; };
+layout(set = 0, binding = 2, scalar) buffer RENDER_INSTANCE_DATA { RenderInstanceData instances[]; };
+layout(set = 0, binding = 3) buffer MATERIAL_DATA { Material materials[]; };
 
 layout(set = 1, binding = 0) uniform accelerationStructureEXT TLAS;
 
@@ -55,27 +55,31 @@ void main()
 	if (luminance(material.emission) > 0.0)
 	{
 		prd.energy += prd.transmission * material.emission;
-		return;
+	}
+	else
+	{
+		bool specularEvent = false;
+		vec3 Wo = vec3(0);
+		randomWalk(prd.seed, Wi, wNormal, material, Wo, specularEvent);
+
+		float pdf = evaluatePDF(Wo, wNormal, material, specularEvent);
+		vec3 brdf = evaluateBRDF(Wi, Wo, wNormal, material, specularEvent);
+		prd.transmission *= pdf * brdf;
+
+		prd.traceDepth++;
+		traceRayEXT(
+			TLAS,
+			gl_RayFlagsOpaqueEXT,
+			prd.rayMask,
+			0, 0, 0,
+			wPos,
+			RAYTRACE_RANGE_TMIN,
+			Wo,
+			RAYTRACE_RANGE_TMAX,
+			0
+		);
 	}
 
-	bool specularEvent = false;
-	vec3 Wo = vec3(0);
-	randomWalk(prd.seed, Wi, wNormal, material, Wo, specularEvent);
-
-	float pdf = evaluatePDF(Wo, wNormal, material, specularEvent);
-	vec3 brdf = evaluateBRDF(Wi, Wo, wNormal, material, specularEvent);
-	prd.transmission *= pdf * brdf;
-
-	prd.traceDepth++;
-	traceRayEXT(
-		TLAS,
-		gl_RayFlagsOpaqueEXT,
-		prd.rayMask,
-		0, 0, 0,
-		wPos,
-		RAYTRACE_RANGE_TMIN,
-		Wo,
-		RAYTRACE_RANGE_TMAX,
-		0
-	);
+	prd.hitPos = wPos;
+	prd.hitNormal = wNormal;
 }

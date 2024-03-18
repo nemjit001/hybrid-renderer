@@ -7,7 +7,7 @@
 #include "render_passes.h"
 
 #define SHOW_DEBUG_OUTPUT			1
-#define USE_REFERENCE_PATH_TRACER	0
+#define USE_REFERENCE_PATH_TRACER	1
 
 Renderer::Renderer(raytracing::RayTracingContext& ctx, hri::Camera& camera, SceneGraph& activeScene)
 	:
@@ -21,6 +21,7 @@ Renderer::Renderer(raytracing::RayTracingContext& ctx, hri::Camera& camera, Scen
 	m_asBuildTimer(m_context),
 	m_accelerationStructureManager(ctx),
 	m_frameCounter(0),
+	m_prevCamera(camera),
 	m_camera(camera),
 	m_activeScene(activeScene)
 {
@@ -29,6 +30,7 @@ Renderer::Renderer(raytracing::RayTracingContext& ctx, hri::Camera& camera, Scen
 	// Set up frame resources
 	auto instances = m_activeScene.generateRenderInstanceList(m_camera);
 	m_frameResources = CommonResources{};
+	m_frameResources.prevCameraUBO = std::unique_ptr<hri::BufferResource>(new hri::BufferResource(m_context, sizeof(hri::CameraShaderData), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, true));
 	m_frameResources.cameraUBO = std::unique_ptr<hri::BufferResource>(new hri::BufferResource(m_context, sizeof(hri::CameraShaderData), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, true));
 	m_frameResources.instanceDataSSBO = &m_activeScene.buffers.instanceDataSSBO;	// FIXME: accessing scene buffers like this is ugly, manage in renderer maybe?
 	m_frameResources.materialSSBO = &m_activeScene.buffers.materialSSBO;			// Same here, also ugly
@@ -60,6 +62,7 @@ void Renderer::prepareFrame()
 	m_frameResources.activeScene = &m_activeScene;
 
 	// Copy SSBO & UBO data to buffers and check if TLAS realloc is needed
+	m_frameResources.prevCameraUBO->copyToBuffer(&m_prevCamera.getShaderData(), sizeof(hri::CameraShaderData));
 	m_frameResources.cameraUBO->copyToBuffer(&m_camera.getShaderData(), sizeof(hri::CameraShaderData));
 	if (m_accelerationStructureManager.shouldReallocTLAS(*m_frameResources.tlas, instances, m_frameResources.blasList))
 		m_frameResources.tlas = std::make_unique<raytracing::AccelerationStructure>(m_accelerationStructureManager.createTLAS(instances, m_frameResources.blasList));
@@ -80,7 +83,7 @@ void Renderer::prepareFrame()
 #if USE_REFERENCE_PATH_TRACER == 1
 	VkDescriptorImageInfo renderResultInfo = VkDescriptorImageInfo{};
 	renderResultInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-	renderResultInfo.imageView = m_pathTracingPass->renderResult->view;
+	renderResultInfo.imageView = m_pathTracingPass->getRenderResultView();
 	renderResultInfo.sampler = m_presentPass->passInputSampler->sampler;
 #else
 	
@@ -184,6 +187,7 @@ void Renderer::drawFrame()
 	m_renderCore.endFrame();
 
 	m_frameCounter += 1;
+	m_prevCamera = m_camera;
 }
 
 void Renderer::initRenderPasses()

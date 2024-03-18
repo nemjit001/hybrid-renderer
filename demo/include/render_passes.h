@@ -11,6 +11,7 @@ struct CommonResources
 {
 	uint32_t frameIndex;
 	SceneGraph* activeScene;
+	std::unique_ptr<hri::BufferResource> prevCameraUBO;
 	std::unique_ptr<hri::BufferResource> cameraUBO;
 	hri::BufferResource* instanceDataSSBO;
 	hri::BufferResource* materialSSBO;
@@ -89,13 +90,18 @@ public:
 
 	void recreateResources(VkExtent2D resolution);
 
+	inline VkImageView getRenderResultView() const { return renderResult[pingPong]->view; };
+
 public:
 	raytracing::RayTracingContext& rtContext;
 	std::unique_ptr<hri::DescriptorSetLayout> sceneDescriptorSetLayout;
 	std::unique_ptr<hri::DescriptorSetLayout> rtDescriptorSetLayout;
 	std::unique_ptr<hri::DescriptorSetManager> sceneDescriptorSet;
 	std::unique_ptr<hri::DescriptorSetManager> rtDescriptorSet;
-	std::unique_ptr<hri::ImageResource> renderResult;
+
+	bool pingPong;	//< used to swap between render buffers
+	std::unique_ptr<hri::ImageResource> renderResult[2];
+	std::unique_ptr<hri::ImageResource> reprojectHistory;
 
 protected:
 	VkPipelineLayout m_layout			= VK_NULL_HANDLE;

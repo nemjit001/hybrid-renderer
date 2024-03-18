@@ -6,6 +6,9 @@
 #define RAYTRACE_RANGE_TMAX			1e30
 #define RAYTRACE_MASK_BITS			8
 
+#define REPROJECT_PLANE_DIST		1e-2
+#define REPROJECT_DELTA_THRESHOLD	1e-2
+
 #define RT_PI		3.14159265358979323846264
 #define RT_2PI		6.28318530717958647692528
 #define RT_INV_PI	0.31830988618379067153777
@@ -36,6 +39,8 @@ struct PTRayPayload
 	uint seed;
 	uint traceDepth;
 	uint rayMask;
+	vec3 hitPos;
+	vec3 hitNormal;
 	vec3 energy;
 	vec3 transmission;
 };
@@ -94,6 +99,64 @@ Material getMaterialFromGBuffer(
 	);
 
 	return material;
+}
+
+/// --- Reproject functions
+
+bool uvWithinRange(vec2 UV)
+{
+	return UV.x >= 0.0 && UV.x <= 1.0 && UV.y >= 0.0 && UV.y <= 1.0;
+}
+
+float camNearPlane(Camera cam)
+{
+// TODO: calculate this correctly pls
+	return 2.5;
+}
+
+vec3 screenToWorldSpace(Camera cam, vec2 uv, float depth)
+{
+	vec3 dir = normalize(cam.forward * camNearPlane(cam) + cam.right * uv.x + cam.up * uv.y);
+	return cam.position + dir * depth;
+}
+
+vec2 worldToScreenSpace(Camera cam, vec3 worldPos)
+{
+	vec3 camToPos = worldPos - cam.position;
+    vec3 camToPosNorm = normalize(camToPos);
+    
+	float nearPlane = camNearPlane(cam);
+	vec3 forward = cam.forward * nearPlane;
+    float d = dot(cam.forward, camToPosNorm);
+    if(d < 1e-3)
+        return vec2(0);
+    
+    d = nearPlane / d;
+    camToPos = camToPosNorm * d - forward;
+    
+    float x = dot(camToPos, cam.right);
+    float y = dot(camToPos, cam.up);
+    return vec2(x, y);
+}
+
+vec2 calculateMotionVector(Camera prevCamera, Camera currCamera, vec3 worldPos, float aspectRatio)
+{
+	vec2 prevPos = worldToScreenSpace(prevCamera, worldPos);
+	prevPos.x /= aspectRatio;
+
+	vec2 currPos = worldToScreenSpace(currCamera, worldPos);	
+	currPos.x /= aspectRatio;
+
+	return prevPos - currPos;
+}
+
+// Simple plane distance reproject check based on https://diharaw.github.io/post/adventures_in_hybrid_rendering/
+bool reprojectValid(vec3 currPos, vec3 prevPos, vec3 currNormal)
+{
+	vec3 prevToCur = currPos - prevPos;
+	float planeDistance = abs(dot(prevToCur, currNormal));
+
+	return planeDistance < REPROJECT_PLANE_DIST || length(prevToCur) < REPROJECT_DELTA_THRESHOLD;
 }
 
 /// --- Random walk functions
