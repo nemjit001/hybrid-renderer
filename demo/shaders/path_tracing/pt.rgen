@@ -55,7 +55,7 @@ void main()
 	
 	vec4 outColor = vec4(prd.energy, 1);
 
-	// Reproject previous frame results
+	// Reproject previous frame results (based on https://www.shadertoy.com/view/ldtGWl)
 	{
 		ivec2 resolution = ivec2(gl_LaunchSizeEXT.xy);
 		ivec2 pixel = ivec2(inUV * resolution);
