@@ -108,35 +108,24 @@ bool uvWithinRange(vec2 UV)
 	return UV.x >= 0.0 && UV.x <= 1.0 && UV.y >= 0.0 && UV.y <= 1.0;
 }
 
-float camNearPlane(Camera cam)
-{
-// TODO: calculate this correctly pls
-	return 2.5;
-}
-
 vec3 screenToWorldSpace(Camera cam, vec2 uv, float depth)
 {
-	vec3 dir = normalize(cam.forward * camNearPlane(cam) + cam.right * uv.x + cam.up * uv.y);
+	const mat4 invProj = inverse(cam.project);
+	const mat4 invView = inverse(cam.view);
+	vec2 ndc = 2.0 * uv - 1.0;
+
+	vec4 rayDirection = invProj * vec4(ndc, 1, 1);
+	vec3 dir = vec3(invView * vec4(normalize(rayDirection.xyz), 0));
+
 	return cam.position + dir * depth;
 }
 
 vec2 worldToScreenSpace(Camera cam, vec3 worldPos)
 {
-	vec3 camToPos = worldPos - cam.position;
-    vec3 camToPosNorm = normalize(camToPos);
-    
-	float nearPlane = camNearPlane(cam);
-	vec3 forward = cam.forward * nearPlane;
-    float d = dot(cam.forward, camToPosNorm);
-    if(d < 1e-3)
-        return vec2(0);
-    
-    d = nearPlane / d;
-    camToPos = camToPosNorm * d - forward;
-    
-    float x = dot(camToPos, cam.right);
-    float y = dot(camToPos, cam.up);
-    return vec2(x, y);
+	vec4 pos = cam.project * cam.view * vec4(worldPos, 1);
+	pos = vec4(pos.xyz / pos.w, 1);
+
+    return vec2(pos.x, pos.y);
 }
 
 vec2 calculateMotionVector(Camera prevCamera, Camera currCamera, vec3 worldPos, float aspectRatio)
