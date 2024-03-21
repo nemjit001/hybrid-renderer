@@ -141,7 +141,7 @@ public:
 	virtual void drawFrame(hri::ActiveFrame& frame, CommonResources& resources) override;
 
 private:
-	void executeGBufferPass(hri::RenderPassResourceManager& pResourceManager, hri::ActiveFrame& frame, CommonResources& resources, LODMode mode);
+	void executeGBufferPass(hri::RenderPassResourceManager& resourceManager, hri::ActiveFrame& frame, CommonResources& resources, LODMode mode);
 
 public:
 	std::unique_ptr<hri::DescriptorSetLayout> sceneDescriptorSetLayout;
@@ -208,7 +208,27 @@ class DeferredShadingPass
 	:
 	public IRenderPass
 {
-	//
+public:
+	DeferredShadingPass(hri::RenderContext& ctx, hri::ShaderDatabase& shaderDB, hri::DescriptorSetAllocator& descriptorAllocator);
+
+	virtual ~DeferredShadingPass();
+
+	virtual void drawFrame(hri::ActiveFrame& frame, CommonResources& resources) override;
+
+public:
+	// Pass sampler
+	std::unique_ptr<hri::ImageSampler> passInputSampler;
+
+	// Descriptor set stuff
+	std::unique_ptr<hri::DescriptorSetLayout> inputDescriptorSetLayout;
+	std::unique_ptr<hri::DescriptorSetManager> inputDescriptorSet;
+
+	// Pass resources
+	std::unique_ptr<hri::RenderPassResourceManager> passResources;
+
+protected:
+	VkPipelineLayout m_layout = VK_NULL_HANDLE;
+	hri::PipelineStateObject* m_pPSO = nullptr;
 };
 
 /// @brief Present pass, draws an image to a window surface

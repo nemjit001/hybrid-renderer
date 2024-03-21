@@ -681,10 +681,10 @@ void GBufferLayoutPass::drawFrame(hri::ActiveFrame& frame, CommonResources& reso
 	debug.cmdRecordEndTimestamp(frame.commandBuffer);
 }
 
-void GBufferLayoutPass::executeGBufferPass(hri::RenderPassResourceManager& pResourceManager, hri::ActiveFrame& frame, CommonResources& resources, LODMode mode)
+void GBufferLayoutPass::executeGBufferPass(hri::RenderPassResourceManager& resourceManager, hri::ActiveFrame& frame, CommonResources& resources, LODMode mode)
 {
-	pResourceManager.beginRenderPass(frame);
 	debug.cmdBeginLabel(frame.commandBuffer, (mode == LODMode::LODNear) ? "GBuffer Layout LOD Near" : "GBuffer Layout LOD Far");
+	resourceManager.beginRenderPass(frame);
 
 	VkExtent2D swapExtent = context.swapchain.extent;
 	VkViewport viewport = VkViewport{ 0.0f, 0.0f, static_cast<float>(swapExtent.width), static_cast<float>(swapExtent.height), hri::DefaultViewportMinDepth, hri::DefaultViewportMaxDepth };
@@ -737,8 +737,8 @@ void GBufferLayoutPass::executeGBufferPass(hri::RenderPassResourceManager& pReso
 		vkCmdDrawIndexed(frame.commandBuffer, mesh.indexCount, 1, 0, 0, 0);
 	}
 
+	resourceManager.endRenderPass(frame);
 	debug.cmdEndLabel(frame.commandBuffer);
-	pResourceManager.endRenderPass(frame);
 }
 
 // --- GBUFFER SAMPLER PASS ---
@@ -952,11 +952,10 @@ GBufferSamplePass::~GBufferSamplePass()
 
 void GBufferSamplePass::drawFrame(hri::ActiveFrame& frame, CommonResources& resources)
 {
-	passResources->beginRenderPass(frame);
-
 	debug.resetTimer();
 	debug.cmdBeginLabel(frame.commandBuffer, "GBuffer Sample Pass");
 	debug.cmdRecordStartTimestamp(frame.commandBuffer);
+	passResources->beginRenderPass(frame);
 
 	VkExtent2D swapExtent = context.swapchain.extent;
 	VkViewport viewport = VkViewport{ 0.0f, 0.0f, static_cast<float>(swapExtent.width), static_cast<float>(swapExtent.height), hri::DefaultViewportMinDepth, hri::DefaultViewportMaxDepth };
@@ -993,9 +992,141 @@ void GBufferSamplePass::drawFrame(hri::ActiveFrame& frame, CommonResources& reso
 
 	vkCmdDraw(frame.commandBuffer, 3, 1, 0, 0);
 
+	passResources->endRenderPass(frame);
 	debug.cmdRecordEndTimestamp(frame.commandBuffer);
 	debug.cmdEndLabel(frame.commandBuffer);
+
+	VkMemoryBarrier2 memoryBarrier = VkMemoryBarrier2{ VK_STRUCTURE_TYPE_MEMORY_BARRIER_2 };
+	memoryBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+	memoryBarrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
+	memoryBarrier.srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
+	memoryBarrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
+	frame.pipelineBarrier({ memoryBarrier });
+}
+
+// --- DEFERRED SHADING PASS ---
+
+DeferredShadingPass::DeferredShadingPass(hri::RenderContext& ctx, hri::ShaderDatabase& shaderDB, hri::DescriptorSetAllocator& descriptorAllocator)
+	:
+	IRenderPass(ctx)
+{
+	// Set up input sampler
+	passInputSampler = std::unique_ptr<hri::ImageSampler>(new hri::ImageSampler(
+		context,
+		VK_FILTER_NEAREST,
+		VK_FILTER_NEAREST,
+		VK_SAMPLER_MIPMAP_MODE_NEAREST
+	));
+
+	// Set up descriptor sets
+	hri::DescriptorSetLayoutBuilder inputDescriptorSetLayoutBuilder(context);
+	inputDescriptorSetLayoutBuilder
+		.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+		.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+		.addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+		.addBinding(3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+		.addBinding(4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
+
+	inputDescriptorSetLayout = std::make_unique<hri::DescriptorSetLayout>(inputDescriptorSetLayoutBuilder.build());
+	inputDescriptorSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(context, descriptorAllocator, *inputDescriptorSetLayout));
+
+	// Set up render pass
+	{
+		hri::RenderPassBuilder passBuilder(ctx);
+		passBuilder
+			.addAttachment(
+				VK_FORMAT_R8G8B8A8_SNORM, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE
+			)
+			.setAttachmentReference(hri::AttachmentType::Color, VkAttachmentReference{ 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
+
+		std::vector<hri::RenderAttachmentConfig> attachmentConfigs = {
+			hri::RenderAttachmentConfig{ VK_FORMAT_R8G8B8A8_SNORM, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT },
+		};
+
+		passResources = std::make_unique<hri::RenderPassResourceManager>(ctx, passBuilder.build(), attachmentConfigs);
+		passResources->setClearValue(0, VkClearValue{ { 0.0f, 0.0f, 0.0f, 0.0f } });
+	}
+
+	// Set up render pipeline
+	{
+		hri::PipelineLayoutBuilder layoutBuilder(context);
+		m_layout = layoutBuilder
+			.addDescriptorSetLayout(*inputDescriptorSetLayout)
+			.build();
+
+		shaderDB.registerShader("FullscreenQuadVert", hri::Shader::loadFile(context, "shaders/fullscreen_quad.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
+		shaderDB.registerShader("DeferredFrag", hri::Shader::loadFile(context, "shaders/deferred_shading.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
+
+		VkExtent2D swapExtent = context.swapchain.extent;
+		std::vector<VkPipelineColorBlendAttachmentState> blendAttachments = {
+			VkPipelineColorBlendAttachmentState{
+				false,
+				VK_BLEND_FACTOR_ONE,
+				VK_BLEND_FACTOR_ZERO,
+				VK_BLEND_OP_ADD,
+				VK_BLEND_FACTOR_ONE,
+				VK_BLEND_FACTOR_ZERO,
+				VK_BLEND_OP_ADD,
+				VK_COLOR_COMPONENT_R_BIT
+				| VK_COLOR_COMPONENT_G_BIT
+				| VK_COLOR_COMPONENT_B_BIT
+				| VK_COLOR_COMPONENT_A_BIT
+			},
+		};
+
+		hri::GraphicsPipelineBuilder pipelineBuilder = hri::GraphicsPipelineBuilder{};
+		pipelineBuilder.vertexInputBindings = {};
+		pipelineBuilder.vertexInputAttributes = {};
+		pipelineBuilder.inputAssemblyState = hri::GraphicsPipelineBuilder::initInputAssemblyState(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, false);
+		pipelineBuilder.viewport = hri::GraphicsPipelineBuilder::initDefaultViewport(static_cast<float>(swapExtent.width), static_cast<float>(swapExtent.height));
+		pipelineBuilder.scissor = hri::GraphicsPipelineBuilder::initDefaultScissor(swapExtent.width, swapExtent.height);
+		pipelineBuilder.rasterizationState = hri::GraphicsPipelineBuilder::initRasterizationState(false, VK_POLYGON_MODE_FILL, VK_CULL_MODE_NONE, VK_FRONT_FACE_COUNTER_CLOCKWISE);
+		pipelineBuilder.multisampleState = hri::GraphicsPipelineBuilder::initMultisampleState(VK_SAMPLE_COUNT_1_BIT);
+		pipelineBuilder.depthStencilState = hri::GraphicsPipelineBuilder::initDepthStencilState(false, false);
+		pipelineBuilder.colorBlendState = hri::GraphicsPipelineBuilder::initColorBlendState(blendAttachments);
+		pipelineBuilder.dynamicStates = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
+		pipelineBuilder.layout = m_layout;
+		pipelineBuilder.renderPass = passResources->renderPass();
+		pipelineBuilder.subpass = 0;
+
+		m_pPSO = shaderDB.createPipeline("DeferredShadingPipeline", { "FullscreenQuadVert", "DeferredFrag" }, pipelineBuilder);
+	}
+}
+
+DeferredShadingPass::~DeferredShadingPass()
+{
+	vkDestroyPipelineLayout(context.device, m_layout, nullptr);
+}
+
+void DeferredShadingPass::drawFrame(hri::ActiveFrame& frame, CommonResources& resources)
+{
+	debug.resetTimer();
+	debug.cmdBeginLabel(frame.commandBuffer, "Deferred Shading Pass");
+	debug.cmdRecordStartTimestamp(frame.commandBuffer);
+	passResources->beginRenderPass(frame);
+
+	VkExtent2D swapExtent = context.swapchain.extent;
+	VkViewport viewport = VkViewport{ 0.0f, 0.0f, static_cast<float>(swapExtent.width), static_cast<float>(swapExtent.height), hri::DefaultViewportMinDepth, hri::DefaultViewportMaxDepth };
+	VkRect2D scissor = VkRect2D{ VkOffset2D{0, 0}, swapExtent };
+
+	vkCmdSetViewport(frame.commandBuffer, 0, 1, &viewport);
+	vkCmdSetScissor(frame.commandBuffer, 0, 1, &scissor);
+
+	vkCmdBindDescriptorSets(
+		frame.commandBuffer,
+		m_pPSO->bindPoint,
+		m_layout,
+		0, 1, &inputDescriptorSet->set,
+		0, nullptr
+	);
+
+	vkCmdBindPipeline(frame.commandBuffer, m_pPSO->bindPoint, m_pPSO->pipeline);
+	vkCmdDraw(frame.commandBuffer, 3, 1, 0, 0);
+
 	passResources->endRenderPass(frame);
+	debug.cmdRecordEndTimestamp(frame.commandBuffer);
+	debug.cmdEndLabel(frame.commandBuffer);
 
 	VkMemoryBarrier2 memoryBarrier = VkMemoryBarrier2{ VK_STRUCTURE_TYPE_MEMORY_BARRIER_2 };
 	memoryBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -1090,11 +1221,10 @@ PresentPass::~PresentPass()
 
 void PresentPass::drawFrame(hri::ActiveFrame& frame, CommonResources& resources)
 {
-	passResources->beginRenderPass(frame);
-
 	debug.resetTimer();
 	debug.cmdBeginLabel(frame.commandBuffer, "Present Pass");
 	debug.cmdRecordStartTimestamp(frame.commandBuffer);
+	passResources->beginRenderPass(frame);
 
 	VkExtent2D swapExtent = context.swapchain.extent;
 	VkViewport viewport = VkViewport{ 0.0f, 0.0f, static_cast<float>(swapExtent.width), static_cast<float>(swapExtent.height), hri::DefaultViewportMinDepth, hri::DefaultViewportMaxDepth };
@@ -1119,10 +1249,9 @@ void PresentPass::drawFrame(hri::ActiveFrame& frame, CommonResources& resources)
 
 	vkCmdDraw(frame.commandBuffer, 3, 1, 0, 0);
 
+	passResources->endRenderPass(frame);
 	debug.cmdRecordEndTimestamp(frame.commandBuffer);
 	debug.cmdEndLabel(frame.commandBuffer);
-
-	passResources->endRenderPass(frame);
 }
 
 // --- UI PASS ---
@@ -1166,16 +1295,14 @@ UIPass::~UIPass()
 
 void UIPass::drawFrame(hri::ActiveFrame& frame, CommonResources& resources)
 {
-	passResources->beginRenderPass(frame);
-
 	debug.resetTimer();
 	debug.cmdBeginLabel(frame.commandBuffer, "UI Pass");
 	debug.cmdRecordStartTimestamp(frame.commandBuffer);
+	passResources->beginRenderPass(frame);
 
 	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), frame.commandBuffer);
 
+	passResources->endRenderPass(frame);
 	debug.cmdRecordEndTimestamp(frame.commandBuffer);
 	debug.cmdEndLabel(frame.commandBuffer);
-
-	passResources->endRenderPass(frame);
 }

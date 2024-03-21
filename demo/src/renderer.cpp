@@ -58,7 +58,7 @@ void Renderer::resetAccumulators()
 	m_pathTracingPass->recreateResources(m_context.swapchain.extent);
 
 	m_subFrameCounter = 1;
-	prepareFrame();
+	prepareFrame();	// prepare frame resources again
 }
 
 void Renderer::prepareFrame()
@@ -100,6 +100,7 @@ void Renderer::prepareFrame()
 	}
 	else
 	{
+		// Set GBuffer sampling descriptors
 		auto writeGBufferSampleDescriptors = [](
 			hri::DescriptorSetManager& descriptorSet,
 			hri::ImageSampler& sampler,
@@ -135,10 +136,23 @@ void Renderer::prepareFrame()
 		writeGBufferSampleDescriptors(*m_gbufferSamplePass->loDefDescriptorSet, *m_gbufferSamplePass->passInputSampler, *m_gbufferLayoutPass->loDefLODPassResources);
 		writeGBufferSampleDescriptors(*m_gbufferSamplePass->hiDefDescriptorSet, *m_gbufferSamplePass->passInputSampler, *m_gbufferLayoutPass->hiDefLODPassResources);
 
-		// TODO: update deferred pass descriptors
-		// TODO: non path tracing result sampling from deferred shading pass
+		// Set Deferred shading descriptors
+		VkDescriptorImageInfo deferredAlbedoInfo = VkDescriptorImageInfo{ m_deferredShadingPass->passInputSampler->sampler, m_gbufferSamplePass->passResources->getAttachmentResource(0).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+		VkDescriptorImageInfo deferredEmissionInfo = VkDescriptorImageInfo{ m_deferredShadingPass->passInputSampler->sampler, m_gbufferSamplePass->passResources->getAttachmentResource(1).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+		VkDescriptorImageInfo deferredSpecularInfo = VkDescriptorImageInfo{ m_deferredShadingPass->passInputSampler->sampler, m_gbufferSamplePass->passResources->getAttachmentResource(2).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+		VkDescriptorImageInfo deferredTransmittanceInfo = VkDescriptorImageInfo{ m_deferredShadingPass->passInputSampler->sampler, m_gbufferSamplePass->passResources->getAttachmentResource(3).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+		VkDescriptorImageInfo deferredNormalInfo = VkDescriptorImageInfo{ m_deferredShadingPass->passInputSampler->sampler, m_gbufferSamplePass->passResources->getAttachmentResource(4).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+		(*m_deferredShadingPass->inputDescriptorSet)
+			.writeImage(0, &deferredAlbedoInfo)
+			.writeImage(1, &deferredEmissionInfo)
+			.writeImage(2, &deferredSpecularInfo)
+			.writeImage(3, &deferredTransmittanceInfo)
+			.writeImage(4, &deferredNormalInfo)
+			.flush();
+
+		// Set render result descriptors
 		renderResultInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		renderResultInfo.imageView = m_gbufferSamplePass->passResources->getAttachmentResource(4).view;
+		renderResultInfo.imageView = m_deferredShadingPass->passResources->getAttachmentResource(0).view;
 		renderResultInfo.sampler = m_presentPass->passInputSampler->sampler;
 	}
 
@@ -176,7 +190,7 @@ void Renderer::drawFrame()
 			m_gbufferLayoutPass->debug.timeDelta(),
 			m_gbufferSamplePass->debug.timeDelta(),
 			0.0f,
-			0.0f,
+			m_deferredShadingPass->debug.timeDelta(),
 			m_asBuildTimer.timeDelta()
 		);
 	}
@@ -198,7 +212,8 @@ void Renderer::drawFrame()
 	{
 		m_gbufferLayoutPass->drawFrame(frame, m_frameResources);
 		m_gbufferSamplePass->drawFrame(frame, m_frameResources);
-		// TODO: DI, Deferred Shading passes
+		// TODO: DI pass
+		m_deferredShadingPass->drawFrame(frame, m_frameResources);
 	}
 
 	m_presentPass->drawFrame(frame, m_frameResources);
@@ -218,6 +233,7 @@ void Renderer::initRenderPasses()
 	m_pathTracingPass = std::unique_ptr<PathTracingPass>(new PathTracingPass(m_raytracingContext, m_shaderDatabase, m_descriptorSetAllocator));
 	m_gbufferLayoutPass = std::unique_ptr<GBufferLayoutPass>(new GBufferLayoutPass(m_context, m_shaderDatabase, m_descriptorSetAllocator));
 	m_gbufferSamplePass = std::unique_ptr<GBufferSamplePass>(new GBufferSamplePass(m_context, m_shaderDatabase, m_descriptorSetAllocator));
+	m_deferredShadingPass = std::unique_ptr<DeferredShadingPass>(new DeferredShadingPass(m_context, m_shaderDatabase, m_descriptorSetAllocator));
 	m_presentPass = std::unique_ptr<PresentPass>(new PresentPass(m_context, m_shaderDatabase, m_descriptorSetAllocator));
 	m_uiPass = std::unique_ptr<UIPass>(new UIPass(m_context, m_descriptorSetAllocator.fixedPool()));
 }
@@ -229,6 +245,7 @@ void Renderer::recreateSwapDependentResources(const vkb::Swapchain& swapchain)
 	m_gbufferLayoutPass->loDefLODPassResources->recreateResources();
 	m_gbufferLayoutPass->hiDefLODPassResources->recreateResources();
 	m_gbufferSamplePass->passResources->recreateResources();
+	m_deferredShadingPass->passResources->recreateResources();
 	m_presentPass->passResources->recreateResources();
 	m_uiPass->passResources->recreateResources();
 
