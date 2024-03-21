@@ -200,7 +200,28 @@ class DirectIlluminationPass
 	:
 	public IRenderPass
 {
-	//
+public:
+	DirectIlluminationPass(raytracing::RayTracingContext& ctx, hri::ShaderDatabase& shaderDB, hri::DescriptorSetAllocator& descriptorAllocator);
+
+	virtual ~DirectIlluminationPass();
+
+	virtual void prepareFrame(CommonResources& resources) override;
+
+	virtual void drawFrame(hri::ActiveFrame& frame, CommonResources& resources) override;
+
+	void recreateResources(VkExtent2D resolution);
+
+public:
+	raytracing::RayTracingContext& rtContext;
+	std::unique_ptr<hri::DescriptorSetLayout> rtDescriptorSetLayout;
+	std::unique_ptr<hri::DescriptorSetManager> rtDescriptorSet;
+
+	std::unique_ptr<hri::ImageResource> renderResult;
+
+protected:
+	VkPipelineLayout m_layout = VK_NULL_HANDLE;
+	hri::PipelineStateObject* m_pPSO = nullptr;
+	std::unique_ptr<raytracing::ShaderBindingTable> m_SBT;
 };
 
 /// @brief Deferred shading pass, combines sampled GBuffer & Direct Illumination pass for a final render result

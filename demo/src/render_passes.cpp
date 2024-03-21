@@ -1004,6 +1004,43 @@ void GBufferSamplePass::drawFrame(hri::ActiveFrame& frame, CommonResources& reso
 	frame.pipelineBarrier({ memoryBarrier });
 }
 
+// --- DIRECT ILLUMINATION PASS ---
+
+DirectIlluminationPass::DirectIlluminationPass(raytracing::RayTracingContext& ctx, hri::ShaderDatabase& shaderDB, hri::DescriptorSetAllocator& descriptorAllocator)
+	:
+	IRenderPass(ctx.renderContext),
+	rtContext(ctx)
+{
+	recreateResources(context.swapchain.extent);
+
+	// TODO: set up raytracing pass
+}
+
+DirectIlluminationPass::~DirectIlluminationPass()
+{
+	vkDestroyPipelineLayout(context.device, m_layout, nullptr);
+}
+
+void DirectIlluminationPass::prepareFrame(CommonResources& resources)
+{
+	// TODO: write common descriptors
+}
+
+void DirectIlluminationPass::drawFrame(hri::ActiveFrame& frame, CommonResources& resources)
+{
+	debug.resetTimer();
+	debug.cmdBeginLabel(frame.commandBuffer, "Direct Illumination Pass");
+	debug.cmdRecordStartTimestamp(frame.commandBuffer);
+
+	debug.cmdRecordEndTimestamp(frame.commandBuffer);
+	debug.cmdEndLabel(frame.commandBuffer);
+}
+
+void DirectIlluminationPass::recreateResources(VkExtent2D resolution)
+{
+	//
+}
+
 // --- DEFERRED SHADING PASS ---
 
 DeferredShadingPass::DeferredShadingPass(hri::RenderContext& ctx, hri::ShaderDatabase& shaderDB, hri::DescriptorSetAllocator& descriptorAllocator)
@@ -1025,7 +1062,8 @@ DeferredShadingPass::DeferredShadingPass(hri::RenderContext& ctx, hri::ShaderDat
 		.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 		.addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 		.addBinding(3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-		.addBinding(4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
+		.addBinding(4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+		.addBinding(5, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
 
 	inputDescriptorSetLayout = std::make_unique<hri::DescriptorSetLayout>(inputDescriptorSetLayoutBuilder.build());
 	inputDescriptorSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(context, descriptorAllocator, *inputDescriptorSetLayout));
