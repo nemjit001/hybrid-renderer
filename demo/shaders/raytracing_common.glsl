@@ -24,6 +24,7 @@
 struct FrameInfo
 {
 	uint frameIndex;
+	uint subFrameIndex;
 };
 
 struct HybridInitialHit

@@ -16,6 +16,8 @@ public:
 
 	void setVSyncMode(hri::VSyncMode vsyncMode);
 
+	void resetAccumulators();
+
 	void prepareFrame();
 
 	void drawFrame();
@@ -24,6 +26,9 @@ private:
 	void initRenderPasses();
 
 	void recreateSwapDependentResources(const vkb::Swapchain& swapchain);
+
+public:
+	bool usePathTracer = true;
 
 private:
 	hri::RenderContext& m_context;
@@ -38,6 +43,7 @@ private:
 
 	// Renderer state
 	uint32_t m_frameCounter;
+	uint32_t m_subFrameCounter;
 	hri::Camera m_prevCamera;
 	hri::Camera& m_camera;
 	SceneGraph& m_activeScene;

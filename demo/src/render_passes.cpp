@@ -70,10 +70,10 @@ void RngGenerationPass::drawFrame(hri::ActiveFrame& frame, CommonResources& reso
 	debug.cmdRecordStartTimestamp(frame.commandBuffer);
 
 	VkImageMemoryBarrier2 rngSourceBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
-	rngSourceBarrier.srcStageMask = VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT_KHR;
+	rngSourceBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
 	rngSourceBarrier.dstStageMask = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
-	rngSourceBarrier.srcAccessMask = VK_ACCESS_2_MEMORY_READ_BIT;
-	rngSourceBarrier.dstAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT;
+	rngSourceBarrier.srcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT;
+	rngSourceBarrier.dstAccessMask = VK_ACCESS_2_MEMORY_READ_BIT;
 	rngSourceBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	rngSourceBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	rngSourceBarrier.image = rngSource->image;
@@ -167,7 +167,8 @@ PathTracingPass::PathTracingPass(raytracing::RayTracingContext& ctx, hri::Shader
 		.addBinding(0, VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR)
 		.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
 		.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
-		.addBinding(3, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR);
+		.addBinding(3, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
+		.addBinding(4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR);
 
 	sceneDescriptorSetLayout = std::make_unique<hri::DescriptorSetLayout>(sceneDescriptorSetLayoutBuilder.build());
 	rtDescriptorSetLayout = std::make_unique<hri::DescriptorSetLayout>(rtDescriptorSetLayoutBuilder.build());
@@ -254,11 +255,17 @@ void PathTracingPass::prepareFrame(CommonResources& resources)
 	reprojectHistoryInfo.imageView = reprojectHistory->view;
 	reprojectHistoryInfo.sampler = VK_NULL_HANDLE;
 
+	VkDescriptorImageInfo accumulatorInfo = VkDescriptorImageInfo{};
+	accumulatorInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+	accumulatorInfo.imageView = accumulator->view;
+	accumulatorInfo.sampler = VK_NULL_HANDLE;
+
 	(*rtDescriptorSet)
 		.writeEXT(0, &tlasWrite)
 		.writeImage(1, &renderResultInfo)
 		.writeImage(2, &prevResultInfo)
 		.writeImage(3, &reprojectHistoryInfo)
+		.writeImage(4, &accumulatorInfo)
 		.flush();
 }
 
@@ -303,7 +310,19 @@ void PathTracingPass::drawFrame(hri::ActiveFrame& frame, CommonResources& resour
 	reprojectHistoryBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	reprojectHistoryBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
 	reprojectHistoryBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
-	frame.pipelineBarrier({ prevFrameResultBarrier, renderResultBarrier, reprojectHistoryBarrier });
+
+	VkImageMemoryBarrier2 accumulatorBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
+	accumulatorBarrier.srcStageMask = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR;
+	accumulatorBarrier.dstStageMask = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR;
+	accumulatorBarrier.srcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT;
+	accumulatorBarrier.dstAccessMask = VK_ACCESS_2_MEMORY_READ_BIT;
+	accumulatorBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	accumulatorBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	accumulatorBarrier.image = accumulator->image;
+	accumulatorBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	accumulatorBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+	accumulatorBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
+	frame.pipelineBarrier({ prevFrameResultBarrier, renderResultBarrier, reprojectHistoryBarrier, accumulatorBarrier });
 
 	VkStridedDeviceAddressRegionKHR raygen = m_SBT->getRegion(raytracing::ShaderBindingTable::SGRayGen);
 	VkStridedDeviceAddressRegionKHR miss = m_SBT->getRegion(raytracing::ShaderBindingTable::SGMiss);
@@ -312,6 +331,7 @@ void PathTracingPass::drawFrame(hri::ActiveFrame& frame, CommonResources& resour
 
 	PushConstantData pushConstants = PushConstantData{};
 	pushConstants.frameIdx = resources.frameIndex;
+	pushConstants.subFrameIdx = resources.subFrameIndex;
 
 	vkCmdPushConstants(
 		frame.commandBuffer,
@@ -391,7 +411,19 @@ void PathTracingPass::recreateResources(VkExtent2D resolution)
 		VK_IMAGE_USAGE_STORAGE_BIT
 	));
 
+	accumulator = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
+		context,
+		VK_IMAGE_TYPE_2D,
+		VK_FORMAT_R32G32B32A32_SFLOAT,
+		VK_SAMPLE_COUNT_1_BIT,
+		VkExtent3D{ resolution.width, resolution.height, 1 },
+		1,
+		1,
+		VK_IMAGE_USAGE_STORAGE_BIT
+	));
+
 	reprojectHistory->createView(VK_IMAGE_VIEW_TYPE_2D, hri::ImageResource::DefaultComponentMapping(), hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1));
+	accumulator->createView(VK_IMAGE_VIEW_TYPE_2D, hri::ImageResource::DefaultComponentMapping(), hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1));
 }
 
 // --- GBUFFER LAYOUT PASS ---

@@ -7,7 +7,6 @@
 #include "render_passes.h"
 
 #define SHOW_DEBUG_OUTPUT			1
-#define USE_REFERENCE_PATH_TRACER	1
 
 Renderer::Renderer(raytracing::RayTracingContext& ctx, hri::Camera& camera, SceneGraph& activeScene)
 	:
@@ -20,7 +19,8 @@ Renderer::Renderer(raytracing::RayTracingContext& ctx, hri::Camera& camera, Scen
 	m_stagingPool(m_context, m_context.queues.transferQueue, VK_COMMAND_POOL_CREATE_TRANSIENT_BIT),
 	m_asBuildTimer(m_context),
 	m_accelerationStructureManager(ctx),
-	m_frameCounter(0),
+	m_frameCounter(1),
+	m_subFrameCounter(1),
 	m_prevCamera(camera),
 	m_camera(camera),
 	m_activeScene(activeScene)
@@ -52,6 +52,15 @@ void Renderer::setVSyncMode(hri::VSyncMode vsyncMode)
 	recreateSwapDependentResources(m_context.swapchain);
 }
 
+void Renderer::resetAccumulators()
+{
+	m_renderCore.awaitFrameFinished();
+	m_pathTracingPass->recreateResources(m_context.swapchain.extent);
+
+	m_subFrameCounter = 1;
+	prepareFrame();
+}
+
 void Renderer::prepareFrame()
 {
 	m_renderCore.awaitFrameFinished();
@@ -59,6 +68,7 @@ void Renderer::prepareFrame()
 	// update instance list & frame resource state
 	auto instances = m_activeScene.generateRenderInstanceList(m_camera);
 	m_frameResources.frameIndex = m_frameCounter;
+	m_frameResources.subFrameIndex = m_subFrameCounter;
 	m_frameResources.activeScene = &m_activeScene;
 
 	// Copy SSBO & UBO data to buffers and check if TLAS realloc is needed
@@ -69,6 +79,7 @@ void Renderer::prepareFrame()
 
 	// Build acceleration structures for this frame
 	VkCommandBuffer ASBuildCommands = m_computePool.createCommandBuffer(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+	m_asBuildTimer.resetTimer();
 	m_asBuildTimer.cmdBeginLabel(ASBuildCommands, "Acceleration Structure Rebuild");
 	m_asBuildTimer.cmdRecordStartTimestamp(ASBuildCommands);
 	m_accelerationStructureManager.cmdBuildBLASses(ASBuildCommands, instances, m_activeScene.meshes, m_frameResources.blasList);
@@ -80,55 +91,56 @@ void Renderer::prepareFrame()
 	m_computePool.freeCommandBuffer(ASBuildCommands);
 
 	// Prepare pass I/O descriptors
-#if USE_REFERENCE_PATH_TRACER == 1
 	VkDescriptorImageInfo renderResultInfo = VkDescriptorImageInfo{};
-	renderResultInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-	renderResultInfo.imageView = m_pathTracingPass->getRenderResultView();
-	renderResultInfo.sampler = m_presentPass->passInputSampler->sampler;
-#else
-	
-	auto writeGBufferSampleDescriptors = [](
-		hri::DescriptorSetManager& descriptorSet,
-		hri::ImageSampler& sampler,
-		hri::RenderPassResourceManager& manager
-	) {
-		VkDescriptorImageInfo albedoInfo		= VkDescriptorImageInfo{ sampler.sampler, manager.getAttachmentResource(0).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
-		VkDescriptorImageInfo emissionInfo		= VkDescriptorImageInfo{ sampler.sampler, manager.getAttachmentResource(1).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
-		VkDescriptorImageInfo specularInfo		= VkDescriptorImageInfo{ sampler.sampler, manager.getAttachmentResource(2).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
-		VkDescriptorImageInfo transmittanceInfo = VkDescriptorImageInfo{ sampler.sampler, manager.getAttachmentResource(3).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
-		VkDescriptorImageInfo normalInfo		= VkDescriptorImageInfo{ sampler.sampler, manager.getAttachmentResource(4).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
-		VkDescriptorImageInfo maskInfo			= VkDescriptorImageInfo{ sampler.sampler, manager.getAttachmentResource(5).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
-		VkDescriptorImageInfo depthInfo			= VkDescriptorImageInfo{ sampler.sampler, manager.getAttachmentResource(6).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+	if (usePathTracer)
+	{
+		renderResultInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		renderResultInfo.imageView = m_pathTracingPass->getRenderResultView();
+		renderResultInfo.sampler = m_presentPass->passInputSampler->sampler;
+	}
+	else
+	{
+		auto writeGBufferSampleDescriptors = [](
+			hri::DescriptorSetManager& descriptorSet,
+			hri::ImageSampler& sampler,
+			hri::RenderPassResourceManager& manager
+		) {
+			VkDescriptorImageInfo albedoInfo = VkDescriptorImageInfo{ sampler.sampler, manager.getAttachmentResource(0).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+			VkDescriptorImageInfo emissionInfo = VkDescriptorImageInfo{ sampler.sampler, manager.getAttachmentResource(1).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+			VkDescriptorImageInfo specularInfo = VkDescriptorImageInfo{ sampler.sampler, manager.getAttachmentResource(2).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+			VkDescriptorImageInfo transmittanceInfo = VkDescriptorImageInfo{ sampler.sampler, manager.getAttachmentResource(3).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+			VkDescriptorImageInfo normalInfo = VkDescriptorImageInfo{ sampler.sampler, manager.getAttachmentResource(4).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+			VkDescriptorImageInfo maskInfo = VkDescriptorImageInfo{ sampler.sampler, manager.getAttachmentResource(5).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+			VkDescriptorImageInfo depthInfo = VkDescriptorImageInfo{ sampler.sampler, manager.getAttachmentResource(6).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
 
-		descriptorSet
-			.writeImage(0, &albedoInfo)
-			.writeImage(1, &emissionInfo)
-			.writeImage(2, &specularInfo)
-			.writeImage(3, &transmittanceInfo)
-			.writeImage(4, &normalInfo)
-			.writeImage(5, &maskInfo)
-			.writeImage(6, &depthInfo)
+			descriptorSet
+				.writeImage(0, &albedoInfo)
+				.writeImage(1, &emissionInfo)
+				.writeImage(2, &specularInfo)
+				.writeImage(3, &transmittanceInfo)
+				.writeImage(4, &normalInfo)
+				.writeImage(5, &maskInfo)
+				.writeImage(6, &depthInfo)
+				.flush();
+		};
+
+		VkDescriptorImageInfo rngSourceInfo = VkDescriptorImageInfo{};
+		rngSourceInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		rngSourceInfo.imageView = m_rngGenPass->rngSource->view;
+		rngSourceInfo.sampler = m_gbufferSamplePass->passInputSampler->sampler;
+		(*m_gbufferSamplePass->rngDescriptorSet)
+			.writeImage(0, &rngSourceInfo)
 			.flush();
-	};
 
-	VkDescriptorImageInfo rngSourceInfo = VkDescriptorImageInfo{};
-	rngSourceInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-	rngSourceInfo.imageView = m_rngGenPass->rngSource->view;
-	rngSourceInfo.sampler = m_gbufferSamplePass->passInputSampler->sampler;
-	(*m_gbufferSamplePass->rngDescriptorSet)
-		.writeImage(0, &rngSourceInfo)
-		.flush();
+		writeGBufferSampleDescriptors(*m_gbufferSamplePass->loDefDescriptorSet, *m_gbufferSamplePass->passInputSampler, *m_gbufferLayoutPass->loDefLODPassResources);
+		writeGBufferSampleDescriptors(*m_gbufferSamplePass->hiDefDescriptorSet, *m_gbufferSamplePass->passInputSampler, *m_gbufferLayoutPass->hiDefLODPassResources);
 
-	writeGBufferSampleDescriptors(*m_gbufferSamplePass->loDefDescriptorSet, *m_gbufferSamplePass->passInputSampler, *m_gbufferLayoutPass->loDefLODPassResources);
-	writeGBufferSampleDescriptors(*m_gbufferSamplePass->hiDefDescriptorSet, *m_gbufferSamplePass->passInputSampler, *m_gbufferLayoutPass->hiDefLODPassResources);
-
-	// TODO: update deferred pass descriptors
-	// TODO: non path tracing result sampling from deferred shading pass
-	VkDescriptorImageInfo renderResultInfo = VkDescriptorImageInfo{};
-	renderResultInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-	renderResultInfo.imageView = m_gbufferSamplePass->passResources->getAttachmentResource(4).view;
-	renderResultInfo.sampler = m_presentPass->passInputSampler->sampler;
-#endif
+		// TODO: update deferred pass descriptors
+		// TODO: non path tracing result sampling from deferred shading pass
+		renderResultInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		renderResultInfo.imageView = m_gbufferSamplePass->passResources->getAttachmentResource(4).view;
+		renderResultInfo.sampler = m_presentPass->passInputSampler->sampler;
+	}
 
 	(*m_presentPass->presentDescriptorSet)
 		.writeImage(0, &renderResultInfo)
@@ -136,13 +148,9 @@ void Renderer::prepareFrame()
 
 	// Prepare per pass frame resources
 	m_rngGenPass->prepareFrame(m_frameResources);
-
-#if USE_REFERENCE_PATH_TRACER == 1
 	m_pathTracingPass->prepareFrame(m_frameResources);
-#else
 	m_gbufferLayoutPass->prepareFrame(m_frameResources);
 	m_gbufferSamplePass->prepareFrame(m_frameResources);
-#endif
 
 	m_presentPass->prepareFrame(m_frameResources);
 	m_uiPass->prepareFrame(m_frameResources);
@@ -150,18 +158,28 @@ void Renderer::prepareFrame()
 
 void Renderer::drawFrame()
 {
-#if		USE_REFERENCE_PATH_TRACER == 1 && SHOW_DEBUG_OUTPUT == 1
-	printf("RNGGen: %8.4f ms, PathTracing: %8.4f ms, AS Build %8.4f ms\n", m_rngGenPass->debug.timeDelta(), m_pathTracingPass->debug.timeDelta(), m_asBuildTimer.timeDelta());
-#elif	SHOW_DEBUG_OUTPUT == 1
-	printf(
-		"RNGGen: %8.4f ms, GBufLayout: %8.4f ms, GBufSample: %8.4f ms, DI: %8.4f ms, DS: %8.4f ms, AS Build %8.4f ms\n",
-		m_rngGenPass->debug.timeDelta(),
-		m_gbufferLayoutPass->debug.timeDelta(),
-		m_gbufferSamplePass->debug.timeDelta(),
-		0.0f,
-		0.0f,
-		m_asBuildTimer.timeDelta()
-	);
+#if SHOW_DEBUG_OUTPUT == 1
+	if (usePathTracer)
+	{
+		printf(
+			"RNGGen: %8.4f ms, PathTracing: %8.4f ms, AS Build %8.4f ms\n",
+			m_rngGenPass->debug.timeDelta(),
+			m_pathTracingPass->debug.timeDelta(),
+			m_asBuildTimer.timeDelta()
+		);
+	}
+	else
+	{
+		printf(
+			"RNGGen: %8.4f ms, GBufLayout: %8.4f ms, GBufSample: %8.4f ms, DI: %8.4f ms, DS: %8.4f ms, AS Build %8.4f ms\n",
+			m_rngGenPass->debug.timeDelta(),
+			m_gbufferLayoutPass->debug.timeDelta(),
+			m_gbufferSamplePass->debug.timeDelta(),
+			0.0f,
+			0.0f,
+			m_asBuildTimer.timeDelta()
+		);
+	}
 #endif
 
 	m_renderCore.startFrame();
@@ -172,13 +190,16 @@ void Renderer::drawFrame()
 
 	m_rngGenPass->drawFrame(frame, m_frameResources);
 
-#if USE_REFERENCE_PATH_TRACER == 1
-	m_pathTracingPass->drawFrame(frame, m_frameResources);
-#else
-	m_gbufferLayoutPass->drawFrame(frame, m_frameResources);
-	m_gbufferSamplePass->drawFrame(frame, m_frameResources);
-	// TODO: DI, Deferred Shading passes
-#endif
+	if (usePathTracer)
+	{
+		m_pathTracingPass->drawFrame(frame, m_frameResources);
+	}
+	else
+	{
+		m_gbufferLayoutPass->drawFrame(frame, m_frameResources);
+		m_gbufferSamplePass->drawFrame(frame, m_frameResources);
+		// TODO: DI, Deferred Shading passes
+	}
 
 	m_presentPass->drawFrame(frame, m_frameResources);
 	m_uiPass->drawFrame(frame, m_frameResources);
@@ -187,6 +208,7 @@ void Renderer::drawFrame()
 	m_renderCore.endFrame();
 
 	m_frameCounter += 1;
+	m_subFrameCounter += 1;
 	m_prevCamera = m_camera;
 }
 

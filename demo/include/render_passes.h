@@ -10,6 +10,7 @@
 struct CommonResources
 {
 	uint32_t frameIndex;
+	uint32_t subFrameIndex;
 	SceneGraph* activeScene;
 	std::unique_ptr<hri::BufferResource> prevCameraUBO;
 	std::unique_ptr<hri::BufferResource> cameraUBO;
@@ -77,6 +78,7 @@ public:
 	struct PushConstantData
 	{
 		HRI_ALIGNAS(4) uint32_t frameIdx;
+		HRI_ALIGNAS(4) uint32_t subFrameIdx;
 	};
 
 public:
@@ -100,8 +102,9 @@ public:
 	std::unique_ptr<hri::DescriptorSetManager> rtDescriptorSet;
 
 	bool pingPong;	//< used to swap between render buffers
-	std::unique_ptr<hri::ImageResource> renderResult[2];
-	std::unique_ptr<hri::ImageResource> reprojectHistory;
+	std::unique_ptr<hri::ImageResource> renderResult[2];	//< Used to ping/pong previous frame data
+	std::unique_ptr<hri::ImageResource> reprojectHistory;	//< Used for reprojection
+	std::unique_ptr<hri::ImageResource> accumulator;		//< Used for simple accumulation of resources
 
 protected:
 	VkPipelineLayout m_layout			= VK_NULL_HANDLE;

@@ -26,21 +26,25 @@ static bool gWindowResized  = false;
 static int gDisplayWidth 	= SCR_WIDTH;
 static int gDisplayHeight 	= SCR_HEIGHT;
 
-void drawSceneGraphNodeMenu(std::vector<SceneNode>& nodes)
+bool drawSceneGraphNodeMenu(std::vector<SceneNode>& nodes)
 {
+	bool updated = false;
+
 	for (auto& node : nodes)
 	{
 		if (ImGui::TreeNode(node.name.c_str()))
 		{
-			ImGui::DragFloat3("Position", node.transform.position.xyz, 0.05f);
-			ImGui::DragFloat3("Rotation", node.transform.rotation.xyz, 0.5f);
-			ImGui::DragFloat3("Scale", node.transform.scale.xyz, 0.05f);
+			updated |= ImGui::DragFloat3("Position", node.transform.position.xyz, 0.05f);
+			updated |= ImGui::DragFloat3("Rotation", node.transform.rotation.xyz, 0.5f);
+			updated |= ImGui::DragFloat3("Scale", node.transform.scale.xyz, 0.05f);
 			ImGui::TreePop();
 		}
 	}
+
+	return updated;
 }
 
-void drawConfigWindow(float deltaTime, hri::Camera& camera, SceneGraph& scene)
+bool drawConfigWindow(float deltaTime, Renderer& renderer, hri::Camera& camera, SceneGraph& scene)
 {
 	static float AVG_FRAMETIME = 1.0f;
 	static float ALPHA = 1.0f;
@@ -48,6 +52,7 @@ void drawConfigWindow(float deltaTime, hri::Camera& camera, SceneGraph& scene)
 	AVG_FRAMETIME = (1.0f - ALPHA) * AVG_FRAMETIME + ALPHA * deltaTime;
 	if (ALPHA > 0.05f) ALPHA *= 0.5f;
 
+	bool updated = false;
 	if (ImGui::Begin("Config"))
 	{
 		ImGui::SetWindowPos(ImVec2(10.0f, 10.0f), ImGuiCond_FirstUseEver);
@@ -58,24 +63,29 @@ void drawConfigWindow(float deltaTime, hri::Camera& camera, SceneGraph& scene)
 		ImGui::Text("Frame Time: %8.2f ms", AVG_FRAMETIME * 1'000.0f);
 		ImGui::Text("FPS:        %8.2f fps", 1.0f / AVG_FRAMETIME);
 
+		ImGui::SeparatorText("Renderer");
+		static bool test;
+		updated |= ImGui::Checkbox("Use reference Path Tracer", &renderer.usePathTracer);
+
 		ImGui::SeparatorText("Scene");
-		ImGui::DragFloat("LOD Bias", &scene.parameters.lodBias, 0.01f);
-		ImGui::DragFloat("LOD T Interval", &scene.parameters.transitionInterval, 0.01f, 0.0f, 1.0f);
-		ImGui::DragFloat("LOD Z Near", &scene.parameters.nearPoint, 0.5f);
-		ImGui::DragFloat("LOD Z Far", &scene.parameters.farPoint, 0.5f);
+		updated |= ImGui::DragFloat("LOD Bias", &scene.parameters.lodBias, 0.01f);
+		updated |= ImGui::DragFloat("LOD T Interval", &scene.parameters.transitionInterval, 0.01f, 0.0f, 1.0f);
+		updated |= ImGui::DragFloat("LOD Z Near", &scene.parameters.nearPoint, 0.5f);
+		updated |= ImGui::DragFloat("LOD Z Far", &scene.parameters.farPoint, 0.5f);
 
 		ImGui::SeparatorText("Camera");
 		ImGui::Text("Position: %.2f %.2f %.2f", camera.position.x, camera.position.y, camera.position.z);
 		ImGui::Text("Forward:  %.2f %.2f %.2f", camera.forward.x, camera.forward.y, camera.forward.z);
-		ImGui::DragFloat("FOV Y", &camera.parameters.fovYDegrees, 1.0f);
-		ImGui::DragFloat("Near Plane", &camera.parameters.zNear, 0.05f);
-		ImGui::DragFloat("Far Plane", &camera.parameters.zFar, 0.05f);
+		updated |= ImGui::DragFloat("FOV Y", &camera.parameters.fovYDegrees, 1.0f);
+		updated |= ImGui::DragFloat("Near Plane", &camera.parameters.zNear, 0.05f);
+		updated |= ImGui::DragFloat("Far Plane", &camera.parameters.zFar, 0.05f);
 
 		ImGui::SeparatorText("Scene Nodes");
-		drawSceneGraphNodeMenu(scene.nodes);
+		updated |= drawSceneGraphNodeMenu(scene.nodes);
 	}
 
 	ImGui::End();
+	return updated;
 }
 
 void windowResizeCallback(WindowHandle* window, int width, int height)
@@ -85,7 +95,7 @@ void windowResizeCallback(WindowHandle* window, int width, int height)
 	gWindowResized = true;
 }
 
-void handleCameraInput(WindowHandle* window, float deltaTime, hri::Camera& camera)
+bool handleCameraInput(WindowHandle* window, float deltaTime, hri::Camera& camera)
 {
 	bool cameraUpdated = false;
 
@@ -95,27 +105,28 @@ void handleCameraInput(WindowHandle* window, float deltaTime, hri::Camera& camer
 
 	hri::Float3 positionDelta = hri::Float3(0.0f);
 	
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) positionDelta += forward * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true;
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) positionDelta -= forward * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true;
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) positionDelta += right * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true;
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) positionDelta -= right * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true;
-	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) positionDelta += up * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true;
-	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) positionDelta -= up * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true;
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) { positionDelta += forward * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true; }
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) { positionDelta -= forward * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true; }
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) { positionDelta += right * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true; }
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) { positionDelta -= right * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true; }
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) { positionDelta += up * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true; }
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) { positionDelta -= up * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true; }
 
 	camera.position += positionDelta;
 	hri::Float3 target = camera.position + forward;
 
-	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) target += up * CAMERA_SPEED * deltaTime; cameraUpdated = true;
-	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) target -= up * CAMERA_SPEED * deltaTime; cameraUpdated = true;
-	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) target += right * CAMERA_SPEED * deltaTime; cameraUpdated = true;
-	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) target -= right * CAMERA_SPEED * deltaTime; cameraUpdated = true;
+	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) { target += up * CAMERA_SPEED * deltaTime; cameraUpdated = true; }
+	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) { target -= up * CAMERA_SPEED * deltaTime; cameraUpdated = true; }
+	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) { target += right * CAMERA_SPEED * deltaTime; cameraUpdated = true; }
+	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) { target -= right * CAMERA_SPEED * deltaTime; cameraUpdated = true; }
 
 	if (!cameraUpdated)
-		return;
+		return false;
 
 	camera.forward = hri::normalize(target - camera.position);
 	camera.right = hri::normalize(hri::cross(HRI_WORLD_UP, camera.forward));
 	camera.up = hri::normalize(hri::cross(camera.forward, camera.right));
+	return true;
 }
 
 int main()
@@ -208,7 +219,7 @@ int main()
 
 		// Record ImGUI draw commands
 		uiManager.startDraw();
-		drawConfigWindow(gFrameTimer.deltaTime, camera, scene);
+		bool UIUpdated = drawConfigWindow(gFrameTimer.deltaTime, renderer, camera, scene);
 		uiManager.endDraw();
 
 		// Update scene & draw renderer frame
@@ -217,11 +228,13 @@ int main()
 		renderer.drawFrame();
 
 		// Update camera state
-		if (gWindowResized)
+		bool cameraUpdated = handleCameraInput(gWindow, gFrameTimer.deltaTime, camera);
+		if (gWindowResized || UIUpdated || cameraUpdated)
+		{
+			renderer.resetAccumulators();
 			camera.parameters.aspectRatio = static_cast<float>(gDisplayWidth) / static_cast<float>(gDisplayHeight);
-
-		handleCameraInput(gWindow, gFrameTimer.deltaTime, camera);
-		camera.updateMatrices();
+			camera.updateMatrices();
+		}
 		
 		if (glfwGetKey(gWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 			windowManager.closeWindow(gWindow);
