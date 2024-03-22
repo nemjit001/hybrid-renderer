@@ -213,9 +213,19 @@ public:
 
 public:
 	raytracing::RayTracingContext& rtContext;
+
+	// Pass sampler
+	std::unique_ptr<hri::ImageSampler> passInputSampler;
+	
+	// Descriptor set layouts
+	std::unique_ptr<hri::DescriptorSetLayout> gbufferDataDescriptorSetLayout;
 	std::unique_ptr<hri::DescriptorSetLayout> rtDescriptorSetLayout;
+
+	// Descriptor sets
+	std::unique_ptr<hri::DescriptorSetManager> gbufferDataDescriptorSet;
 	std::unique_ptr<hri::DescriptorSetManager> rtDescriptorSet;
 
+	// Image handles
 	std::unique_ptr<hri::ImageResource> renderResult;
 
 protected:

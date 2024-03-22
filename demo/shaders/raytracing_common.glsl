@@ -46,12 +46,15 @@ struct PTRayPayload
 	vec3 transmission;
 };
 
-/// --- Common functions
-
-uint calculateLaunchIndex(uvec3 launchID, uvec3 launchSize)
+struct DIRayPayload
 {
-	return launchID.x + launchID.y * launchSize.x + launchID.z * launchSize.x * launchSize.y;
-}
+	uint seed;
+	uint rayMask;
+	vec3 energy;
+	vec3 transmission;
+};
+
+/// --- Common functions
 
 bool gbufferRayHit(float depth)
 {
@@ -171,16 +174,6 @@ vec3 diffuseReflect(inout uint seed, vec3 wI, vec3 N)
 
 void randomWalk(inout uint seed, vec3 Wi, vec3 N, Material material, out vec3 Wo, out bool specularEvent)
 {
-	float rng = randomFloat(seed);
-
-// TODO: uncomment when frame accumulation works
-//	if (rng < material.specular.r || rng < material.specular.g || rng < material.specular.b)
-//	{
-//		specularEvent = true;
-//		Wo = reflect(Wi, N);
-//		return;
-//	}
-
 	specularEvent = false;
 	Wo = diffuseReflect(seed, Wi, N);
 }
@@ -206,6 +199,14 @@ vec3 evaluateBRDF(vec3 Wi, vec3 Wo, vec3 N, Material material, bool specularEven
 		return material.diffuse * material.specular;
 
 	return material.diffuse * RT_INV_PI;
+}
+
+vec3 evaluareBRDFNoAlbedo(vec3 Wi, vec3 Wo, vec3 N, Material material, bool specularEvent)
+{
+	if (specularEvent)
+		return material.specular;
+
+	return vec3(RT_INV_PI);
 }
 
 #endif // RT_COMMON_GLSL

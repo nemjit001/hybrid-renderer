@@ -54,6 +54,9 @@ void Renderer::setVSyncMode(hri::VSyncMode vsyncMode)
 
 void Renderer::resetAccumulators()
 {
+	if (!usePathTracer)	// Only when the path tracer is used should the accumulator be reset
+		return;
+
 	m_renderCore.awaitFrameFinished();
 	m_pathTracingPass->recreateResources(m_context.swapchain.extent);
 
@@ -136,7 +139,23 @@ void Renderer::prepareFrame()
 		writeGBufferSampleDescriptors(*m_gbufferSamplePass->loDefDescriptorSet, *m_gbufferSamplePass->passInputSampler, *m_gbufferLayoutPass->loDefLODPassResources);
 		writeGBufferSampleDescriptors(*m_gbufferSamplePass->hiDefDescriptorSet, *m_gbufferSamplePass->passInputSampler, *m_gbufferLayoutPass->hiDefLODPassResources);
 
-		// TODO: set direct illumination descriptors
+		// Set direct illumination descriptors
+		VkDescriptorImageInfo DIAlbedoInfo = VkDescriptorImageInfo{ m_directIlluminationPass->passInputSampler->sampler, m_gbufferSamplePass->passResources->getAttachmentResource(0).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+		VkDescriptorImageInfo DIEmissionInfo = VkDescriptorImageInfo{ m_directIlluminationPass->passInputSampler->sampler, m_gbufferSamplePass->passResources->getAttachmentResource(1).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+		VkDescriptorImageInfo DISpecularInfo = VkDescriptorImageInfo{ m_directIlluminationPass->passInputSampler->sampler, m_gbufferSamplePass->passResources->getAttachmentResource(2).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+		VkDescriptorImageInfo DITransmittanceInfo = VkDescriptorImageInfo{ m_directIlluminationPass->passInputSampler->sampler, m_gbufferSamplePass->passResources->getAttachmentResource(3).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+		VkDescriptorImageInfo DINormalInfo = VkDescriptorImageInfo{ m_directIlluminationPass->passInputSampler->sampler, m_gbufferSamplePass->passResources->getAttachmentResource(4).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+		VkDescriptorImageInfo DIDepthInfo = VkDescriptorImageInfo{ m_directIlluminationPass->passInputSampler->sampler, m_gbufferSamplePass->passResources->getAttachmentResource(5).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+		rngSourceInfo.sampler = m_directIlluminationPass->passInputSampler->sampler;
+		(*m_directIlluminationPass->gbufferDataDescriptorSet)
+			.writeImage(0, &DIAlbedoInfo)
+			.writeImage(1, &DIEmissionInfo)
+			.writeImage(2, &DISpecularInfo)
+			.writeImage(3, &DITransmittanceInfo)
+			.writeImage(4, &DINormalInfo)
+			.writeImage(5, &DIDepthInfo)
+			.writeImage(6, &rngSourceInfo)
+			.flush();
 
 		// Set Deferred shading descriptors
 		VkDescriptorImageInfo deferredAlbedoInfo = VkDescriptorImageInfo{ m_deferredShadingPass->passInputSampler->sampler, m_gbufferSamplePass->passResources->getAttachmentResource(0).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
@@ -144,12 +163,16 @@ void Renderer::prepareFrame()
 		VkDescriptorImageInfo deferredSpecularInfo = VkDescriptorImageInfo{ m_deferredShadingPass->passInputSampler->sampler, m_gbufferSamplePass->passResources->getAttachmentResource(2).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
 		VkDescriptorImageInfo deferredTransmittanceInfo = VkDescriptorImageInfo{ m_deferredShadingPass->passInputSampler->sampler, m_gbufferSamplePass->passResources->getAttachmentResource(3).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
 		VkDescriptorImageInfo deferredNormalInfo = VkDescriptorImageInfo{ m_deferredShadingPass->passInputSampler->sampler, m_gbufferSamplePass->passResources->getAttachmentResource(4).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+		VkDescriptorImageInfo deferredDepthInfo = VkDescriptorImageInfo{ m_deferredShadingPass->passInputSampler->sampler, m_gbufferSamplePass->passResources->getAttachmentResource(5).view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+		VkDescriptorImageInfo deferredDIInfo = VkDescriptorImageInfo{ m_deferredShadingPass->passInputSampler->sampler, m_directIlluminationPass->renderResult->view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
 		(*m_deferredShadingPass->inputDescriptorSet)
 			.writeImage(0, &deferredAlbedoInfo)
 			.writeImage(1, &deferredEmissionInfo)
 			.writeImage(2, &deferredSpecularInfo)
 			.writeImage(3, &deferredTransmittanceInfo)
 			.writeImage(4, &deferredNormalInfo)
+			.writeImage(5, &deferredDepthInfo)
+			.writeImage(6, &deferredDIInfo)
 			.flush();
 
 		// Set render result descriptors

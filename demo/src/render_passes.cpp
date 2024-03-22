@@ -1013,7 +1013,58 @@ DirectIlluminationPass::DirectIlluminationPass(raytracing::RayTracingContext& ct
 {
 	recreateResources(context.swapchain.extent);
 
-	// TODO: set up raytracing pass
+	// Create sampler
+	passInputSampler = std::unique_ptr<hri::ImageSampler>(new hri::ImageSampler(context));
+	
+	// Create descriptor set layouts & sets
+	hri::DescriptorSetLayoutBuilder gbufferDataDescriptorSetLayoutBuilder(context);
+	gbufferDataDescriptorSetLayoutBuilder
+		.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
+		.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
+		.addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
+		.addBinding(3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
+		.addBinding(4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
+		.addBinding(5, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
+		.addBinding(6, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_RAYGEN_BIT_KHR);
+
+	hri::DescriptorSetLayoutBuilder rtDescriptorSetLayoutBuilder(context);
+	rtDescriptorSetLayoutBuilder
+		.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
+		.addBinding(1, VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
+		.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
+		.addBinding(3, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR)
+		.addBinding(4, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
+
+	gbufferDataDescriptorSetLayout = std::make_unique<hri::DescriptorSetLayout>(gbufferDataDescriptorSetLayoutBuilder.build());
+	rtDescriptorSetLayout = std::make_unique<hri::DescriptorSetLayout>(rtDescriptorSetLayoutBuilder.build());
+
+	gbufferDataDescriptorSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(context, descriptorAllocator, *gbufferDataDescriptorSetLayout));
+	rtDescriptorSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(context, descriptorAllocator, *rtDescriptorSetLayout));
+
+	// Create pipeline & SBT
+	hri::PipelineLayoutBuilder layoutBuilder(context);
+	m_layout = layoutBuilder
+		.addDescriptorSetLayout(*gbufferDataDescriptorSetLayout)
+		.addDescriptorSetLayout(*rtDescriptorSetLayout)
+		.build();
+
+	hri::Shader* pRayGen = shaderDB.registerShader("DIRayGen", hri::Shader::loadFile(context, "shaders/di.rgen.spv", VK_SHADER_STAGE_RAYGEN_BIT_KHR));
+	hri::Shader* pMiss = shaderDB.registerShader("DIMiss", hri::Shader::loadFile(context, "shaders/di.rmiss.spv", VK_SHADER_STAGE_MISS_BIT_KHR));
+	hri::Shader* pCHit = shaderDB.registerShader("DICHit", hri::Shader::loadFile(context, "shaders/di.rchit.spv", VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR));
+
+	raytracing::RayTracingPipelineBuilder pipelineBuilder(rtContext);
+	pipelineBuilder
+		.addShaderStage(pRayGen->stage, pRayGen->module)
+		.addShaderStage(pMiss->stage, pMiss->module)
+		.addShaderStage(pCHit->stage, pCHit->module)
+		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR, 0)
+		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR, 1)
+		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR, VK_SHADER_UNUSED_KHR, 2)
+		.setMaxRecursionDepth()
+		.setLayout(m_layout);
+
+	m_pPSO = shaderDB.registerPipeline("DirectIlluminationPipeline", VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, pipelineBuilder.build());
+	m_SBT = std::unique_ptr<raytracing::ShaderBindingTable>(new raytracing::ShaderBindingTable(rtContext, m_pPSO->pipeline, pipelineBuilder));
 }
 
 DirectIlluminationPass::~DirectIlluminationPass()
@@ -1023,7 +1074,37 @@ DirectIlluminationPass::~DirectIlluminationPass()
 
 void DirectIlluminationPass::prepareFrame(CommonResources& resources)
 {
-	// TODO: write common descriptors
+	VkDescriptorBufferInfo cameraInfo = VkDescriptorBufferInfo{};
+	cameraInfo.buffer = resources.cameraUBO->buffer;
+	cameraInfo.offset = 0;
+	cameraInfo.range = resources.cameraUBO->bufferSize;
+
+	VkWriteDescriptorSetAccelerationStructureKHR tlasWrite = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR };
+	tlasWrite.accelerationStructureCount = 1;
+	tlasWrite.pAccelerationStructures = &resources.tlas->accelerationStructure;
+
+	VkDescriptorImageInfo renderResultInfo = VkDescriptorImageInfo{};
+	renderResultInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+	renderResultInfo.imageView = renderResult->view;
+	renderResultInfo.sampler = VK_NULL_HANDLE;
+
+	VkDescriptorBufferInfo instanceInfo = VkDescriptorBufferInfo{};
+	instanceInfo.buffer = resources.instanceDataSSBO->buffer;
+	instanceInfo.offset = 0;
+	instanceInfo.range = resources.instanceDataSSBO->bufferSize;
+
+	VkDescriptorBufferInfo materialInfo = VkDescriptorBufferInfo{};
+	materialInfo.buffer = resources.materialSSBO->buffer;
+	materialInfo.offset = 0;
+	materialInfo.range = resources.materialSSBO->bufferSize;
+
+	(*rtDescriptorSet)
+		.writeBuffer(0, &cameraInfo)
+		.writeEXT(1, &tlasWrite)
+		.writeImage(2, &renderResultInfo)
+		.writeBuffer(3, &instanceInfo)
+		.writeBuffer(4, &materialInfo)
+		.flush();
 }
 
 void DirectIlluminationPass::drawFrame(hri::ActiveFrame& frame, CommonResources& resources)
@@ -1032,13 +1113,77 @@ void DirectIlluminationPass::drawFrame(hri::ActiveFrame& frame, CommonResources&
 	debug.cmdBeginLabel(frame.commandBuffer, "Direct Illumination Pass");
 	debug.cmdRecordStartTimestamp(frame.commandBuffer);
 
+	VkImageMemoryBarrier2 resultBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
+	resultBarrier.srcStageMask = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR;
+	resultBarrier.dstStageMask = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR;
+	resultBarrier.srcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT;
+	resultBarrier.dstAccessMask = VK_ACCESS_2_MEMORY_READ_BIT;
+	resultBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	resultBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	resultBarrier.image = renderResult->image;
+	resultBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	resultBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+	resultBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
+	frame.pipelineBarrier({ resultBarrier });
+
+	VkStridedDeviceAddressRegionKHR raygen = m_SBT->getRegion(raytracing::ShaderBindingTable::SGRayGen);
+	VkStridedDeviceAddressRegionKHR miss = m_SBT->getRegion(raytracing::ShaderBindingTable::SGMiss);
+	VkStridedDeviceAddressRegionKHR hit = m_SBT->getRegion(raytracing::ShaderBindingTable::SGHit);
+	VkStridedDeviceAddressRegionKHR call = m_SBT->getRegion(raytracing::ShaderBindingTable::SGCall);
+
+	VkDescriptorSet sets[] = { gbufferDataDescriptorSet->set, rtDescriptorSet->set, };
+	vkCmdBindDescriptorSets(
+		frame.commandBuffer,
+		m_pPSO->bindPoint,
+		m_layout,
+		0, HRI_SIZEOF_ARRAY(sets), sets,
+		0, nullptr
+	);
+
+	vkCmdBindPipeline(
+		frame.commandBuffer,
+		m_pPSO->bindPoint,
+		m_pPSO->pipeline
+	);
+
+	rtContext.rayTracingDispatch.vkCmdTraceRays(
+		frame.commandBuffer,
+		&raygen,
+		&miss,
+		&hit,
+		&call,
+		context.swapchain.extent.width,
+		context.swapchain.extent.height,
+		1
+	);
+
+	resultBarrier.srcStageMask = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR;
+	resultBarrier.dstStageMask = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR;
+	resultBarrier.srcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT;
+	resultBarrier.dstAccessMask = VK_ACCESS_2_MEMORY_READ_BIT;
+	resultBarrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+	resultBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	frame.pipelineBarrier({ resultBarrier });
+
 	debug.cmdRecordEndTimestamp(frame.commandBuffer);
 	debug.cmdEndLabel(frame.commandBuffer);
 }
 
 void DirectIlluminationPass::recreateResources(VkExtent2D resolution)
 {
-	//
+	renderResult = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
+		context,
+		VK_IMAGE_TYPE_2D,
+		VK_FORMAT_R32G32B32A32_SFLOAT,
+		VK_SAMPLE_COUNT_1_BIT,
+		{ resolution.width, resolution.height, 1 },
+		1,
+		1,
+		VK_IMAGE_USAGE_STORAGE_BIT
+		| VK_IMAGE_USAGE_SAMPLED_BIT
+	));
+
+	renderResult->createView(VK_IMAGE_VIEW_TYPE_2D, hri::ImageResource::DefaultComponentMapping(), hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1));
 }
 
 // --- DEFERRED SHADING PASS ---
@@ -1063,7 +1208,8 @@ DeferredShadingPass::DeferredShadingPass(hri::RenderContext& ctx, hri::ShaderDat
 		.addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 		.addBinding(3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 		.addBinding(4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-		.addBinding(5, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
+		.addBinding(5, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+		.addBinding(6, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
 
 	inputDescriptorSetLayout = std::make_unique<hri::DescriptorSetLayout>(inputDescriptorSetLayoutBuilder.build());
 	inputDescriptorSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(context, descriptorAllocator, *inputDescriptorSetLayout));
