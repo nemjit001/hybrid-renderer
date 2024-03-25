@@ -2,7 +2,7 @@
 #define RT_COMMON_GLSL
 
 #define RAYTRACE_MAX_BOUNCE_COUNT	5
-#define RAYTRACE_RANGE_TMIN			1e-3
+#define RAYTRACE_RANGE_TMIN			1e-2
 #define RAYTRACE_RANGE_TMAX			1e30
 #define RAYTRACE_MASK_BITS			8
 
@@ -190,7 +190,7 @@ float evaluatePDF(vec3 Wo, vec3 N, Material material, bool specularEvent)
 	if (specularEvent)
 		return 1.0;
 
-	return dot(Wo, N) / RT_2PI;
+	return dot(Wo, N) * RT_2PI;
 }
 
 vec3 evaluateBRDF(vec3 Wi, vec3 Wo, vec3 N, Material material, bool specularEvent)

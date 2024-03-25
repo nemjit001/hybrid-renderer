@@ -53,7 +53,7 @@ void main()
 			gl_RayFlagsOpaqueEXT,
 			prd.rayMask,
 			0, 0, 0,
-			hit.worldPos,
+			hit.worldPos + Wo * RAYTRACE_RANGE_TMIN,	// This is done to account for depth buffer precision issues
 			RAYTRACE_RANGE_TMIN,
 			Wo,						// TODO: sample light direction from light array
 			RAYTRACE_RANGE_TMAX,	// TODO: only trace to light dist -> miss is lit according to light, hit is shadow?

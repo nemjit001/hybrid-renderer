@@ -3,8 +3,10 @@
 #include <fstream>
 #include <hybrid_renderer.h>
 #include <nlohmann/json.hpp>
+#include <set>
 #include <string>
 #include <tiny_obj_loader.h>
+#include <vector>
 
 #include "demo.h"
 
@@ -174,15 +176,25 @@ void SceneASManager::cmdBuildBLASses(
 	);
 
 	// Gather build batch
+	std::set<SceneNode::SceneId> processedLODS = {};
 	std::vector<raytracing::ASBuilder::ASBuildInfo> batchInfo = {};
 	std::vector<VkAccelerationStructureKHR> batchHandles = {};
 	for (auto const& instance : instances)
 	{
-		batchInfo.push_back(blasBuildInfos[instance.instanceIdLOD0]);
-		batchInfo.push_back(blasBuildInfos[instance.instanceIdLOD1]);
+		// Only insert not already processed batch info
+		if (processedLODS.find(instance.instanceIdLOD0) == processedLODS.end())
+		{
+			batchHandles.push_back(blasList[instance.instanceIdLOD0].accelerationStructure);
+			batchInfo.push_back(blasBuildInfos[instance.instanceIdLOD0]);
+			processedLODS.insert(instance.instanceIdLOD0);
+		}
 
-		batchHandles.push_back(blasList[instance.instanceIdLOD0].accelerationStructure);
-		batchHandles.push_back(blasList[instance.instanceIdLOD1].accelerationStructure);
+		if (processedLODS.find(instance.instanceIdLOD1) == processedLODS.end())
+		{
+			batchHandles.push_back(blasList[instance.instanceIdLOD1].accelerationStructure);
+			batchInfo.push_back(blasBuildInfos[instance.instanceIdLOD1]);
+			processedLODS.insert(instance.instanceIdLOD1);
+		}
 	}
 
 	VkDeviceAddress scratchBufferAddress = raytracing::getDeviceAddress(m_ctx, scratchBuffer);
@@ -212,6 +224,8 @@ hri::BufferResource SceneASManager::generateTLASInstances(
 	std::vector<VkAccelerationStructureInstanceKHR> tlasInstances = {}; tlasInstances.reserve(instanceCount);
 	for (auto const& renderInstance : instances)
 	{
+		VkTransformMatrixKHR transform = raytracing::toTransformMatrix(renderInstance.modelMatrix);
+
 		uint32_t lodLoMask = SceneGraph::generateLODMask(renderInstance);
 		uint32_t lodHiMask = (~lodLoMask) & VALID_MASK;
 		auto const& blasHi = blasList[renderInstance.instanceIdLOD0];
@@ -226,7 +240,7 @@ hri::BufferResource SceneASManager::generateTLASInstances(
 
 		VkAccelerationStructureInstanceKHR tlasInstanceHigh = VkAccelerationStructureInstanceKHR{};
 		tlasInstanceHigh.flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
-		tlasInstanceHigh.transform = raytracing::toTransformMatrix(renderInstance.modelMatrix);
+		tlasInstanceHigh.transform = transform;
 		tlasInstanceHigh.instanceCustomIndex = renderInstance.instanceIdLOD0;
 		tlasInstanceHigh.accelerationStructureReference = blasHiAddress;
 		tlasInstanceHigh.mask = lodHiMask;
@@ -234,7 +248,7 @@ hri::BufferResource SceneASManager::generateTLASInstances(
 
 		VkAccelerationStructureInstanceKHR tlasInstanceLow = VkAccelerationStructureInstanceKHR{};
 		tlasInstanceLow.flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
-		tlasInstanceLow.transform = raytracing::toTransformMatrix(renderInstance.modelMatrix);
+		tlasInstanceLow.transform = transform;
 		tlasInstanceLow.instanceCustomIndex = renderInstance.instanceIdLOD1;
 		tlasInstanceLow.accelerationStructureReference = blasLoAddress;
 		tlasInstanceLow.mask = lodLoMask;
@@ -340,6 +354,8 @@ SceneGraph::SceneGraph(
 	vkCmdCopyBuffer(transferBuffer, materialStaging.buffer, buffers.materialSSBO.buffer, 1, &matSSBOCopy);
 
 	stagingPool.submitAndWait(transferBuffer);
+
+	printf("Loaded scene with %zu instances (%u light(s))\n", m_instanceData.size(), lightCount);
 }
 
 void SceneGraph::update(float deltaTime)
@@ -443,8 +459,7 @@ SceneGraph SceneLoader::load(raytracing::RayTracingContext& context, const std::
 					context.renderContext,
 					vertices,
 					indices,
-					VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT
-					| VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR
+					MESH_RAYTRACING_BUFFER_FLAGS
 				)));
 			}
 

@@ -19,12 +19,108 @@
 #include <crtdbg.h>
 #endif
 
+#if USE_BENCHMARK_SCENE == 1
+int32_t gBenchMarkMeshCount					= 15;
+const char* gBenchMarkMesh					= "assets/armadillo_lod.obj";
+const char* gBenchMarkLods[MAX_LOD_LEVELS]	= { "armadillo01", "armadillo05", "armadillo10" };
+#endif
+
 static Timer gFrameTimer		= Timer();
 static WindowHandle* gWindow	= nullptr;
 
 static bool gWindowResized  = false;
 static int gDisplayWidth 	= SCR_WIDTH;
 static int gDisplayHeight 	= SCR_HEIGHT;
+
+#if USE_BENCHMARK_SCENE == 1
+SceneGraph loadBenchmarkScene(raytracing::RayTracingContext& ctx)
+{
+	std::srand(0x42);
+	std::vector<Material> materials = {};
+	std::vector<hri::Mesh> meshes = {};
+	std::vector<SceneNode> nodes = {};
+
+	// Load benchmark mesh LODs
+	for (size_t i = 0; i < MAX_LOD_LEVELS; i++)
+	{
+		Material material = Material{};
+		std::vector<hri::Vertex> verts;
+		std::vector<uint32_t> indices;
+		if (SceneLoader::loadOBJMesh(gBenchMarkMesh, gBenchMarkLods[i], material, verts, indices, (i == 0)))
+			meshes.push_back(std::move(hri::Mesh(ctx.renderContext, verts, indices, MESH_RAYTRACING_BUFFER_FLAGS)));
+
+		if (i == 0)
+		{
+			material.diffuse = hri::Float3(0.1f);
+			materials.push_back(material);
+		}
+	}
+
+	// Set up benchmark nodes
+	for (int32_t x = -(gBenchMarkMeshCount / 2); x < (gBenchMarkMeshCount / 2) + 1; x++)
+	{
+		for (int32_t y = -(gBenchMarkMeshCount / 2); y < (gBenchMarkMeshCount / 2) + 1; y++)
+		{
+			char buff[64];
+			snprintf(buff, 64, "(%d %d)", x, y);
+
+			SceneNode newNode = SceneNode{};
+			newNode.name = "Armadillo" + std::string(buff);
+			newNode.transform = SceneTransform{};
+			newNode.transform.position = hri::Float3((float)x * 5.0f, 1.3f, (float)y * 5.0f);
+			newNode.transform.scale = hri::Float3(0.025f, 0.025f, 0.025f);
+			newNode.transform.rotation.y = (static_cast <float>(rand()) / static_cast <float>(RAND_MAX)) * 360.0f;
+			newNode.material = 0;
+			newNode.numLods = 3;
+			newNode.meshLODs[0] = 0;
+			newNode.meshLODs[1] = 1;
+			newNode.meshLODs[2] = 2;
+
+			nodes.push_back(newNode);
+		}
+	}
+
+	{	// Load an area light and a floor mesh
+		Material material = Material{};
+		std::vector<hri::Vertex> verts;
+		std::vector<uint32_t> indices;
+		if (SceneLoader::loadOBJMesh("assets/simple_objects_lod.obj", "Plane_LOD0", material, verts, indices, false))
+			meshes.push_back(std::move(hri::Mesh(ctx.renderContext, verts, indices, MESH_RAYTRACING_BUFFER_FLAGS)));
+
+		materials.push_back(material);
+
+		// HACK: temp second load, remove when instance data setting in scene works
+		verts.clear(); indices.clear();
+		if (SceneLoader::loadOBJMesh("assets/simple_objects_lod.obj", "Plane_LOD0", material, verts, indices, true))
+			meshes.push_back(std::move(hri::Mesh(ctx.renderContext, verts, indices, MESH_RAYTRACING_BUFFER_FLAGS)));
+
+		materials.push_back(material);
+
+		SceneNode floorNode = SceneNode{};
+		floorNode.name = "Floor";
+		floorNode.transform = SceneTransform{};
+		floorNode.transform.position = hri::Float3(0.0f, 0.0f, 0.0f);
+		floorNode.transform.scale = hri::Float3(50.0f, 1.0f, 50.0f);
+		floorNode.material = 1;
+		floorNode.numLods = 1;
+		floorNode.meshLODs[0] = 4;
+
+		SceneNode lightNode = SceneNode{};
+		lightNode.name = "Area Light";
+		lightNode.transform = SceneTransform{};
+		lightNode.transform.position = hri::Float3(0.0f, 20.0f, 0.0f);
+		lightNode.transform.scale = hri::Float3(10.0f, 1.0f, 10.0f);
+		lightNode.material = 2;
+		lightNode.numLods = 1;
+		lightNode.meshLODs[0] = 3;
+
+		nodes.push_back(floorNode);
+		nodes.push_back(lightNode);
+	}
+
+	return SceneGraph(ctx, std::move(materials), std::move(meshes), std::move(nodes));
+}
+#endif
 
 bool drawSceneGraphNodeMenu(std::vector<SceneNode>& nodes)
 {
@@ -203,8 +299,12 @@ int main()
 	);
 
 	// Load scene file & Create renderer
-	// TODO: add define to load in benchmark scene
-	SceneGraph scene = SceneLoader::load(rtContext, "./assets/default_scene.json");
+#if USE_BENCHMARK_SCENE == 1
+	SceneGraph scene = loadBenchmarkScene(rtContext);
+#else
+	SceneGraph scene = SceneLoader::load(rtContext, "./assets/interior_scene.json");
+#endif
+
 	Renderer renderer = Renderer(rtContext, camera, scene);
 
 	printf("Startup complete\n");

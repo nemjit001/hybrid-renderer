@@ -11,6 +11,8 @@
 #define INSTANCE_MASK_BITS	8
 #define VALID_MASK			((1 << INSTANCE_MASK_BITS) - 1)
 
+#define MESH_RAYTRACING_BUFFER_FLAGS	(VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR)
+
 /// @brief Scene parameters allow modifying LOD selection.
 struct SceneParameters
 {
@@ -223,7 +225,6 @@ public:
 	/// @return A new SceneGraph generated from the scene file.
 	static SceneGraph load(raytracing::RayTracingContext& context, const std::string& path);
 
-private:
 	/// @brief Load an OBJ Mesh from an OBJ file.
 	/// @param path File path.
 	/// @param name Name of the mesh to load.
