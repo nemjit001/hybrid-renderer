@@ -1,0 +1,79 @@
+#version 450
+
+#extension GL_EXT_ray_tracing : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+
+#include "shader_common.glsl"
+#include "raytracing_common.glsl"
+
+layout(set = 0, binding = 0) uniform CURR_CAMERA { Camera currCamera; };
+layout(set = 0, binding = 1) uniform PREV_CAMERA { Camera prevCamera; };
+layout(set = 0, binding = 2, rgba32f) uniform image2D PreviousFrame;
+layout(set = 0, binding = 3, rgba32f) uniform image2D CurrentFrame;
+layout(set = 0, binding = 4, rg32f) uniform image2D ReprojectHistory;
+
+layout(set = 0, binding = 5) uniform sampler2D RenderResult;
+layout(set = 0, binding = 6) uniform sampler2D RenderDepth;
+
+layout(push_constant) uniform TEMPORAL_INPUT
+{
+	bool resetHistory;
+	vec2 resolution;
+};
+
+layout(local_size_x = 1, local_size_y = 1) in;
+
+vec4 screenToWorld(Camera cam, vec2 uv, float depth)
+{
+	vec2 ndc = 2.0 * uv - 1.0;
+	vec3 wPos = depthToWorldPos(inverse(cam.project), inverse(cam.view), ndc, depth);
+	return vec4(wPos, 1);
+}
+
+vec2 reprojectUV(vec2 uv, float depth)
+{
+	vec4 worldPos = screenToWorld(currCamera, uv, depth);
+	vec4 screenPos = prevCamera.project * prevCamera.view * worldPos;
+	screenPos = vec4(screenPos.xyz / screenPos.w, 1);
+
+	return 0.5 * screenPos.xy + 0.5;
+}
+
+bool uvValid(vec2 uv)
+{
+	return uv.x >= 0.0 && uv.x < 1.0 && uv.y >= 0.0 && uv.y < 1.0;
+}
+
+void main()
+{
+	ivec2 pixel = ivec2(gl_GlobalInvocationID.xy);
+	vec2 pixelCenter = vec2(pixel) + vec2(0.5);
+
+	vec2 currUV = pixelCenter / resolution;
+	float currentDepth = texture(RenderDepth, currUV).r;
+	vec2 prevUV = reprojectUV(currUV, currentDepth);
+
+	ivec2 prevPixel = ivec2(prevUV * resolution);
+	vec4 prevSample = vec4(0);
+	vec4 currSample = texture(RenderResult, currUV);
+	
+	float historyLength = 1.0;
+	if (!resetHistory && uvValid(prevUV))
+	{
+		// Check if prev sample & current sample are same surface (distance based, see https://www.shadertoy.com/view/ldtGWl)
+		float prevDepth = imageLoad(ReprojectHistory, prevPixel).g;
+		vec4 currPos = screenToWorld(currCamera, currUV, currentDepth);
+		vec4 prevPos = screenToWorld(prevCamera, prevUV, prevDepth);
+		if (length(prevPos - currPos) < REPROJECT_DELTA_THRESHOLD)
+		{
+			prevSample = imageLoad(PreviousFrame, prevPixel);
+			historyLength = imageLoad(ReprojectHistory, prevPixel).r + 1.0;
+		}
+	}
+
+	float alpha = 1.0 / historyLength;
+	vec4 outSample = mix(prevSample, currSample, alpha);
+	
+	imageStore(CurrentFrame, pixel, outSample);
+	imageStore(ReprojectHistory, pixel, vec4(historyLength, currentDepth, 0, 0));
+}

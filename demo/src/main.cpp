@@ -56,30 +56,6 @@ SceneGraph loadBenchmarkScene(raytracing::RayTracingContext& ctx)
 		}
 	}
 
-	// Set up benchmark nodes
-	for (int32_t x = -(gBenchMarkMeshCount / 2); x < (gBenchMarkMeshCount / 2) + 1; x++)
-	{
-		for (int32_t y = -(gBenchMarkMeshCount / 2); y < (gBenchMarkMeshCount / 2) + 1; y++)
-		{
-			char buff[64];
-			snprintf(buff, 64, "(%d %d)", x, y);
-
-			SceneNode newNode = SceneNode{};
-			newNode.name = "Armadillo" + std::string(buff);
-			newNode.transform = SceneTransform{};
-			newNode.transform.position = hri::Float3((float)x * 5.0f, 1.3f, (float)y * 5.0f);
-			newNode.transform.scale = hri::Float3(0.025f, 0.025f, 0.025f);
-			newNode.transform.rotation.y = (static_cast <float>(rand()) / static_cast <float>(RAND_MAX)) * 360.0f;
-			newNode.material = 0;
-			newNode.numLods = 3;
-			newNode.meshLODs[0] = 0;
-			newNode.meshLODs[1] = 1;
-			newNode.meshLODs[2] = 2;
-
-			nodes.push_back(newNode);
-		}
-	}
-
 	{	// Load an area light and a floor mesh
 		Material material = Material{};
 		std::vector<hri::Vertex> verts;
@@ -116,6 +92,30 @@ SceneGraph loadBenchmarkScene(raytracing::RayTracingContext& ctx)
 
 		nodes.push_back(floorNode);
 		nodes.push_back(lightNode);
+	}
+
+	// Set up benchmark nodes
+	for (int32_t x = -(gBenchMarkMeshCount / 2); x < (gBenchMarkMeshCount / 2) + 1; x++)
+	{
+		for (int32_t y = -(gBenchMarkMeshCount / 2); y < (gBenchMarkMeshCount / 2) + 1; y++)
+		{
+			char buff[64];
+			snprintf(buff, 64, "(%d %d)", x, y);
+
+			SceneNode newNode = SceneNode{};
+			newNode.name = "Armadillo" + std::string(buff);
+			newNode.transform = SceneTransform{};
+			newNode.transform.position = hri::Float3((float)x * 5.0f, 1.3f, (float)y * 5.0f);
+			newNode.transform.scale = hri::Float3(0.025f, 0.025f, 0.025f);
+			newNode.transform.rotation.y = (static_cast <float>(rand()) / static_cast <float>(RAND_MAX)) * 360.0f;
+			newNode.material = 0;
+			newNode.numLods = 3;
+			newNode.meshLODs[0] = 0;
+			newNode.meshLODs[1] = 1;
+			newNode.meshLODs[2] = 2;
+
+			nodes.push_back(newNode);
+		}
 	}
 
 	return SceneGraph(ctx, std::move(materials), std::move(meshes), std::move(nodes));
@@ -331,6 +331,9 @@ int main()
 		bool cameraUpdated = handleCameraInput(gWindow, gFrameTimer.deltaTime, camera);
 		if (gWindowResized || UIUpdated || cameraUpdated)
 		{
+			if (gWindowResized || UIUpdated)
+				renderer.resetHistory = true;
+
 			camera.parameters.aspectRatio = static_cast<float>(gDisplayWidth) / static_cast<float>(gDisplayHeight);
 			camera.updateMatrices();
 		}

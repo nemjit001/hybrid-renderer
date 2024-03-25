@@ -15,8 +15,8 @@ layout(location = 0) rayPayloadInEXT PTRayPayload prd;
 layout(buffer_reference, scalar) buffer VertexBuffer  { Vertex v[]; };
 layout(buffer_reference, scalar) buffer IndexBuffer { ivec3 i[]; };
 
-layout(set = 0, binding = 2, scalar) buffer RENDER_INSTANCE_DATA { RenderInstanceData instances[]; };
-layout(set = 0, binding = 3) buffer MATERIAL_DATA { Material materials[]; };
+layout(set = 0, binding = 1, scalar) buffer RENDER_INSTANCE_DATA { RenderInstanceData instances[]; };
+layout(set = 0, binding = 2) buffer MATERIAL_DATA { Material materials[]; };
 
 layout(set = 1, binding = 0) uniform accelerationStructureEXT TLAS;
 

@@ -10,11 +10,11 @@
 
 layout(location = 0) rayPayloadEXT PTRayPayload prd;
 
-layout(set = 0, binding = 0) uniform CURR_CAMERA { Camera currCamera; };
-layout(set = 0, binding = 1) uniform PREV_CAMERA { Camera prevCamera; };
+layout(set = 0, binding = 0) uniform CAMERA { Camera camera; };
 
 layout(set = 1, binding = 0) uniform accelerationStructureEXT TLAS;
 layout(set = 1, binding = 1, rgba32f) uniform writeonly image2D PathTracingOut;
+layout(set = 1, binding = 2, r32f) uniform writeonly image2D PathTracingDepthOut;
 
 layout(push_constant) uniform FRAME_INFO { FrameInfo frameInfo; };
 
@@ -34,8 +34,8 @@ void main()
 	vec2 pixelCenter = pixelLocation + vec2(0.5);
 
 	vec2 inUV = pixelCenter / vec2(gl_LaunchSizeEXT.xy);
-	mat4 invProj = inverse(currCamera.project);
-	mat4 invView = inverse(currCamera.view);
+	mat4 invProj = inverse(camera.project);
+	mat4 invView = inverse(camera.view);
 	vec2 ndc = inUV * 2.0 - 1.0;
 	
 	vec4 rayDirection = invProj * vec4(ndc, 1, 1);
@@ -54,6 +54,11 @@ void main()
 		0
 	);
 	
+	vec4 screenPos = camera.project * camera.view * vec4(prd.hitPos, 1);
+	screenPos = vec4(screenPos.xyz / screenPos.w, 1);
+	float depth = screenPos.z;
+
 	vec4 outColor = vec4(prd.energy, 1);
 	imageStore(PathTracingOut, ivec2(gl_LaunchIDEXT.xy), outColor);
+	imageStore(PathTracingDepthOut, ivec2(gl_LaunchIDEXT.xy), vec4(depth));
 }

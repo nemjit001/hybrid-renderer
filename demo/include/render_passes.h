@@ -10,7 +10,7 @@
 struct CommonResources
 {
 	uint32_t frameIndex;
-	uint32_t subFrameIndex;
+	bool resetHistory;
 	SceneGraph* activeScene;
 	std::unique_ptr<hri::BufferResource> prevCameraUBO;
 	std::unique_ptr<hri::BufferResource> cameraUBO;
@@ -78,7 +78,6 @@ public:
 	struct PushConstantData
 	{
 		HRI_ALIGNAS(4) uint32_t frameIdx;
-		HRI_ALIGNAS(4) uint32_t subFrameIdx;
 	};
 
 public:
@@ -92,8 +91,6 @@ public:
 
 	void recreateResources(VkExtent2D resolution);
 
-	inline VkImageView getRenderResultView() const { return renderResult->view; };
-
 public:
 	raytracing::RayTracingContext& rtContext;
 
@@ -106,6 +103,7 @@ public:
 	std::unique_ptr<hri::DescriptorSetManager> rtDescriptorSet;
 
 	std::unique_ptr<hri::ImageResource> renderResult;
+	std::unique_ptr<hri::ImageResource> renderDepthResult;
 
 protected:
 	VkPipelineLayout m_layout			= VK_NULL_HANDLE;
@@ -257,6 +255,44 @@ public:
 
 	// Pass resources
 	std::unique_ptr<hri::RenderPassResourceManager> passResources;
+
+protected:
+	VkPipelineLayout m_layout = VK_NULL_HANDLE;
+	hri::PipelineStateObject* m_pPSO = nullptr;
+};
+
+class TemporalReprojectPass
+	:
+	public IRenderPass
+{
+public:
+	struct PushConstantData
+	{
+		HRI_ALIGNAS(4) u32 resetHistory;
+		HRI_ALIGNAS(8) hri::Float2 resolution;
+	};
+
+public:
+	TemporalReprojectPass(hri::RenderContext& ctx, hri::ShaderDatabase& shaderDB, hri::DescriptorSetAllocator& descriptorAllocator);
+
+	virtual ~TemporalReprojectPass();
+
+	virtual void prepareFrame(CommonResources& resources) override;
+
+	virtual void drawFrame(hri::ActiveFrame& frame, CommonResources& resources) override;
+
+	void recreateResources(VkExtent2D resolution);
+
+	inline VkImageView getRenderResultView() const { return result[activeFrame]->view; };
+
+public:
+	std::unique_ptr<hri::ImageSampler> passInputSampler;
+	std::unique_ptr<hri::DescriptorSetLayout> inputDescriptorSetLayout;
+	std::unique_ptr<hri::DescriptorSetManager> inputDescriptorSet;
+
+	u32 activeFrame = 0;
+	std::unique_ptr<hri::ImageResource> reprojectHistory;
+	std::unique_ptr<hri::ImageResource> result[2];
 
 protected:
 	VkPipelineLayout m_layout = VK_NULL_HANDLE;

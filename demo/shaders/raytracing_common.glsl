@@ -6,7 +6,6 @@
 #define RAYTRACE_RANGE_TMAX			1e30
 #define RAYTRACE_MASK_BITS			8
 
-#define REPROJECT_PLANE_DIST		1e-2
 #define REPROJECT_DELTA_THRESHOLD	1e-2
 
 #define RT_PI		3.14159265358979323846264
@@ -24,7 +23,6 @@
 struct FrameInfo
 {
 	uint frameIndex;
-	uint subFrameIndex;
 };
 
 struct HybridInitialHit
@@ -103,53 +101,6 @@ Material getMaterialFromGBuffer(
 	);
 
 	return material;
-}
-
-/// --- Reproject functions
-
-bool uvWithinRange(vec2 UV)
-{
-	return UV.x >= 0.0 && UV.x <= 1.0 && UV.y >= 0.0 && UV.y <= 1.0;
-}
-
-vec3 screenToWorldSpace(Camera cam, vec2 uv, float depth)
-{
-	const mat4 invProj = inverse(cam.project);
-	const mat4 invView = inverse(cam.view);
-	vec2 ndc = 2.0 * uv - 1.0;
-
-	vec4 rayDirection = invProj * vec4(ndc, 1, 1);
-	vec3 dir = vec3(invView * vec4(normalize(rayDirection.xyz), 0));
-
-	return cam.position + dir * depth;
-}
-
-vec2 worldToScreenSpace(Camera cam, vec3 worldPos)
-{
-	vec4 pos = cam.project * cam.view * vec4(worldPos, 1);
-	pos = vec4(pos.xyz / pos.w, 1);
-
-    return vec2(pos.x, pos.y);
-}
-
-vec2 calculateMotionVector(Camera prevCamera, Camera currCamera, vec3 worldPos, float aspectRatio)
-{
-	vec2 prevPos = worldToScreenSpace(prevCamera, worldPos);
-	prevPos.x /= aspectRatio;
-
-	vec2 currPos = worldToScreenSpace(currCamera, worldPos);	
-	currPos.x /= aspectRatio;
-
-	return prevPos - currPos;
-}
-
-// Simple plane distance reproject check based on https://diharaw.github.io/post/adventures_in_hybrid_rendering/
-bool reprojectValid(vec3 currPos, vec3 prevPos, vec3 currNormal)
-{
-	vec3 prevToCur = currPos - prevPos;
-	float planeDistance = abs(dot(prevToCur, currNormal));
-
-	return planeDistance < REPROJECT_PLANE_DIST || length(prevToCur) < REPROJECT_DELTA_THRESHOLD;
 }
 
 /// --- Random walk functions

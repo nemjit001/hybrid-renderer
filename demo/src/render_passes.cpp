@@ -157,14 +157,14 @@ PathTracingPass::PathTracingPass(raytracing::RayTracingContext& ctx, hri::Shader
 	hri::DescriptorSetLayoutBuilder sceneDescriptorSetLayoutBuilder(context);
 	sceneDescriptorSetLayoutBuilder
 		.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
-		.addBinding(1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
-		.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR)
-		.addBinding(3, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
+		.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR)
+		.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
 
 	hri::DescriptorSetLayoutBuilder rtDescriptorSetLayoutBuilder(context);
 	rtDescriptorSetLayoutBuilder
 		.addBinding(0, VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR)
-		.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR);
+		.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
+		.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR);
 
 	sceneDescriptorSetLayout = std::make_unique<hri::DescriptorSetLayout>(sceneDescriptorSetLayoutBuilder.build());
 	rtDescriptorSetLayout = std::make_unique<hri::DescriptorSetLayout>(rtDescriptorSetLayoutBuilder.build());
@@ -205,15 +205,10 @@ PathTracingPass::~PathTracingPass()
 
 void PathTracingPass::prepareFrame(CommonResources& resources)
 {
-	VkDescriptorBufferInfo currCameraInfo = VkDescriptorBufferInfo{};
-	currCameraInfo.buffer = resources.cameraUBO->buffer;
-	currCameraInfo.offset = 0;
-	currCameraInfo.range = resources.cameraUBO->bufferSize;
-
-	VkDescriptorBufferInfo prevCameraInfo = VkDescriptorBufferInfo{};
-	prevCameraInfo.buffer = resources.prevCameraUBO->buffer;
-	prevCameraInfo.offset = 0;
-	prevCameraInfo.range = resources.prevCameraUBO->bufferSize;
+	VkDescriptorBufferInfo cameraInfo = VkDescriptorBufferInfo{};
+	cameraInfo.buffer = resources.cameraUBO->buffer;
+	cameraInfo.offset = 0;
+	cameraInfo.range = resources.cameraUBO->bufferSize;
 
 	VkDescriptorBufferInfo instanceInfo = VkDescriptorBufferInfo{};
 	instanceInfo.buffer = resources.instanceDataSSBO->buffer;
@@ -226,10 +221,9 @@ void PathTracingPass::prepareFrame(CommonResources& resources)
 	materialInfo.range = resources.materialSSBO->bufferSize;
 
 	(*sceneDescriptorSet)
-		.writeBuffer(0, &currCameraInfo)
-		.writeBuffer(1, &prevCameraInfo)
-		.writeBuffer(2, &instanceInfo)
-		.writeBuffer(3, &materialInfo)
+		.writeBuffer(0, &cameraInfo)
+		.writeBuffer(1, &instanceInfo)
+		.writeBuffer(2, &materialInfo)
 		.flush();
 
 	VkWriteDescriptorSetAccelerationStructureKHR tlasWrite = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR };
@@ -241,9 +235,15 @@ void PathTracingPass::prepareFrame(CommonResources& resources)
 	renderResultInfo.imageView = renderResult->view;
 	renderResultInfo.sampler = VK_NULL_HANDLE;
 
+	VkDescriptorImageInfo renderDepthResultInfo = VkDescriptorImageInfo{};
+	renderDepthResultInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+	renderDepthResultInfo.imageView = renderDepthResult->view;
+	renderDepthResultInfo.sampler = VK_NULL_HANDLE;
+
 	(*rtDescriptorSet)
 		.writeEXT(0, &tlasWrite)
 		.writeImage(1, &renderResultInfo)
+		.writeImage(2, &renderDepthResultInfo)
 		.flush();
 }
 
@@ -265,7 +265,10 @@ void PathTracingPass::drawFrame(hri::ActiveFrame& frame, CommonResources& resour
 	renderResultBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
 	renderResultBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
 
-	frame.pipelineBarrier({ renderResultBarrier });
+	VkImageMemoryBarrier2 renderDepthResultBarrier = renderResultBarrier;
+	renderDepthResultBarrier.image = renderDepthResult->image;
+
+	frame.pipelineBarrier({ renderResultBarrier, renderDepthResultBarrier });
 
 	VkStridedDeviceAddressRegionKHR raygen = m_SBT->getRegion(raytracing::ShaderBindingTable::SGRayGen);
 	VkStridedDeviceAddressRegionKHR miss = m_SBT->getRegion(raytracing::ShaderBindingTable::SGMiss);
@@ -274,7 +277,6 @@ void PathTracingPass::drawFrame(hri::ActiveFrame& frame, CommonResources& resour
 
 	PushConstantData pushConstants = PushConstantData{};
 	pushConstants.frameIdx = resources.frameIndex;
-	pushConstants.subFrameIdx = resources.subFrameIndex;
 
 	vkCmdPushConstants(
 		frame.commandBuffer,
@@ -316,7 +318,11 @@ void PathTracingPass::drawFrame(hri::ActiveFrame& frame, CommonResources& resour
 	renderResultBarrier.dstAccessMask = VK_ACCESS_2_MEMORY_READ_BIT;
 	renderResultBarrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
 	renderResultBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-	frame.pipelineBarrier({ renderResultBarrier });
+
+	renderDepthResultBarrier = renderResultBarrier;
+	renderDepthResultBarrier.image = renderDepthResult->image;
+
+	frame.pipelineBarrier({ renderResultBarrier, renderDepthResultBarrier });
 
 	debug.cmdRecordEndTimestamp(frame.commandBuffer);
 	debug.cmdEndLabel(frame.commandBuffer);
@@ -336,7 +342,20 @@ void PathTracingPass::recreateResources(VkExtent2D resolution)
 		| VK_IMAGE_USAGE_SAMPLED_BIT
 	));
 
+	renderDepthResult = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
+		context,
+		VK_IMAGE_TYPE_2D,
+		VK_FORMAT_R32_SFLOAT,
+		VK_SAMPLE_COUNT_1_BIT,
+		VkExtent3D{ resolution.width, resolution.height, 1 },
+		1,
+		1,
+		VK_IMAGE_USAGE_STORAGE_BIT
+		| VK_IMAGE_USAGE_SAMPLED_BIT
+	));
+
 	renderResult->createView(VK_IMAGE_VIEW_TYPE_2D, hri::ImageResource::DefaultComponentMapping(), hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1));
+	renderDepthResult->createView(VK_IMAGE_VIEW_TYPE_2D, hri::ImageResource::DefaultComponentMapping(), hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1));
 }
 
 // --- GBUFFER LAYOUT PASS ---
@@ -1226,6 +1245,183 @@ void DeferredShadingPass::drawFrame(hri::ActiveFrame& frame, CommonResources& re
 	memoryBarrier.srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
 	memoryBarrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
 	frame.pipelineBarrier({ memoryBarrier });
+}
+
+// --- TEMPORAL REPROJECT PASS ---
+
+TemporalReprojectPass::TemporalReprojectPass(hri::RenderContext& ctx, hri::ShaderDatabase& shaderDB, hri::DescriptorSetAllocator& descriptorAllocator)
+	:
+	IRenderPass(ctx)
+{
+	recreateResources(context.swapchain.extent);
+
+	passInputSampler = std::unique_ptr<hri::ImageSampler>(new hri::ImageSampler(context));
+
+	hri::DescriptorSetLayoutBuilder inputDescriptorSetLayoutBuilder(context);
+	inputDescriptorSetLayoutBuilder
+		.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT)
+		.addBinding(1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT)
+		.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+		.addBinding(3, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+		.addBinding(4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+		.addBinding(5, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
+		.addBinding(6, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT);
+
+	inputDescriptorSetLayout = std::make_unique<hri::DescriptorSetLayout>(inputDescriptorSetLayoutBuilder.build());
+	inputDescriptorSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(context, descriptorAllocator, *inputDescriptorSetLayout));
+
+	hri::PipelineLayoutBuilder layoutBuilder(context);
+	m_layout = layoutBuilder
+		.addPushConstant(sizeof(TemporalReprojectPass::PushConstantData), VK_SHADER_STAGE_COMPUTE_BIT)
+		.addDescriptorSetLayout(*inputDescriptorSetLayout)
+		.build();
+
+	shaderDB.registerShader("TemporalReprojectCompute", hri::Shader::loadFile(context, "shaders/temporal_reproject.comp.spv", VK_SHADER_STAGE_COMPUTE_BIT));
+	m_pPSO = shaderDB.createPipeline("TemporalReprojectComputePipeline", "TemporalReprojectCompute", m_layout);
+}
+
+TemporalReprojectPass::~TemporalReprojectPass()
+{
+	vkDestroyPipelineLayout(context.device, m_layout, nullptr);
+}
+
+void TemporalReprojectPass::prepareFrame(CommonResources& resources)
+{
+	VkDescriptorBufferInfo currCamInfo = VkDescriptorBufferInfo{};
+	currCamInfo.buffer = resources.cameraUBO->buffer;
+	currCamInfo.offset = 0;
+	currCamInfo.range = resources.cameraUBO->bufferSize;
+
+	VkDescriptorBufferInfo prevCamInfo = VkDescriptorBufferInfo{};
+	prevCamInfo.buffer = resources.prevCameraUBO->buffer;
+	prevCamInfo.offset = 0;
+	prevCamInfo.range = resources.prevCameraUBO->bufferSize;
+
+	VkDescriptorImageInfo prevFrameInfo = VkDescriptorImageInfo{};
+	prevFrameInfo.imageView = result[(activeFrame + 1) % 2]->view;
+	prevFrameInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+	prevFrameInfo.sampler = VK_NULL_HANDLE;
+
+	VkDescriptorImageInfo currFrameInfo = VkDescriptorImageInfo{};
+	currFrameInfo.imageView = result[activeFrame]->view;
+	currFrameInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+	currFrameInfo.sampler = VK_NULL_HANDLE;
+
+	VkDescriptorImageInfo reprojectInfo = VkDescriptorImageInfo{};
+	reprojectInfo.imageView = reprojectHistory->view;
+	reprojectInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+	reprojectInfo.sampler = VK_NULL_HANDLE;
+
+	(*inputDescriptorSet)
+		.writeBuffer(0, &currCamInfo)
+		.writeBuffer(1, &prevCamInfo)
+		.writeImage(2, &prevFrameInfo)
+		.writeImage(3, &currFrameInfo)
+		.writeImage(4, &reprojectInfo)
+		.flush();
+}
+
+void TemporalReprojectPass::drawFrame(hri::ActiveFrame& frame, CommonResources& resources)
+{
+	debug.resetTimer();
+	debug.cmdBeginLabel(frame.commandBuffer, "Temporal Reproject Pass");
+	debug.cmdRecordStartTimestamp(frame.commandBuffer);
+
+	VkExtent2D extent = context.swapchain.extent;
+	PushConstantData pushConstant = PushConstantData{};
+	pushConstant.resetHistory = resources.resetHistory;
+	pushConstant.resolution = hri::Float2((float)extent.width, (float)extent.height);
+
+	VkImageMemoryBarrier2 renderResultBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
+	renderResultBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT_KHR;
+	renderResultBarrier.dstStageMask = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT_KHR;
+	renderResultBarrier.srcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT;
+	renderResultBarrier.dstAccessMask = VK_ACCESS_2_MEMORY_READ_BIT;
+	renderResultBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	renderResultBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	renderResultBarrier.image = result[activeFrame]->image;
+	renderResultBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	renderResultBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+	renderResultBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
+
+	VkImageMemoryBarrier2 prevResultBarrier = renderResultBarrier;
+	prevResultBarrier.image = result[(activeFrame + 1) % 2]->image;
+
+	VkImageMemoryBarrier2 reprojectHistoryBarrier = renderResultBarrier;
+	reprojectHistoryBarrier.image = reprojectHistory->image;
+
+	frame.pipelineBarrier({ renderResultBarrier, prevResultBarrier, reprojectHistoryBarrier });
+
+	vkCmdPushConstants(
+		frame.commandBuffer,
+		m_layout,
+		VK_SHADER_STAGE_COMPUTE_BIT,
+		0, sizeof(TemporalReprojectPass::PushConstantData),
+		&pushConstant
+	);
+
+	vkCmdBindDescriptorSets(
+		frame.commandBuffer,
+		m_pPSO->bindPoint,
+		m_layout,
+		0, 1, &inputDescriptorSet->set,
+		0, nullptr
+	);
+
+	vkCmdBindPipeline(
+		frame.commandBuffer,
+		m_pPSO->bindPoint,
+		m_pPSO->pipeline
+	);
+
+	vkCmdDispatch(frame.commandBuffer, extent.width, extent.height, 1);
+
+	renderResultBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT_KHR;
+	renderResultBarrier.dstStageMask = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT_KHR;
+	renderResultBarrier.srcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT;
+	renderResultBarrier.dstAccessMask = VK_ACCESS_2_MEMORY_READ_BIT;
+	renderResultBarrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+	renderResultBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	frame.pipelineBarrier({ renderResultBarrier });
+
+	debug.cmdRecordEndTimestamp(frame.commandBuffer);
+	debug.cmdEndLabel(frame.commandBuffer);
+	activeFrame = (activeFrame + 1) % 2;
+}
+
+void TemporalReprojectPass::recreateResources(VkExtent2D resolution)
+{
+	// Create rproject history storage
+	reprojectHistory = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
+		context,
+		VK_IMAGE_TYPE_2D,
+		VK_FORMAT_R32G32_SFLOAT,
+		VK_SAMPLE_COUNT_1_BIT,
+		VkExtent3D{ resolution.width, resolution.height, 1 },
+		1,
+		1,
+		VK_IMAGE_USAGE_STORAGE_BIT
+	));
+
+	reprojectHistory->createView(VK_IMAGE_VIEW_TYPE_2D, hri::ImageResource::DefaultComponentMapping(), hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1));
+
+	// Create reproject frame storage
+	for (u32 i = 0; i < HRI_SIZEOF_ARRAY(result); i++)
+	{
+		result[i] = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
+			context,
+			VK_IMAGE_TYPE_2D,
+			VK_FORMAT_R32G32B32A32_SFLOAT,
+			VK_SAMPLE_COUNT_1_BIT,
+			VkExtent3D{ resolution.width, resolution.height, 1 },
+			1,
+			1,
+			VK_IMAGE_USAGE_STORAGE_BIT
+			| VK_IMAGE_USAGE_SAMPLED_BIT
+		));
+
+		result[i]->createView(VK_IMAGE_VIEW_TYPE_2D, hri::ImageResource::DefaultComponentMapping(), hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1));
+	}
 }
 
 // --- PRESENT PASS ---

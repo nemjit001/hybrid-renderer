@@ -27,6 +27,7 @@ private:
 
 public:
 	bool usePathTracer = true;
+	bool resetHistory = false;
 
 private:
 	hri::RenderContext& m_context;
@@ -41,7 +42,6 @@ private:
 
 	// Renderer state
 	uint32_t m_frameCounter;
-	uint32_t m_subFrameCounter;
 	hri::Camera m_prevCamera;
 	hri::Camera& m_camera;
 	SceneGraph& m_activeScene;
@@ -54,6 +54,7 @@ private:
 	std::unique_ptr<GBufferSamplePass> m_gbufferSamplePass;
 	std::unique_ptr<DirectIlluminationPass> m_directIlluminationPass;
 	std::unique_ptr<DeferredShadingPass> m_deferredShadingPass;
+	std::unique_ptr<TemporalReprojectPass> m_temporalReprojectPass;
 	std::unique_ptr<PresentPass> m_presentPass;
 	std::unique_ptr<UIPass> m_uiPass;
 };

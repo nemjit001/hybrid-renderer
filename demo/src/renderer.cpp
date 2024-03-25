@@ -20,7 +20,6 @@ Renderer::Renderer(raytracing::RayTracingContext& ctx, hri::Camera& camera, Scen
 	m_asBuildTimer(m_context),
 	m_accelerationStructureManager(ctx),
 	m_frameCounter(1),
-	m_subFrameCounter(1),
 	m_prevCamera(camera),
 	m_camera(camera),
 	m_activeScene(activeScene)
@@ -59,7 +58,7 @@ void Renderer::prepareFrame()
 	// update instance list & frame resource state
 	auto instances = m_activeScene.generateRenderInstanceList(m_camera);
 	m_frameResources.frameIndex = m_frameCounter;
-	m_frameResources.subFrameIndex = m_subFrameCounter;
+	m_frameResources.resetHistory = resetHistory;
 	m_frameResources.activeScene = &m_activeScene;
 
 	// Copy SSBO & UBO data to buffers and check if TLAS realloc is needed
@@ -82,12 +81,22 @@ void Renderer::prepareFrame()
 	m_computePool.freeCommandBuffer(ASBuildCommands);
 
 	// Prepare pass I/O descriptors
-	VkDescriptorImageInfo renderResultInfo = VkDescriptorImageInfo{};
 	if (usePathTracer)
 	{
-		renderResultInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		renderResultInfo.imageView = m_pathTracingPass->getRenderResultView();
-		renderResultInfo.sampler = m_presentPass->passInputSampler->sampler;
+		VkDescriptorImageInfo temporalResultInfo = VkDescriptorImageInfo{};
+		temporalResultInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		temporalResultInfo.imageView = m_pathTracingPass->renderResult->view;
+		temporalResultInfo.sampler = m_temporalReprojectPass->passInputSampler->sampler;
+
+		VkDescriptorImageInfo temporalDepthInfo = VkDescriptorImageInfo{};
+		temporalDepthInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		temporalDepthInfo.imageView = m_pathTracingPass->renderDepthResult->view;
+		temporalDepthInfo.sampler = m_temporalReprojectPass->passInputSampler->sampler;
+		
+		(*m_temporalReprojectPass->inputDescriptorSet)
+			.writeImage(5, &temporalResultInfo)
+			.writeImage(6, &temporalDepthInfo)
+			.flush();
 	}
 	else
 	{
@@ -163,11 +172,27 @@ void Renderer::prepareFrame()
 			.writeImage(6, &deferredDIInfo)
 			.flush();
 
-		// Set render result descriptors
-		renderResultInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		renderResultInfo.imageView = m_deferredShadingPass->passResources->getAttachmentResource(0).view;
-		renderResultInfo.sampler = m_presentPass->passInputSampler->sampler;
+		VkDescriptorImageInfo temporalResultInfo = VkDescriptorImageInfo{};
+		temporalResultInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		temporalResultInfo.imageView = m_deferredShadingPass->passResources->getAttachmentResource(0).view;
+		temporalResultInfo.sampler = m_temporalReprojectPass->passInputSampler->sampler;
+
+		VkDescriptorImageInfo temporalDepthInfo = VkDescriptorImageInfo{};
+		temporalDepthInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		temporalDepthInfo.imageView = m_gbufferSamplePass->passResources->getAttachmentResource(5).view;
+		temporalDepthInfo.sampler = m_temporalReprojectPass->passInputSampler->sampler;
+
+		(*m_temporalReprojectPass->inputDescriptorSet)
+			.writeImage(5, &temporalResultInfo)
+			.writeImage(6, &temporalDepthInfo)
+			.flush();
 	}
+
+
+	VkDescriptorImageInfo renderResultInfo = VkDescriptorImageInfo{};
+	renderResultInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	renderResultInfo.imageView = m_temporalReprojectPass->getRenderResultView();
+	renderResultInfo.sampler = m_presentPass->passInputSampler->sampler;
 
 	(*m_presentPass->presentDescriptorSet)
 		.writeImage(0, &renderResultInfo)
@@ -180,7 +205,7 @@ void Renderer::prepareFrame()
 	m_gbufferSamplePass->prepareFrame(m_frameResources);
 	m_directIlluminationPass->prepareFrame(m_frameResources);
 	m_deferredShadingPass->prepareFrame(m_frameResources);
-
+	m_temporalReprojectPass->prepareFrame(m_frameResources);
 	m_presentPass->prepareFrame(m_frameResources);
 	m_uiPass->prepareFrame(m_frameResources);
 }
@@ -191,21 +216,23 @@ void Renderer::drawFrame()
 	if (usePathTracer)
 	{
 		printf(
-			"RNGGen: %8.4f ms, PathTracing: %8.4f ms, AS Build %8.4f ms\n",
+			"RNGGen: %8.4f ms, PathTracing: %8.4f ms, Reproject: %8.4f ms, AS Build %8.4f ms\n",
 			m_rngGenPass->debug.timeDelta(),
 			m_pathTracingPass->debug.timeDelta(),
+			m_temporalReprojectPass->debug.timeDelta(),
 			m_asBuildTimer.timeDelta()
 		);
 	}
 	else
 	{
 		printf(
-			"RNGGen: %8.4f ms, GBufLayout: %8.4f ms, GBufSample: %8.4f ms, DI: %8.4f ms, DS: %8.4f ms, AS Build %8.4f ms\n",
+			"RNGGen: %8.4f ms, GBufLayout: %8.4f ms, GBufSample: %8.4f ms, DI: %8.4f ms, DS: %8.4f ms, Reproject: %8.4f ms, AS Build %8.4f ms\n",
 			m_rngGenPass->debug.timeDelta(),
 			m_gbufferLayoutPass->debug.timeDelta(),
 			m_gbufferSamplePass->debug.timeDelta(),
 			m_directIlluminationPass->debug.timeDelta(),
 			m_deferredShadingPass->debug.timeDelta(),
+			m_temporalReprojectPass->debug.timeDelta(),
 			m_asBuildTimer.timeDelta()
 		);
 	}
@@ -231,6 +258,7 @@ void Renderer::drawFrame()
 		m_deferredShadingPass->drawFrame(frame, m_frameResources);
 	}
 
+	m_temporalReprojectPass->drawFrame(frame, m_frameResources);
 	m_presentPass->drawFrame(frame, m_frameResources);
 	m_uiPass->drawFrame(frame, m_frameResources);
 
@@ -238,8 +266,8 @@ void Renderer::drawFrame()
 	m_renderCore.endFrame();
 
 	m_frameCounter += 1;
-	m_subFrameCounter += 1;
 	m_prevCamera = m_camera;
+	resetHistory = false;
 }
 
 void Renderer::initRenderPasses()
@@ -250,6 +278,7 @@ void Renderer::initRenderPasses()
 	m_gbufferSamplePass = std::unique_ptr<GBufferSamplePass>(new GBufferSamplePass(m_context, m_shaderDatabase, m_descriptorSetAllocator));
 	m_directIlluminationPass = std::unique_ptr<DirectIlluminationPass>(new DirectIlluminationPass(m_raytracingContext, m_shaderDatabase, m_descriptorSetAllocator));
 	m_deferredShadingPass = std::unique_ptr<DeferredShadingPass>(new DeferredShadingPass(m_context, m_shaderDatabase, m_descriptorSetAllocator));
+	m_temporalReprojectPass = std::unique_ptr<TemporalReprojectPass>(new TemporalReprojectPass(m_context, m_shaderDatabase, m_descriptorSetAllocator));
 	m_presentPass = std::unique_ptr<PresentPass>(new PresentPass(m_context, m_shaderDatabase, m_descriptorSetAllocator));
 	m_uiPass = std::unique_ptr<UIPass>(new UIPass(m_context, m_descriptorSetAllocator.fixedPool()));
 }
@@ -263,6 +292,7 @@ void Renderer::recreateSwapDependentResources(const vkb::Swapchain& swapchain)
 	m_gbufferSamplePass->passResources->recreateResources();
 	m_directIlluminationPass->recreateResources(swapchain.extent);
 	m_deferredShadingPass->passResources->recreateResources();
+	m_temporalReprojectPass->recreateResources(swapchain.extent);
 	m_presentPass->passResources->recreateResources();
 	m_uiPass->passResources->recreateResources();
 
