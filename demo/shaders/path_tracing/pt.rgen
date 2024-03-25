@@ -6,6 +6,8 @@
 #include "../shader_common.glsl"
 #include "../raytracing_common.glsl"
 
+#define ENABLE_ANTI_ALIASING 1
+
 layout(location = 0) rayPayloadEXT PTRayPayload prd;
 
 layout(set = 0, binding = 0) uniform CURR_CAMERA { Camera currCamera; };
@@ -13,27 +15,12 @@ layout(set = 0, binding = 1) uniform PREV_CAMERA { Camera prevCamera; };
 
 layout(set = 1, binding = 0) uniform accelerationStructureEXT TLAS;
 layout(set = 1, binding = 1, rgba32f) uniform writeonly image2D PathTracingOut;
-layout(set = 1, binding = 2, rgba32f) uniform readonly image2D PreviousFrame;
-layout(set = 1, binding = 3, rgba32f) uniform image2D ReprojectHistory;
-layout(set = 1, binding = 4, rgba32f) uniform image2D Accumulator;
 
 layout(push_constant) uniform FRAME_INFO { FrameInfo frameInfo; };
 
 void main()
 {
-	// Calculate launch & pixel info
 	const uint launchIndex = gl_LaunchIDEXT.x + gl_LaunchIDEXT.y * gl_LaunchSizeEXT.x;
-	const vec2 pixelLocation = gl_LaunchIDEXT.xy;
-	const vec2 pixelCenter = pixelLocation + vec2(0.5);
-	const vec2 inUV = pixelCenter / vec2(gl_LaunchSizeEXT.xy);
-
-	const mat4 invProj = inverse(currCamera.project);
-	const mat4 invView = inverse(currCamera.view);
-	const vec2 ndc = inUV * 2.0 - 1.0;
-
-	vec4 rayDirection = invProj * vec4(ndc, 1, 1);
-	vec3 wPos = vec3(invView * vec4(0, 0, 0, 1));
-	vec3 Wo = vec3(invView * vec4(normalize(rayDirection.xyz), 0));
 
 	// init payload
 	prd.seed = initSeed(launchIndex + frameInfo.frameIndex * 1799);
@@ -41,6 +28,19 @@ void main()
 	prd.rayMask = generateRayMask(prd.seed);
 	prd.energy = vec3(0);
 	prd.transmission = vec3(1);
+
+	// Calculate pixel center & location
+	vec2 pixelLocation = gl_LaunchIDEXT.xy;
+	vec2 pixelCenter = pixelLocation + vec2(0.5);
+
+	vec2 inUV = pixelCenter / vec2(gl_LaunchSizeEXT.xy);
+	mat4 invProj = inverse(currCamera.project);
+	mat4 invView = inverse(currCamera.view);
+	vec2 ndc = inUV * 2.0 - 1.0;
+	
+	vec4 rayDirection = invProj * vec4(ndc, 1, 1);
+	vec3 wPos = vec3(invView * vec4(0, 0, 0, 1));
+	vec3 Wo = vec3(invView * vec4(normalize(rayDirection.xyz), 0));
 
 	traceRayEXT(
 		TLAS,
@@ -55,47 +55,5 @@ void main()
 	);
 	
 	vec4 outColor = vec4(prd.energy, 1);
-	
-	// Simple accumulator system, expects reset on move or world update
-	{
-		vec4 accumulatedColor = imageLoad(Accumulator, ivec2(gl_LaunchIDEXT.xy));
-		imageStore(Accumulator, ivec2(gl_LaunchIDEXT.xy), accumulatedColor + outColor);
-		float alpha = 1.0 / float(frameInfo.subFrameIndex);
-		outColor = (outColor + accumulatedColor) * alpha;
-	}
-
-	// Reproject previous frame results (based on https://www.shadertoy.com/view/ldtGWl)
-	// XXX: does not work correctly :(
-//	{
-//		ivec2 resolution = ivec2(gl_LaunchSizeEXT.xy);
-//		ivec2 pixel = ivec2(inUV * resolution);
-//		float aspectRatio = float(resolution.x) / float(resolution.y);
-//		vec2 motionVector = calculateMotionVector(prevCamera, currCamera, prd.hitPos, aspectRatio);
-//		vec2 reprojectedUV = inUV + motionVector;
-//
-//		vec4 currSample = outColor;
-//		vec4 prevSample = vec4(0);
-//		vec3 prevHitPos = vec3(0);
-//		float historyLength = 1.0;
-//
-//		if (uvWithinRange(reprojectedUV))
-//		{
-//			ivec2 prevPixel = ivec2(reprojectedUV * resolution);
-//			vec4 reprojectHistory = imageLoad(ReprojectHistory, prevPixel);
-//
-//			prevHitPos = screenToWorldSpace(prevCamera, reprojectedUV, reprojectHistory.b);
-//			if (reprojectValid(prd.hitPos, prevHitPos, prd.hitNormal))
-//			{
-//				prevSample = imageLoad(PreviousFrame, prevPixel);
-//				historyLength = reprojectHistory.a + 1.0;
-//			}
-//		}
-//
-//		float rayDepth = length(prd.hitPos - currCamera.position);
-//		imageStore(ReprojectHistory, pixel, vec4(motionVector, rayDepth, historyLength));
-//
-//		outColor = mix(prevSample, currSample, 1.0 / historyLength);
-//	}
-
 	imageStore(PathTracingOut, ivec2(gl_LaunchIDEXT.xy), outColor);
 }

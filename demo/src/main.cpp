@@ -331,7 +331,6 @@ int main()
 		bool cameraUpdated = handleCameraInput(gWindow, gFrameTimer.deltaTime, camera);
 		if (gWindowResized || UIUpdated || cameraUpdated)
 		{
-			renderer.resetAccumulators();
 			camera.parameters.aspectRatio = static_cast<float>(gDisplayWidth) / static_cast<float>(gDisplayHeight);
 			camera.updateMatrices();
 		}

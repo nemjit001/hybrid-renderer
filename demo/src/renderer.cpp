@@ -52,18 +52,6 @@ void Renderer::setVSyncMode(hri::VSyncMode vsyncMode)
 	recreateSwapDependentResources(m_context.swapchain);
 }
 
-void Renderer::resetAccumulators()
-{
-	if (!usePathTracer)	// Only when the path tracer is used should the accumulator be reset
-		return;
-
-	m_renderCore.awaitFrameFinished();
-	m_pathTracingPass->recreateResources(m_context.swapchain.extent);
-
-	m_subFrameCounter = 1;
-	prepareFrame();	// prepare frame resources again
-}
-
 void Renderer::prepareFrame()
 {
 	m_renderCore.awaitFrameFinished();

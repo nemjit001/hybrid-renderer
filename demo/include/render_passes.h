@@ -92,19 +92,20 @@ public:
 
 	void recreateResources(VkExtent2D resolution);
 
-	inline VkImageView getRenderResultView() const { return renderResult[pingPong]->view; };
+	inline VkImageView getRenderResultView() const { return renderResult->view; };
 
 public:
 	raytracing::RayTracingContext& rtContext;
+
+	// set layouts
 	std::unique_ptr<hri::DescriptorSetLayout> sceneDescriptorSetLayout;
 	std::unique_ptr<hri::DescriptorSetLayout> rtDescriptorSetLayout;
+
+	// descriptor sets
 	std::unique_ptr<hri::DescriptorSetManager> sceneDescriptorSet;
 	std::unique_ptr<hri::DescriptorSetManager> rtDescriptorSet;
 
-	bool pingPong;	//< used to swap between render buffers
-	std::unique_ptr<hri::ImageResource> renderResult[2];	//< Used to ping/pong previous frame data
-	std::unique_ptr<hri::ImageResource> reprojectHistory;	//< Used for reprojection
-	std::unique_ptr<hri::ImageResource> accumulator;		//< Used for simple accumulation of resources
+	std::unique_ptr<hri::ImageResource> renderResult;
 
 protected:
 	VkPipelineLayout m_layout			= VK_NULL_HANDLE;

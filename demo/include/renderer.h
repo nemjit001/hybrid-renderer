@@ -16,8 +16,6 @@ public:
 
 	void setVSyncMode(hri::VSyncMode vsyncMode);
 
-	void resetAccumulators();
-
 	void prepareFrame();
 
 	void drawFrame();
