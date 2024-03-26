@@ -35,7 +35,7 @@ void main()
 	}
 	else
 	{	// Hit something, resolve Direct Illumination
-		outColor = DI * albedo;
+		outColor = DI;
 	}
 
 	FragColor = vec4(outColor, 1);

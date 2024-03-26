@@ -10,7 +10,7 @@
 struct CommonResources
 {
 	uint32_t frameIndex;
-	bool resetHistory;
+	bool accumulate;
 	SceneGraph* activeScene;
 	std::unique_ptr<hri::BufferResource> prevCameraUBO;
 	std::unique_ptr<hri::BufferResource> cameraUBO;
@@ -103,6 +103,7 @@ public:
 	std::unique_ptr<hri::DescriptorSetManager> rtDescriptorSet;
 
 	std::unique_ptr<hri::ImageResource> renderResult;
+	std::unique_ptr<hri::ImageResource> renderNormalResult;
 	std::unique_ptr<hri::ImageResource> renderDepthResult;
 
 protected:
@@ -268,7 +269,7 @@ class TemporalReprojectPass
 public:
 	struct PushConstantData
 	{
-		HRI_ALIGNAS(4) u32 resetHistory;
+		HRI_ALIGNAS(4) uint32_t accumulate;
 		HRI_ALIGNAS(8) hri::Float2 resolution;
 	};
 
@@ -291,6 +292,7 @@ public:
 	std::unique_ptr<hri::DescriptorSetManager> inputDescriptorSet;
 
 	u32 activeFrame = 0;
+	std::unique_ptr<hri::ImageResource> normalHistory;
 	std::unique_ptr<hri::ImageResource> reprojectHistory;
 	std::unique_ptr<hri::ImageResource> result[2];
 

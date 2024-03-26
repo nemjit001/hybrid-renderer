@@ -6,8 +6,6 @@
 #define RAYTRACE_RANGE_TMAX			1e30
 #define RAYTRACE_MASK_BITS			8
 
-#define REPROJECT_DELTA_THRESHOLD	1e-2
-
 #define RT_PI		3.14159265358979323846264
 #define RT_2PI		6.28318530717958647692528
 #define RT_INV_PI	0.31830988618379067153777
@@ -48,8 +46,15 @@ struct DIRayPayload
 {
 	uint seed;
 	uint rayMask;
+	uint lightInstanceID;
 	vec3 energy;
 	vec3 transmission;
+};
+
+struct LightInfo
+{
+	mat4 transform;
+	uint instanceID;
 };
 
 /// --- Common functions

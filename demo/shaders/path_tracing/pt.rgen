@@ -13,8 +13,9 @@ layout(location = 0) rayPayloadEXT PTRayPayload prd;
 layout(set = 0, binding = 0) uniform CAMERA { Camera camera; };
 
 layout(set = 1, binding = 0) uniform accelerationStructureEXT TLAS;
-layout(set = 1, binding = 1, rgba32f) uniform writeonly image2D PathTracingOut;
-layout(set = 1, binding = 2, r32f) uniform writeonly image2D PathTracingDepthOut;
+layout(set = 1, binding = 1, rgba32f)	uniform writeonly image2D PathTracingOut;
+layout(set = 1, binding = 2, rgba32f)	uniform writeonly image2D PathTracingNormalOut;
+layout(set = 1, binding = 3, r32f)		uniform writeonly image2D PathTracingDepthOut;
 
 layout(push_constant) uniform FRAME_INFO { FrameInfo frameInfo; };
 
@@ -60,5 +61,6 @@ void main()
 
 	vec4 outColor = vec4(prd.energy, 1);
 	imageStore(PathTracingOut, ivec2(gl_LaunchIDEXT.xy), outColor);
+	imageStore(PathTracingNormalOut, ivec2(gl_LaunchIDEXT.xy), vec4(prd.hitNormal, 1));
 	imageStore(PathTracingDepthOut, ivec2(gl_LaunchIDEXT.xy), vec4(depth));
 }

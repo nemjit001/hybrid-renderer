@@ -58,7 +58,7 @@ void Renderer::prepareFrame()
 	// update instance list & frame resource state
 	auto instances = m_activeScene.generateRenderInstanceList(m_camera);
 	m_frameResources.frameIndex = m_frameCounter;
-	m_frameResources.resetHistory = resetHistory;
+	m_frameResources.accumulate = useTemporalAccumulation;
 	m_frameResources.activeScene = &m_activeScene;
 
 	// Copy SSBO & UBO data to buffers and check if TLAS realloc is needed
@@ -88,14 +88,20 @@ void Renderer::prepareFrame()
 		temporalResultInfo.imageView = m_pathTracingPass->renderResult->view;
 		temporalResultInfo.sampler = m_temporalReprojectPass->passInputSampler->sampler;
 
+		VkDescriptorImageInfo temporalNormalInfo = VkDescriptorImageInfo{};
+		temporalNormalInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		temporalNormalInfo.imageView = m_pathTracingPass->renderNormalResult->view;
+		temporalNormalInfo.sampler = m_temporalReprojectPass->passInputSampler->sampler;
+
 		VkDescriptorImageInfo temporalDepthInfo = VkDescriptorImageInfo{};
 		temporalDepthInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		temporalDepthInfo.imageView = m_pathTracingPass->renderDepthResult->view;
 		temporalDepthInfo.sampler = m_temporalReprojectPass->passInputSampler->sampler;
 		
 		(*m_temporalReprojectPass->inputDescriptorSet)
-			.writeImage(5, &temporalResultInfo)
-			.writeImage(6, &temporalDepthInfo)
+			.writeImage(6, &temporalResultInfo)
+			.writeImage(7, &temporalNormalInfo)
+			.writeImage(8, &temporalDepthInfo)
 			.flush();
 	}
 	else
@@ -177,14 +183,20 @@ void Renderer::prepareFrame()
 		temporalResultInfo.imageView = m_deferredShadingPass->passResources->getAttachmentResource(0).view;
 		temporalResultInfo.sampler = m_temporalReprojectPass->passInputSampler->sampler;
 
+		VkDescriptorImageInfo temporalNormalInfo = VkDescriptorImageInfo{};
+		temporalNormalInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		temporalNormalInfo.imageView = m_gbufferSamplePass->passResources->getAttachmentResource(4).view;
+		temporalNormalInfo.sampler = m_temporalReprojectPass->passInputSampler->sampler;
+
 		VkDescriptorImageInfo temporalDepthInfo = VkDescriptorImageInfo{};
 		temporalDepthInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		temporalDepthInfo.imageView = m_gbufferSamplePass->passResources->getAttachmentResource(5).view;
 		temporalDepthInfo.sampler = m_temporalReprojectPass->passInputSampler->sampler;
 
 		(*m_temporalReprojectPass->inputDescriptorSet)
-			.writeImage(5, &temporalResultInfo)
-			.writeImage(6, &temporalDepthInfo)
+			.writeImage(6, &temporalResultInfo)
+			.writeImage(7, &temporalNormalInfo)
+			.writeImage(8, &temporalDepthInfo)
 			.flush();
 	}
 
@@ -267,7 +279,6 @@ void Renderer::drawFrame()
 
 	m_frameCounter += 1;
 	m_prevCamera = m_camera;
-	resetHistory = false;
 }
 
 void Renderer::initRenderPasses()

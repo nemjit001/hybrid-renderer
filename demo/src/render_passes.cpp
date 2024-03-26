@@ -164,7 +164,8 @@ PathTracingPass::PathTracingPass(raytracing::RayTracingContext& ctx, hri::Shader
 	rtDescriptorSetLayoutBuilder
 		.addBinding(0, VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR)
 		.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
-		.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR);
+		.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
+		.addBinding(3, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR);
 
 	sceneDescriptorSetLayout = std::make_unique<hri::DescriptorSetLayout>(sceneDescriptorSetLayoutBuilder.build());
 	rtDescriptorSetLayout = std::make_unique<hri::DescriptorSetLayout>(rtDescriptorSetLayoutBuilder.build());
@@ -235,6 +236,11 @@ void PathTracingPass::prepareFrame(CommonResources& resources)
 	renderResultInfo.imageView = renderResult->view;
 	renderResultInfo.sampler = VK_NULL_HANDLE;
 
+	VkDescriptorImageInfo renderNormalResultInfo = VkDescriptorImageInfo{};
+	renderNormalResultInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+	renderNormalResultInfo.imageView = renderNormalResult->view;
+	renderNormalResultInfo.sampler = VK_NULL_HANDLE;
+
 	VkDescriptorImageInfo renderDepthResultInfo = VkDescriptorImageInfo{};
 	renderDepthResultInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 	renderDepthResultInfo.imageView = renderDepthResult->view;
@@ -243,7 +249,8 @@ void PathTracingPass::prepareFrame(CommonResources& resources)
 	(*rtDescriptorSet)
 		.writeEXT(0, &tlasWrite)
 		.writeImage(1, &renderResultInfo)
-		.writeImage(2, &renderDepthResultInfo)
+		.writeImage(2, &renderNormalResultInfo)
+		.writeImage(3, &renderDepthResultInfo)
 		.flush();
 }
 
@@ -265,10 +272,13 @@ void PathTracingPass::drawFrame(hri::ActiveFrame& frame, CommonResources& resour
 	renderResultBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
 	renderResultBarrier.subresourceRange = hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
 
+	VkImageMemoryBarrier2 renderNormalResultBarrier = renderResultBarrier;
+	renderNormalResultBarrier.image = renderNormalResult->image;
+
 	VkImageMemoryBarrier2 renderDepthResultBarrier = renderResultBarrier;
 	renderDepthResultBarrier.image = renderDepthResult->image;
 
-	frame.pipelineBarrier({ renderResultBarrier, renderDepthResultBarrier });
+	frame.pipelineBarrier({ renderResultBarrier, renderNormalResultBarrier, renderDepthResultBarrier });
 
 	VkStridedDeviceAddressRegionKHR raygen = m_SBT->getRegion(raytracing::ShaderBindingTable::SGRayGen);
 	VkStridedDeviceAddressRegionKHR miss = m_SBT->getRegion(raytracing::ShaderBindingTable::SGMiss);
@@ -319,10 +329,13 @@ void PathTracingPass::drawFrame(hri::ActiveFrame& frame, CommonResources& resour
 	renderResultBarrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
 	renderResultBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
+	renderNormalResultBarrier = renderResultBarrier;
+	renderNormalResultBarrier.image = renderNormalResult->image;
+
 	renderDepthResultBarrier = renderResultBarrier;
 	renderDepthResultBarrier.image = renderDepthResult->image;
 
-	frame.pipelineBarrier({ renderResultBarrier, renderDepthResultBarrier });
+	frame.pipelineBarrier({ renderResultBarrier, renderNormalResultBarrier, renderDepthResultBarrier });
 
 	debug.cmdRecordEndTimestamp(frame.commandBuffer);
 	debug.cmdEndLabel(frame.commandBuffer);
@@ -331,6 +344,18 @@ void PathTracingPass::drawFrame(hri::ActiveFrame& frame, CommonResources& resour
 void PathTracingPass::recreateResources(VkExtent2D resolution)
 {
 	renderResult = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
+		context,
+		VK_IMAGE_TYPE_2D,
+		VK_FORMAT_R32G32B32A32_SFLOAT,
+		VK_SAMPLE_COUNT_1_BIT,
+		VkExtent3D{ resolution.width, resolution.height, 1 },
+		1,
+		1,
+		VK_IMAGE_USAGE_STORAGE_BIT
+		| VK_IMAGE_USAGE_SAMPLED_BIT
+	));
+
+	renderNormalResult = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
 		context,
 		VK_IMAGE_TYPE_2D,
 		VK_FORMAT_R32G32B32A32_SFLOAT,
@@ -355,6 +380,7 @@ void PathTracingPass::recreateResources(VkExtent2D resolution)
 	));
 
 	renderResult->createView(VK_IMAGE_VIEW_TYPE_2D, hri::ImageResource::DefaultComponentMapping(), hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1));
+	renderNormalResult->createView(VK_IMAGE_VIEW_TYPE_2D, hri::ImageResource::DefaultComponentMapping(), hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1));
 	renderDepthResult->createView(VK_IMAGE_VIEW_TYPE_2D, hri::ImageResource::DefaultComponentMapping(), hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1));
 }
 
@@ -959,8 +985,8 @@ DirectIlluminationPass::DirectIlluminationPass(raytracing::RayTracingContext& ct
 		.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
 		.addBinding(1, VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
 		.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
-		.addBinding(3, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR)
-		.addBinding(4, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
+		.addBinding(3, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_MISS_BIT_KHR)
+		.addBinding(4, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_MISS_BIT_KHR);
 
 	gbufferDataDescriptorSetLayout = std::make_unique<hri::DescriptorSetLayout>(gbufferDataDescriptorSetLayoutBuilder.build());
 	rtDescriptorSetLayout = std::make_unique<hri::DescriptorSetLayout>(rtDescriptorSetLayoutBuilder.build());
@@ -977,16 +1003,13 @@ DirectIlluminationPass::DirectIlluminationPass(raytracing::RayTracingContext& ct
 
 	hri::Shader* pRayGen = shaderDB.registerShader("DIRayGen", hri::Shader::loadFile(context, "shaders/di.rgen.spv", VK_SHADER_STAGE_RAYGEN_BIT_KHR));
 	hri::Shader* pMiss = shaderDB.registerShader("DIMiss", hri::Shader::loadFile(context, "shaders/di.rmiss.spv", VK_SHADER_STAGE_MISS_BIT_KHR));
-	hri::Shader* pCHit = shaderDB.registerShader("DICHit", hri::Shader::loadFile(context, "shaders/di.rchit.spv", VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR));
 
 	raytracing::RayTracingPipelineBuilder pipelineBuilder(rtContext);
 	pipelineBuilder
 		.addShaderStage(pRayGen->stage, pRayGen->module)
 		.addShaderStage(pMiss->stage, pMiss->module)
-		.addShaderStage(pCHit->stage, pCHit->module)
 		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR, 0)
 		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR, 1)
-		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR, VK_SHADER_UNUSED_KHR, 2)
 		.setMaxRecursionDepth()
 		.setLayout(m_layout);
 
@@ -1255,7 +1278,7 @@ TemporalReprojectPass::TemporalReprojectPass(hri::RenderContext& ctx, hri::Shade
 {
 	recreateResources(context.swapchain.extent);
 
-	passInputSampler = std::unique_ptr<hri::ImageSampler>(new hri::ImageSampler(context));
+	passInputSampler = std::unique_ptr<hri::ImageSampler>(new hri::ImageSampler(context, VK_FILTER_LINEAR, VK_FILTER_LINEAR));
 
 	hri::DescriptorSetLayoutBuilder inputDescriptorSetLayoutBuilder(context);
 	inputDescriptorSetLayoutBuilder
@@ -1264,8 +1287,10 @@ TemporalReprojectPass::TemporalReprojectPass(hri::RenderContext& ctx, hri::Shade
 		.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 		.addBinding(3, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 		.addBinding(4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-		.addBinding(5, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
-		.addBinding(6, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT);
+		.addBinding(5, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+		.addBinding(6, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
+		.addBinding(7, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
+		.addBinding(8, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT);
 
 	inputDescriptorSetLayout = std::make_unique<hri::DescriptorSetLayout>(inputDescriptorSetLayoutBuilder.build());
 	inputDescriptorSet = std::unique_ptr<hri::DescriptorSetManager>(new hri::DescriptorSetManager(context, descriptorAllocator, *inputDescriptorSetLayout));
@@ -1307,6 +1332,11 @@ void TemporalReprojectPass::prepareFrame(CommonResources& resources)
 	currFrameInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 	currFrameInfo.sampler = VK_NULL_HANDLE;
 
+	VkDescriptorImageInfo normalHistoryInfo = VkDescriptorImageInfo{};
+	normalHistoryInfo.imageView = normalHistory->view;
+	normalHistoryInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+	normalHistoryInfo.sampler = VK_NULL_HANDLE;
+
 	VkDescriptorImageInfo reprojectInfo = VkDescriptorImageInfo{};
 	reprojectInfo.imageView = reprojectHistory->view;
 	reprojectInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
@@ -1317,7 +1347,8 @@ void TemporalReprojectPass::prepareFrame(CommonResources& resources)
 		.writeBuffer(1, &prevCamInfo)
 		.writeImage(2, &prevFrameInfo)
 		.writeImage(3, &currFrameInfo)
-		.writeImage(4, &reprojectInfo)
+		.writeImage(4, &normalHistoryInfo)
+		.writeImage(5, &reprojectInfo)
 		.flush();
 }
 
@@ -1329,7 +1360,7 @@ void TemporalReprojectPass::drawFrame(hri::ActiveFrame& frame, CommonResources& 
 
 	VkExtent2D extent = context.swapchain.extent;
 	PushConstantData pushConstant = PushConstantData{};
-	pushConstant.resetHistory = resources.resetHistory;
+	pushConstant.accumulate = resources.accumulate;
 	pushConstant.resolution = hri::Float2((float)extent.width, (float)extent.height);
 
 	VkImageMemoryBarrier2 renderResultBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
@@ -1347,10 +1378,13 @@ void TemporalReprojectPass::drawFrame(hri::ActiveFrame& frame, CommonResources& 
 	VkImageMemoryBarrier2 prevResultBarrier = renderResultBarrier;
 	prevResultBarrier.image = result[(activeFrame + 1) % 2]->image;
 
+	VkImageMemoryBarrier2 normalHistoryBarrier = renderResultBarrier;
+	normalHistoryBarrier.image = normalHistory->image;
+
 	VkImageMemoryBarrier2 reprojectHistoryBarrier = renderResultBarrier;
 	reprojectHistoryBarrier.image = reprojectHistory->image;
 
-	frame.pipelineBarrier({ renderResultBarrier, prevResultBarrier, reprojectHistoryBarrier });
+	frame.pipelineBarrier({ renderResultBarrier, prevResultBarrier, normalHistoryBarrier, reprojectHistoryBarrier });
 
 	vkCmdPushConstants(
 		frame.commandBuffer,
@@ -1391,7 +1425,17 @@ void TemporalReprojectPass::drawFrame(hri::ActiveFrame& frame, CommonResources& 
 
 void TemporalReprojectPass::recreateResources(VkExtent2D resolution)
 {
-	// Create rproject history storage
+	normalHistory = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
+		context,
+		VK_IMAGE_TYPE_2D,
+		VK_FORMAT_R32G32B32A32_SFLOAT,
+		VK_SAMPLE_COUNT_1_BIT,
+		VkExtent3D{ resolution.width, resolution.height, 1 },
+		1,
+		1,
+		VK_IMAGE_USAGE_STORAGE_BIT
+	));
+
 	reprojectHistory = std::unique_ptr<hri::ImageResource>(new hri::ImageResource(
 		context,
 		VK_IMAGE_TYPE_2D,
@@ -1403,6 +1447,7 @@ void TemporalReprojectPass::recreateResources(VkExtent2D resolution)
 		VK_IMAGE_USAGE_STORAGE_BIT
 	));
 
+	normalHistory->createView(VK_IMAGE_VIEW_TYPE_2D, hri::ImageResource::DefaultComponentMapping(), hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1));
 	reprojectHistory->createView(VK_IMAGE_VIEW_TYPE_2D, hri::ImageResource::DefaultComponentMapping(), hri::ImageResource::SubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1));
 
 	// Create reproject frame storage

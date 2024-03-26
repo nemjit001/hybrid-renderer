@@ -162,6 +162,7 @@ bool drawConfigWindow(float deltaTime, Renderer& renderer, hri::Camera& camera, 
 		ImGui::SeparatorText("Renderer");
 		static bool test;
 		updated |= ImGui::Checkbox("Use reference Path Tracer", &renderer.usePathTracer);
+		updated |= ImGui::Checkbox("Use temporal accumulation", &renderer.useTemporalAccumulation);
 
 		ImGui::SeparatorText("Scene");
 		updated |= ImGui::DragFloat("LOD Bias", &scene.parameters.lodBias, 0.01f);
@@ -331,9 +332,6 @@ int main()
 		bool cameraUpdated = handleCameraInput(gWindow, gFrameTimer.deltaTime, camera);
 		if (gWindowResized || UIUpdated || cameraUpdated)
 		{
-			if (gWindowResized || UIUpdated)
-				renderer.resetHistory = true;
-
 			camera.parameters.aspectRatio = static_cast<float>(gDisplayWidth) / static_cast<float>(gDisplayHeight);
 			camera.updateMatrices();
 		}

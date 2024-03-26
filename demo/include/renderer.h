@@ -27,7 +27,7 @@ private:
 
 public:
 	bool usePathTracer = true;
-	bool resetHistory = false;
+	bool useTemporalAccumulation = false;
 
 private:
 	hri::RenderContext& m_context;
