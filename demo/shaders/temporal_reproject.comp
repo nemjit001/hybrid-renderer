@@ -110,7 +110,7 @@ void main()
 		if (
 			length(currPos - prevPos) <= REPROJECT_DELTA_THRESHOLD
 			|| planeDistance(currPos, currNormal, prevPos) <= REPROJECT_DELTA_THRESHOLD
-			|| normalDisocclusionFactor(currNormal, prevNormal) <= NORMAL_DISOCCLUSION_THRESHOLD
+			|| (normalDisocclusionFactor(currNormal, prevNormal) <= NORMAL_DISOCCLUSION_THRESHOLD && (currentDepth - prevDepth) < REPROJECT_DELTA_THRESHOLD)
 		)
 		{
 			historyLength = imageLoad(ReprojectHistory, prevPixel).r + 1.0;

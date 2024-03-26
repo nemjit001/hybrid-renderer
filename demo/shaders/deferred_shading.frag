@@ -19,23 +19,23 @@ layout(set = 0, binding = 6) uniform sampler2D DirectIllumination;
 void main()
 {
 // TODO: PBR deferred shading using DI & GBuffer data
-	vec3 DI = texture(DirectIllumination, ScreenUV).rgb;	// DI should be resolved BRDF without albedo
+	vec3 DI = texture(DirectIllumination, ScreenUV).rgb;	// DI should be resolved BRDF
 	vec3 albedo = texture(GBufferAlbedo, ScreenUV).rgb;
 	vec3 emission = texture(GBufferEmission, ScreenUV).rgb;
 	float depth = texture(GBufferDepth, ScreenUV).r;
 
 	vec3 outColor = vec3(1);
 	if (luminance(emission) > 0.0)
-	{	// Hit light
+	{	// Hit light -> overlay light on shading pass
 		outColor = emission;
 	}
 	else if (depth == 1.0)
-	{	// Missed scene entirely
+	{	// Missed scene entirely -> draw sky
 		outColor = SKY_COLOR;
 	}
 	else
 	{	// Hit something, resolve Direct Illumination
-		outColor = DI;
+		outColor = albedo * DI;
 	}
 
 	FragColor = vec4(outColor, 1);

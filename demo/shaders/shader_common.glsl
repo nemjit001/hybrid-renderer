@@ -67,7 +67,7 @@ vec3 depthToWorldPos(mat4 invProject, mat4 invView, vec2 ndc, float depth)
 	return view.xyz;
 }
 
-int generateRayMask(uint seed)
+int generateRayMask(inout uint seed)
 {
 	return 0xFF & (1 << randomRangeU32(seed, 0, INSTANCE_MASK_BITS));
 }

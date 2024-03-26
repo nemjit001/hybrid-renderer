@@ -985,8 +985,8 @@ DirectIlluminationPass::DirectIlluminationPass(raytracing::RayTracingContext& ct
 		.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
 		.addBinding(1, VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
 		.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR)
-		.addBinding(3, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_MISS_BIT_KHR)
-		.addBinding(4, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_MISS_BIT_KHR);
+		.addBinding(3, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR)
+		.addBinding(4, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
 
 	gbufferDataDescriptorSetLayout = std::make_unique<hri::DescriptorSetLayout>(gbufferDataDescriptorSetLayoutBuilder.build());
 	rtDescriptorSetLayout = std::make_unique<hri::DescriptorSetLayout>(rtDescriptorSetLayoutBuilder.build());
@@ -1003,13 +1003,16 @@ DirectIlluminationPass::DirectIlluminationPass(raytracing::RayTracingContext& ct
 
 	hri::Shader* pRayGen = shaderDB.registerShader("DIRayGen", hri::Shader::loadFile(context, "shaders/di.rgen.spv", VK_SHADER_STAGE_RAYGEN_BIT_KHR));
 	hri::Shader* pMiss = shaderDB.registerShader("DIMiss", hri::Shader::loadFile(context, "shaders/di.rmiss.spv", VK_SHADER_STAGE_MISS_BIT_KHR));
+	hri::Shader* pCHit = shaderDB.registerShader("DICHit", hri::Shader::loadFile(context, "shaders/di.rchit.spv", VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR));
 
 	raytracing::RayTracingPipelineBuilder pipelineBuilder(rtContext);
 	pipelineBuilder
 		.addShaderStage(pRayGen->stage, pRayGen->module)
 		.addShaderStage(pMiss->stage, pMiss->module)
+		.addShaderStage(pCHit->stage, pCHit->module)
 		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR, 0)
 		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR, 1)
+		.addRayTracingShaderGroup(VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR, VK_SHADER_UNUSED_KHR, 2)
 		.setMaxRecursionDepth()
 		.setLayout(m_layout);
 
@@ -1169,13 +1172,13 @@ DeferredShadingPass::DeferredShadingPass(hri::RenderContext& ctx, hri::ShaderDat
 		hri::RenderPassBuilder passBuilder(ctx);
 		passBuilder
 			.addAttachment(
-				VK_FORMAT_R8G8B8A8_SNORM, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				VK_FORMAT_R32G32B32A32_SFLOAT, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 				VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE
 			)
 			.setAttachmentReference(hri::AttachmentType::Color, VkAttachmentReference{ 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
 
 		std::vector<hri::RenderAttachmentConfig> attachmentConfigs = {
-			hri::RenderAttachmentConfig{ VK_FORMAT_R8G8B8A8_SNORM, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT },
+			hri::RenderAttachmentConfig{ VK_FORMAT_R32G32B32A32_SFLOAT, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT },
 		};
 
 		passResources = std::make_unique<hri::RenderPassResourceManager>(ctx, passBuilder.build(), attachmentConfigs);

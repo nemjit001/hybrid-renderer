@@ -157,12 +157,12 @@ vec3 evaluateBRDF(vec3 Wi, vec3 Wo, vec3 N, Material material, bool specularEven
 	return material.diffuse * RT_INV_PI;
 }
 
-vec3 evaluareBRDFNoAlbedo(vec3 Wi, vec3 Wo, vec3 N, Material material, bool specularEvent)
+vec3 evaluateBRDFNoAlbedo(vec3 Wi, vec3 Wo, vec3 N, Material material, bool specularEvent)
 {
 	if (specularEvent)
 		return material.specular;
 
-	return vec3(RT_INV_PI);
+	return vec3(1) * RT_INV_PI;
 }
 
 #endif // RT_COMMON_GLSL
