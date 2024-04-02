@@ -7,6 +7,7 @@
 #include "raytracing_common.glsl"
 
 #define REPROJECT_DELTA_THRESHOLD		1e-2
+#define REPROJECT_DISTANCE_THRESHOLD	1e-4
 #define NORMAL_DISOCCLUSION_THRESHOLD	1e-1
 
 layout(set = 0, binding = 0) uniform CURR_CAMERA { Camera currCamera; };
@@ -110,7 +111,7 @@ void main()
 		if (
 			length(currPos - prevPos) <= REPROJECT_DELTA_THRESHOLD
 			|| planeDistance(currPos, currNormal, prevPos) <= REPROJECT_DELTA_THRESHOLD
-			|| (normalDisocclusionFactor(currNormal, prevNormal) <= NORMAL_DISOCCLUSION_THRESHOLD && (currentDepth - prevDepth) < REPROJECT_DELTA_THRESHOLD)
+			|| (normalDisocclusionFactor(currNormal, prevNormal) <= NORMAL_DISOCCLUSION_THRESHOLD && (prevDepth - currentDepth) <= REPROJECT_DISTANCE_THRESHOLD)
 		)
 		{
 			historyLength = imageLoad(ReprojectHistory, prevPixel).r + 1.0;

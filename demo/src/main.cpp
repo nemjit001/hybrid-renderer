@@ -20,9 +20,32 @@
 #endif
 
 #if USE_BENCHMARK_SCENE == 1
-int32_t gBenchMarkMeshCount					= 15;
+
+const int32_t gBenchMarkMeshCount			= 20;
 const char* gBenchMarkMesh					= "assets/armadillo_lod.obj";
 const char* gBenchMarkLods[MAX_LOD_LEVELS]	= { "armadillo01", "armadillo05", "armadillo10" };
+
+const uint32_t gCaptureFrameCount = 500;
+std::vector<hri::Float3> gCamPositions = {
+	hri::Float3( 60.0f, 10.0f,  60.0f),
+	hri::Float3(-60.0f, 10.0f,  60.0f),
+	hri::Float3( 60.0f, 10.0f, -60.0f),
+	hri::Float3(-60.0f, 10.0f, -60.0f),
+	hri::Float3( 60.0f,  1.0f,  60.0f),
+	hri::Float3(-60.0f,  1.0f,  60.0f),
+	hri::Float3( 60.0f,  1.0f, -60.0f),
+	hri::Float3(-60.0f,  1.0f, -60.0f),
+
+	hri::Float3( 20.0f, 10.0f,  20.0f),
+	hri::Float3(-20.0f, 10.0f,  20.0f),
+	hri::Float3( 20.0f, 10.0f, -20.0f),
+	hri::Float3(-20.0f, 10.0f, -20.0f),
+	hri::Float3( 20.0f,  1.0f,  20.0f),
+	hri::Float3(-20.0f,  1.0f,  20.0f),
+	hri::Float3( 20.0f,  1.0f, -20.0f),
+	hri::Float3(-20.0f,  1.0f, -20.0f),
+};
+
 #endif
 
 static Timer gFrameTimer		= Timer();
@@ -76,7 +99,7 @@ SceneGraph loadBenchmarkScene(raytracing::RayTracingContext& ctx)
 		floorNode.name = "Floor";
 		floorNode.transform = SceneTransform{};
 		floorNode.transform.position = hri::Float3(0.0f, 0.0f, 0.0f);
-		floorNode.transform.scale = hri::Float3(50.0f, 1.0f, 50.0f);
+		floorNode.transform.scale = hri::Float3(100.0f, 1.0f, 100.0f);
 		floorNode.material = 1;
 		floorNode.numLods = 1;
 		floorNode.meshLODs[0] = 4;
@@ -85,7 +108,7 @@ SceneGraph loadBenchmarkScene(raytracing::RayTracingContext& ctx)
 		lightNode.name = "Area Light";
 		lightNode.transform = SceneTransform{};
 		lightNode.transform.position = hri::Float3(0.0f, 20.0f, 0.0f);
-		lightNode.transform.scale = hri::Float3(10.0f, 1.0f, 10.0f);
+		lightNode.transform.scale = hri::Float3(15.0f, 1.0f, 15.0f);
 		lightNode.material = 2;
 		lightNode.numLods = 1;
 		lightNode.meshLODs[0] = 3;
@@ -95,9 +118,9 @@ SceneGraph loadBenchmarkScene(raytracing::RayTracingContext& ctx)
 	}
 
 	// Set up benchmark nodes
-	for (int32_t x = -(gBenchMarkMeshCount / 2); x < (gBenchMarkMeshCount / 2) + 1; x++)
+	for (int32_t x = -(gBenchMarkMeshCount / 2); x < (gBenchMarkMeshCount / 2); x++)
 	{
-		for (int32_t y = -(gBenchMarkMeshCount / 2); y < (gBenchMarkMeshCount / 2) + 1; y++)
+		for (int32_t y = -(gBenchMarkMeshCount / 2); y < (gBenchMarkMeshCount / 2); y++)
 		{
 			char buff[64];
 			snprintf(buff, 64, "(%d %d)", x, y);
@@ -305,13 +328,39 @@ int main()
 #else
 	SceneGraph scene = SceneLoader::load(rtContext, "./assets/interior_scene.json");
 #endif
-
 	Renderer renderer = Renderer(rtContext, camera, scene);
 
 	printf("Startup complete\n");
 
+#if DO_BENCHMARK == 1
+	renderer.usePathTracer = BENCHMARK_PATH_TRACER;
+	scene.parameters.transitionInterval = BENCHMARK_T_INTERVAL;
+
+	printf("Running benchmark (Path Tracing %d, T: %5.2f)\n", renderer.usePathTracer, scene.parameters.transitionInterval);
+	uint32_t positionIndex = 0;
+	uint32_t frameIndex = 0;
+#endif
+
 	while (!windowManager.windowShouldClose(gWindow))
 	{
+#if DO_BENCHMARK == 1
+		if (frameIndex % gCaptureFrameCount == 0)
+		{
+			if (positionIndex >= gCamPositions.size())
+				break;
+
+			printf("--- BENCHMARK POSITION %d ---\n", positionIndex);
+
+			camera.position = gCamPositions[positionIndex];
+			camera.forward = hri::normalize(hri::Float3(0.0f) - camera.position);
+			camera.right = hri::normalize(hri::cross(HRI_WORLD_UP, camera.forward));
+			camera.up = hri::normalize(hri::cross(camera.forward, camera.right));
+			camera.parameters.aspectRatio = static_cast<float>(gDisplayWidth) / static_cast<float>(gDisplayHeight);
+			camera.updateMatrices();
+			positionIndex++;
+		}
+#endif
+
 		windowManager.pollEvents();
 		gFrameTimer.tick();
 
@@ -341,6 +390,10 @@ int main()
 
 		// Always set to false, resize dependent things should be handled here
 		gWindowResized = false;
+
+#if DO_BENCHMARK == 1
+		frameIndex++;
+#endif
 	}
 
 	printf("Shutting down\n");

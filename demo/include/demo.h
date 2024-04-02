@@ -13,7 +13,11 @@
 #define SCR_WIDTH				1280
 #define SCR_HEIGHT				720
 #define CAMERA_SPEED			2.0f
-#define USE_BENCHMARK_SCENE		1
+
+#define USE_BENCHMARK_SCENE		0
+#define DO_BENCHMARK			0
+#define BENCHMARK_PATH_TRACER	1
+#define BENCHMARK_T_INTERVAL	1.0f
 
 // Raytracing config
 #define DEMO_DEFAULT_RT_RECURSION_DEPTH		5
