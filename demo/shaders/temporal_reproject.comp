@@ -1,0 +1,127 @@
+#version 450
+
+#extension GL_EXT_ray_tracing : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+
+#include "shader_common.glsl"
+#include "raytracing_common.glsl"
+
+#define REPROJECT_DELTA_THRESHOLD		1e-2
+#define REPROJECT_DISTANCE_THRESHOLD	1e-4
+#define NORMAL_DISOCCLUSION_THRESHOLD	1e-1
+
+layout(set = 0, binding = 0) uniform CURR_CAMERA { Camera currCamera; };
+layout(set = 0, binding = 1) uniform PREV_CAMERA { Camera prevCamera; };
+layout(set = 0, binding = 2, rgba32f) uniform image2D PreviousFrame;
+layout(set = 0, binding = 3, rgba32f) uniform image2D CurrentFrame;
+layout(set = 0, binding = 4, rgba32f) uniform image2D PreviousNormal;
+layout(set = 0, binding = 5, rg32f) uniform image2D ReprojectHistory;
+
+layout(set = 0, binding = 6) uniform sampler2D RenderResult;
+layout(set = 0, binding = 7) uniform sampler2D RenderNormal;
+layout(set = 0, binding = 8) uniform sampler2D RenderDepth;
+
+layout(push_constant) uniform TEMPORAL_INPUT
+{
+	bool accumulate;
+	vec2 resolution;
+};
+
+layout(local_size_x = 1, local_size_y = 1) in;
+
+vec4 screenToWorld(Camera cam, vec2 uv, float depth)
+{
+	vec2 ndc = 2.0 * uv - 1.0;
+	vec3 wPos = depthToWorldPos(inverse(cam.project), inverse(cam.view), ndc, depth);
+	return vec4(wPos, 1);
+}
+
+vec2 reprojectUV(vec2 uv, float depth)
+{
+	vec4 worldPos = screenToWorld(currCamera, uv, depth);
+	vec4 screenPos = prevCamera.project * prevCamera.view * worldPos;
+	screenPos = vec4(screenPos.xy / screenPos.w, 1, 1);
+
+	return 0.5 * screenPos.xy + 0.5;
+}
+
+bool uvValid(vec2 uv)
+{
+	return uv.x >= 0.0 && uv.x < 1.0 && uv.y >= 0.0 && uv.y < 1.0;
+}
+
+// Based on https://www.elopezr.com/temporal-aa-and-the-quest-for-the-holy-trail/
+vec4 colorClamp(vec2 uv, vec4 clampColor)
+{
+	vec4 colorClampEpsilon = vec4(0.15);	// Epsilon to allow noise to converge
+	vec4 minColor = vec4(9999.0);
+	vec4 maxColor = vec4(-9999.0);
+
+	for (int x = -1; x <= 1; x++)
+	{
+		for (int y = -1; y <= 1; y++)
+		{
+			vec2 sampleUV = uv + (vec2(x, y) / resolution);
+			vec4 currColor = texture(RenderResult, sampleUV);
+			minColor = min(currColor, minColor - colorClampEpsilon);
+			maxColor = max(currColor, maxColor + colorClampEpsilon);
+		}
+	}
+
+	return clamp(clampColor, minColor, maxColor);
+}
+
+float planeDistance(vec3 P0, vec3 N, vec3 P1)
+{
+	return abs(dot(P0 - P1, N));
+}
+
+float normalDisocclusionFactor(vec3 N0, vec3 N1)
+{
+	float val = abs(dot(N0, N1));
+	return 1.0 - (val * val);
+}
+
+void main()
+{
+	ivec2 pixel = ivec2(gl_GlobalInvocationID.xy);
+	vec2 pixelCenter = vec2(pixel) + vec2(0.5);
+
+	vec2 currUV = pixelCenter / resolution;
+	float currentDepth = texture(RenderDepth, currUV).r;
+	vec3 currNormal = normalize(texture(RenderNormal, currUV).rgb);
+	vec2 prevUV = reprojectUV(currUV, currentDepth);
+
+	ivec2 prevPixel = ivec2(prevUV * resolution);
+	vec4 prevSample = vec4(0);
+	vec4 currSample = texture(RenderResult, currUV);
+	
+	float historyLength = 1.0;
+	if (accumulate && uvValid(prevUV))
+	{
+		float prevDepth = imageLoad(ReprojectHistory, prevPixel).g;
+		vec3 prevNormal = normalize(imageLoad(PreviousNormal, prevPixel).rgb);
+		prevSample = imageLoad(PreviousFrame, prevPixel);
+		prevSample = colorClamp(currUV, prevSample);
+
+		vec3 currPos = screenToWorld(currCamera, currUV, currentDepth).xyz;
+		vec3 prevPos = screenToWorld(prevCamera, prevUV, prevDepth).xyz;
+
+		// Reproject check based on https://www.shadertoy.com/view/ldtGWl, https://diharaw.github.io/post/adventures_in_hybrid_rendering/
+		if (
+			length(currPos - prevPos) <= REPROJECT_DELTA_THRESHOLD
+			|| planeDistance(currPos, currNormal, prevPos) <= REPROJECT_DELTA_THRESHOLD
+			|| (normalDisocclusionFactor(currNormal, prevNormal) <= NORMAL_DISOCCLUSION_THRESHOLD && (prevDepth - currentDepth) <= REPROJECT_DISTANCE_THRESHOLD)
+		)
+		{
+			historyLength = imageLoad(ReprojectHistory, prevPixel).r + 1.0;
+		}
+	}
+
+	float alpha = 1.0 / historyLength;
+	vec4 outSample = mix(prevSample, currSample, alpha);
+	
+	imageStore(CurrentFrame, pixel, outSample);
+	imageStore(PreviousNormal, pixel, vec4(currNormal, 1));
+	imageStore(ReprojectHistory, pixel, vec4(historyLength, currentDepth, 0, 0));
+}

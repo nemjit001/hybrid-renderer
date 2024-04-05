@@ -5,52 +5,7 @@
 
 #include "detail/raytracing.h"
 #include "scene.h"
-#include "subsystems.h"
-
-/// @brief The Renderer Frame Data structure contains per frame data for rendering.
-struct RendererFrameData
-{
-	// Per frame resources
-	std::unique_ptr<hri::BufferResource> cameraUBO;
-	std::unique_ptr<raytracing::AccelerationStructure> tlas;
-	std::vector<raytracing::AccelerationStructure> blasList;
-
-	// Descriptor sets
-	std::unique_ptr<hri::DescriptorSetManager> sceneDataSet;
-	std::unique_ptr<hri::DescriptorSetManager> raytracingSet;
-	std::unique_ptr<hri::DescriptorSetManager> presentInputSet;
-};
-
-enum SceneDataBindings
-{
-	Camera,
-	RenderInstanceData,
-	MaterialData,
-};
-
-enum RayTracingBindings
-{
-	Tlas,
-	GBufferAlbedo,
-	GBufferEmission,
-	GBufferMatSpecular,
-	GBufferMatTransmittance,
-	GBufferNormal,
-	GBufferDepth,
-	SoftShadowOutImage,
-	DIOutImage,
-};
-
-enum ComposeInputBindings
-{
-	SoftShadowImage,
-	DirectIlluminationImage,
-};
-
-enum PresentInputBindings
-{
-	RenderResult,
-};
+#include "render_passes.h"
 
 class Renderer
 {
@@ -61,65 +16,45 @@ public:
 
 	void setVSyncMode(hri::VSyncMode vsyncMode);
 
+	void prepareFrame();
+
 	void drawFrame();
 
 private:
-	void initShaderDB();
-
 	void initRenderPasses();
-
-	void initSharedResources();
-
-	void initGlobalDescriptorSets();
-
-	void initRenderSubsystems();
-
-	void initRendererFrameData();
 
 	void recreateSwapDependentResources(const vkb::Swapchain& swapchain);
 
-	void updateFrameDescriptors(RendererFrameData& frame);
-
-	void prepareFrameResources(uint32_t frameIdx);
+public:
+	bool usePathTracer = true;
+	bool useTemporalAccumulation = false;
 
 private:
 	hri::RenderContext& m_context;
 	raytracing::RayTracingContext& m_raytracingContext;
-	hri_debug::DebugLabelHandler m_debug;
 	hri::RenderCore m_renderCore;
 	hri::ShaderDatabase m_shaderDatabase;
-	hri::RenderSubsystemManager m_subsystemManager;
 	hri::DescriptorSetAllocator m_descriptorSetAllocator;
 	hri::CommandPool m_computePool;
 	hri::CommandPool m_stagingPool;
+	hri_debug::DebugHandler m_asBuildTimer;
+	SceneASManager m_accelerationStructureManager;
 
 	// Renderer state
+	uint32_t m_frameCounter;
+	hri::Camera m_prevCamera;
 	hri::Camera& m_camera;
 	SceneGraph& m_activeScene;
+	CommonResources m_frameResources;
 
-	// Shared preinitialized samplers
-	std::unique_ptr<hri::ImageSampler> m_renderResultNearestSampler;
-	std::unique_ptr<hri::ImageSampler> m_renderResultLinearSampler;
-
-	// Global descriptor set layouts
-	std::unique_ptr<hri::DescriptorSetLayout> m_sceneDataSetLayout;
-	std::unique_ptr<hri::DescriptorSetLayout> m_rtDescriptorSetLayout;
-	std::unique_ptr<hri::DescriptorSetLayout> m_presentInputSetLayout;
-
-	// Render pass managers
-	std::unique_ptr<hri::RenderPassResourceManager> m_gbufferLayoutPassManager;
-	std::unique_ptr<hri::SwapchainPassResourceManager> m_swapchainPassManager;
-
-	// Ray Tracing Targets
-	std::unique_ptr<hri::ImageResource> m_softShadowRTPassResult;
-	std::unique_ptr<hri::ImageResource> m_directIlluminationRTPassResult;
-
-	// Render subsystems
-	std::unique_ptr<GBufferLayoutSubsystem> m_gbufferLayoutSubsystem;
-	std::unique_ptr<HybridRayTracingSubsystem> m_hybridRTSubsystem;
-	std::unique_ptr<UISubsystem> m_uiSubsystem;
-	std::unique_ptr<PresentationSubsystem> m_presentSubsystem;
-
-	// Renderer per frame data
-	RendererFrameData m_frames[hri::RenderCore::framesInFlight()] = {};
+	// Render passes
+	std::unique_ptr<RngGenerationPass> m_rngGenPass;
+	std::unique_ptr<PathTracingPass> m_pathTracingPass;
+	std::unique_ptr<GBufferLayoutPass> m_gbufferLayoutPass;
+	std::unique_ptr<GBufferSamplePass> m_gbufferSamplePass;
+	std::unique_ptr<DirectIlluminationPass> m_directIlluminationPass;
+	std::unique_ptr<DeferredShadingPass> m_deferredShadingPass;
+	std::unique_ptr<TemporalReprojectPass> m_temporalReprojectPass;
+	std::unique_ptr<PresentPass> m_presentPass;
+	std::unique_ptr<UIPass> m_uiPass;
 };

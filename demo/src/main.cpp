@@ -19,6 +19,35 @@
 #include <crtdbg.h>
 #endif
 
+#if USE_BENCHMARK_SCENE == 1
+
+const int32_t gBenchMarkMeshCount			= 20;
+const char* gBenchMarkMesh					= "assets/armadillo_lod.obj";
+const char* gBenchMarkLods[MAX_LOD_LEVELS]	= { "armadillo01", "armadillo05", "armadillo10" };
+
+const uint32_t gCaptureFrameCount = 500;
+std::vector<hri::Float3> gCamPositions = {
+	hri::Float3( 60.0f, 10.0f,  60.0f),
+	hri::Float3(-60.0f, 10.0f,  60.0f),
+	hri::Float3( 60.0f, 10.0f, -60.0f),
+	hri::Float3(-60.0f, 10.0f, -60.0f),
+	hri::Float3( 60.0f,  1.0f,  60.0f),
+	hri::Float3(-60.0f,  1.0f,  60.0f),
+	hri::Float3( 60.0f,  1.0f, -60.0f),
+	hri::Float3(-60.0f,  1.0f, -60.0f),
+
+	hri::Float3( 20.0f, 10.0f,  20.0f),
+	hri::Float3(-20.0f, 10.0f,  20.0f),
+	hri::Float3( 20.0f, 10.0f, -20.0f),
+	hri::Float3(-20.0f, 10.0f, -20.0f),
+	hri::Float3( 20.0f,  1.0f,  20.0f),
+	hri::Float3(-20.0f,  1.0f,  20.0f),
+	hri::Float3( 20.0f,  1.0f, -20.0f),
+	hri::Float3(-20.0f,  1.0f, -20.0f),
+};
+
+#endif
+
 static Timer gFrameTimer		= Timer();
 static WindowHandle* gWindow	= nullptr;
 
@@ -26,21 +55,115 @@ static bool gWindowResized  = false;
 static int gDisplayWidth 	= SCR_WIDTH;
 static int gDisplayHeight 	= SCR_HEIGHT;
 
-void drawSceneGraphNodeMenu(std::vector<SceneNode>& nodes)
+#if USE_BENCHMARK_SCENE == 1
+SceneGraph loadBenchmarkScene(raytracing::RayTracingContext& ctx)
 {
+	std::srand(0x42);
+	std::vector<Material> materials = {};
+	std::vector<hri::Mesh> meshes = {};
+	std::vector<SceneNode> nodes = {};
+
+	// Load benchmark mesh LODs
+	for (size_t i = 0; i < MAX_LOD_LEVELS; i++)
+	{
+		Material material = Material{};
+		std::vector<hri::Vertex> verts;
+		std::vector<uint32_t> indices;
+		if (SceneLoader::loadOBJMesh(gBenchMarkMesh, gBenchMarkLods[i], material, verts, indices, (i == 0)))
+			meshes.push_back(std::move(hri::Mesh(ctx.renderContext, verts, indices, MESH_RAYTRACING_BUFFER_FLAGS)));
+
+		if (i == 0)
+		{
+			material.diffuse = hri::Float3(0.1f);
+			materials.push_back(material);
+		}
+	}
+
+	{	// Load an area light and a floor mesh
+		Material material = Material{};
+		std::vector<hri::Vertex> verts;
+		std::vector<uint32_t> indices;
+		if (SceneLoader::loadOBJMesh("assets/simple_objects_lod.obj", "Plane_LOD0", material, verts, indices, false))
+			meshes.push_back(std::move(hri::Mesh(ctx.renderContext, verts, indices, MESH_RAYTRACING_BUFFER_FLAGS)));
+
+		materials.push_back(material);
+
+		// HACK: temp second load, remove when instance data setting in scene works
+		verts.clear(); indices.clear();
+		if (SceneLoader::loadOBJMesh("assets/simple_objects_lod.obj", "Plane_LOD0", material, verts, indices, true))
+			meshes.push_back(std::move(hri::Mesh(ctx.renderContext, verts, indices, MESH_RAYTRACING_BUFFER_FLAGS)));
+
+		materials.push_back(material);
+
+		SceneNode floorNode = SceneNode{};
+		floorNode.name = "Floor";
+		floorNode.transform = SceneTransform{};
+		floorNode.transform.position = hri::Float3(0.0f, 0.0f, 0.0f);
+		floorNode.transform.scale = hri::Float3(100.0f, 1.0f, 100.0f);
+		floorNode.material = 1;
+		floorNode.numLods = 1;
+		floorNode.meshLODs[0] = 4;
+
+		SceneNode lightNode = SceneNode{};
+		lightNode.name = "Area Light";
+		lightNode.transform = SceneTransform{};
+		lightNode.transform.position = hri::Float3(0.0f, 20.0f, 0.0f);
+		lightNode.transform.scale = hri::Float3(15.0f, 1.0f, 15.0f);
+		lightNode.material = 2;
+		lightNode.numLods = 1;
+		lightNode.meshLODs[0] = 3;
+
+		nodes.push_back(floorNode);
+		nodes.push_back(lightNode);
+	}
+
+	// Set up benchmark nodes
+	for (int32_t x = -(gBenchMarkMeshCount / 2); x < (gBenchMarkMeshCount / 2); x++)
+	{
+		for (int32_t y = -(gBenchMarkMeshCount / 2); y < (gBenchMarkMeshCount / 2); y++)
+		{
+			char buff[64];
+			snprintf(buff, 64, "(%d %d)", x, y);
+
+			SceneNode newNode = SceneNode{};
+			newNode.name = "Armadillo" + std::string(buff);
+			newNode.transform = SceneTransform{};
+			newNode.transform.position = hri::Float3((float)x * 5.0f, 1.3f, (float)y * 5.0f);
+			newNode.transform.scale = hri::Float3(0.025f, 0.025f, 0.025f);
+			newNode.transform.rotation.y = (static_cast <float>(rand()) / static_cast <float>(RAND_MAX)) * 360.0f;
+			newNode.material = 0;
+			newNode.numLods = 3;
+			newNode.meshLODs[0] = 0;
+			newNode.meshLODs[1] = 1;
+			newNode.meshLODs[2] = 2;
+
+			nodes.push_back(newNode);
+		}
+	}
+
+	return SceneGraph(ctx, std::move(materials), std::move(meshes), std::move(nodes));
+}
+#endif
+
+bool drawSceneGraphNodeMenu(std::vector<SceneNode>& nodes)
+{
+	bool updated = false;
+
 	for (auto& node : nodes)
 	{
 		if (ImGui::TreeNode(node.name.c_str()))
 		{
-			ImGui::DragFloat3("Position", node.transform.position.xyz, 0.05f);
-			ImGui::DragFloat3("Rotation", node.transform.rotation.xyz, 0.5f);
-			ImGui::DragFloat3("Scale", node.transform.scale.xyz, 0.05f);
+			updated |= ImGui::DragFloat3("Position", node.transform.position.xyz, 0.05f);
+			updated |= ImGui::DragFloat3("Rotation", node.transform.rotation.xyz, 0.5f);
+			updated |= ImGui::DragFloat3("Scale", node.transform.scale.xyz, 0.05f);
 			ImGui::TreePop();
 		}
 	}
+
+	return updated;
 }
 
-void drawConfigWindow(float deltaTime, hri::Camera& camera, SceneGraph& scene)
+bool drawConfigWindow(float deltaTime, Renderer& renderer, hri::Camera& camera, SceneGraph& scene)
 {
 	static float AVG_FRAMETIME = 1.0f;
 	static float ALPHA = 1.0f;
@@ -48,6 +171,7 @@ void drawConfigWindow(float deltaTime, hri::Camera& camera, SceneGraph& scene)
 	AVG_FRAMETIME = (1.0f - ALPHA) * AVG_FRAMETIME + ALPHA * deltaTime;
 	if (ALPHA > 0.05f) ALPHA *= 0.5f;
 
+	bool updated = false;
 	if (ImGui::Begin("Config"))
 	{
 		ImGui::SetWindowPos(ImVec2(10.0f, 10.0f), ImGuiCond_FirstUseEver);
@@ -58,22 +182,30 @@ void drawConfigWindow(float deltaTime, hri::Camera& camera, SceneGraph& scene)
 		ImGui::Text("Frame Time: %8.2f ms", AVG_FRAMETIME * 1'000.0f);
 		ImGui::Text("FPS:        %8.2f fps", 1.0f / AVG_FRAMETIME);
 
+		ImGui::SeparatorText("Renderer");
+		static bool test;
+		updated |= ImGui::Checkbox("Use reference Path Tracer", &renderer.usePathTracer);
+		updated |= ImGui::Checkbox("Use temporal accumulation", &renderer.useTemporalAccumulation);
+
 		ImGui::SeparatorText("Scene");
-		ImGui::DragFloat("LOD Near", &scene.parameters.nearPoint, 0.5f);
-		ImGui::DragFloat("LOD Far", &scene.parameters.farPoint, 0.5f);
+		updated |= ImGui::DragFloat("LOD Bias", &scene.parameters.lodBias, 0.01f);
+		updated |= ImGui::DragFloat("LOD T Interval", &scene.parameters.transitionInterval, 0.01f, 0.0f, 1.0f);
+		updated |= ImGui::DragFloat("LOD Z Near", &scene.parameters.nearPoint, 0.5f);
+		updated |= ImGui::DragFloat("LOD Z Far", &scene.parameters.farPoint, 0.5f);
 
 		ImGui::SeparatorText("Camera");
 		ImGui::Text("Position: %.2f %.2f %.2f", camera.position.x, camera.position.y, camera.position.z);
 		ImGui::Text("Forward:  %.2f %.2f %.2f", camera.forward.x, camera.forward.y, camera.forward.z);
-		ImGui::DragFloat("FOV Y", &camera.parameters.fovYDegrees, 1.0f);
-		ImGui::DragFloat("Near Plane", &camera.parameters.zNear, 0.05f);
-		ImGui::DragFloat("Far Plane", &camera.parameters.zFar, 0.05f);
+		updated |= ImGui::DragFloat("FOV Y", &camera.parameters.fovYDegrees, 1.0f);
+		updated |= ImGui::DragFloat("Near Plane", &camera.parameters.zNear, 0.05f);
+		updated |= ImGui::DragFloat("Far Plane", &camera.parameters.zFar, 0.05f);
 
 		ImGui::SeparatorText("Scene Nodes");
-		drawSceneGraphNodeMenu(scene.nodes);
+		updated |= drawSceneGraphNodeMenu(scene.nodes);
 	}
 
 	ImGui::End();
+	return updated;
 }
 
 void windowResizeCallback(WindowHandle* window, int width, int height)
@@ -83,7 +215,7 @@ void windowResizeCallback(WindowHandle* window, int width, int height)
 	gWindowResized = true;
 }
 
-void handleCameraInput(WindowHandle* window, float deltaTime, hri::Camera& camera)
+bool handleCameraInput(WindowHandle* window, float deltaTime, hri::Camera& camera)
 {
 	bool cameraUpdated = false;
 
@@ -93,27 +225,28 @@ void handleCameraInput(WindowHandle* window, float deltaTime, hri::Camera& camer
 
 	hri::Float3 positionDelta = hri::Float3(0.0f);
 	
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) positionDelta += forward * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true;
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) positionDelta -= forward * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true;
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) positionDelta += right * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true;
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) positionDelta -= right * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true;
-	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) positionDelta += up * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true;
-	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) positionDelta -= up * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true;
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) { positionDelta += forward * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true; }
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) { positionDelta -= forward * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true; }
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) { positionDelta += right * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true; }
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) { positionDelta -= right * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true; }
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) { positionDelta += up * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true; }
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) { positionDelta -= up * 2.0f * CAMERA_SPEED * deltaTime; cameraUpdated = true; }
 
 	camera.position += positionDelta;
 	hri::Float3 target = camera.position + forward;
 
-	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) target += up * CAMERA_SPEED * deltaTime; cameraUpdated = true;
-	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) target -= up * CAMERA_SPEED * deltaTime; cameraUpdated = true;
-	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) target += right * CAMERA_SPEED * deltaTime; cameraUpdated = true;
-	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) target -= right * CAMERA_SPEED * deltaTime; cameraUpdated = true;
+	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) { target += up * CAMERA_SPEED * deltaTime; cameraUpdated = true; }
+	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) { target -= up * CAMERA_SPEED * deltaTime; cameraUpdated = true; }
+	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) { target += right * CAMERA_SPEED * deltaTime; cameraUpdated = true; }
+	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) { target -= right * CAMERA_SPEED * deltaTime; cameraUpdated = true; }
 
 	if (!cameraUpdated)
-		return;
+		return false;
 
 	camera.forward = hri::normalize(target - camera.position);
 	camera.right = hri::normalize(hri::cross(HRI_WORLD_UP, camera.forward));
 	camera.up = hri::normalize(hri::cross(camera.forward, camera.right));
+	return true;
 }
 
 int main()
@@ -165,6 +298,7 @@ int main()
 	rtPipelineFeatures.rayTracingPipeline = true;
 
 	ctxCreateInfo.deviceFeatures.shaderInt64 = true;
+	ctxCreateInfo.deviceFeatures12.hostQueryReset = true;
 	ctxCreateInfo.deviceFeatures12.bufferDeviceAddress = true;
 	ctxCreateInfo.deviceFeatures12.descriptorIndexing = true;
 	ctxCreateInfo.deviceFeatures12.scalarBlockLayout = true;
@@ -189,13 +323,44 @@ int main()
 	);
 
 	// Load scene file & Create renderer
-	SceneGraph scene = SceneLoader::load(rtContext, "./assets/default_scene.json");
+#if USE_BENCHMARK_SCENE == 1
+	SceneGraph scene = loadBenchmarkScene(rtContext);
+#else
+	SceneGraph scene = SceneLoader::load(rtContext, "./assets/interior_scene.json");
+#endif
 	Renderer renderer = Renderer(rtContext, camera, scene);
 
 	printf("Startup complete\n");
 
+#if DO_BENCHMARK == 1
+	renderer.usePathTracer = BENCHMARK_PATH_TRACER;
+	scene.parameters.transitionInterval = BENCHMARK_T_INTERVAL;
+
+	printf("Running benchmark (Path Tracing %d, T: %5.2f)\n", renderer.usePathTracer, scene.parameters.transitionInterval);
+	uint32_t positionIndex = 0;
+	uint32_t frameIndex = 0;
+#endif
+
 	while (!windowManager.windowShouldClose(gWindow))
 	{
+#if DO_BENCHMARK == 1
+		if (frameIndex % gCaptureFrameCount == 0)
+		{
+			if (positionIndex >= gCamPositions.size())
+				break;
+
+			printf("--- BENCHMARK POSITION %d ---\n", positionIndex);
+
+			camera.position = gCamPositions[positionIndex];
+			camera.forward = hri::normalize(hri::Float3(0.0f) - camera.position);
+			camera.right = hri::normalize(hri::cross(HRI_WORLD_UP, camera.forward));
+			camera.up = hri::normalize(hri::cross(camera.forward, camera.right));
+			camera.parameters.aspectRatio = static_cast<float>(gDisplayWidth) / static_cast<float>(gDisplayHeight);
+			camera.updateMatrices();
+			positionIndex++;
+		}
+#endif
+
 		windowManager.pollEvents();
 		gFrameTimer.tick();
 
@@ -204,25 +369,31 @@ int main()
 
 		// Record ImGUI draw commands
 		uiManager.startDraw();
-		drawConfigWindow(gFrameTimer.deltaTime, camera, scene);
+		bool UIUpdated = drawConfigWindow(gFrameTimer.deltaTime, renderer, camera, scene);
 		uiManager.endDraw();
 
 		// Update scene & draw renderer frame
 		scene.update(gFrameTimer.deltaTime);
+		renderer.prepareFrame();
 		renderer.drawFrame();
 
 		// Update camera state
-		if (gWindowResized)
+		bool cameraUpdated = handleCameraInput(gWindow, gFrameTimer.deltaTime, camera);
+		if (gWindowResized || UIUpdated || cameraUpdated)
+		{
 			camera.parameters.aspectRatio = static_cast<float>(gDisplayWidth) / static_cast<float>(gDisplayHeight);
-
-		handleCameraInput(gWindow, gFrameTimer.deltaTime, camera);
-		camera.updateMatrices();
+			camera.updateMatrices();
+		}
 		
 		if (glfwGetKey(gWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 			windowManager.closeWindow(gWindow);
 
 		// Always set to false, resize dependent things should be handled here
 		gWindowResized = false;
+
+#if DO_BENCHMARK == 1
+		frameIndex++;
+#endif
 	}
 
 	printf("Shutting down\n");

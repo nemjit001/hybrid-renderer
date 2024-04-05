@@ -47,6 +47,11 @@ namespace hri
 			HRI_VK_CHECK(vkEndCommandBuffer(commandBuffer));
 		}
 
+		/// @brief Insert a memory pipeline barrier in the frame.
+		/// @param memoryBarriers Memory Barriers list.
+		/// @param flags Dependency flags to use.
+		void pipelineBarrier(const std::vector<VkMemoryBarrier2>& memoryBarriers, VkDependencyFlags flags = 0) const;
+
 		/// @brief Insert an image pipeline barrier in the frame.
 		/// @param memoryBarriers Image Memory Barriers list.
 		/// @param flags Dependency flags to use.

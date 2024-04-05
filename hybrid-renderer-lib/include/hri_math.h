@@ -81,8 +81,11 @@ namespace hri
 	inline float rsqrtf(float val) { return 1.0f / sqrtf(val); }
 
 	inline float degrees(float radians) { return radians * 180.0f * HRI_INV_PI; /* rad * (180 / pi) */ }
-
 	inline float radians(float degrees) { return degrees * HRI_PI * 0.00555555555555555555555555555556f; /* deg * (pi / 180) */ }
+
+	inline float floor(float val) { return std::floor(val); }
+	inline float ceil(float val) { return std::ceil(val); }
+	inline float clamp(float val, float min, float max) { return (val < min) ? min : (val > max) ? max : val; }
 
 	template<typename _Ty>
 	inline void swap(_Ty& a, _Ty& b) { _Ty t = a; a = b; b = t; }
@@ -91,7 +94,7 @@ namespace hri
 	inline _Ty max(const _Ty& a, const _Ty& b) { return a > b ? a : b; }
 
 	template<typename _Ty>
-	inline _Ty min(const _Ty& a, const _Ty& b) { return a > b ? a : b; }
+	inline _Ty min(const _Ty& a, const _Ty& b) { return a < b ? a : b; }
 
 	// --- Standard math operations
 

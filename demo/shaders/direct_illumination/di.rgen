@@ -1,0 +1,68 @@
+#version 460
+
+#extension GL_EXT_ray_tracing : require
+#extension GL_EXT_scalar_block_layout : enable
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+#extension GL_EXT_buffer_reference2 : require
+
+#include "../shader_common.glsl"
+#include "../raytracing_common.glsl"
+
+layout(location = 0) rayPayloadEXT DIRayPayload prd;
+
+layout(set = 0, binding = 0) uniform sampler2D GBufferAlbedo;
+layout(set = 0, binding = 1) uniform sampler2D GBufferEmission;
+layout(set = 0, binding = 2) uniform sampler2D GBufferSpecular;
+layout(set = 0, binding = 3) uniform sampler2D GBufferTransmittance;
+layout(set = 0, binding = 4) uniform sampler2D GBufferNormal;
+layout(set = 0, binding = 5) uniform sampler2D GBufferDepth;
+layout(set = 0, binding = 6) uniform sampler2D RNGSource;
+
+layout(set = 1, binding = 0) uniform CAMERA { Camera camera; };
+layout(set = 1, binding = 1) uniform accelerationStructureEXT TLAS;
+layout(set = 1, binding = 2, rgba32f) uniform writeonly image2D DirectIlluminationOut;
+
+void main()
+{
+	// Calculate launch & pixel info
+	const uint launchIndex = gl_LaunchIDEXT.x + gl_LaunchIDEXT.y * gl_LaunchSizeEXT.x;
+	const vec2 pixelLocation = gl_LaunchIDEXT.xy;
+	const vec2 pixelCenter = pixelLocation + vec2(0.5);
+	const vec2 inUV = pixelCenter / vec2(gl_LaunchSizeEXT.xy);
+
+	HybridInitialHit hit = getInitialHitData(inverse(camera.view), inverse(camera.project), inUV, GBufferNormal, GBufferDepth);
+	Material material = getMaterialFromGBuffer(inUV, GBufferAlbedo, GBufferSpecular, GBufferTransmittance, GBufferEmission);
+
+	// init payload
+	prd.seed = uint(texture(RNGSource, inUV).r);
+	prd.rayMask = generateRayMask(prd.seed);
+	prd.lightInstanceID = 0;
+	prd.energy = vec3(0);
+	prd.transmission = vec3(1);
+
+	if (luminance(material.emission) < 0.1 && !hit.miss)
+	{
+		bool specularEvent = false;
+		vec3 Wo = vec3(0);
+		randomWalk(prd.seed, hit.Wi, hit.worldNormal, material, Wo, specularEvent);
+
+		float pdf = evaluatePDF(Wo, hit.worldNormal, material, specularEvent);
+		vec3 brdf = evaluateBRDFNoAlbedo(hit.Wi, Wo, hit.worldNormal, material, specularEvent);
+		prd.transmission *= pdf * brdf;
+
+		// Trace random bounce
+		traceRayEXT(
+			TLAS,
+			gl_RayFlagsOpaqueEXT,
+			prd.rayMask,
+			0, 0, 0,
+			hit.worldPos,
+			RAYTRACE_RANGE_TMIN,
+			Wo,
+			RAYTRACE_RANGE_TMAX,
+			0
+		);
+	}
+
+	imageStore(DirectIlluminationOut, ivec2(gl_LaunchIDEXT.xy), vec4(prd.energy, 1.0));
+}

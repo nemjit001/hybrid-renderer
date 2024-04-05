@@ -13,12 +13,24 @@
 			]
 		},
 		{
-			"name": "AreaLight",
+			"name": "AreaLight1",
 			"mesh_file": "assets/simple_objects_lod.obj",
 			"transform": {
-				"position": [ 0.0, 9.0, 0.0 ],
+				"position": [ 0.0, 7.5, 0.0 ],
 				"rotation": [ 0.0, 0.0, 0.0 ],
-				"scale": [ 7.5, 1.0, 2 ]
+				"scale": [ 1.0, 1.0, 1.0 ]
+			},
+			"lod_levels": [
+				"Plane_LOD0"
+			]
+		},
+		{
+			"name": "AreaLight2",
+			"mesh_file": "assets/simple_objects_lod.obj",
+			"transform": {
+				"position": [ -5.0, 4.0, 0.0 ],
+				"rotation": [ 0.0, 0.0, 60.0 ],
+				"scale": [ 4.0, 1.0, 1.0 ]
 			},
 			"lod_levels": [
 				"Plane_LOD0"

@@ -47,6 +47,16 @@ void FrameState::destroy(RenderContext* ctx, FrameState& frameState)
 	memset(&frameState, 0, sizeof(FrameState));
 }
 
+void ActiveFrame::pipelineBarrier(const std::vector<VkMemoryBarrier2>& memoryBarriers, VkDependencyFlags flags) const
+{
+	VkDependencyInfo dependency = VkDependencyInfo{ VK_STRUCTURE_TYPE_DEPENDENCY_INFO };
+	dependency.dependencyFlags = flags;
+	dependency.memoryBarrierCount = static_cast<uint32_t>(memoryBarriers.size());
+	dependency.pMemoryBarriers = memoryBarriers.data();
+
+	vkCmdPipelineBarrier2(commandBuffer, &dependency);
+}
+
 void ActiveFrame::pipelineBarrier(const std::vector<VkImageMemoryBarrier2>& memoryBarriers, VkDependencyFlags flags) const
 {
 	VkDependencyInfo dependency = VkDependencyInfo{ VK_STRUCTURE_TYPE_DEPENDENCY_INFO };

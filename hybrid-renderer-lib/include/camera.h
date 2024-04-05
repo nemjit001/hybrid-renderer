@@ -14,13 +14,16 @@ namespace hri
 		float fovYDegrees	= 60.0f;
 		float aspectRatio	= 1.0f;
 		float zNear 		= 0.1f;
-		float zFar			= 100.0f;
+		float zFar			= 1000.0f;
 	};
 
 	/// @brief Shader layout of camera data
 	struct CameraShaderData
 	{
 		HRI_ALIGNAS(16) Float3 position;
+		HRI_ALIGNAS(16) Float3 forward;
+		HRI_ALIGNAS(16)	Float3 right;
+		HRI_ALIGNAS(16)	Float3 up;
 		HRI_ALIGNAS(16) Float4x4 view;
 		HRI_ALIGNAS(16) Float4x4 project;
 	};

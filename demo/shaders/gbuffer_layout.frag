@@ -16,16 +16,15 @@ layout(location = 0) in VS_OUT
 
 layout(location = 0) out vec4 FragAlbedo;
 layout(location = 1) out vec4 FragEmission;
-layout(location = 2) out vec4 FragMatSpecular;
+layout(location = 2) out vec4 FragSpecular;
 layout(location = 3) out vec4 FragTransmittance;
 layout(location = 4) out vec4 FragNormal;
+layout(location = 5) out vec4 FragLODMask;
 
-layout(push_constant) uniform INSTANCE_PC
+layout(push_constant) uniform INSTANCE_INFO
 {
-    uint instanceId;
-    mat4 model;
-    mat3 normal;
-} push;
+    InstanceInfo instanceInfo;
+};
 
 layout(buffer_reference, scalar) buffer VERTEX_DATA { Vertex vertices[]; };
 layout(buffer_reference, scalar) buffer INDEX_DATA { uint indices[]; };
@@ -35,12 +34,13 @@ layout(set = 0, binding = 2) buffer MATERIAL_DATA { Material materials[]; };
 
 void main()
 {
-    RenderInstanceData instance = instances[push.instanceId];
+    RenderInstanceData instance = instances[instanceInfo.instanceId];
     Material material = materials[instance.materialIdx];
 
     FragAlbedo = vec4(material.diffuse, 1);
     FragEmission = vec4(material.emission, 1);
-    FragMatSpecular = vec4(material.specular, material.shininess);
+    FragSpecular = vec4(material.specular, material.shininess);
     FragTransmittance = vec4(material.transmittance, material.ior);
     FragNormal = vec4(normalize(fs_in.normal), 1);
+    FragLODMask = vec4(instanceInfo.lodMask);
 }

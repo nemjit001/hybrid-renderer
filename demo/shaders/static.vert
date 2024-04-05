@@ -21,19 +21,17 @@ layout(set = 0, binding = 0) uniform CAMERA
     Camera camera;
 };
 
-layout(push_constant) uniform INSTANCE_PC
+layout(push_constant) uniform INSTANCE_INFO
 {
-    uint instanceId;
-    mat4 model;
-    mat3 normal;
-} push;
+    InstanceInfo instanceInfo;
+};
 
 void main()
 {
-    vec4 wPos = push.model * vec4(VertexPosition, 1);
+    vec4 wPos = instanceInfo.model * vec4(VertexPosition, 1);
 
     vs_out.wPos = wPos;
-    vs_out.normal = normalize(push.model * vec4(VertexNormal, 0)).xyz;
+    vs_out.normal = normalize(instanceInfo.model * vec4(VertexNormal, 0)).xyz;
     vs_out.texCoord = VertexTexCoord;
 
     gl_Position = camera.project * camera.view * vs_out.wPos;

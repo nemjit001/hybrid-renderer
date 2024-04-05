@@ -37,6 +37,9 @@ CameraShaderData Camera::getShaderData()
 {
 	return CameraShaderData{
 		position,
+		forward,
+		right,
+		up,
 		view,
 		project,
 	};

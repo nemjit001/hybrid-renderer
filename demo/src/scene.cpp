@@ -3,14 +3,15 @@
 #include <fstream>
 #include <hybrid_renderer.h>
 #include <nlohmann/json.hpp>
+#include <set>
 #include <string>
 #include <tiny_obj_loader.h>
+#include <vector>
 
 #include "demo.h"
 
 SceneASManager::SceneASManager(
-	raytracing::RayTracingContext& ctx,
-	const std::vector<hri::Mesh>& meshes
+	raytracing::RayTracingContext& ctx
 )
 	:
 	m_ctx(ctx),
@@ -26,9 +27,6 @@ bool SceneASManager::shouldReallocTLAS(
 ) const
 {
 	size_t instanceCount = instances.size();
-	if (instanceCount == 0)
-		return false;
-
 	hri::BufferResource tlasInstanceBuffer = generateTLASInstances(instances, blasList);
 	raytracing::ASBuilder::ASInput tlasInput = m_asBuilder.instancesToGeometry(
 		tlasInstanceBuffer,
@@ -55,7 +53,7 @@ raytracing::AccelerationStructure SceneASManager::createTLAS(
 	const std::vector<raytracing::AccelerationStructure>& blasList
 )
 {
-	size_t instanceCount = instances.size();
+	size_t instanceCount = instances.size() * 2;	// 2x because of 2 LOD levels per render instance
 	hri::BufferResource tlasInstanceBuffer = generateTLASInstances(instances, blasList);
 	raytracing::ASBuilder::ASInput tlasInput = m_asBuilder.instancesToGeometry(
 		tlasInstanceBuffer,
@@ -115,10 +113,7 @@ void SceneASManager::cmdBuildTLAS(
 	raytracing::AccelerationStructure& tlas
 ) const
 {
-	size_t instanceCount = instances.size();
-	if (instanceCount == 0)	// Nothing to do
-		return;
-
+	size_t instanceCount = instances.size() * 2; 	// 2x because of 2 LOD levels per render instance
 	hri::BufferResource tlasInstanceBuffer = generateTLASInstances(instances, blasList);
 
 	raytracing::ASBuilder::ASInput tlasInput = m_asBuilder.instancesToGeometry(
@@ -181,12 +176,25 @@ void SceneASManager::cmdBuildBLASses(
 	);
 
 	// Gather build batch
+	std::set<SceneNode::SceneId> processedLODS = {};
 	std::vector<raytracing::ASBuilder::ASBuildInfo> batchInfo = {};
 	std::vector<VkAccelerationStructureKHR> batchHandles = {};
 	for (auto const& instance : instances)
 	{
-		batchInfo.push_back(blasBuildInfos[instance.instanceId]);
-		batchHandles.push_back(blasList[instance.instanceId].accelerationStructure);
+		// Only insert not already processed batch info
+		if (processedLODS.find(instance.instanceIdLOD0) == processedLODS.end())
+		{
+			batchHandles.push_back(blasList[instance.instanceIdLOD0].accelerationStructure);
+			batchInfo.push_back(blasBuildInfos[instance.instanceIdLOD0]);
+			processedLODS.insert(instance.instanceIdLOD0);
+		}
+
+		if (processedLODS.find(instance.instanceIdLOD1) == processedLODS.end())
+		{
+			batchHandles.push_back(blasList[instance.instanceIdLOD1].accelerationStructure);
+			batchInfo.push_back(blasBuildInfos[instance.instanceIdLOD1]);
+			processedLODS.insert(instance.instanceIdLOD1);
+		}
 	}
 
 	VkDeviceAddress scratchBufferAddress = raytracing::getDeviceAddress(m_ctx, scratchBuffer);
@@ -203,7 +211,7 @@ hri::BufferResource SceneASManager::generateTLASInstances(
 	const std::vector<raytracing::AccelerationStructure>& blasList
 ) const
 {
-	size_t instanceCount = instances.size();
+	size_t instanceCount = instances.size() * 2; 	// 2x because of 2 LOD levels per render instance
 	hri::BufferResource tlasInstanceBuffer = hri::BufferResource(
 		m_ctx.renderContext,
 		sizeof(VkAccelerationStructureInstanceKHR) * instanceCount,
@@ -213,27 +221,41 @@ hri::BufferResource SceneASManager::generateTLASInstances(
 		true
 	);
 
-	std::vector<VkAccelerationStructureInstanceKHR> tlasInstances = {}; tlasInstances.reserve(instances.size());
+	std::vector<VkAccelerationStructureInstanceKHR> tlasInstances = {}; tlasInstances.reserve(instanceCount);
 	for (auto const& renderInstance : instances)
 	{
-		auto const& blas = blasList[renderInstance.instanceId];
+		VkTransformMatrixKHR transform = raytracing::toTransformMatrix(renderInstance.modelMatrix);
+
+		uint32_t lodLoMask = SceneGraph::generateLODMask(renderInstance);
+		uint32_t lodHiMask = (~lodLoMask) & VALID_MASK;
+		auto const& blasHi = blasList[renderInstance.instanceIdLOD0];
+		auto const& blasLo = blasList[renderInstance.instanceIdLOD1];
+
 		VkAccelerationStructureDeviceAddressInfoKHR addrInfo = VkAccelerationStructureDeviceAddressInfoKHR{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR };
-		addrInfo.accelerationStructure = blas.accelerationStructure;
+		addrInfo.accelerationStructure = blasHi.accelerationStructure;
+		VkDeviceAddress blasHiAddress = m_ctx.accelStructDispatch.vkGetAccelerationStructureDeviceAddress(m_ctx.renderContext.device, &addrInfo);
 
-		VkDeviceAddress blasAddress = m_ctx.accelStructDispatch.vkGetAccelerationStructureDeviceAddress(
-			m_ctx.renderContext.device,
-			&addrInfo
-		);
+		addrInfo.accelerationStructure = blasLo.accelerationStructure;
+		VkDeviceAddress blasLoAddress = m_ctx.accelStructDispatch.vkGetAccelerationStructureDeviceAddress(m_ctx.renderContext.device, &addrInfo);
 
-		VkAccelerationStructureInstanceKHR tlasInstance = VkAccelerationStructureInstanceKHR{};
-		tlasInstance.flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
-		tlasInstance.transform = raytracing::toTransformMatrix(renderInstance.modelMatrix);
-		tlasInstance.instanceCustomIndex = renderInstance.instanceId;
-		tlasInstance.accelerationStructureReference = blasAddress;
-		tlasInstance.mask = 0xFF;
-		tlasInstance.instanceShaderBindingTableRecordOffset = 0;
+		VkAccelerationStructureInstanceKHR tlasInstanceHigh = VkAccelerationStructureInstanceKHR{};
+		tlasInstanceHigh.flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
+		tlasInstanceHigh.transform = transform;
+		tlasInstanceHigh.instanceCustomIndex = renderInstance.instanceIdLOD0;
+		tlasInstanceHigh.accelerationStructureReference = blasHiAddress;
+		tlasInstanceHigh.mask = lodHiMask;
+		tlasInstanceHigh.instanceShaderBindingTableRecordOffset = 0;
 
-		tlasInstances.push_back(tlasInstance);
+		VkAccelerationStructureInstanceKHR tlasInstanceLow = VkAccelerationStructureInstanceKHR{};
+		tlasInstanceLow.flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
+		tlasInstanceLow.transform = transform;
+		tlasInstanceLow.instanceCustomIndex = renderInstance.instanceIdLOD1;
+		tlasInstanceLow.accelerationStructureReference = blasLoAddress;
+		tlasInstanceLow.mask = lodLoMask;
+		tlasInstanceLow.instanceShaderBindingTableRecordOffset = 0;
+
+		tlasInstances.push_back(tlasInstanceHigh);
+		tlasInstances.push_back(tlasInstanceLow);
 	}
 
 	tlasInstanceBuffer.copyToBuffer(tlasInstances.data(), tlasInstanceBuffer.bufferSize);
@@ -266,11 +288,10 @@ SceneGraph::SceneGraph(
 )
 	:
 	m_ctx(ctx),
-	m_asBuilder(ctx),
 	materials(std::move(materials)),
 	meshes(std::move(meshes)),
 	nodes(std::move(nodes)),
-	accelStructManager(ctx, this->meshes),
+	lightCount(0),
 	buffers{
 		hri::BufferResource(
 			ctx.renderContext,
@@ -296,6 +317,10 @@ SceneGraph::SceneGraph(
 	m_instanceData.resize(this->meshes.size());
 	for (auto const& node : this->nodes)
 	{
+		const Material& mat = this->materials[node.material];
+		if (mat.emission.r > 0 || mat.emission.g > 0 || mat.emission.b > 0)
+			this->lightCount++;
+
 		for (size_t lodIdx = 0; lodIdx < MAX_LOD_LEVELS; lodIdx++)
 		{
 			size_t meshLOD = node.meshLODs[lodIdx];
@@ -306,6 +331,7 @@ SceneGraph::SceneGraph(
 			RenderInstanceData& instanceData = m_instanceData[meshLOD];
 
 			instanceData.materialIdx = static_cast<uint32_t>(node.material);
+			instanceData.indexCount = mesh.indexCount;
 			instanceData.vertexBufferAddress = raytracing::getDeviceAddress(m_ctx, mesh.vertexBuffer);
 			instanceData.indexBufferAddress = raytracing::getDeviceAddress(m_ctx, mesh.indexBuffer);
 		}
@@ -328,6 +354,8 @@ SceneGraph::SceneGraph(
 	vkCmdCopyBuffer(transferBuffer, materialStaging.buffer, buffers.materialSSBO.buffer, 1, &matSSBOCopy);
 
 	stagingPool.submitAndWait(transferBuffer);
+
+	printf("Loaded scene with %zu instances (%u light(s))\n", m_instanceData.size(), lightCount);
 }
 
 void SceneGraph::update(float deltaTime)
@@ -346,48 +374,51 @@ const std::vector<RenderInstance>& SceneGraph::generateRenderInstanceList(const 
 
 	for (auto const& node : nodes)
 	{
-		SceneNode::SceneId meshLOD = calculateLODLevel(camera, node);
-		if (meshLOD == INVALID_SCENE_ID)	// Don't show out of bounds meshes
-			continue;
+		float blendFactor = 0.0;
+		SceneNode::SceneId meshLOD0, meshLOD1;
+		calculateLODLevel(camera, node, blendFactor, meshLOD0, meshLOD1);
+		assert(meshLOD0 != INVALID_SCENE_ID && meshLOD1 != INVALID_SCENE_ID);
 
 		// TODO: upload mesh data into scene buffers, build TLAS from instance BLASses
 		m_instances.push_back(RenderInstance{
 			node.transform.modelMatrix(),
-			static_cast<uint32_t>(meshLOD),
+			blendFactor,
+			static_cast<uint32_t>(meshLOD0),
+			static_cast<uint32_t>(meshLOD1),
 		});
 	}
 
 	return m_instances;
 }
 
-SceneNode::SceneId SceneGraph::calculateLODLevel(const hri::Camera& camera, const SceneNode& node)
+void SceneGraph::calculateLODLevel(const hri::Camera& camera, const SceneNode& node, float& LODBlendFactor, SceneNode::SceneId& LOD0, SceneNode::SceneId& LOD1)
 {
-	hri::Float3 camToNode = node.transform.position - camera.position;
-	const float nodeDist = hri::magnitude(camToNode);
-	const float LODRange = parameters.farPoint - parameters.nearPoint;
-	const float LODSegmentSize = LODRange / static_cast<float>(MAX_LOD_LEVELS);
+	const hri::Float3 camToNode = node.transform.position - camera.position;
 
-	if (nodeDist > parameters.farPoint)
-		return INVALID_SCENE_ID;
+	const float LODNear = hri::max(parameters.nearPoint, 1e-3f);
+	const float LODFar = hri::max(LODNear + 1e-3f, parameters.farPoint);
 
-	// XXX: Check -> is Linear LOD sufficient, or should better algorithm be used?
-	SceneNode::SceneId LODIndex = 0;
-	for (size_t segmentIdx = 0; segmentIdx < MAX_LOD_LEVELS; segmentIdx++)
-	{
-		float fIdx = static_cast<float>(segmentIdx);
-		float nearPointAdjustedDist = nodeDist - parameters.nearPoint;
-		float minSegmentDist = fIdx * LODSegmentSize;
+	float z = hri::max(hri::dot(camera.forward, camToNode), 1e-3f);
+	float lodLevel = (z - LODNear) / (LODFar - LODNear);
+	float lodIdx = lodLevel * node.numLods + parameters.lodBias;
+	lodIdx = hri::clamp(lodIdx, 0.0f, static_cast<float>(node.numLods - 1));
 
-		if (nearPointAdjustedDist >= minSegmentDist && node.meshLODs[segmentIdx] != INVALID_SCENE_ID)
-			LODIndex = segmentIdx;
-	}
+	uint32_t LOD0Idx = static_cast<uint32_t>(lodIdx);
+	uint32_t LOD1Idx = hri::min(LOD0Idx + 1, node.numLods - 1);
 
-	return node.meshLODs[LODIndex];
+	LODBlendFactor = lodIdx - hri::floor(lodIdx);
+	LODBlendFactor = hri::clamp((LODBlendFactor - 0.5f) / parameters.transitionInterval + 0.5f, 0.0f, 1.0f);
+
+	LOD0 = node.meshLODs[LOD0Idx];
+	LOD1 = node.meshLODs[LOD1Idx];
 }
 
 SceneGraph SceneLoader::load(raytracing::RayTracingContext& context, const std::string& path)
 {
 	std::ifstream sceneFile = std::ifstream(path);
+	if (!sceneFile.good())
+		FATAL_ERROR("Failed to load scene file!");
+
 	nlohmann::json sceneJSON = nlohmann::json::parse(sceneFile);
 
 	std::vector<Material> materials = {};
@@ -403,6 +434,7 @@ SceneGraph SceneLoader::load(raytracing::RayTracingContext& context, const std::
 		newNode.name = node["name"];
 		newNode.transform = SceneTransform{};
 		newNode.material = materials.size();
+		newNode.numLods = 0;
 
 		// Set node transform
 		newNode.transform.position = hri::Float3(transform["position"][0], transform["position"][1], transform["position"][2]);
@@ -411,29 +443,27 @@ SceneGraph SceneLoader::load(raytracing::RayTracingContext& context, const std::
 
 		// Load meshes
 		Material newMaterial = Material{};
-		uint32_t lodIndex = 0;
 		for (auto const& lodLevel : node["lod_levels"])
 		{
-			bool loadMaterial = lodIndex == 0;	// Only load material of first LOD, assume materials are the same.
+			if (newNode.numLods >= MAX_LOD_LEVELS)
+				break;
+
+			bool loadMaterial = (newNode.numLods == 0);	// Only load material of first LOD, assume materials are the same.
 			std::vector<hri::Vertex> vertices = {};
 			std::vector<uint32_t> indices = {};
 
 			if (loadOBJMesh(meshFile, lodLevel, newMaterial, vertices, indices, loadMaterial))
 			{
-				newNode.meshLODs[lodIndex] = meshes.size();
+				newNode.meshLODs[newNode.numLods] = meshes.size();
 				meshes.push_back(std::move(hri::Mesh(
 					context.renderContext,
 					vertices,
 					indices,
-					VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT
-					| VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR
+					MESH_RAYTRACING_BUFFER_FLAGS
 				)));
 			}
 
-			if (lodIndex >= MAX_LOD_LEVELS)
-				break;
-
-			lodIndex++;
+			newNode.numLods++;
 		}
 
 		materials.push_back(newMaterial);
@@ -502,22 +532,19 @@ bool SceneLoader::loadOBJMesh(
 			size_t normalIndex = index.normal_index * 3;
 			size_t texCoordIndex = index.texcoord_index * 2;
 
+			hri::Float3 vertexPosition = hri::Float3(objAttributes.vertices[vertexIndex + 0], objAttributes.vertices[vertexIndex + 1], objAttributes.vertices[vertexIndex + 2]);
+			hri::Float3 vertexNormal = hri::Float3(objAttributes.normals[normalIndex + 0], objAttributes.normals[normalIndex + 1], objAttributes.normals[normalIndex + 2]);
+			hri::Float2 texCoord = hri::Float2(0.0f, 0.0f);
+
+			// Check if tex coords exist
+			if (objAttributes.texcoords.size() > 0)
+				texCoord = hri::Float2(objAttributes.texcoords[texCoordIndex + 0], objAttributes.texcoords[texCoordIndex + 1]);
+
 			hri::Vertex newVertex = hri::Vertex{
-				hri::Float3(
-					objAttributes.vertices[vertexIndex + 0],
-					objAttributes.vertices[vertexIndex + 1],
-					objAttributes.vertices[vertexIndex + 2]
-				),
-				hri::Float3(
-					objAttributes.normals[normalIndex + 0],
-					objAttributes.normals[normalIndex + 1],
-					objAttributes.normals[normalIndex + 2]
-				),
+				vertexPosition,
+				vertexNormal,
 				hri::Float3(0.0f),	// The tangent vector is initialy (0, 0, 0), because it can only be calculated AFTER triangles are loaded
-				hri::Float2(
-					objAttributes.texcoords[texCoordIndex + 0],
-					objAttributes.texcoords[texCoordIndex + 1]
-				),
+				texCoord,
 			};
 
 			vertices.push_back(newVertex);
@@ -546,15 +573,19 @@ bool SceneLoader::loadOBJMesh(
 		if (loadMaterial)
 		{
 			// Set material params & load textures
-			tinyobj::material_t objMaterial = objMaterials[shape.mesh.material_ids[0]];
 			material = Material{};
+			int materialId = shape.mesh.material_ids[0];
 
-			material.diffuse = hri::Float3(objMaterial.diffuse[0], objMaterial.diffuse[1], objMaterial.diffuse[2]);
-			material.specular = hri::Float3(objMaterial.specular[0], objMaterial.specular[1], objMaterial.specular[2]);
-			material.transmittance = hri::Float3(objMaterial.transmittance[0], objMaterial.transmittance[1], objMaterial.transmittance[2]);
-			material.emission = hri::Float3(objMaterial.emission[0], objMaterial.emission[1], objMaterial.emission[2]);
-			material.shininess = objMaterial.shininess;
-			material.ior = objMaterial.ior;
+			if (materialId >= 0)	// A material is used for this mesh
+			{
+				tinyobj::material_t objMaterial = objMaterials[materialId];
+				material.diffuse = hri::Float3(objMaterial.diffuse[0], objMaterial.diffuse[1], objMaterial.diffuse[2]);
+				material.specular = hri::Float3(objMaterial.specular[0], objMaterial.specular[1], objMaterial.specular[2]);
+				material.transmittance = hri::Float3(objMaterial.transmittance[0], objMaterial.transmittance[1], objMaterial.transmittance[2]);
+				material.emission = hri::Float3(objMaterial.emission[0], objMaterial.emission[1], objMaterial.emission[2]);
+				material.shininess = objMaterial.shininess;
+				material.ior = objMaterial.ior;
+			}
 		}
 
 		break;
