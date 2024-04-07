@@ -62,8 +62,11 @@ void Renderer::prepareFrame()
 	m_frameResources.activeScene = &m_activeScene;
 
 	// Copy SSBO & UBO data to buffers and check if TLAS realloc is needed
-	m_frameResources.prevCameraUBO->copyToBuffer(&m_prevCamera.getShaderData(), sizeof(hri::CameraShaderData));
-	m_frameResources.cameraUBO->copyToBuffer(&m_camera.getShaderData(), sizeof(hri::CameraShaderData));
+	hri::CameraShaderData prevCam = m_prevCamera.getShaderData();
+	hri::CameraShaderData currCam = m_camera.getShaderData();
+
+	m_frameResources.prevCameraUBO->copyToBuffer(&prevCam, sizeof(hri::CameraShaderData));
+	m_frameResources.cameraUBO->copyToBuffer(&currCam, sizeof(hri::CameraShaderData));
 	if (m_accelerationStructureManager.shouldReallocTLAS(*m_frameResources.tlas, instances, m_frameResources.blasList))
 		m_frameResources.tlas = std::make_unique<raytracing::AccelerationStructure>(m_accelerationStructureManager.createTLAS(instances, m_frameResources.blasList));
 
