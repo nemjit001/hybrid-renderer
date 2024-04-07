@@ -15,14 +15,33 @@ def create_dataset(files, renderPassColumns: list[str]):
         df = pd.read_csv(file)
 
         render_time = df[renderPassColumns].sum(axis=1)
-        df["Total Render time (ms)"] = render_time
+        df['Total Render time (ms)'] = render_time
 
         df_results = pd.concat([df_results, df])
 
     return df_results
 
+def create_t_barchart(df: pd.DataFrame, filename: str):
+    T_LIST = [ 0.0, 0.25, 0.50, 0.75, 1.00 ]
+    t_data = {
+        'T Interval': [],
+        'Avg Render Time (ms)': [],
+    }
+
+    for t in T_LIST:
+        t_df = df[df['T Interval'] == t]
+        t_data['T Interval'].append(t)
+        t_data['Avg Render Time (ms)'].append(t_df["Total Render time (ms)"].mean())
+
+    avgd_df = pd.DataFrame(t_data)
+    avgd_df.plot.bar('T Interval', 'Avg Render Time (ms)')
+    plt.savefig(filename)
+
 pt_df = create_dataset(PT_FILES, PT_RP_COLS)
 hr_df = create_dataset(HR_FILES, HR_RP_COLS)
+
+create_t_barchart(hr_df, 'hr_avg_rendertime.png')
+create_t_barchart(pt_df, 'ht_avg_rendertime.png')
 
 # TODO: calculate mean render time & as build time per cam position per interval
 # TODO: create figures for total render time & as build time, per t interval, per cam position
