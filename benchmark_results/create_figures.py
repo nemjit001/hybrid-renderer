@@ -43,6 +43,25 @@ def create_t_barchart(df: pd.DataFrame, filename: str, title: str, ylimits: list
     plt.ylim(ylimits[0], ylimits[1])
     plt.savefig(filename)
 
+def create_t_barchart_build_time(df: pd.DataFrame, filename: str, title: str, ylimits: list[float]):
+    T_LIST = [ 0.0, 0.25, 0.50, 0.75, 1.00 ]
+    t_data = {
+        'T Interval': [],
+        'Avg AS Build Time (ms)': [],
+    }
+
+    for t in T_LIST:
+        t_df = df[df['T Interval'] == t]
+        t_data['T Interval'].append(t)
+        t_data['Avg AS Build Time (ms)'].append(t_df["AS Build time (ms)"].mean())
+
+    avgd_df = pd.DataFrame(t_data)
+    avgd_df.plot.bar('T Interval', 'Avg AS Build Time (ms)')
+    plt.title(title)
+    plt.tight_layout()
+    plt.ylim(ylimits[0], ylimits[1])
+    plt.savefig(filename)
+
 pt_df = create_dataset(PT_FILES, PT_RP_COLS)
 hr_df = create_dataset(HR_FILES, HR_RP_COLS)
 
@@ -52,6 +71,5 @@ create_t_barchart(pt_df, 'figs/pt_avg_rendertime.png', 'Average Render time (ms)
 create_t_barchart(hr_df, 'figs/hr_avg_rendertime_view0.png', 'Average Render time (ms) for View 0 using Hybrid Rendering', [ 2.25, 2.75 ], True)
 create_t_barchart(pt_df, 'figs/pt_avg_rendertime_view0.png', 'Average Render time (ms) for View 0 using Pathtracing', [ 1.50, 2.00 ], True)
 
-# TODO: calculate mean render time & as build time per cam position per interval
-# TODO: create figures for total render time & as build time, per t interval, per cam position
-# TODO: create comparison between render method times
+create_t_barchart_build_time(hr_df, 'figs/hr_avg_as_build_time.png', 'Average AS Build time (ms) using Hybrid Rendering', [ 1.0, 3.0 ])
+create_t_barchart_build_time(pt_df, 'figs/pt_avg_as_build_time.png', 'Average AS Build time (ms) using Pathtracing', [ 1.0, 3.0 ])
