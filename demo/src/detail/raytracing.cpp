@@ -206,7 +206,7 @@ ShaderBindingTable::ShaderBindingTable(
 			hri::BufferResource groupBuffer = hri::BufferResource(m_ctx.renderContext, m_shaderGroupSizes[group], sbtBufferUsage, true);
 			groupBuffer.copyToBuffer(m_sbtData[group].data(), m_shaderGroupSizes[group]);
 
-			auto& it = m_buffers.insert(std::make_pair(shaderGroup, std::move(groupBuffer)));
+			const auto& it = m_buffers.insert(std::make_pair(shaderGroup, std::move(groupBuffer)));
 			assert(it.second == true);
 		}
 	}
