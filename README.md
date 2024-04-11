@@ -7,3 +7,6 @@ The stochastic LOD parameters can be adjusted in the UI, and temporal reprojecti
 ## Building the project
 
 The project is based on CMake, all dependencies are included as git submodules. The project should build correctly out of the box using both MSVC and GCC.
+
+The only depency not included is the Vulkan SDK (version 1.3.280).
+Harware raytracing MUST be supported on your device in order to run the demo.
