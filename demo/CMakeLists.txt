@@ -54,6 +54,10 @@ target_include_directories(${TARGET_NAME} PRIVATE
 	"../hybrid-renderer-lib/include/"
 )
 
+if (MSVC)
+	set_target_properties(${TARGET_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY $<TARGET_FILE_DIR:${TARGET_NAME}>)
+endif()
+
 add_custom_target(custom-commands-${TARGET_NAME} ALL
 	COMMAND ${CMAKE_COMMAND} -E echo "Running custom commands..."
 )
