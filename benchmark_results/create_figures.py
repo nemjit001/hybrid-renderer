@@ -123,7 +123,8 @@ def create_bar_char_performance(df_hr: pd.DataFrame, df_pt: pd.DataFrame, filena
     }
 
     df = pd.DataFrame(data)
-    df.plot.bar()
+    df.plot.bar('Renderer')
+    plt.xticks(rotation=0)
     plt.title(title)
     plt.tight_layout()
     plt.savefig(filename)
@@ -140,7 +141,7 @@ create_t_barchart(pt_df, 'figs/pt_avg_rendertime_view0.png', 'Average Render tim
 create_t_barchart_build_time(hr_df, 'figs/hr_avg_as_build_time.png', 'Average AS Build time (ms) using Hybrid Rendering', [ 1.0, 3.0 ])
 create_t_barchart_build_time(pt_df, 'figs/pt_avg_as_build_time.png', 'Average AS Build time (ms) using Pathtracing', [ 1.0, 3.0 ])
 
-create_bar_char_performance(hr_df, pt_df, 'figs/performance_comp.png', 'Average render time for each renderer.')
+create_bar_char_performance(hr_df, pt_df, 'figs/performance_comp.png', 'Average render time (ms) over all views and t intervals.')
 
 hr_per_pass_bar_char(hr_df, 'figs/hr_avg_per_pass.png', 'Per pass render time for Hybrid Rendering')
 hr_pass_time_bar_char(hr_df, 'figs/hr_gbuff_sample_time.png', 'GBuffer Sample pass Render time', 'GBuffer Sample time (ms)')
