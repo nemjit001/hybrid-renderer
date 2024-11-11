@@ -10,3 +10,5 @@ The project is based on CMake, all dependencies are included as git submodules. 
 
 The only depency not included is the Vulkan SDK (version 1.3.280).
 Hardware raytracing MUST be supported on your device in order to run the demo.
+
+![Example image rendered using path tracer](render_example.png?raw=true "Example render rendered using reference path tracer")
